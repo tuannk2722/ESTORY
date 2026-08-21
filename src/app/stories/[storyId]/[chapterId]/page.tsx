@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { storyRepository } from "@/lib/repositories";
 import ReaderPane from "@/components/reader/ReaderPane";
+import ReaderScreenHeader from "@/components/reader/ReaderScreenHeader";
 
 interface ReaderPageProps {
   params: Promise<{ storyId: string; chapterId: string }>;
@@ -15,23 +15,41 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
     notFound();
   }
 
-  const chapter = story.chapters.find((ch) => ch.id === chapterId);
-  if (!chapter) {
+  // Sắp xếp các chương theo thứ tự order
+  const sortedChapters = [...story.chapters].sort((a, b) => a.order - b.order);
+  const currentChapterIndex = sortedChapters.findIndex((ch) => ch.id === chapterId);
+
+  if (currentChapterIndex === -1) {
     notFound();
   }
 
-  return (
-    <div className="reader-screen min-h-screen">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur border-b px-4 py-3 flex items-center justify-between">
-        <Link href={`/stories/${story.id}`} className="text-sm text-muted-foreground hover:underline">
-          ← {story.title}
-        </Link>
-        <span className="text-sm font-medium">{chapter.title}</span>
-      </header>
+  const chapter = sortedChapters[currentChapterIndex];
+  const prevChapter = currentChapterIndex > 0 ? sortedChapters[currentChapterIndex - 1] : null;
+  const nextChapter =
+    currentChapterIndex < sortedChapters.length - 1
+      ? sortedChapters[currentChapterIndex + 1]
+      : null;
+  const isLastChapter = currentChapterIndex === sortedChapters.length - 1;
 
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        <ReaderPane chapter={chapter} />
-      </main>
+  return (
+    <div className="reader-screen min-h-screen bg-[var(--color-background)] transition-colors duration-300">
+      {/* Header thanh công cụ đọc */}
+      <ReaderScreenHeader
+        storyId={story.id}
+        storyTitle={story.title}
+        chapterTitle={chapter.title}
+      />
+
+      {/* Khung đọc chính */}
+      <div className="max-w-2xl mx-auto px-4 py-8 md:py-12">
+        <ReaderPane
+          storyId={story.id}
+          chapter={chapter}
+          prevChapterId={prevChapter?.id}
+          nextChapterId={nextChapter?.id}
+          isLastChapter={isLastChapter}
+        />
+      </div>
     </div>
   );
 }

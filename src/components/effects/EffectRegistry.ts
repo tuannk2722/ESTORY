@@ -4,6 +4,14 @@
 
 import { ComponentType } from "react";
 import { EffectType, EffectConfig } from "@/types/story";
+import LightningFlash from "./visual/LightningFlash";
+import ParticleRain from "./visual/ParticleRain"; // CSS fallback — giữ lại để tham khảo
+import ParticleRainTsParticles from "./visual/ParticleRainTsParticles"; // tsParticles implementation
+import BgColorShift from "./visual/BgColorShift";
+import ScreenShake from "./visual/ScreenShake";
+import TextShake from "./visual/TextShake";
+import TransitionFade from "./visual/TransitionFade";
+import AudioEffectPlayer from "./audio/AudioEffectPlayer";
 
 export interface EffectComponentProps {
   config: EffectConfig;
@@ -11,24 +19,24 @@ export interface EffectComponentProps {
   intensityMultiplier?: number;
 }
 
-// TODO: Phase 1 & 2 - Map từng EffectType tới component cụ thể
-// export const EFFECT_REGISTRY: Record<EffectType, ComponentType<EffectComponentProps> | null> = {
-//   bg_color_shift: BgColorShift,
-//   particle_rain: ParticleRain,
-//   particle_snow: null, // stub
-//   particle_fire: null, // stub
-//   particle_smoke: null, // stub
-//   particle_fireflies: null, // stub
-//   screen_shake: ScreenShake,
-//   screen_blur: null, // stub
-//   text_shake: TextShake,
-//   text_grow: null, // stub
-//   text_fade_flashback: null, // stub
-//   typewriter: null, // stub
-//   lightning_flash: LightningFlash,
-//   vibration: null, // stub
-//   transition_fade: null, // stub
-//   transition_page_tear: null, // stub
-// };
+export const EFFECT_REGISTRY: Record<EffectType, ComponentType<EffectComponentProps> | null> = {
+  lightning_flash: LightningFlash,
+  particle_rain: ParticleRain, // CSS fallback — giữ lại để tham khảo
+  // particle_rain: ParticleRainTsParticles, // Dùng bản tsParticles — swap về ParticleRain nếu cần CSS fallback
+  bg_color_shift: BgColorShift,
+  screen_shake: ScreenShake,
+  text_shake: TextShake,
+  particle_snow: null,
+  particle_fire: null,
+  particle_smoke: null,
+  particle_fireflies: null,
+  screen_blur: null,
+  text_grow: null,
+  text_fade_flashback: null,
+  typewriter: null,
+  vibration: null,
+  transition_fade: TransitionFade,
+  transition_page_tear: null,
+};
 
-export const EFFECT_REGISTRY: Partial<Record<EffectType, ComponentType<EffectComponentProps>>> = {};
+export { AudioEffectPlayer };

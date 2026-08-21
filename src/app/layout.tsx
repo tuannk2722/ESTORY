@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
-import { Cinzel, Cormorant_Garamond, Outfit } from "next/font/google";
+import { Playfair_Display, Cormorant_Garamond, Outfit } from "next/font/google";
 import "./globals.css";
 
-/* ── Google Fonts ───────────────────────────────────────────── */
-const cinzel = Cinzel({
+const playfairDisplay = Playfair_Display({
   variable: "--font-display",
-  subsets: ["latin"],
+  subsets: ["latin", "vietnamese"],
   weight: ["600", "700", "900"],
   display: "swap",
 });
 
 const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-story",
-  subsets: ["latin"],
+  subsets: ["latin", "vietnamese"],
   weight: ["400", "600"],
   style: ["normal", "italic"],
   display: "swap",
@@ -20,7 +19,7 @@ const cormorantGaramond = Cormorant_Garamond({
 
 const outfit = Outfit({
   variable: "--font-ui",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
@@ -36,6 +35,8 @@ export const metadata: Metadata = {
   keywords: ["đọc truyện", "interactive story", "hiệu ứng", "scrollytelling"],
 };
 
+import { ThemeProvider } from "@/components/ui/ThemeProvider";
+
 /* ── Root Layout ─────────────────────────────────────────────── */
 export default function RootLayout({
   children,
@@ -46,10 +47,13 @@ export default function RootLayout({
     <html
       lang="vi"
       data-theme="dark"
-      className={`${cinzel.variable} ${cormorantGaramond.variable} ${outfit.variable} h-full antialiased`}
+      className={`${playfairDisplay.variable} ${cormorantGaramond.variable} ${outfit.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-dvh flex flex-col bg-[var(--color-background)] text-[var(--color-foreground)] font-ui">
-        {children}
+      <body className="min-h-dvh flex flex-col bg-[var(--color-background)] text-[var(--color-foreground)] font-ui transition-colors duration-300">
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

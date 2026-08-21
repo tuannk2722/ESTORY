@@ -1,19 +1,30 @@
-import Link from "next/link";
+import { storyRepository } from "@/lib/repositories";
+import AppHeader from "@/components/ui/AppHeader";
+import BookmarksListClient from "@/components/library/BookmarksListClient";
+import { Bookmark } from "lucide-react";
 
-export default function BookmarksLibraryPage() {
+export const dynamic = "force-dynamic";
+
+export default async function BookmarksLibraryPage() {
+  const stories = await storyRepository.getAll();
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <header className="mb-6">
-        <h1 className="text-3xl font-bold">Đã Lưu (Bookmarks)</h1>
-        <p className="text-muted-foreground mt-1">Danh sách các truyện bạn đã đánh dấu để đọc sau.</p>
-      </header>
-      <div className="empty-state p-8 text-center text-muted-foreground border rounded-lg">
-        {/* TODO: Phase 1 đọc từ settingsStore.getBookmarks() */}
-        <p>Chưa có truyện nào trong danh sách đã lưu.</p>
-        <Link href="/" className="inline-block mt-4 text-primary hover:underline">
-          Khám phá thư viện truyện →
-        </Link>
-      </div>
+    <div className="min-h-screen bg-[var(--color-background)] transition-colors duration-300">
+      <AppHeader />
+
+      <main className="max-w-4xl mx-auto px-4 py-8 md:py-12 space-y-8">
+        <header className="space-y-2 border-b border-[var(--color-border)] pb-4">
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-[var(--color-foreground)] flex items-center gap-3">
+            <Bookmark className="w-8 h-8 text-amber-400" />
+            <span>Truyện Đã Lưu</span>
+          </h1>
+          {/* <p className="font-story text-base text-[var(--color-muted-foreground)]">
+            Danh sách các tác phẩm bạn đã chủ động đánh dấu để theo dõi.
+          </p> */}
+        </header>
+
+        <BookmarksListClient stories={stories} />
+      </main>
     </div>
   );
 }

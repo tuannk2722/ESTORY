@@ -21,9 +21,9 @@ export const DEFAULT_READER_SETTINGS: ReaderSettings = {
     motion: true,
     transition: true,
   },
-  intensity_multiplier: 1.0,
+  intensity_multiplier: 0.8,
   reduced_motion: false,
-  font_size: "md",
+  font_size: "lg",
   theme: "dark",
 };
 

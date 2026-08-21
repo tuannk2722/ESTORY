@@ -98,7 +98,7 @@
   --color-ring:               var(--color-ring);
 
   /* Font families */
-  --font-display: "Cinzel", "Georgia", serif;
+  --font-display: "Playfair Display", "Georgia", serif;
   --font-story:   "Cormorant Garamond", "Georgia", serif;
   --font-ui:      "Outfit", "Inter", system-ui, sans-serif;
 }
@@ -166,13 +166,30 @@ body {
   padding-bottom: 0.05em;
 }
 
-/* Khung đọc truyện: tối đa 65ch, căn giữa */
+/* Khung đọc truyện: tối đa 65ch (max-w-2xl), căn giữa theo docs/04-ui-ux-design.md */
 .prose-reader {
   font-family: var(--font-story);
-  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
-  line-height: 1.85;
   max-width: 65ch;
   margin-inline: auto;
+  line-height: 1.85;
+}
+
+/* Thang cỡ chữ chuẩn UI/UX reading app */
+.prose-reader.font-size-sm {
+  font-size: 1rem;
+  line-height: 1.8;
+}
+.prose-reader.font-size-md {
+  font-size: 1.15rem;
+  line-height: 1.85;
+}
+.prose-reader.font-size-lg {
+  font-size: 1.3rem;
+  line-height: 1.95;
+}
+.prose-reader.font-size-xl {
+  font-size: 1.5rem;
+  line-height: 2.05;
 }
 
 /* ============================================================
@@ -250,12 +267,17 @@ body {
 }
 
 /* Rung màn hình screen_shake */
+.animate-screen-shake {
+  animation: screen-shake 0.08s linear infinite;
+  will-change: transform;
+}
+
 @keyframes screen-shake {
   0%   { transform: translate(0, 0) rotate(0deg); }
-  20%  { transform: translate(-4px, 2px) rotate(-0.3deg); }
-  40%  { transform: translate(4px, -2px) rotate(0.3deg); }
-  60%  { transform: translate(-3px, 3px) rotate(-0.2deg); }
-  80%  { transform: translate(3px, -1px) rotate(0.2deg); }
+  20%  { transform: translate(calc(var(--shake-x, 6px) * -1), var(--shake-y, 4px)) rotate(-0.4deg); }
+  40%  { transform: translate(var(--shake-x, 6px), calc(var(--shake-y, 4px) * -1)) rotate(0.4deg); }
+  60%  { transform: translate(calc(var(--shake-x, 6px) * -0.7), var(--shake-y, 4px)) rotate(-0.3deg); }
+  80%  { transform: translate(calc(var(--shake-x, 6px) * 0.7), calc(var(--shake-y, 4px) * -0.5)) rotate(0.3deg); }
   100% { transform: translate(0, 0) rotate(0deg); }
 }
 

@@ -1,12 +1,17 @@
 {
   "id": "demo-story",
   "title": "Đêm Giông",
-  "author": "Bạn",
-  "description": "Một đêm mưa bão định mệnh nơi ngọn hải đăng cổ.",
+  "author": "Nguyễn Du Ký",
+  "description": "Một đêm mưa bão định mệnh nơi ngọn hải đăng cô độc ngoài khơi xa, khi những bí ẩn dưới lòng biển sâu bắt đầu trỗi dậy.",
   "cover_image": "/covers/demo-cover.jpg",
-  "genre": ["kinh dị", "tâm lý", "huyền bí"],
+  "genre": [
+    "Kinh dị",
+    "Huyền bí",
+    "Tâm lý",
+    "Kịch tính"
+  ],
   "status": "published",
-  "view_count": 0,
+  "view_count": 256,
   "chapters": [
     {
       "id": "ch1",
@@ -16,100 +21,455 @@
         {
           "id": "ch1-block-001",
           "type": "heading",
-          "text": "Phần I: Tiếng Gió Rít",
+          "text": "Phần I: Điềm Báo Ngoài Khơi",
           "mood_tag": "bí ẩn",
           "effects": [
             {
-              "id": "eff-001",
+              "id": "eff-101",
               "type": "transition_fade",
               "category": "transition",
-              "intensity": 0.8,
-              "duration_ms": 1000
+              "intensity": 0.7,
+              "duration_ms": 1200
             }
           ]
         },
         {
           "id": "ch1-block-002",
           "type": "paragraph",
-          "text": "Bầu trời đêm chuyển dần sang sắc tím sẫm kỳ quái, từng hạt mưa bắt đầu nặng hạt rơi xuống mái tôn cũ kỹ.",
+          "text": "Hoàng hôn buông xuống trên mỏm đá Vọng Hải mang theo một sự tĩnh lặng đến rợn ngời. Gió biển chiều nay bỗng nhiên ngừng thổi, để lại mặt nước phẳng lặng như một tấm gương đen khổng lồ. Từ phía chân trời xa xăm, những đám mây màu tím sẫm cuồn cuộn dâng lên, nuốt chửng những tia sáng le lói cuối cùng của một ngày tàn.",
           "mood_tag": "u ám",
           "effects": [
             {
-              "id": "eff-002",
-              "type": "particle_rain",
-              "category": "visual",
-              "intensity": 0.6,
-              "duration_ms": 4000
-            },
-            {
-              "id": "eff-003",
+              "id": "eff-102",
               "type": "bg_color_shift",
               "category": "visual",
-              "intensity": 0.5,
-              "duration_ms": 2000
+              "intensity": 0.6,
+              "duration_ms": 2500
             }
           ]
         },
         {
           "id": "ch1-block-003",
           "type": "paragraph",
-          "text": "Sấm chớp lóe lên giữa màn đêm, xé toạc bầu trời đen kịt trong một khoảnh khắc chói lòa!",
-          "mood_tag": "kinh dị / căng thẳng",
+          "text": "Lộp độp... lộp độp... Những giọt mưa đầu tiên bắt đầu rơi xuống mái tôn rỉ sét của trạm gác. Chỉ vài giây sau, màn đêm bị xé rách bởi một trận mưa như trút nước, bao phủ lấy ngọn hải đăng cổ kính giữa muôn trùng sóng vỗ. Không khí lạnh buốt tràn qua từng khe cửa gỗ mục nát, mang theo hơi thở mặn chát và tanh nồng của biển sâu.",
+          "mood_tag": "mưa bão",
           "effects": [
             {
-              "id": "eff-004",
-              "type": "lightning_flash",
+              "id": "eff-103",
+              "type": "particle_rain",
               "category": "visual",
-              "intensity": 0.9,
-              "duration_ms": 1200
+              "intensity": 0.75,
+              "duration_ms": 5000
             },
             {
-              "id": "eff-005",
-              "type": "screen_shake",
-              "category": "motion",
-              "intensity": 0.7,
-              "duration_ms": 600,
-              "delay_ms": 200
+              "id": "eff-200",
+              "type": "particle_rain",
+              "category": "audio",
+              "intensity": 0.3,
+              "duration_ms": 5000,
+              "audio_src": "/audio/gentle_rain_falling.mp3",
+              "loop": true
             }
           ]
         },
         {
           "id": "ch1-block-004",
-          "type": "dialogue",
-          "text": "\"Có ai ở ngoài đó không?\" — giọng người gác hải đăng run rẩy vang lên trong tiếng sấm rền vang dội.",
-          "mood_tag": "sợ hãi",
-          "effects": [
-            {
-              "id": "eff-006",
-              "type": "text_shake",
-              "category": "visual",
-              "intensity": 0.4,
-              "duration_ms": 800
-            },
-            {
-              "id": "eff-007",
-              "type": "vibration",
-              "category": "motion",
-              "intensity": 0.3,
-              "duration_ms": 300,
-              "delay_ms": 100
-            }
-          ]
+          "type": "paragraph",
+          "text": "Ông lão gác đèn khẽ rùng mình, đôi bàn tay gầy guộc châm lại bấc ngọn đèn dầu trên bàn. Tiếng mưa rơi ràn rạt bên ngoài dường như đang cố gắng vùi dập tất cả mọi thanh âm của sự sống. Nhưng giữa tiếng gió gầm rít điên cuồng ấy, ông bỗng nghe thấy tiếng đập cửa dồn dập vang lên từ chân tháp.",
+          "mood_tag": "căng thẳng",
+          "effects": []
         },
         {
           "id": "ch1-block-005",
           "type": "paragraph",
-          "text": "Tiếng sấm rền vang rền từ đằng xa, rung chuyển từng phiến đá ngầm bên dưới chân tháp.",
-          "mood_tag": "căng thẳng",
+          "text": "ĐOÀNG! Một tia chớp chói lòa bất ngờ rạch ngang vòm trời, biến toàn bộ không gian đêm đen trở nên trắng xóa trong tích tắc. Ánh sáng chói lọi hắt qua khung cửa kính, in hằn bóng đen của một bóng người kỳ dị đang đứng bất động ngoài ban công tháp canh!",
+          "mood_tag": "kinh dị / cao trào",
           "effects": [
             {
-              "id": "eff-008",
+              "id": "eff-104",
+              "type": "lightning_flash",
+              "category": "visual",
+              "intensity": 0.95,
+              "duration_ms": 1200
+            }
+          ]
+        },
+        {
+          "id": "ch1-block-006",
+          "type": "paragraph",
+          "text": "Ngay sau ánh chớp là một tiếng sấm nổ đinh tai nhức óc rền vang khắp vịnh biển. Chấn động khủng khiếp khiến cả ngọn tháp đá vững chãi rung lắc dữ dội, chiếc đèn dầu trên bàn chao đảo muốn ngã nhào xuống sàn đá.",
+          "mood_tag": "chấn động",
+          "effects": [
+            {
+              "id": "eff-105",
+              "type": "screen_shake",
+              "category": "motion",
+              "intensity": 0.85,
+              "duration_ms": 800,
+              "delay_ms": 150
+            },
+            {
+              "id": "eff-106",
               "type": "screen_shake",
               "category": "audio",
-              "intensity": 0.8,
-              "duration_ms": 3000,
+              "intensity": 0.85,
+              "duration_ms": 3500,
               "audio_src": "/audio/thunder-rumble.mp3",
               "loop": false
+            }
+          ]
+        },
+        {
+          "id": "ch1-block-007",
+          "type": "dialogue",
+          "text": "\"K-Kẻ nào... Kẻ nào đang ở ngoài đó?!\" — Ông lão lùi lại một bước, cổ họng nghẹn đắng, giọng nói run rẩy hòa vào màn mưa lạnh ngắt.",
+          "mood_tag": "sợ hãi",
+          "effects": [
+            {
+              "id": "eff-107",
+              "type": "text_shake",
+              "category": "visual",
+              "intensity": 0.6,
+              "duration_ms": 1000
+            }
+          ]
+        },
+        {
+          "id": "ch1-block-008",
+          "type": "paragraph",
+          "text": "Không có tiếng trả lời. Chỉ có tiếng then cài cửa bên dưới lách cách chuyển động, như thể có một bàn tay ướt đẫm đang từ từ vặn mở ổ khóa rỉ sét từ phía ngoài...",
+          "mood_tag": "lơ lửng / bí ẩn",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "ch2",
+      "title": "Chương 2: Tiếng Gõ Dưới Tầng Hầm",
+      "order": 2,
+      "blocks": [
+        {
+          "id": "ch2-block-001",
+          "type": "heading",
+          "text": "Phần II: Dấu Vết Dưới Màn Sương",
+          "mood_tag": "hồi hộp",
+          "effects": [
+            {
+              "id": "eff-201",
+              "type": "transition_fade",
+              "category": "transition",
+              "intensity": 0.8,
+              "duration_ms": 1200
+            }
+          ]
+        },
+        {
+          "id": "ch2-block-002",
+          "type": "paragraph",
+          "text": "Cánh cửa gỗ nặng trịch kẽo kẹt mở toang, gió bão ùa vào dập tắt ngọn đèn dầu leo lét. Trong bóng tối đặc quánh, một làn khói sương mờ mịt từ dưới lòng biển dâng lên, bò trườn qua từng bậc thềm đá hoa cương phủ đầy rêu phong ẩm ướt.",
+          "mood_tag": "huyền bí",
+          "effects": [
+            {
+              "id": "eff-202",
+              "type": "particle_smoke",
+              "category": "visual",
+              "intensity": 0.7,
+              "duration_ms": 4000
+            }
+          ]
+        },
+        {
+          "id": "ch2-block-003",
+          "type": "paragraph",
+          "text": "Ông lão quờ quạng tìm hộp diêm đánh lửa. Khi ánh sáng vàng vọt bùng lên, ông bàng hoàng nhìn thấy những vệt bùn đen tanh tưởi kéo dài từ ngưỡng cửa dẫn thẳng xuống lối thang xoắn ốc của căn hầm chứa nước ngọt dưới đáy tháp canh.",
+          "mood_tag": "rùng rợn",
+          "effects": [
+            {
+              "id": "eff-203",
+              "type": "screen_blur",
+              "category": "visual",
+              "intensity": 0.5,
+              "duration_ms": 1500
+            }
+          ]
+        },
+        {
+          "id": "ch2-block-004",
+          "type": "dialogue",
+          "text": "\"Cọt kẹt... cọt kẹt... Cứu... cứu chúng tôi với...\" — Một thanh âm ma mị thì thầm như tiếng gió luồn qua khe nứt, vọng lên từ đáy sâu tăm tối.",
+          "mood_tag": "kinh hoàng",
+          "effects": [
+            {
+              "id": "eff-204",
+              "type": "text_shake",
+              "category": "visual",
+              "intensity": 0.7,
+              "duration_ms": 1200
+            }
+          ]
+        },
+        {
+          "id": "ch2-block-005",
+          "type": "paragraph",
+          "text": "Tim ông lão đập thình thịch như muốn nhảy ra khỏi lồng ngực. Từng bước chân run rẩy bước xuống cầu thang đá, tay ông nắm chặt cây lao săn cá cũ kỹ. Dưới đáy hầm, mặt nước ngầm đang sủi bọt cuồn cuộn phát ra những đốm sáng lân tinh kỳ dị chưa từng thấy.",
+          "mood_tag": "căng thẳng cực độ",
+          "effects": [
+            {
+              "id": "eff-205",
+              "type": "particle_fireflies",
+              "category": "visual",
+              "intensity": 0.8,
+              "duration_ms": 4500
+            },
+            {
+              "id": "eff-206",
+              "type": "vibration",
+              "category": "motion",
+              "intensity": 0.6,
+              "duration_ms": 400
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ch3",
+      "title": "Chương 3: Nhật Ký Của Người Đã Khuất",
+      "order": 3,
+      "blocks": [
+        {
+          "id": "ch3-block-001",
+          "type": "heading",
+          "text": "Phần III: Bản Ghi Chép Năm 1974",
+          "mood_tag": "hoài niệm / bí ẩn",
+          "effects": [
+            {
+              "id": "eff-301",
+              "type": "transition_fade",
+              "category": "transition",
+              "intensity": 0.75,
+              "duration_ms": 1100
+            }
+          ]
+        },
+        {
+          "id": "ch3-block-002",
+          "type": "paragraph",
+          "text": "Mắc kẹt giữa khe đá ngầm là một chiếc rương sắt bọc da cá voi đã rỉ sét theo năm tháng. Bên trong rương, một cuốn sổ hải trình bọc da thuộc vẫn còn nguyên vẹn dù mép giấy đã ố vàng và vương mùi muối biển nồng nặc.",
+          "mood_tag": "cổ kính",
+          "effects": [
+            {
+              "id": "eff-302",
+              "type": "bg_color_shift",
+              "category": "visual",
+              "intensity": 0.65,
+              "duration_ms": 3000
+            }
+          ]
+        },
+        {
+          "id": "ch3-block-003",
+          "type": "paragraph",
+          "text": "\"Ngày 14 tháng 10 năm 1974: Con tàu chở 40 thủy thủ đoàn gặp bão tại rạn san hô Đầu Rồng. Chúng tôi nhìn thấy một cái bóng khổng lồ bơi vòng quanh đáy tàu... Nó không phải cá voi... Nó có mười cái vòi gai nhọn và đang kéo ngọn hải đăng chìm xuống...\"",
+          "mood_tag": "hồi ức rùng rợn",
+          "effects": [
+            {
+              "id": "eff-303",
+              "type": "typewriter",
+              "category": "visual",
+              "intensity": 0.8,
+              "duration_ms": 3500
+            },
+            {
+              "id": "eff-304",
+              "type": "text_fade_flashback",
+              "category": "visual",
+              "intensity": 0.6,
+              "duration_ms": 2500
+            }
+          ]
+        },
+        {
+          "id": "ch3-block-004",
+          "type": "paragraph",
+          "text": "Đọc đến dòng cuối cùng, những giọt mồ hôi lạnh toát túa ra trên trán ông lão. Ngày hôm nay... đúng tròn 50 năm kể từ ngày con tàu xấu số đó biến mất không một dấu vết vào lòng biển thẳm.",
+          "mood_tag": "bàng hoàng",
+          "effects": [
+            {
+              "id": "eff-305",
+              "type": "screen_blur",
+              "category": "visual",
+              "intensity": 0.4,
+              "duration_ms": 1200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ch4",
+      "title": "Chương 4: Quái Thú Thức Giấc",
+      "order": 4,
+      "blocks": [
+        {
+          "id": "ch4-block-001",
+          "type": "heading",
+          "text": "Phần IV: Cơn Thịnh Nộ Đại Dương",
+          "mood_tag": "nguy hiểm cao độ",
+          "effects": [
+            {
+              "id": "eff-401",
+              "type": "transition_fade",
+              "category": "transition",
+              "intensity": 0.85,
+              "duration_ms": 1000
+            }
+          ]
+        },
+        {
+          "id": "ch4-block-002",
+          "type": "paragraph",
+          "text": "ẦM ẦM! Một đợt sóng thần cao hơn hai mươi mét bất ngờ trỗi dậy từ biển đen, giáng thẳng vào thân tháp canh. Kính cửa sổ tầng thượng vỡ vụn tung tóe thành ngàn mảnh pha lê sắc lẹm, nước biển lạnh buốt như băng tràn ngập cả phòng điều khiển.",
+          "mood_tag": "hủy diệt",
+          "effects": [
+            {
+              "id": "eff-402",
+              "type": "screen_shake",
+              "category": "motion",
+              "intensity": 0.95,
+              "duration_ms": 1000
+            },
+            {
+              "id": "eff-403",
+              "type": "particle_rain",
+              "category": "visual",
+              "intensity": 0.9,
+              "duration_ms": 5000
+            }
+          ]
+        },
+        {
+          "id": "ch4-block-003",
+          "type": "paragraph",
+          "text": "Giữa màn mưa xối xả và chớp giật liên hồi, một sinh vật khổng lồ trồi lên khỏi mặt nước. Lưng nó phủ đầy gai đá và những khối xúc tu to bằng thân cây cổ thụ đang cuộn chặt lấy chân móng ngọn tháp đá, kéo nghiêng cả công trình lịch sử.",
+          "mood_tag": "kinh hoàng tột độ",
+          "effects": [
+            {
+              "id": "eff-404",
+              "type": "lightning_flash",
+              "category": "visual",
+              "intensity": 0.95,
+              "duration_ms": 1400
+            },
+            {
+              "id": "eff-405",
+              "type": "text_grow",
+              "category": "visual",
+              "intensity": 0.85,
+              "duration_ms": 1800
+            }
+          ]
+        },
+        {
+          "id": "ch4-block-004",
+          "type": "dialogue",
+          "text": "\"Ta sẽ không để ngươi kéo ngọn hải đăng này xuống địa ngục một lần nữa!\" — Ông lão gào thét trong cuồng phong, dồn hết tàn lực lao về phía cần gạt trục quay của ngọn đèn pha cực đại.",
+          "mood_tag": "quả cảm",
+          "effects": [
+            {
+              "id": "eff-406",
+              "type": "text_shake",
+              "category": "visual",
+              "intensity": 0.8,
+              "duration_ms": 1200
+            },
+            {
+              "id": "eff-407",
+              "type": "vibration",
+              "category": "motion",
+              "intensity": 0.7,
+              "duration_ms": 600
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ch5",
+      "title": "Chương 5: Bình Minh Sau Đêm Dài",
+      "order": 5,
+      "blocks": [
+        {
+          "id": "ch5-block-001",
+          "type": "heading",
+          "text": "Phần V: Ánh Sáng Cứu Rỗi",
+          "mood_tag": "sử thi / hy vọng",
+          "effects": [
+            {
+              "id": "eff-501",
+              "type": "transition_fade",
+              "category": "transition",
+              "intensity": 0.8,
+              "duration_ms": 1500
+            }
+          ]
+        },
+        {
+          "id": "ch5-block-002",
+          "type": "paragraph",
+          "text": "CÔNG TẮC ĐƯỢC ĐẨY TỚI NẤC CUỐI CÙNG! Thấu kính Fresnel khổng lồ rực sáng như mặt trời giữa đêm đen, phóng ra luồng ánh sáng huỳnh quang hàng triệu lumen chiếu thẳng vào mắt quái thú biển sâu. Tiếng gầm rú đớn đau của sinh vật huyền bí xé rách vòm trời khi nó vội vã buông xúc tu, lặn sâu về đáy đại dương tối tăm.",
+          "mood_tag": "chiến thắng",
+          "effects": [
+            {
+              "id": "eff-502",
+              "type": "lightning_flash",
+              "category": "visual",
+              "intensity": 0.9,
+              "duration_ms": 2000
+            },
+            {
+              "id": "eff-503",
+              "type": "particle_fire",
+              "category": "visual",
+              "intensity": 0.7,
+              "duration_ms": 3000
+            }
+          ]
+        },
+        {
+          "id": "ch5-block-003",
+          "type": "paragraph",
+          "text": "Gió bão dần tan biến. Phía chân trời xa xăm, những tia nắng bình minh đầu tiên của một ngày mới nhuộm vàng mặt biển êm đềm. Ngọn hải đăng cổ kính vẫn sừng sững đứng đó, hiên ngang soi sáng cho những con tàu viễn chinh ngoài khơi xa.",
+          "mood_tag": "bình yên",
+          "effects": [
+            {
+              "id": "eff-504",
+              "type": "bg_color_shift",
+              "category": "visual",
+              "intensity": 0.7,
+              "duration_ms": 3500
+            },
+            {
+              "id": "eff-505",
+              "type": "particle_fireflies",
+              "category": "visual",
+              "intensity": 0.6,
+              "duration_ms": 4000
+            }
+          ]
+        },
+        {
+          "id": "ch5-block-004",
+          "type": "paragraph",
+          "text": "Ông lão ngồi trên bậc thềm đón ánh nắng ban mai, nhấp một ngụm trà ấm. Đêm giông bão kinh hoàng đã qua đi, nhưng truyền thuyết về ngọn hải đăng Vọng Hải và người canh giữ ánh sáng sẽ còn được kể mãi cho ngàn đời sau.",
+          "mood_tag": "kết thúc trọn vẹn",
+          "effects": [
+            {
+              "id": "eff-506",
+              "type": "transition_page_tear",
+              "category": "transition",
+              "intensity": 0.75,
+              "duration_ms": 1500
             }
           ]
         }

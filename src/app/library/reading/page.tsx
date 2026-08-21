@@ -1,19 +1,30 @@
-import Link from "next/link";
+import { storyRepository } from "@/lib/repositories";
+import AppHeader from "@/components/ui/AppHeader";
+import ReadingListClient from "@/components/library/ReadingListClient";
+import { Clock } from "lucide-react";
 
-export default function ReadingLibraryPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ReadingLibraryPage() {
+  const stories = await storyRepository.getAll();
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <header className="mb-6">
-        <h1 className="text-3xl font-bold">Đang Đọc</h1>
-        <p className="text-muted-foreground mt-1">Danh sách các truyện bạn đang đọc dở.</p>
-      </header>
-      <div className="empty-state p-8 text-center text-muted-foreground border rounded-lg">
-        {/* TODO: Phase 1 đọc từ settingsStore.getAllProgress() */}
-        <p>Chưa có tiến trình đọc nào được lưu.</p>
-        <Link href="/" className="inline-block mt-4 text-primary hover:underline">
-          Khám phá thư viện truyện →
-        </Link>
-      </div>
+    <div className="min-h-screen bg-[var(--color-background)] transition-colors duration-300">
+      <AppHeader />
+
+      <main className="max-w-4xl mx-auto px-4 py-8 md:py-12 space-y-8">
+        <header className="space-y-2 border-b border-[var(--color-border)] pb-4">
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-[var(--color-foreground)] flex items-center gap-3">
+            <Clock className="w-8 h-8 text-cyan-400" />
+            <span>Truyện Đang Đọc</span>
+          </h1>
+          {/* <p className="font-story text-base text-[var(--color-muted-foreground)]">
+            Tự động lưu lại chính xác vị trí đoạn văn bạn đã dừng chân.
+          </p> */}
+        </header>
+
+        <ReadingListClient stories={stories} />
+      </main>
     </div>
   );
 }

@@ -7,7 +7,7 @@ export interface ReaderSettings {
   intensity_multiplier: number;   // 0.0 – 1.0, nhân với intensity gốc của từng effect
   reduced_motion: boolean;        // mặc định sync với prefers-reduced-motion, user có thể override
   font_size: "sm" | "md" | "lg" | "xl";
-  theme: "light" | "dark";
+  theme: "light" | "dark" | "sepia";
 }
 
 export type ReadingStatus = "reading" | "completed";
