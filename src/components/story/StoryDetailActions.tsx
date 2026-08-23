@@ -20,7 +20,18 @@ export default function StoryDetailActions({
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   useEffect(() => {
-    setProgress(settingsStore.getProgress(story.id));
+    const resume = settingsStore.getResumeReading(story.id);
+    if (resume) {
+      setProgress({
+        story_id: story.id,
+        chapter_id: resume.chapter_id,
+        block_id: resume.block_id,
+        status: "reading",
+        updated_at: new Date(resume.updated_at).toISOString(),
+      });
+    } else {
+      setProgress(settingsStore.getProgress(story.id));
+    }
     setIsBookmarked(settingsStore.isBookmarked(story.id));
   }, [story.id]);
 

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Settings, List } from "lucide-react";
+import { ArrowLeft, Settings } from "lucide-react";
 import SettingsPanel from "./SettingsPanel";
 
 export interface ReaderScreenHeaderProps {
@@ -37,17 +37,6 @@ export default function ReaderScreenHeader({
 
           {/* Action buttons */}
           <div className="flex items-center gap-2">
-            {/* Mục lục */}
-            <Link
-              href={`/stories/${storyId}`}
-              className="flex items-center justify-center gap-2 p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] hover:bg-[var(--color-muted)] text-[var(--color-foreground)] transition-all duration-200 min-h-[44px] min-w-[44px]"
-              title="Mục lục chương"
-            >
-              <List className="w-5 h-5 text-[var(--color-accent)]" />
-              <span className="font-ui text-sm font-medium hidden sm:inline">Mục lục</span>
-            </Link>
-
-            {/* Settings button */}
             <button
               onClick={() => setIsSettingsOpen(true)}
               className="p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-muted)] text-[var(--color-foreground)] transition-all min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"

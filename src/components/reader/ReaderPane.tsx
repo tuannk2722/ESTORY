@@ -5,8 +5,7 @@ import { Chapter } from "@/types/story";
 import StoryBlock from "./StoryBlock";
 import ProgressBar from "./ProgressBar";
 import ChapterNav from "./ChapterNav";
-import SafetyModal from "./SafetyModal";
-import { useReadingProgress } from "@/hooks/useReadingProgress";
+import { useResumeCommit } from "@/hooks/useResumeCommit";
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
 
 export interface ReaderPaneProps {
@@ -25,7 +24,6 @@ export default function ReaderPane({
   isLastChapter = false,
 }: ReaderPaneProps) {
   const { settings } = useReaderSettings();
-  const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
   const [activeBlockId, setActiveBlockId] = useState<string | null>(
     chapter.blocks[0]?.id || null
   );
@@ -33,8 +31,8 @@ export default function ReaderPane({
   const lastBlockId = chapter.blocks[chapter.blocks.length - 1]?.id;
   const isLastBlock = activeBlockId === lastBlockId;
 
-  // Tự động lưu tiến trình đọc khi cuộn
-  useReadingProgress({
+  // Chỉ commit resume reading khi reader thực sự đọc đủ threshold (10s time hoặc 20% scroll)
+  useResumeCommit({
     storyId,
     chapterId: chapter.id,
     activeBlockId,
@@ -65,9 +63,6 @@ export default function ReaderPane({
       {/* 1. Thanh tiến trình cuộn trang trên đỉnh */}
       <ProgressBar />
 
-      {/* 2. Modal cảnh báo an toàn nếu có hiệu ứng mạnh */}
-      <SafetyModal chapter={chapter} onOpenChange={setIsSafetyModalOpen} />
-
       {/* 3. Tiêu đề chương */}
       <header className="mb-12 text-center pt-6">
         <span className="font-ui text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)]">
@@ -93,7 +88,6 @@ export default function ReaderPane({
               block={block}
               isFirstParagraph={isFirstP}
               onBlockVisible={setActiveBlockId}
-              isPaused={isSafetyModalOpen}
             />
           );
         })}

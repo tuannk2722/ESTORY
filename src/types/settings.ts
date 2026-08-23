@@ -19,3 +19,15 @@ export interface ReadingProgress {
   status: ReadingStatus;    // mặc định "reading", đổi "completed" khi đọc hết block cuối chương cuối
   updated_at: string;       // ISO date
 }
+
+export interface ResumeReading {
+  chapter_id: string;
+  block_id: string;
+  progress: number;         // 0.0 – 1.0, % scroll tiến trình đọc
+  updated_at: number;       // Date.now() timestamp
+}
+
+export const RESUME_COMMIT_THRESHOLDS = {
+  TIME_SPENT_MS: 10_000,    // 10 giây
+  SCROLL_PROGRESS: 0.20,    // 20% scroll
+} as const;

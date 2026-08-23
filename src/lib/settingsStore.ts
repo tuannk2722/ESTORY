@@ -1,5 +1,5 @@
 // lib/settingsStore.ts
-import { ReaderSettings, ReadingProgress } from "@/types/settings";
+import { ReaderSettings, ReadingProgress, ResumeReading } from "@/types/settings";
 import { Bookmark } from "@/types/bookmark";
 
 export interface ISettingsStore {
@@ -11,6 +11,8 @@ export interface ISettingsStore {
   getBookmarks(): Bookmark[];
   isBookmarked(storyId: string): boolean;
   toggleBookmark(storyId: string, userId?: string): boolean;
+  getResumeReading(storyId: string): ResumeReading | null;
+  saveResumeReading(storyId: string, resume: ResumeReading): void;
 }
 
 export const DEFAULT_READER_SETTINGS: ReaderSettings = {
@@ -31,6 +33,7 @@ const STORAGE_KEYS = {
   SETTINGS: "story_reader_settings",
   PROGRESS: "story_reading_progress",
   BOOKMARKS: "story_bookmarks",
+  RESUME_READING: "story_resume_reading",
 } as const;
 
 export class LocalStorageSettingsStore implements ISettingsStore {
@@ -145,6 +148,30 @@ export class LocalStorageSettingsStore implements ISettingsStore {
     } catch (error) {
       console.error("Failed to toggle bookmark in localStorage:", error);
       return false;
+    }
+  }
+
+  getResumeReading(storyId: string): ResumeReading | null {
+    if (!this.isClient()) return null;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.RESUME_READING);
+      if (!raw) return null;
+      const map: Record<string, ResumeReading> = JSON.parse(raw);
+      return map[storyId] || null;
+    } catch {
+      return null;
+    }
+  }
+
+  saveResumeReading(storyId: string, resume: ResumeReading): void {
+    if (!this.isClient()) return;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.RESUME_READING);
+      const map: Record<string, ResumeReading> = raw ? JSON.parse(raw) : {};
+      map[storyId] = resume;
+      localStorage.setItem(STORAGE_KEYS.RESUME_READING, JSON.stringify(map));
+    } catch (error) {
+      console.error("Failed to save resume reading to localStorage:", error);
     }
   }
 }
