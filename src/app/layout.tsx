@@ -1,6 +1,17 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Cormorant_Garamond, Outfit } from "next/font/google";
+import {
+  Be_Vietnam_Pro,
+  Cormorant_Garamond,
+  EB_Garamond,
+  Literata,
+  Lora,
+  Merriweather,
+  Noto_Sans,
+  Outfit,
+  Playfair_Display,
+} from "next/font/google";
 import "./globals.css";
+import { Toaster } from 'sonner';
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-display",
@@ -23,6 +34,25 @@ const outfit = Outfit({
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
+
+const beVietnamPro = Be_Vietnam_Pro({
+  variable: "--font-editor",
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const notoSans = Noto_Sans({
+  variable: "--font-editor-fallback",
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const lora = Lora({ variable: "--font-story-lora", subsets: ["latin", "vietnamese"], weight: ["400", "600"], display: "swap" });
+const merriweather = Merriweather({ variable: "--font-story-merriweather", subsets: ["latin", "vietnamese"], weight: ["400", "700"], display: "swap" });
+const literata = Literata({ variable: "--font-story-literata", subsets: ["latin", "vietnamese"], weight: ["400", "600"], display: "swap" });
+const ebGaramond = EB_Garamond({ variable: "--font-story-eb-garamond", subsets: ["latin", "vietnamese"], weight: ["400", "600"], display: "swap" });
 
 /* ── SEO Metadata ───────────────────────────────────────────── */
 export const metadata: Metadata = {
@@ -47,12 +77,13 @@ export default function RootLayout({
     <html
       lang="vi"
       data-theme="dark"
-      className={`${playfairDisplay.variable} ${cormorantGaramond.variable} ${outfit.variable} h-full antialiased`}
+      className={`${playfairDisplay.variable} ${cormorantGaramond.variable} ${outfit.variable} ${beVietnamPro.variable} ${notoSans.variable} ${lora.variable} ${merriweather.variable} ${literata.variable} ${ebGaramond.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-dvh flex flex-col bg-[var(--color-background)] text-[var(--color-foreground)] font-ui transition-colors duration-300">
         <ThemeProvider>
           {children}
+          <Toaster position="top-center" richColors />
         </ThemeProvider>
       </body>
     </html>

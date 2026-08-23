@@ -26,6 +26,7 @@ export const DEFAULT_READER_SETTINGS: ReaderSettings = {
   intensity_multiplier: 0.8,
   reduced_motion: false,
   font_size: "lg",
+  font_family: "cormorant",
   theme: "dark",
 };
 

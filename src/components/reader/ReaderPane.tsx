@@ -7,6 +7,7 @@ import ProgressBar from "./ProgressBar";
 import ChapterNav from "./ChapterNav";
 import { useResumeCommit } from "@/hooks/useResumeCommit";
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
+import { STORY_FONT_OPTIONS } from "@/types/settings";
 
 export interface ReaderPaneProps {
   storyId: string;
@@ -54,9 +55,10 @@ export default function ReaderPane({
 
   // Map font-size class theo thiết kế docs/04-ui-ux-design.md
   const fontSizeClass = `font-size-${settings.font_size || "lg"}`;
+  const fontFamilyClass = STORY_FONT_OPTIONS.find((font) => font.id === settings.font_family)?.className
+    || "story-font-cormorant";
 
-  // Xác định vị trí block paragraph đầu tiên để đặt Drop-Cap
-  let foundFirstParagraph = false;
+  const firstParagraphId = chapter.blocks.find((block) => block.type === "paragraph")?.id;
 
   return (
     <div className="reader-pane relative w-full min-h-screen">
@@ -76,16 +78,12 @@ export default function ReaderPane({
       {/* 4. Khung đọc chính */}
       <main className={`prose-reader ${fontSizeClass}`}>
         {chapter.blocks.map((block) => {
-          let isFirstP = false;
-          if (block.type === "paragraph" && !foundFirstParagraph) {
-            isFirstP = true;
-            foundFirstParagraph = true;
-          }
-
+          const isFirstP = block.id === firstParagraphId;
           return (
-            <StoryBlock
+              <StoryBlock
               key={block.id}
               block={block}
+                storyFontClass={fontFamilyClass}
               isFirstParagraph={isFirstP}
               onBlockVisible={setActiveBlockId}
             />

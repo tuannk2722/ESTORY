@@ -98,7 +98,10 @@ export default function UserMenu() {
                 return (
                   <button
                     key={id}
-                    onClick={() => setTheme(id)}
+                    onClick={() => {
+                      setTheme(id);
+                      setIsOpen(false);
+                    }}
                     className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-xs font-ui transition-all cursor-pointer min-h-[44px] ${isActive
                       ? "border-[var(--color-accent)] bg-[var(--color-accent)]/15 text-[var(--color-accent)] font-semibold shadow-xs"
                       : "border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"

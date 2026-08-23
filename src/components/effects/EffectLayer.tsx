@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { EffectConfig } from "@/types/story";
-import { EFFECT_REGISTRY, AudioEffectPlayer } from "./EffectRegistry";
+import { EFFECT_REGISTRY } from "./EffectRegistry";
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
 import { useMobileDetect } from "@/hooks/useMobileDetect";
 
@@ -79,19 +79,7 @@ export default function EffectLayer({ effects = [], isActive }: EffectLayerProps
         const isCatEnabled = settings.effects_by_category?.[eff.category] !== false;
         if (!isCatEnabled) return null;
 
-        // Xử lý riêng cho Audio
-        if (eff.category === "audio") {
-          return (
-            <AudioEffectPlayer
-              key={eff.id}
-              config={eff}
-              isActive={isEffectActive}
-              intensityMultiplier={totalIntensityMultiplier}
-            />
-          );
-        }
-
-        // Xử lý cho Visual / Motion / Transition qua Registry
+        // Registry ánh xạ cả audio, visual, motion và transition.
         const Component = EFFECT_REGISTRY[eff.type];
         if (!Component) return null;
 

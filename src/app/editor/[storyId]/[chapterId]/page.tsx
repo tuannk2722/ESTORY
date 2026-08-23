@@ -1,5 +1,9 @@
 // src/app/editor/[storyId]/[chapterId]/page.tsx
-// Phase 2: Author Editor Screen
+// Phase 2: Author Editor Screen (US-2.1 -> US-2.6)
+
+import { notFound } from "next/navigation";
+import { storyRepository } from "@/lib/repositories";
+import EditorClient from "@/components/editor/EditorClient";
 
 interface EditorPageProps {
   params: Promise<{ storyId: string; chapterId: string }>;
@@ -7,13 +11,15 @@ interface EditorPageProps {
 
 export default async function EditorPage({ params }: EditorPageProps) {
   const { storyId, chapterId } = await params;
+  const story = await storyRepository.getById(storyId);
 
-  return (
-    <div className="editor-screen min-h-screen p-8">
-      <h1 className="text-2xl font-bold">Author Editor (Phase 2)</h1>
-      <p className="text-muted-foreground mt-2">
-        Story ID: {storyId} | Chapter ID: {chapterId}
-      </p>
-    </div>
-  );
+  if (!story) {
+    notFound();
+  }
+
+  // Đảm bảo chapterId hợp lệ trong story
+  const chapterExists = story.chapters.some((c) => c.id === chapterId);
+  const targetChapterId = chapterExists ? chapterId : story.chapters[0]?.id || chapterId;
+
+  return <EditorClient initialStory={story} chapterId={targetChapterId} />;
 }

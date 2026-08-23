@@ -25,11 +25,22 @@
           "mood_tag": "bí ẩn",
           "effects": [
             {
-              "id": "eff-101",
-              "type": "transition_fade",
-              "category": "transition",
-              "intensity": 0.7,
-              "duration_ms": 1200
+              "id": "eff-437542",
+              "type": "audio",
+              "category": "audio",
+              "intensity": 0.85,
+              "duration_ms": 1200,
+              "delay_ms": 0,
+              "audio_src": "/audio/gentle_rain_falling.mp3",
+              "loop": false
+            },
+            {
+              "id": "eff-537051",
+              "type": "particle_rain",
+              "category": "visual",
+              "intensity": 0.75,
+              "duration_ms": 5000,
+              "delay_ms": 0
             }
           ]
         },
@@ -43,8 +54,9 @@
               "id": "eff-102",
               "type": "bg_color_shift",
               "category": "visual",
-              "intensity": 0.6,
-              "duration_ms": 2500
+              "intensity": 0.8,
+              "duration_ms": 2500,
+              "delay_ms": 0
             }
           ]
         },
@@ -62,20 +74,22 @@
           "mood_tag": "mưa bão",
           "effects": [
             {
-              "id": "eff-103",
+              "id": "eff-495858",
+              "type": "audio",
+              "category": "audio",
+              "intensity": 0.85,
+              "duration_ms": 1200,
+              "delay_ms": 0,
+              "audio_src": "/audio/gentle_rain_falling.mp3",
+              "loop": true
+            },
+            {
+              "id": "eff-570287",
               "type": "particle_rain",
               "category": "visual",
               "intensity": 0.75,
-              "duration_ms": 5000
-            },
-            {
-              "id": "eff-200",
-              "type": "particle_rain",
-              "category": "audio",
-              "intensity": 0.3,
               "duration_ms": 5000,
-              "audio_src": "/audio/gentle_rain_falling.mp3",
-              "loop": true
+              "delay_ms": 0
             }
           ]
         },
@@ -123,11 +137,12 @@
               "delay_ms": 150
             },
             {
-              "id": "eff-106",
-              "type": "screen_shake",
+              "id": "eff-472865",
+              "type": "audio",
               "category": "audio",
               "intensity": 0.85,
-              "duration_ms": 3500,
+              "duration_ms": 1200,
+              "delay_ms": 0,
               "audio_src": "/audio/thunder-rumble.mp3",
               "loop": false
             }

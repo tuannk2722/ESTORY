@@ -79,6 +79,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // 3. Gán data-theme lên <html>
     if (typeof document !== "undefined") {
       document.documentElement.setAttribute("data-theme", initialSettings.theme || "dark");
+      document.documentElement.setAttribute("data-story-font", initialSettings.font_family || "cormorant");
     }
 
     dispatch({ type: "INIT", payload: initialSettings });
@@ -90,6 +91,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.setAttribute("data-theme", state.settings.theme || "dark");
     }
   }, [state.settings.theme, state.isMounted]);
+
+  useEffect(() => {
+    if (state.isMounted && typeof document !== "undefined") {
+      document.documentElement.setAttribute(
+        "data-story-font",
+        state.settings.font_family || "cormorant"
+      );
+    }
+  }, [state.settings.font_family, state.isMounted]);
 
   const updateSettings = (newSettings: Partial<ReaderSettings>) => {
     dispatch({ type: "SET_SETTINGS", payload: newSettings });

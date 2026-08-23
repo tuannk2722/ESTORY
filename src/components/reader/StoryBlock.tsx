@@ -8,6 +8,7 @@ import EffectLayer from "../effects/EffectLayer";
 export interface StoryBlockProps {
   block: IStoryBlock;
   isFirstParagraph?: boolean;
+  storyFontClass?: string;
   onBlockVisible?: (blockId: string) => void;
   isPaused?: boolean;
 }
@@ -18,6 +19,7 @@ export interface StoryBlockProps {
 export default function StoryBlock({
   block,
   isFirstParagraph = false,
+  storyFontClass = "story-font-cormorant",
   onBlockVisible,
   isPaused = false,
 }: StoryBlockProps) {
@@ -57,7 +59,7 @@ export default function StoryBlock({
 
       {block.type === "paragraph" && (
         <p
-          className={`font-story text-[length:inherit] leading-[inherit] text-[var(--color-foreground)] transition-all duration-300 ${isFirstParagraph ? "drop-cap" : ""
+          className={`font-story ${storyFontClass} text-[length:inherit] leading-[inherit] text-[var(--color-foreground)] transition-all duration-300 ${isFirstParagraph ? "drop-cap" : ""
             }`}
         >
           {block.text}
@@ -66,7 +68,7 @@ export default function StoryBlock({
 
       {block.type === "dialogue" && (
         <div className="dialogue-box my-8 p-5 md:p-6 bg-[var(--color-card)]/90 border-l-4 border-[var(--color-accent)] shadow-md">
-          <p className="font-story text-[length:inherit] leading-[inherit] text-[var(--color-foreground)] transition-all duration-300">
+          <p className={`font-story ${storyFontClass} text-[length:inherit] leading-[inherit] text-[var(--color-foreground)] transition-all duration-300`}>
             {block.text}
           </p>
         </div>

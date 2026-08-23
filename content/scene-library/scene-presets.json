@@ -1,0 +1,42 @@
+[
+  {
+    "id": "preset-storm-deep-sea",
+    "label": "Bão Đêm Ngoài Khơi",
+    "background_id": "bg-storm-ocean",
+    "palette_id": "pal-ocean-abyss",
+    "layout_id": "layout-center-standard",
+    "ambient_audio_src": "/audio/gentle_rain_falling.mp3",
+    "ambient_volume": 0.6,
+    "mood_tags": ["mưa bão", "u ám", "căng thẳng"]
+  },
+  {
+    "id": "preset-underground-mystery",
+    "label": "Tiếng Thì Thầm Dưới Hầm",
+    "background_id": "bg-fireflies-dark",
+    "palette_id": "pal-phosphor-green",
+    "layout_id": "layout-side-panel",
+    "ambient_audio_src": "/audio/horror_atmosphe.mp3",
+    "ambient_volume": 0.5,
+    "mood_tags": ["huyền bí", "rùng rợn"]
+  },
+  {
+    "id": "preset-ancient-journal",
+    "label": "Hải Trình Quá Khứ",
+    "background_id": "bg-vintage-parchment",
+    "palette_id": "pal-ancient-parchment",
+    "layout_id": "layout-center-standard",
+    "ambient_audio_src": "",
+    "ambient_volume": 0,
+    "mood_tags": ["cổ kính", "hoài niệm"]
+  },
+  {
+    "id": "preset-dawn-peace",
+    "label": "Bình Minh Tươi Sáng",
+    "background_id": "bg-dawn-hope",
+    "palette_id": "pal-dawn-victory",
+    "layout_id": "layout-center-standard",
+    "ambient_audio_src": "",
+    "ambient_volume": 0,
+    "mood_tags": ["bình yên", "hy vọng"]
+  }
+]

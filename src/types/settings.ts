@@ -1,12 +1,28 @@
 // types/settings.ts
 import { EffectCategory } from "./story";
 
+export type StoryFontFamily =
+  | "cormorant"
+  | "lora"
+  | "merriweather"
+  | "literata"
+  | "eb-garamond";
+
+export const STORY_FONT_OPTIONS = [
+  { id: "cormorant", label: "Cormorant", className: "story-font-cormorant" },
+  { id: "lora", label: "Lora", className: "story-font-lora" },
+  { id: "merriweather", label: "Merriweather", className: "story-font-merriweather" },
+  { id: "literata", label: "Literata", className: "story-font-literata" },
+  { id: "eb-garamond", label: "EB Garamond", className: "story-font-eb-garamond" },
+] as const;
+
 export interface ReaderSettings {
   effects_enabled: boolean;
   effects_by_category: Record<EffectCategory, boolean>;
   intensity_multiplier: number;   // 0.0 – 1.0, nhân với intensity gốc của từng effect
   reduced_motion: boolean;        // mặc định sync với prefers-reduced-motion, user có thể override
   font_size: "sm" | "md" | "lg" | "xl";
+  font_family: StoryFontFamily;
   theme: "light" | "dark" | "sepia";
 }
 

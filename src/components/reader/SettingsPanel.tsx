@@ -1,9 +1,22 @@
 "use client";
 
-import React from "react";
-import { X, Moon, Sun, BookOpen, Volume2, Sparkles, Activity, Layers, EyeOff } from "lucide-react";
+import React, { useState } from "react";
+import {
+  X,
+  Moon,
+  Sun,
+  BookOpen,
+  Volume2,
+  Sparkles,
+  Activity,
+  Layers,
+  EyeOff,
+  ChevronDown,
+  Check,
+} from "lucide-react";
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
 import { EffectCategory } from "@/types/story";
+import { STORY_FONT_OPTIONS } from "@/types/settings";
 
 export interface SettingsPanelProps {
   isOpen: boolean;
@@ -12,8 +25,13 @@ export interface SettingsPanelProps {
 
 export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const { settings, updateSettings, setTheme } = useReaderSettings();
+  const [isFontOpen, setIsFontOpen] = useState(false);
 
   if (!isOpen) return null;
+
+  const currentFont =
+    STORY_FONT_OPTIONS.find((f) => f.id === settings.font_family) ||
+    STORY_FONT_OPTIONS[0];
 
   const handleCategoryToggle = (category: EffectCategory) => {
     const currentMap = settings.effects_by_category || {
@@ -39,11 +57,11 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
       />
 
       {/* Drawer Panel */}
-      <aside className="glass-card relative w-full max-w-md h-full bg-[var(--color-card)]/95 shadow-2xl border-l border-[var(--color-border)] p-6 overflow-y-auto z-10 flex flex-col justify-between animate-fade-in">
+      <aside className="glass-card font-editor relative w-full max-w-md h-full bg-[var(--color-card)]/95 shadow-2xl border-l border-[var(--color-border)] p-6 overflow-y-auto z-10 flex flex-col justify-between animate-fade-in">
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border)]">
-            <h3 className="font-display text-xl font-bold text-[var(--color-foreground)] flex items-center gap-2">
+            <h3 className="font-editor text-xl font-bold text-[var(--color-foreground)] flex items-center gap-2">
               <span>Cài Đặt Đọc Truyện</span>
             </h3>
             <button
@@ -57,7 +75,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
           {/* 1. Theme Selection */}
           <div className="space-y-3">
-            <label className="font-ui text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+            <label className="font-editor text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
               Giao Diện
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -69,7 +87,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                   }`}
               >
                 <Moon className="w-5 h-5" />
-                <span className="text-xs font-ui">Dark OLED</span>
+                <span className="text-xs font-editor">Dark OLED</span>
               </button>
 
               <button
@@ -80,7 +98,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                   }`}
               >
                 <Sun className="w-5 h-5" />
-                <span className="text-xs font-ui">Paper Light</span>
+                <span className="text-xs font-editor">Paper Light</span>
               </button>
 
               <button
@@ -91,14 +109,14 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                   }`}
               >
                 <BookOpen className="w-5 h-5" />
-                <span className="text-xs font-ui">Sepia Warm</span>
+                <span className="text-xs font-editor">Sepia Warm</span>
               </button>
             </div>
           </div>
 
           {/* 2. Cỡ chữ (Font Size) */}
           <div className="space-y-3">
-            <label className="font-ui text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+            <label className="font-editor text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
               Cỡ Chữ
             </label>
             <div className="grid grid-cols-4 gap-2">
@@ -106,7 +124,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 <button
                   key={size}
                   onClick={() => updateSettings({ font_size: size })}
-                  className={`py-2 rounded-lg border text-sm font-ui transition-all cursor-pointer min-h-[44px] ${settings.font_size === size
+                  className={`py-2 rounded-lg border text-sm font-editor transition-all cursor-pointer min-h-[44px] ${settings.font_size === size
                     ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white font-semibold"
                     : "border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
                     }`}
@@ -117,15 +135,73 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             </div>
           </div>
 
+          {/* 2. Font chữ nội dung truyện */}
+          <div className="space-y-2 relative">
+            <label className="font-editor text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+              Font Chữ Truyện
+            </label>
+            <div className="relative">
+              {/* Trigger Button */}
+              <button
+                type="button"
+                onClick={() => setIsFontOpen(!isFontOpen)}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer min-h-[44px] ${isFontOpen
+                  ? "border-[var(--color-primary)] bg-[var(--color-background)] shadow-xs ring-2 ring-[var(--color-primary)]/20"
+                  : "border-[var(--color-border)] bg-[var(--color-background)] hover:border-[var(--color-primary)]/70 hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
+                  }`}
+              >
+                <span className={`text-sm font-medium ${currentFont.className}`}>
+                  {currentFont.label}
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 text-[var(--color-muted-foreground)] transition-transform duration-200 ${isFontOpen ? "rotate-180 text-[var(--color-primary)]" : ""
+                    }`}
+                />
+              </button>
+
+              {/* Dropdown Options */}
+              {isFontOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-20"
+                    onClick={() => setIsFontOpen(false)}
+                  />
+                  <div className="absolute left-0 right-0 top-full mt-1.5 p-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)]/95 backdrop-blur-md shadow-xl z-30 space-y-0.5 animate-fade-in">
+                    {STORY_FONT_OPTIONS.map(({ id, label, className }) => {
+                      const isSelected = settings.font_family === id;
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => {
+                            updateSettings({ font_family: id });
+                            setIsFontOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer min-h-[40px] ${className} ${isSelected
+                            ? "bg-[var(--color-primary)] text-white font-medium shadow-xs"
+                            : "hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
+                            }`}
+                        >
+                          <span>{label}</span>
+                          {isSelected && <Check className="w-4 h-4" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
           {/* 3. Hiệu ứng (Effects Switcher) */}
           <div className="space-y-4 pt-2 border-t border-[var(--color-border)]">
             {/* Master Toggle dạng label có thể click cả dòng */}
             <label className="flex items-center justify-between select-none">
               <div>
-                <h4 className="font-ui text-sm font-semibold text-[var(--color-foreground)]">
+                <h4 className="font-editor text-sm font-semibold text-[var(--color-foreground)]">
                   Kích hoạt hiệu ứng
                 </h4>
-                <p className="font-ui text-xs text-[var(--color-muted-foreground)]">
+                <p className="font-editor text-xs text-[var(--color-muted-foreground)]">
                   Bật/tắt toàn bộ hiệu ứng chuyển động & âm thanh
                 </p>
               </div>
@@ -142,7 +218,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               <div className="space-y-1 pl-2 border-l-2 border-[var(--color-border)] pt-1 animate-fade-in">
                 {/* Visual */}
                 <label className="flex items-center justify-between text-sm py-2 px-2.5 rounded-lg hover:bg-[var(--color-muted)]/60 transition-colors cursor-pointer select-none">
-                  <span className="flex items-center gap-2 text-[var(--color-foreground)] font-ui">
+                  <span className="flex items-center gap-2 text-[var(--color-foreground)] font-editor">
                     <Sparkles className="w-4 h-4 text-cyan-400" /> Thị giác (Chớp sáng, Mưa...)
                   </span>
                   <input
@@ -155,7 +231,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
                 {/* Audio */}
                 <label className="flex items-center justify-between text-sm py-2 px-2.5 rounded-lg hover:bg-[var(--color-muted)]/60 transition-colors cursor-pointer select-none">
-                  <span className="flex items-center gap-2 text-[var(--color-foreground)] font-ui">
+                  <span className="flex items-center gap-2 text-[var(--color-foreground)] font-editor">
                     <Volume2 className="w-4 h-4 text-amber-400" /> Âm thanh (SFX, BGM)
                   </span>
                   <input
@@ -168,7 +244,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
                 {/* Motion */}
                 <label className="flex items-center justify-between text-sm py-2 px-2.5 rounded-lg hover:bg-[var(--color-muted)]/60 transition-colors cursor-pointer select-none">
-                  <span className="flex items-center gap-2 text-[var(--color-foreground)] font-ui">
+                  <span className="flex items-center gap-2 text-[var(--color-foreground)] font-editor">
                     <Activity className="w-4 h-4 text-emerald-400" /> Chuyển động (Rung màn hình...)
                   </span>
                   <input
@@ -181,7 +257,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
                 {/* Transition */}
                 <label className="flex items-center justify-between text-sm py-2 px-2.5 rounded-lg hover:bg-[var(--color-muted)]/60 transition-colors cursor-pointer select-none">
-                  <span className="flex items-center gap-2 text-[var(--color-foreground)] font-ui">
+                  <span className="flex items-center gap-2 text-[var(--color-foreground)] font-editor">
                     <Layers className="w-4 h-4 text-purple-400" /> Chuyển cảnh (Fade, Mờ dần)
                   </span>
                   <input
@@ -198,7 +274,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           {/* 4. Cường độ hiệu ứng (Intensity Multiplier) */}
           {settings.effects_enabled && (
             <div className="space-y-2 pt-2 border-t border-[var(--color-border)]">
-              <div className="flex justify-between items-center text-sm font-ui">
+              <div className="flex justify-between items-center text-sm font-editor">
                 <span className="text-[var(--color-foreground)]">Cường độ hiệu ứng:</span>
                 <span className="font-semibold text-[var(--color-accent)]">
                   {Math.round((settings.intensity_multiplier ?? 1) * 100)}%
@@ -220,11 +296,11 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           {/* 5. Reduced Motion Toggle dạng label click cả dòng */}
           <label className="flex items-center justify-between py-3 px-3 rounded-xl border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 bg-[var(--color-card)]/50 hover:bg-[var(--color-card)] transition-colors cursor-pointer select-none">
             <div>
-              <h4 className="font-ui text-sm font-semibold text-[var(--color-foreground)] flex items-center gap-2">
+              <h4 className="font-editor text-sm font-semibold text-[var(--color-foreground)] flex items-center gap-2">
                 <EyeOff className="w-4 h-4 text-[var(--color-muted-foreground)]" />
                 <span>Giảm Chuyển Động</span>
               </h4>
-              <p className="font-ui text-xs text-[var(--color-muted-foreground)]">
+              <p className="font-editor text-xs text-[var(--color-muted-foreground)]">
                 Dành cho người nhạy cảm ánh sáng/chóng mặt
               </p>
             </div>
@@ -238,7 +314,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         </div>
 
         {/* Footer */}
-        <div className="pt-6 border-t border-[var(--color-border)] text-center text-xs font-ui text-[var(--color-muted-foreground)]">
+        <div className="pt-6 border-t border-[var(--color-border)] text-center text-xs font-editor text-[var(--color-muted-foreground)]">
           Tùy chỉnh được lưu tự động trên trình duyệt.
         </div>
       </aside>

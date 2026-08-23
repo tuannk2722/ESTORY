@@ -1,0 +1,62 @@
+[
+  {
+    "id": "pal-midnight-horror",
+    "label": "Màn Đêm U Ám",
+    "colors": {
+      "primary": "#3B82F6",
+      "secondary": "#1E293B",
+      "accent": "#E2B714",
+      "text": "#F8FAFC",
+      "background_tint": "rgba(5, 7, 15, 0.85)"
+    },
+    "mood_tags": ["u ám", "kinh dị", "căng thẳng"]
+  },
+  {
+    "id": "pal-ocean-abyss",
+    "label": "Vực Thẳm Đại Dương",
+    "colors": {
+      "primary": "#0EA5E9",
+      "secondary": "#0F172A",
+      "accent": "#38BDF8",
+      "text": "#F0F9FF",
+      "background_tint": "rgba(3, 15, 30, 0.88)"
+    },
+    "mood_tags": ["mưa bão", "bí ẩn", "nguy hiểm"]
+  },
+  {
+    "id": "pal-ancient-parchment",
+    "label": "Sách Cổ Nâu Trầm",
+    "colors": {
+      "primary": "#B45309",
+      "secondary": "#3E2723",
+      "accent": "#D97706",
+      "text": "#F4EEDD",
+      "background_tint": "rgba(24, 18, 12, 0.9)"
+    },
+    "mood_tags": ["cổ kính", "hoài niệm", "ký ức"]
+  },
+  {
+    "id": "pal-dawn-victory",
+    "label": "Bình Minh Khải Hoàn",
+    "colors": {
+      "primary": "#F59E0B",
+      "secondary": "#451A03",
+      "accent": "#FDE047",
+      "text": "#FFFBEB",
+      "background_tint": "rgba(20, 10, 5, 0.82)"
+    },
+    "mood_tags": ["bình yên", "hy vọng", "chiến thắng"]
+  },
+  {
+    "id": "pal-phosphor-green",
+    "label": "Lân Tinh Huyền Bí",
+    "colors": {
+      "primary": "#10B981",
+      "secondary": "#064E3B",
+      "accent": "#34D399",
+      "text": "#ECFDF5",
+      "background_tint": "rgba(2, 20, 12, 0.86)"
+    },
+    "mood_tags": ["huyền bí", "rùng rợn", "kỳ dị"]
+  }
+]

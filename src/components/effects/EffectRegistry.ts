@@ -6,7 +6,6 @@ import { ComponentType } from "react";
 import { EffectType, EffectConfig } from "@/types/story";
 import LightningFlash from "./visual/LightningFlash";
 import ParticleRain from "./visual/ParticleRain"; // CSS fallback — giữ lại để tham khảo
-import ParticleRainTsParticles from "./visual/ParticleRainTsParticles"; // tsParticles implementation
 import BgColorShift from "./visual/BgColorShift";
 import ScreenShake from "./visual/ScreenShake";
 import TextShake from "./visual/TextShake";
@@ -37,6 +36,6 @@ export const EFFECT_REGISTRY: Record<EffectType, ComponentType<EffectComponentPr
   vibration: null,
   transition_fade: TransitionFade,
   transition_page_tear: null,
+  audio: AudioEffectPlayer,
 };
 
-export { AudioEffectPlayer };

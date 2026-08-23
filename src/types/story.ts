@@ -16,7 +16,8 @@ export type EffectType =
   | "lightning_flash"
   | "vibration"            // Vibration API, chỉ hoạt động trên mobile hỗ trợ
   | "transition_fade"
-  | "transition_page_tear";
+  | "transition_page_tear"
+  | "audio";
 
 export type EffectCategory = "visual" | "audio" | "motion" | "transition";
 

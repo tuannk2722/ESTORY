@@ -1,0 +1,76 @@
+[
+  {
+    "id": "bg-storm-ocean",
+    "type": "gradient",
+    "label": "Giông Bão Đại Dương",
+    "value": "linear-gradient(135deg, #050b14 0%, #0d1b2a 50%, #1b263b 100%)",
+    "motion": "static",
+    "mood_tags": [
+      "kinh dị",
+      "u ám",
+      "mưa bão"
+    ]
+  },
+  {
+    "id": "bg-rain-loop",
+    "type": "video",
+    "label": "Mưa Đêm Ngọn Hải Đăng",
+    "value": "/scene-backgrounds/rain-loop.mp4",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/rain-poster.png",
+    "mood_tags": [
+      "mưa bão",
+      "cô độc",
+      "u ám"
+    ]
+  },
+  {
+    "id": "bg-fireflies-dark",
+    "type": "particle_composition",
+    "label": "Lân Tinh Biển Sâu",
+    "value": "fireflies_green",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/fireflies-poster.png",
+    "mood_tags": [
+      "huyền bí",
+      "rùng rợn",
+      "kỳ dị"
+    ]
+  },
+  {
+    "id": "bg-vintage-parchment",
+    "type": "gradient",
+    "label": "Trang Sách Cổ Kính",
+    "value": "radial-gradient(ellipse at center, #231b14 0%, #140f0b 70%, #080605 100%)",
+    "motion": "static",
+    "mood_tags": [
+      "cổ kính",
+      "hoài niệm",
+      "bí ẩn"
+    ]
+  },
+  {
+    "id": "bg-dawn-hope",
+    "type": "gradient",
+    "label": "Bình Minh Sau Giông Tố",
+    "value": "linear-gradient(180deg, #0f172a 0%, #311b42 40%, #7c2d12 75%, #f59e0b 100%)",
+    "motion": "static",
+    "mood_tags": [
+      "bình yên",
+      "hy vọng",
+      "chiến thắng"
+    ]
+  },
+  {
+    "id": "bg-lighthouse-night",
+    "type": "image",
+    "label": "Hải Đăng Đêm Vắng",
+    "value": "/scene-backgrounds/lighthouse-night.png",
+    "motion": "static",
+    "mood_tags": [
+      "cô độc",
+      "bí ẩn",
+      "căng thẳng"
+    ]
+  }
+]
