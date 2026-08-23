@@ -36,7 +36,7 @@
         {
           "id": "ch1-block-002",
           "type": "paragraph",
-          "text": "Hoàng hôn buông xuống trên mỏm đá Vọng Hải mang theo một sự tĩnh lặng đến rợn ngời. Gió biển chiều nay bỗng nhiên ngừng thổi, để lại mặt nước phẳng lặng như một tấm gương đen khổng lồ. Từ phía chân trời xa xăm, những đám mây màu tím sẫm cuồn cuộn dâng lên, nuốt chửng những tia sáng le lói cuối cùng của một ngày tàn.",
+          "text": "Hoàng hôn buông xuống trên mỏm đá Vọng Hải mang theo một sự tĩnh lặng đến rợn ngời. Gió biển chiều nay bỗng nhiên ngừng thổi một cách kỳ quái, để lại mặt nước phẳng lặng như một tấm gương đen khổng lồ trải dài đến vô tận. Từ phía chân trời xa xăm, những đám mây màu tím sẫm cuồn cuộn dâng lên từ đáy vịnh, nuốt chửng những tia sáng le lói cuối cùng của một ngày tàn. Ngọn hải đăng cổ kính này được xây dựng từ thời Pháp thuộc hơn một trăm năm trước, nằm trơ trọi trên mỏm đá cô độc cách đất liền gần mười hải lý. Suốt ba mươi năm gắn bó với ngọn tháp đá sừng sững giữa muôn trùng sóng gió, lão Bảy – người gác đèn già nua với làn da sạm đen vì nắng gió – chưa từng chứng kiến một buổi chiều nào ngột ngạt và nặng nề đến thế.",
           "mood_tag": "u ám",
           "effects": [
             {
@@ -51,7 +51,14 @@
         {
           "id": "ch1-block-003",
           "type": "paragraph",
-          "text": "Lộp độp... lộp độp... Những giọt mưa đầu tiên bắt đầu rơi xuống mái tôn rỉ sét của trạm gác. Chỉ vài giây sau, màn đêm bị xé rách bởi một trận mưa như trút nước, bao phủ lấy ngọn hải đăng cổ kính giữa muôn trùng sóng vỗ. Không khí lạnh buốt tràn qua từng khe cửa gỗ mục nát, mang theo hơi thở mặn chát và tanh nồng của biển sâu.",
+          "text": "Áp kế treo trên vách đá của phòng điều khiển đã tụt dốc không phanh từ giữa trưa, kim đồng hồ rung bần bật như đang cảnh báo một thảm họa sắp giáng xuống. Nước biển dưới chân vách đá rút ra xa một cách bất thường, để lộ những rạn đá ngầm lởm chởm phủ đầy rong rêu đen đúa và xác của hàng ngàn con ốc biển đang bốc lên mùi hôi nồng nặc. Những đàn mòng biển vốn dĩ tấp nập chao liệng quanh tháp canh giờ đây đã biến mất không còn một bóng dáng, dường như trực giác loài vật đã mách bảo chúng tìm nơi ẩn náu sâu trong những hốc đá kín gió từ trước khi màn đêm buông xuống.",
+          "mood_tag": "bí ẩn",
+          "effects": []
+        },
+        {
+          "id": "ch1-block-004",
+          "type": "paragraph",
+          "text": "Lộp độp... lộp độp... Những giọt mưa đầu tiên bắt đầu rơi xuống mái tôn rỉ sét của trạm gác. Chỉ vài giây sau, màn đêm bị xé rách bởi một trận mưa như trút nước, bao phủ lấy ngọn hải đăng cổ kính giữa muôn trùng sóng vỗ. Không khí lạnh buốt tràn qua từng khe cửa gỗ mục nát, mang theo hơi thở mặn chát và tanh nồng của biển sâu. Từng đợt gió rít gầm rú qua các thanh lan can sắt, tạo nên những âm thanh ma quái như tiếng thở dài ai oán của những linh hồn từng vùi thây dưới lòng đại dương sâu thẳm này.",
           "mood_tag": "mưa bão",
           "effects": [
             {
@@ -73,16 +80,23 @@
           ]
         },
         {
-          "id": "ch1-block-004",
+          "id": "ch1-block-005",
           "type": "paragraph",
-          "text": "Ông lão gác đèn khẽ rùng mình, đôi bàn tay gầy guộc châm lại bấc ngọn đèn dầu trên bàn. Tiếng mưa rơi ràn rạt bên ngoài dường như đang cố gắng vùi dập tất cả mọi thanh âm của sự sống. Nhưng giữa tiếng gió gầm rít điên cuồng ấy, ông bỗng nghe thấy tiếng đập cửa dồn dập vang lên từ chân tháp.",
+          "text": "Lão Bảy khẽ rùng mình, đôi bàn tay gầy guộc châm lại bấc ngọn đèn dầu trên bàn gỗ lim đã lên nước bóng lộn. Tiếng mưa rơi ràn rạt bên ngoài dường như đang cố gắng vùi dập tất cả mọi thanh âm của sự sống con người. Lão khoác lên mình chiếc áo mưa cánh dơi dày cộm bằng vải bạt, với lấy chiếc đèn bão rồi từng bước leo lên cầu thang xoắn ốc bằng gang đúc dẫn lên đỉnh tháp. Ngọn thấu kính Fresnel khổng lồ xoay tròn nhịp nhàng, phóng ra luồng ánh sáng vàng rực quét ngang màn mưa mịt mù, cố gắng soi rọi luồng tàu cho bất kỳ con thuyền xấu số nào còn lạc lối ngoài khơi xa.",
           "mood_tag": "căng thẳng",
           "effects": []
         },
         {
-          "id": "ch1-block-005",
+          "id": "ch1-block-006",
+          "type": "dialogue",
+          "text": "\"Trời hành cơn này dữ quá... Ba mươi năm canh biển, chưa bao giờ thấy mặt nước cuộn sóng ngược chiều gió như đêm nay. Cầu trời cho lũ trẻ trên mấy ghe lưới ngoài rạn Mũi Trâu kịp chạy vào vịnh trú ẩn...\" — Lão Bảy lẩm bẩm một mình, đôi mắt mờ đục đăm đăm nhìn vào khoảng không vô tận phía tây nam.",
+          "mood_tag": "lo âu",
+          "effects": []
+        },
+        {
+          "id": "ch1-block-007",
           "type": "paragraph",
-          "text": "ĐOÀNG! Một tia chớp chói lòa bất ngờ rạch ngang vòm trời, biến toàn bộ không gian đêm đen trở nên trắng xóa trong tích tắc. Ánh sáng chói lọi hắt qua khung cửa kính, in hằn bóng đen của một bóng người kỳ dị đang đứng bất động ngoài ban công tháp canh!",
+          "text": "ĐOÀNG! Một tia chớp chói lòa bất ngờ rạch ngang vòm trời, biến toàn bộ không gian đêm đen trở nên trắng xóa trong tích tắc. Ánh sáng chói lọi hắt qua khung cửa kính dày ba lớp của phòng đèn pha, in hằn bóng đen của một bóng người kỳ dị đang đứng bất động ngoài hành lang lộng gió của tháp canh! Bóng đen ấy cao lêu nghêu, ướt sũng, với những đường nét méo mó và dường như không có khuôn mặt rõ ràng dưới làn mưa quất xối xả.",
           "mood_tag": "kinh dị / cao trào",
           "effects": [
             {
@@ -95,9 +109,9 @@
           ]
         },
         {
-          "id": "ch1-block-006",
+          "id": "ch1-block-008",
           "type": "paragraph",
-          "text": "Ngay sau ánh chớp là một tiếng sấm nổ đinh tai nhức óc rền vang khắp vịnh biển. Chấn động khủng khiếp khiến cả ngọn tháp đá vững chãi rung lắc dữ dội, chiếc đèn dầu trên bàn chao đảo muốn ngã nhào xuống sàn đá.",
+          "text": "Ngay sau ánh chớp là một tiếng sấm nổ đinh tai nhức óc rền vang khắp vịnh biển. Chấn động khủng khiếp khiến cả ngọn tháp đá hoa cương vững chãi rung lắc dữ dội, chiếc đèn dầu trên bàn chao đảo muốn ngã nhào xuống sàn đá. Những mảnh vữa vôi cũ kỹ trên trần vòm rơi lả tả xuống sàn nhà. Lão Bảy phải bám chặt lấy lan can sắt để không bị ngã khuỵu, lồng ngực đập liên hồi như muốn vỡ tung trước sự xuất hiện phi lý của bóng người trên đỉnh tháp cao gần bốn mươi mét giữa cơn bão cuồng phong.",
           "mood_tag": "chấn động",
           "effects": [
             {
@@ -120,9 +134,9 @@
           ]
         },
         {
-          "id": "ch1-block-007",
+          "id": "ch1-block-009",
           "type": "dialogue",
-          "text": "\"K-Kẻ nào... Kẻ nào đang ở ngoài đó?!\" — Ông lão lùi lại một bước, cổ họng nghẹn đắng, giọng nói run rẩy hòa vào màn mưa lạnh ngắt.",
+          "text": "\"K-Kẻ nào... Kẻ nào đang ở ngoài đó?! Mau vào trong kẻo gió cuốn xuống biển bây giờ!\" — Lão Bảy hét lớn qua khe thông gió, giọng nói run rẩy hòa lẫn vào tiếng gầm thét của cuồng phong.",
           "mood_tag": "sợ hãi",
           "effects": [
             {
@@ -135,9 +149,9 @@
           ]
         },
         {
-          "id": "ch1-block-008",
+          "id": "ch1-block-010",
           "type": "paragraph",
-          "text": "Không có tiếng trả lời. Chỉ có tiếng then cài cửa bên dưới lách cách chuyển động, như thể có một bàn tay ướt đẫm đang từ từ vặn mở ổ khóa rỉ sét từ phía ngoài...",
+          "text": "Nhưng khi lão vội vã đẩy then cài cửa kính nhìn ra ngoài, hành lang trống rỗng. Không có một ai cả. Chỉ có những vũng nước biển sủi bọt trắng xóa đang cuộn tròn trên mặt sàn xi măng, mang theo những sợi rong biển dài ngoằng màu tím đen bốc mùi tanh nồng nặc. Và ngay lúc đó, từ dưới chân tháp – nơi đặt cánh cửa gỗ lim dày cộp khóa chặt bằng ba then sắt – vang lên những tiếng đập cửa dồn dập, nặng trịch như có một tảng đá ngầm đang va đập liên hồi vào thành lũy...",
           "mood_tag": "lơ lửng / bí ẩn",
           "effects": []
         }
@@ -166,7 +180,7 @@
         {
           "id": "ch2-block-002",
           "type": "paragraph",
-          "text": "Cánh cửa gỗ nặng trịch kẽo kẹt mở toang, gió bão ùa vào dập tắt ngọn đèn dầu leo lét. Trong bóng tối đặc quánh, một làn khói sương mờ mịt từ dưới lòng biển dâng lên, bò trườn qua từng bậc thềm đá hoa cương phủ đầy rêu phong ẩm ướt.",
+          "text": "Cánh cửa gỗ nặng trịch ở chân tháp kẽo kẹt mở toang, gió bão cuồng loạn ùa vào dập tắt ngọn đèn dầu leo lét trên tay lão Bảy. Trong bóng tối đặc quánh và lạnh buốt, một làn khói sương mờ mịt từ dưới lòng biển sâu bốc lên cuồn cuộn, bò trườn qua từng bậc thềm đá hoa cương phủ đầy rêu phong ẩm ướt. Mùi nước biển mặn chát hòa lẫn với mùi bùn lầy của đáy biển sâu ngập tràn khắp không gian ngột ngạt của ngọn tháp cổ.",
           "mood_tag": "huyền bí",
           "effects": [
             {
@@ -181,7 +195,7 @@
         {
           "id": "ch2-block-003",
           "type": "paragraph",
-          "text": "Ông lão quờ quạng tìm hộp diêm đánh lửa. Khi ánh sáng vàng vọt bùng lên, ông bàng hoàng nhìn thấy những vệt bùn đen tanh tưởi kéo dài từ ngưỡng cửa dẫn thẳng xuống lối thang xoắn ốc của căn hầm chứa nước ngọt dưới đáy tháp canh.",
+          "text": "Lão Bảy quờ quạng trong túi áo mưa tìm hộp diêm đánh lửa bằng đồng. Sau vài tiếng quẹt khô khốc, ánh lửa vàng vọt bùng lên trong chốc lát rồi soi rọi một cảnh tượng khiến sống lưng lão lạnh toát. Từ ngưỡng cửa chính, một vệt bùn đen tanh tưởi kéo dài ngoằn ngoèo trên nền đá hoa cương, dẫn thẳng về phía góc phòng – nơi đặt nắp hầm bằng sắt rỉ sét dẫn xuống bể chứa nước ngọt ngầm ăn sâu vào lòng mỏm đá ngập dưới mực nước biển.",
           "mood_tag": "rùng rợn",
           "effects": [
             {
@@ -195,8 +209,15 @@
         },
         {
           "id": "ch2-block-004",
+          "type": "paragraph",
+          "text": "Căn hầm này vốn đã bị niêm phong bằng ba vòng xích sắt đặc nặng từ năm 1974, sau một vụ tai nạn bí hiểm cướp đi sinh mạng của toàn bộ kíp gác đèn tiền nhiệm trong một đêm giông bão tương tự. Kể từ ngày tiếp quản ngọn hải đăng, lão Bảy luôn tuân thủ lời dặn nghiêm ngặt của những bậc tiền bối: tuyệt đối không bao giờ mở nắp hầm sau nửa đêm, bất kể có nghe thấy âm thanh gì vọng lên từ lòng đất đá.",
+          "mood_tag": "căng thẳng",
+          "effects": []
+        },
+        {
+          "id": "ch2-block-005",
           "type": "dialogue",
-          "text": "\"Cọt kẹt... cọt kẹt... Cứu... cứu chúng tôi với...\" — Một thanh âm ma mị thì thầm như tiếng gió luồn qua khe nứt, vọng lên từ đáy sâu tăm tối.",
+          "text": "\"Cọt kẹt... cọt kẹt... Cứu... cứu chúng tôi với... Dưới này lạnh lắm... Mau mở xích ra đi...\" — Một thanh âm ma mị thì thầm như tiếng gió luồn qua khe nứt vách đá, vang vọng mồn một từ phía dưới nắp hầm tăm tối.",
           "mood_tag": "kinh hoàng",
           "effects": [
             {
@@ -209,10 +230,17 @@
           ]
         },
         {
-          "id": "ch2-block-005",
+          "id": "ch2-block-006",
           "type": "paragraph",
-          "text": "Tim ông lão đập thình thịch như muốn nhảy ra khỏi lồng ngực. Từng bước chân run rẩy bước xuống cầu thang đá, tay ông nắm chặt cây lao săn cá cũ kỹ. Dưới đáy hầm, mặt nước ngầm đang sủi bọt cuồn cuộn phát ra những đốm sáng lân tinh kỳ dị chưa từng thấy.",
+          "text": "Tim lão Bảy đập thình thịch như muốn nhảy tung ra khỏi lồng ngực gầy guộc. Từng sợi dây xích sắt dày bằng cổ tay người lớn đang rung lên bần bật, những mắt xích ma sát vào nhau kêu loảng xoảng trong đêm vắng. Lão vội với lấy cây lao săn cá bằng thép bọc gỗ lim dựng ở góc tường, hai tay nắm chặt báng gỗ ướt đẫm mồ hôi lạnh, từng bước dè dặt tiến lại gần miệng hầm ngầm.",
           "mood_tag": "căng thẳng cực độ",
+          "effects": []
+        },
+        {
+          "id": "ch2-block-007",
+          "type": "paragraph",
+          "text": "Bỗng nhiên, một tiếng rắc khô khốc vang lên khi ổ khóa sắt cổ xưa bị bẻ gãy từ bên trong! Nắp hầm bật mở hé ra một khe hở rộng bằng gang tay. Từ dưới làn nước đen ngòm dâng cao trong hầm, hàng ngàn đốm sáng lân tinh màu xanh lục kỳ quái trồi lên lơ lửng giữa không trung, phát ra thứ ánh sáng ma quái chập chờn chiếu rọi khuôn mặt thất thần của người gác đèn già.",
+          "mood_tag": "huyền bí / cao trào",
           "effects": [
             {
               "id": "eff-205",
@@ -229,6 +257,13 @@
               "duration_ms": 400
             }
           ]
+        },
+        {
+          "id": "ch2-block-008",
+          "type": "paragraph",
+          "text": "Nhìn sâu vào khe nứt ngập nước, lão Bảy bàng hoàng nhận ra những đốm sáng lân tinh ấy không phải là sinh vật phù du. Chúng đang tụ lại thành hình dạng của những bàn tay người nhợt nhạt, trồi lên bám chặt lấy mép đá hoa cương. Và bên dưới đáy nước sâu hun hút, một khối kim loại đen bóng khổng lồ đang từ từ chuyển động, làm rung chuyển cả nền móng ngọn tháp đá trăm tuổi sừng sững giữa biển khơi...",
+          "mood_tag": "kết thúc hồi hộp",
+          "effects": []
         }
       ]
     },

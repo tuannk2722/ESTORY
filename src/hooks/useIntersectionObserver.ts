@@ -12,7 +12,7 @@ export function useIntersectionObserver(
   elementRef: RefObject<Element | null>,
   {
     threshold = 0.3,
-    rootMargin = "0px 0px -30% 0px",
+    rootMargin = "-20% 0px -30% 0px",
     freezeOnceVisible = false,
   }: UseIntersectionObserverOptions = {}
 ): IntersectionObserverEntry | null {

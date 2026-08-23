@@ -24,7 +24,7 @@ export default function StoryBlock({
   const blockRef = useRef<HTMLDivElement>(null);
   const entry = useIntersectionObserver(blockRef, {
     threshold: 0.35,
-    rootMargin: "0px 0px -25% 0px",
+    rootMargin: "-20% 0px -25% 0px",
   });
 
   const isIntersecting = !!entry?.isIntersecting;
@@ -42,9 +42,8 @@ export default function StoryBlock({
       id={block.id}
       data-block-id={block.id}
       data-has-effect={block.effects?.map((e) => e.id).join(" ")}
-      className={`story-block relative my-10 md:my-14 transition-all duration-700 ${
-        isIntersecting ? "opacity-100 active scale-[1.005]" : "opacity-75"
-      }`}
+      className={`story-block relative my-10 md:my-14 transition-all duration-700 ${isIntersecting ? "opacity-100 active scale-[1.005]" : "opacity-75"
+        }`}
     >
       {/* Lớp kích hoạt hiệu ứng - chỉ kích hoạt khi không bị modal tạm dừng */}
       <EffectLayer effects={block.effects} isActive={isEffectActive} />
@@ -58,9 +57,8 @@ export default function StoryBlock({
 
       {block.type === "paragraph" && (
         <p
-          className={`font-story text-[length:inherit] leading-[inherit] text-[var(--color-foreground)] transition-all duration-300 ${
-            isFirstParagraph ? "drop-cap" : ""
-          }`}
+          className={`font-story text-[length:inherit] leading-[inherit] text-[var(--color-foreground)] transition-all duration-300 ${isFirstParagraph ? "drop-cap" : ""
+            }`}
         >
           {block.text}
         </p>
