@@ -18,7 +18,7 @@ export default function TextFadeFlashback({
     <div
       data-effect-id={config.id}
       data-effect-type="text_fade_flashback"
-      className="flashback-effect-layer fixed inset-0 pointer-events-none z-10 overflow-hidden transition-opacity duration-1000 ease-in-out"
+      className="flashback-effect-layer fixed inset-0 pointer-events-none z-[5] overflow-hidden transition-opacity duration-1000 ease-in-out"
       aria-hidden="true"
     >
       {/* Sepia Nostalgia Color Wash */}

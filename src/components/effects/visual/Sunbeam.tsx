@@ -31,7 +31,7 @@ export default function Sunbeam({
     <div
       data-effect-id={config.id}
       data-effect-type="sunbeam"
-      className="sunbeam-effect-layer fixed inset-0 pointer-events-none z-20 overflow-hidden"
+      className="sunbeam-effect-layer fixed inset-0 pointer-events-none z-[5] overflow-hidden"
       aria-hidden="true"
     >
       {/* 1. Warm Sun Source Glow (Top Right) */}

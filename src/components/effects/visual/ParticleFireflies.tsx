@@ -42,7 +42,7 @@ export default function ParticleFireflies({
     <div
       data-effect-id={config.id}
       data-effect-type="particle_fireflies"
-      className="particle-fireflies-layer fixed inset-0 pointer-events-none z-20 overflow-hidden"
+      className="particle-fireflies-layer fixed inset-0 pointer-events-none z-[5] overflow-hidden"
       aria-hidden="true"
     >
       {fireflies.map((f) => (

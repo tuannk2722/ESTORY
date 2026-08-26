@@ -41,7 +41,7 @@ export default function BgColorShift({
           repeat: isLoop ? Infinity : 0,
           ease: "easeInOut",
         }}
-        className={`pointer-events-none fixed inset-0 z-10 ${themeTint.className}`}
+        className={`pointer-events-none fixed inset-0 z-[5] ${themeTint.className}`}
         aria-hidden="true"
       />
     </AnimatePresence>

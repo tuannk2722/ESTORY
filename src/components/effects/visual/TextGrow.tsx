@@ -68,7 +68,7 @@ export default function TextGrow({
 
   return (
     <div
-      className="fixed inset-0 pointer-events-none z-20 flex items-center justify-center transition-all"
+      className="fixed inset-0 pointer-events-none z-[5] flex items-center justify-center transition-all"
       aria-hidden="true"
     >
       <div

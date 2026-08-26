@@ -231,8 +231,8 @@ export default function SceneLayer({
         />
       )}
 
-      {/* 5. Khung đọc chính: Cố định vị trí trung tâm chuẩn mực, không bị bọc hộp cứng nhắc, giữ mắt đọc êm ái */}
-      <div className="relative z-10 w-full max-w-2xl mx-auto">
+      {/* 5. Khung đọc chính: Cố định vị trí trung tâm chuẩn mực, luôn ở tầng cao nhất (z-20) trên các hiệu ứng */}
+      <div className="relative z-20 w-full max-w-2xl mx-auto">
         {children}
       </div>
     </div>

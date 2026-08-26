@@ -29,7 +29,7 @@ export default function HapticVibration({
     <div
       data-effect-id={config.id}
       data-effect-type="vibration"
-      className="vibration-effect-layer fixed inset-0 pointer-events-none z-10 animate-vibrate-subtle"
+      className="vibration-effect-layer fixed inset-0 pointer-events-none z-[5] animate-vibrate-subtle"
       aria-hidden="true"
     />
   );

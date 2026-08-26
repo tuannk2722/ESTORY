@@ -673,7 +673,7 @@ export default function ScenePicker({
       <div
         role="dialog"
         aria-modal="true"
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
+        className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
         onClick={onClose}
       >
         <div
@@ -1467,7 +1467,7 @@ export default function ScenePicker({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[70] bg-background text-foreground overflow-y-auto animate-fade-in flex flex-col"
+          className="fixed inset-0 z-[90] bg-background text-foreground overflow-y-auto animate-fade-in flex flex-col"
         >
           {/* 1. Background Layer */}
           {activeBackgroundAsset && (
@@ -1668,7 +1668,7 @@ export default function ScenePicker({
 
           {/* 6. Main Preview Content with Reader Typography */}
           <main
-            className="relative z-10 flex-1 w-full max-w-2xl mx-auto px-4 md:px-6 py-12"
+            className="relative z-20 flex-1 w-full max-w-2xl mx-auto px-4 md:px-6 py-12"
             style={
               activeColorPalette
                 ? ({
@@ -1685,7 +1685,7 @@ export default function ScenePicker({
                 const isFirstP = block.id === firstParagraphId;
 
                 return (
-                  <div key={block.id} className="story-block relative my-8">
+                  <div key={block.id} className="story-block relative z-20 my-8">
                     {block.type === "heading" && (
                       <div className="my-10 text-center">
                         <h2 className="font-display text-2xl md:text-3xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#F8FAFC] via-[var(--color-primary,#38BDF8)] to-[#F8FAFC] inline-block pb-3 border-b-2 border-[var(--color-accent,#E2B714)]/60">

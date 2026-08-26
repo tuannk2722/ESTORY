@@ -159,7 +159,7 @@ export default function EffectLayer({ effects = [], isActive }: EffectLayerProps
   const isReducedMotion = !!settings.reduced_motion;
 
   const effectElements = (
-    <div className="effect-layer pointer-events-none">
+    <div className="effect-layer pointer-events-none relative z-[5]">
       <AnimatePresence mode="sync">
         {effects.map((eff) => {
           const isEffectActive = isActive && !!delayedActiveEffects[eff.id];

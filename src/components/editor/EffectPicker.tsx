@@ -246,7 +246,7 @@ export default function EffectPicker({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -584,12 +584,12 @@ export default function EffectPicker({
           </button>
         </div>
 
-        {/* ── Preview Effect Layer — phủ toàn trang viewport qua createPortal với z-index cao (z-[70]) để hiển thị nổi bật trên Modal (z-50) ── */}
+        {/* ── Preview Effect Layer — phủ toàn trang viewport qua createPortal với z-index cao (z-[90]) để hiển thị nổi bật trên Modal (z-[80]) ── */}
         {previewEffect && (() => {
           const Component = EFFECT_REGISTRY[previewEffect.type];
           if (!Component) return null;
           const element = (
-            <div className="effect-modal-preview-portal pointer-events-none fixed inset-0 z-[70] overflow-hidden">
+            <div className="effect-modal-preview-portal pointer-events-none fixed inset-0 z-[90] overflow-hidden">
               <Component config={previewEffect} isActive={true} intensityMultiplier={1} />
             </div>
           );

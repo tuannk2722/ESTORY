@@ -218,49 +218,9 @@ export default function EditorClient({
         </div>
       </main>
 
-      {/* 4. Floating Action Dock — ẩn khi preview overlay đang mở */}
-      {!isPreview && (
-        <div
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 p-2 bg-card/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl max-w-[95vw] animate-fade-in"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <PreviewToggle isPreview={isPreview} onToggle={setIsPreview} />
-
-          <button
-            type="button"
-            onClick={() => handleSave(story)}
-            disabled={isSaving}
-            className="px-5 py-2 rounded-xl bg-editor-action hover:bg-editor-action-hover text-editor-action-foreground font-editor font-semibold text-sm flex items-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-50 min-h-[44px]"
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Đang lưu...</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                <span>Lưu Thay Đổi</span>
-              </>
-            )}
-          </button>
-        </div>
-      )}
-
       {/* 5. Preview: Full-screen overlay (US-2.5, US-2.9, docs/04b-page-layouts.md mục 5.5) */}
       {isPreview && (
         <div className="fixed inset-0 z-50 bg-[#05070F] overflow-y-auto animate-fade-in">
-          {/* Nút thoát preview — cố định góc trên-trái (chuẩn docs/04b-page-layouts.md & UI/UX tokens) */}
-          <button
-            type="button"
-            onClick={() => setIsPreview(false)}
-            className="fixed top-4 left-4 z-[60] flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card/90 hover:bg-card text-card-foreground border border-border backdrop-blur-md font-editor text-xs md:text-sm font-semibold shadow-xl hover:shadow-2xl transition-all min-h-[44px] cursor-pointer focus-visible:outline-2 focus-visible:outline-ring"
-            aria-label="Quay lại giao diện soạn thảo"
-          >
-            <ArrowLeft className="w-4 h-4 text-primary" />
-            <span>Quay lại soạn thảo</span>
-          </button>
-
           <ReaderPane
             storyId={story.id}
             chapter={currentChapter}
@@ -272,6 +232,33 @@ export default function EditorClient({
           />
         </div>
       )}
+
+      {/* 4. Floating Action Dock — luôn hiển thị nổi (z-[60]) trên cả chế độ Preview để chuyển đổi qua lại và lưu */}
+      <div
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-3 p-2 bg-card/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl max-w-[95vw] animate-fade-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <PreviewToggle isPreview={isPreview} onToggle={setIsPreview} />
+
+        <button
+          type="button"
+          onClick={() => handleSave(story)}
+          disabled={isSaving}
+          className="px-5 py-2 rounded-xl bg-editor-action hover:bg-editor-action-hover text-editor-action-foreground font-editor font-semibold text-sm flex items-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-50 min-h-[44px]"
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Đang lưu...</span>
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4" />
+              <span>Lưu Thay Đổi</span>
+            </>
+          )}
+        </button>
+      </div>
 
       {/* 6. ScenePicker Modal (US-2.7, US-2.8) */}
       {scenePickerOpen && (

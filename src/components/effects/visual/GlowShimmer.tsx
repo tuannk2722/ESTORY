@@ -20,7 +20,7 @@ export default function GlowShimmer({
     <div
       data-effect-id={config.id}
       data-effect-type="glow_shimmer"
-      className="glow-shimmer-layer fixed inset-0 pointer-events-none z-20 overflow-hidden"
+      className="glow-shimmer-layer fixed inset-0 pointer-events-none z-[5] overflow-hidden"
       aria-hidden="true"
     >
       <motion.div

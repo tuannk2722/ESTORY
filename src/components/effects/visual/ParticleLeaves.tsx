@@ -60,7 +60,7 @@ export default function ParticleLeaves({
     <div
       data-effect-id={config.id}
       data-effect-type="particle_leaves"
-      className="particle-leaves-layer fixed inset-0 pointer-events-none z-20 overflow-hidden"
+      className="particle-leaves-layer fixed inset-0 pointer-events-none z-[5] overflow-hidden"
       aria-hidden="true"
     >
       {leaves.map((l) => (

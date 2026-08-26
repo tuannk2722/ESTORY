@@ -62,7 +62,7 @@ export default function ParticleFire({
     <div
       data-effect-id={config.id}
       data-effect-type="particle_fire"
-      className="particle-fire-layer fixed inset-0 pointer-events-none z-10 overflow-hidden"
+      className="particle-fire-layer fixed inset-0 pointer-events-none z-[5] overflow-hidden"
       aria-hidden="true"
     >
       {/* Warm Fire Ambience Bottom Glow */}

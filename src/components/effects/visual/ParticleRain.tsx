@@ -41,7 +41,7 @@ export default function ParticleRain({
     <div
       data-effect-id={config.id}
       data-effect-type="particle_rain"
-      className="particle-rain-layer pointer-events-none fixed inset-0 z-20 overflow-hidden"
+      className="particle-rain-layer pointer-events-none fixed inset-0 z-[5] overflow-hidden"
       aria-hidden="true"
     >
       {/* Light mist overlay on bottom */}

@@ -44,7 +44,7 @@ export default function StoryBlock({
       id={block.id}
       data-block-id={block.id}
       data-has-effect={block.effects?.map((e) => e.id).join(" ")}
-      className={`story-block relative my-10 md:my-14 transition-all duration-700 ${isIntersecting ? "opacity-100 active" : "opacity-75"
+      className={`story-block relative z-20 my-10 md:my-14 transition-all duration-700 ${isIntersecting ? "opacity-100 active" : "opacity-75"
         }`}
     >
       {/* Lớp kích hoạt hiệu ứng - chỉ kích hoạt khi không bị modal tạm dừng */}

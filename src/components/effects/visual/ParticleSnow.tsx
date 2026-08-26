@@ -37,7 +37,7 @@ export default function ParticleSnow({
     <div
       data-effect-id={config.id}
       data-effect-type="particle_snow"
-      className="particle-snow-layer pointer-events-none fixed inset-0 z-20 overflow-hidden"
+      className="particle-snow-layer pointer-events-none fixed inset-0 z-[5] overflow-hidden"
       aria-hidden="true"
     >
       {flakes.map((f) => (

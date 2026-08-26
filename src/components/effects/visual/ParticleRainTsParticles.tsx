@@ -92,7 +92,7 @@ export default function ParticleRainTsParticles({
   if (!isActive || settings.reduced_motion) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-30 overflow-hidden">
+    <div className="pointer-events-none fixed inset-0 z-[5] overflow-hidden">
       <ParticlesProvider init={initEngine}>
         <Particles
           id={`rain-${config.id}`}

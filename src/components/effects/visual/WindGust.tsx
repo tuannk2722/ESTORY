@@ -45,7 +45,7 @@ export default function WindGust({
     <div
       data-effect-id={config.id}
       data-effect-type="wind_gust"
-      className="wind-gust-layer fixed inset-0 pointer-events-none z-20 overflow-hidden"
+      className="wind-gust-layer fixed inset-0 pointer-events-none z-[5] overflow-hidden"
       aria-hidden="true"
     >
       {streaks.map((s) => (

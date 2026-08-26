@@ -35,7 +35,7 @@ export default function FloatingClouds({
     <div
       data-effect-id={config.id}
       data-effect-type="floating_clouds"
-      className="floating-clouds-layer fixed inset-0 pointer-events-none z-20 overflow-hidden"
+      className="floating-clouds-layer fixed inset-0 pointer-events-none z-[5] overflow-hidden"
       aria-hidden="true"
     >
       {cloudLayers.map((c) => (

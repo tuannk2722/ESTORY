@@ -169,7 +169,7 @@ export default function ReaderPane({
         <div id="effect-portal-root" className="pointer-events-none" />
 
         {/* Tiêu đề chương */}
-        <header className="mb-12 text-center pt-6">
+        <header className="relative z-20 mb-12 text-center pt-6">
           <span className="font-ui text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)]">
             {chapter.title.split(":")[0] || `Chương ${chapter.order}`}
           </span>
@@ -179,7 +179,7 @@ export default function ReaderPane({
         </header>
 
         {/* Khung đọc chính */}
-        <main className={`prose-reader ${fontSizeClass}`}>
+        <main className={`relative z-20 prose-reader ${fontSizeClass}`}>
           {chapter.blocks.map((block) => {
             const isFirstP = block.id === firstParagraphId;
             return (
