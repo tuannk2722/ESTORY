@@ -1,10 +1,8 @@
-// lib/repositories/scene-repository.ts
-import { BackgroundAsset, ColorPalette, LayoutPreset, ScenePreset, Scene } from "@/types/scene";
+import { BackgroundAsset, ColorPalette, ScenePreset, Scene } from "@/types/scene";
 
 export interface SceneLibraryRepository {
   getBackgrounds(): Promise<BackgroundAsset[]>;
   getPalettes(): Promise<ColorPalette[]>;
-  getLayouts(): Promise<LayoutPreset[]>;
   getScenePresets(): Promise<ScenePreset[]>;
 }
 

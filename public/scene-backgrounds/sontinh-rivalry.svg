@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Left Mountain Gradient (Son Tinh Emerald/Gold) -->
+    <linearGradient id="mountainSide" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" />
+      <stop offset="40%" stop-color="#062c22" />
+      <stop offset="80%" stop-color="#02120e" />
+      <stop offset="100%" stop-color="#010806" />
+    </linearGradient>
+
+    <!-- Right Ocean Gradient (Thuy Tinh Deep Indigo/Cyan) -->
+    <linearGradient id="oceanSide" x1="100%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#0369a1" />
+      <stop offset="40%" stop-color="#082f49" />
+      <stop offset="80%" stop-color="#031525" />
+      <stop offset="100%" stop-color="#01080e" />
+    </linearGradient>
+
+    <radialGradient id="mountainAura" cx="25%" cy="40%" r="40%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#064e3b" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="waterAura" cx="75%" cy="40%" r="40%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="elementalGlow">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Left/Right Split Dual Base -->
+  <rect x="0" y="0" width="960" height="1080" fill="url(#mountainSide)" />
+  <rect x="960" y="0" width="960" height="1080" fill="url(#oceanSide)" />
+
+  <!-- Mountain Aura & Water Aura Centers -->
+  <rect x="0" y="0" width="960" height="1080" fill="url(#mountainAura)" />
+  <rect x="960" y="0" width="960" height="1080" fill="url(#waterAura)" />
+
+  <!-- LEFT: Ba Vi Mountains Silhouette & Golden Fields -->
+  <g fill="#022c22" stroke="#047857" stroke-width="1.5">
+    <!-- Far Mountain Ridges -->
+    <path d="M 0,550 L 150,420 L 320,490 L 520,310 L 700,460 L 960,520 L 960,1080 L 0,1080 Z" opacity="0.6" fill="#034133" />
+    <!-- Mid Ridges (Ba Vi Peaks) -->
+    <path d="M 0,680 L 220,520 L 410,580 L 590,430 L 800,600 L 960,670 L 960,1080 L 0,1080 Z" opacity="0.85" />
+    <!-- Foreground Lush Hill -->
+    <path d="M -50,820 Q 250,680 550,780 Q 750,840 960,820 L 960,1080 L -50,1080 Z" fill="#011913" />
+    <!-- Golden Rice Grain Sprouts Shimmer -->
+    <path d="M 120,860 Q 140,810 170,800 Q 180,820 160,870 Z" fill="#eab308" filter="url(#elementalGlow)" />
+    <path d="M 280,840 Q 300,790 330,780 Q 340,800 320,850 Z" fill="#eab308" filter="url(#elementalGlow)" />
+    <path d="M 450,850 Q 470,800 500,790 Q 510,810 490,860 Z" fill="#eab308" filter="url(#elementalGlow)" />
+  </g>
+
+  <!-- RIGHT: East Sea Great Swirls & Waves Silhouette -->
+  <g fill="#082f49" stroke="#0284c7" stroke-width="1.5">
+    <!-- Far Ocean Horizon Storm -->
+    <path d="M 960,520 C 1100,480 1300,540 1500,490 C 1700,440 1850,510 1920,490 L 1920,1080 L 960,1080 Z" opacity="0.6" fill="#032135" />
+    <!-- Roaring Wave Crests -->
+    <path d="M 960,670 C 1120,600 1280,720 1450,610 C 1600,520 1780,680 1920,620 L 1920,1080 L 960,1080 Z" opacity="0.85" />
+    <!-- Foreground Great Water Vortex / Wave -->
+    <path d="M 960,820 C 1150,780 1350,860 1580,750 C 1720,680 1850,780 1950,740 L 1950,1080 L 960,1080 Z" fill="#01121d" />
+    <!-- Glowing Water Spirals / Droplets -->
+    <circle cx="1380" cy="720" r="18" fill="none" stroke="#38bdf8" stroke-width="3" filter="url(#elementalGlow)" />
+    <circle cx="1620" cy="670" r="24" fill="none" stroke="#38bdf8" stroke-width="3" filter="url(#elementalGlow)" />
+  </g>
+
+  <!-- Center Clash Energy Seam (Điểm giao thoa thần thông) -->
+  <line x1="960" y1="0" x2="960" y2="1080" stroke="#fde047" stroke-width="2" opacity="0.4" stroke-dasharray="12 8" filter="url(#elementalGlow)" />
+  <circle cx="960" cy="480" r="60" fill="#fde047" opacity="0.15" filter="url(#elementalGlow)" />
+
+  <!-- Dual Floating Particles (Emerald Green left, Cyan Blue right) -->
+  <g filter="url(#elementalGlow)">
+    <!-- Mountain Spores Left -->
+    <circle cx="280" cy="350" r="4" fill="#34d399" opacity="0.8" />
+    <circle cx="480" cy="240" r="5" fill="#10b981" opacity="0.7" />
+    <circle cx="680" cy="420" r="3.5" fill="#34d399" opacity="0.9" />
+    
+    <!-- Water Bubbles Right -->
+    <circle cx="1200" cy="320" r="4.5" fill="#38bdf8" opacity="0.8" />
+    <circle cx="1450" cy="410" r="5.5" fill="#0ea5e9" opacity="0.7" />
+    <circle cx="1700" cy="280" r="4" fill="#38bdf8" opacity="0.9" />
+  </g>
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000" stroke-width="30" opacity="0.5" />
+</svg>

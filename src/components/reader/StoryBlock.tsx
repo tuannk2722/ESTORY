@@ -25,8 +25,8 @@ export default function StoryBlock({
 }: StoryBlockProps) {
   const blockRef = useRef<HTMLDivElement>(null);
   const entry = useIntersectionObserver(blockRef, {
-    threshold: 0.35,
-    rootMargin: "-20% 0px -25% 0px",
+    threshold: 0,
+    rootMargin: "-25% 0px -35% 0px",
   });
 
   const isIntersecting = !!entry?.isIntersecting;
@@ -44,7 +44,7 @@ export default function StoryBlock({
       id={block.id}
       data-block-id={block.id}
       data-has-effect={block.effects?.map((e) => e.id).join(" ")}
-      className={`story-block relative my-10 md:my-14 transition-all duration-700 ${isIntersecting ? "opacity-100 active scale-[1.005]" : "opacity-75"
+      className={`story-block relative my-10 md:my-14 transition-all duration-700 ${isIntersecting ? "opacity-100 active" : "opacity-75"
         }`}
     >
       {/* Lớp kích hoạt hiệu ứng - chỉ kích hoạt khi không bị modal tạm dừng */}
@@ -52,14 +52,16 @@ export default function StoryBlock({
 
       {/* Render văn bản theo type */}
       {block.type === "heading" && (
-        <h2 className="font-display text-2xl md:text-3xl font-bold tracking-wide my-10 text-center text-[var(--color-foreground)] border-b border-[var(--color-border)]/50 pb-4">
-          {block.text}
-        </h2>
+        <div className="my-10 text-center">
+          <h2 className="font-display text-2xl md:text-3xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#F8FAFC] via-[var(--color-primary,#38BDF8)] to-[#F8FAFC] inline-block pb-3 border-b-2 border-[var(--color-accent,#E2B714)]/60">
+            {block.text}
+          </h2>
+        </div>
       )}
 
       {block.type === "paragraph" && (
         <p
-          className={`font-story ${storyFontClass} text-[length:inherit] leading-[inherit] text-[var(--color-foreground)] transition-all duration-300 ${isFirstParagraph ? "drop-cap" : ""
+          className={`font-story ${storyFontClass} text-[length:inherit] leading-[inherit] text-[#F8FAFC] transition-all duration-300 ${isFirstParagraph ? "drop-cap" : ""
             }`}
         >
           {block.text}
@@ -67,8 +69,8 @@ export default function StoryBlock({
       )}
 
       {block.type === "dialogue" && (
-        <div className="dialogue-box my-8 p-5 md:p-6 bg-[var(--color-card)]/90 border-l-4 border-[var(--color-accent)] shadow-md">
-          <p className={`font-story ${storyFontClass} text-[length:inherit] leading-[inherit] text-[var(--color-foreground)] transition-all duration-300`}>
+        <div className="dialogue-box my-8 p-5 md:p-6 rounded-r-2xl border-l-4 border-[var(--color-accent,#E2B714)] shadow-xl transition-all duration-500">
+          <p className={`font-story ${storyFontClass} text-[length:inherit] leading-[inherit] text-[#F8FAFC] transition-all duration-300`}>
             {block.text}
           </p>
         </div>

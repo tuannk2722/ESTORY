@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Deep Cave Interior Gradient -->
+    <radialGradient id="caveInner" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#3b1502" />
+      <stop offset="35%" stop-color="#1c0a01" />
+      <stop offset="75%" stop-color="#080200" />
+      <stop offset="100%" stop-color="#010000" />
+    </radialGradient>
+
+    <!-- Blinding Mountain of Gold Glow -->
+    <radialGradient id="goldMountainGlow" cx="50%" cy="60%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="25%" stop-color="#fde047" stop-opacity="0.9" />
+      <stop offset="55%" stop-color="#eab308" stop-opacity="0.7" />
+      <stop offset="85%" stop-color="#ca8a04" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#78350f" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="insaneGlow">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Cave Wall Backdrop -->
+  <rect width="1920" height="1080" fill="url(#caveInner)" />
+
+  <!-- Cave Stalactites & Rock Ceiling (Nhũ đá hang sâu) -->
+  <polygon points="0,0 120,240 240,0 360,320 480,0 650,280 820,0 1000,360 1180,0 1350,260 1520,0 1700,340 1920,0 1920,1080 0,1080" fill="#0f0502" opacity="0.9" />
+
+  <!-- Giant Glowing Pile of Gold & Jewels (Núi Vàng Bạc Châu Báu Ngập Tràn) -->
+  <path d="M 0,1080 L 150,750 Q 550,520 960,480 Q 1400,520 1780,760 L 1920,1080 Z" fill="url(#goldMountainGlow)" filter="url(#insaneGlow)" />
+
+  <!-- Sparkling Golden Coins, Ingots & Gems Detail -->
+  <g filter="url(#insaneGlow)">
+    <!-- Gold Heaps -->
+    <ellipse cx="600" cy="720" rx="220" ry="120" fill="#fde047" stroke="#ca8a04" stroke-width="4" />
+    <ellipse cx="1320" cy="740" rx="240" ry="130" fill="#fde047" stroke="#ca8a04" stroke-width="4" />
+    <ellipse cx="960" cy="800" rx="350" ry="160" fill="#eab308" stroke="#a16207" stroke-width="4" />
+    
+    <!-- Huge Glowing Crystals (Kim cương đỏ, xanh, ngọc bích) -->
+    <polygon points="450,560 480,480 540,490 570,580 510,640" fill="#ef4444" stroke="#f87171" stroke-width="3" />
+    <polygon points="1420,540 1460,450 1520,460 1560,560 1490,620" fill="#38bdf8" stroke="#93c5fd" stroke-width="3" />
+    <polygon points="850,420 890,340 950,350 980,430 920,490" fill="#a855f7" stroke="#d8b4fe" stroke-width="3" />
+  </g>
+
+  <!-- Greedy Older Brother Overloaded with Gold (Người Anh Nhồi Nhét Đầy Quần Áo & Kéo Túi Khổng Lồ) -->
+  <g transform="translate(960, 680)">
+    <!-- Bloated Heavy Clothes (2 Ống Quần & 2 Ống Tay Áo Nhét Căng Phồng Vàng) -->
+    <!-- Bulging Left & Right Sleeves -->
+    <ellipse cx="-75" cy="-20" rx="45" ry="30" fill="#f59e0b" stroke="#78350f" stroke-width="3" filter="url(#insaneGlow)" />
+    <ellipse cx="75" cy="-20" rx="45" ry="30" fill="#f59e0b" stroke="#78350f" stroke-width="3" filter="url(#insaneGlow)" />
+    
+    <!-- Bulging Left & Right Pant Legs (2 Ống quần nặng trĩu vàng) -->
+    <ellipse cx="-45" cy="90" rx="40" ry="60" fill="#f59e0b" stroke="#78350f" stroke-width="3" filter="url(#insaneGlow)" />
+    <ellipse cx="45" cy="90" rx="40" ry="60" fill="#f59e0b" stroke="#78350f" stroke-width="3" filter="url(#insaneGlow)" />
+
+    <!-- Brother Body Sweating & Struggling (Người anh oằn mình kéo lê) -->
+    <circle cx="0" cy="-90" r="24" fill="#ea580c" stroke="#7c2d12" stroke-width="2" />
+    <path d="M -30,-60 L 30,-60 L 35,40 L -35,40 Z" fill="#9a3412" stroke="#431407" stroke-width="3" />
+    
+    <!-- Sweat Drops & Dizzy Eyes (Mồ hôi nhễ nhại, hoa mắt) -->
+    <circle cx="-8" cy="-95" r="4" fill="#000000" />
+    <circle cx="8" cy="-95" r="4" fill="#000000" />
+    <path d="M -15,-110 Q -25,-120 -15,-130" stroke="#38bdf8" stroke-width="2" fill="none" />
+    <path d="M 15,-110 Q 25,-120 15,-130" stroke="#38bdf8" stroke-width="2" fill="none" />
+
+    <!-- Colossal 9-Span Sack Overflowing with Gold (Tay nải 9 gang quá khổ căng nứt) -->
+    <g transform="translate(180, 20)" filter="url(#insaneGlow)">
+      <ellipse cx="0" cy="0" rx="140" ry="120" fill="#78350f" stroke="#fde047" stroke-width="5" />
+      <!-- Gold Spilling Out of Sack Mouth -->
+      <ellipse cx="-60" cy="-70" rx="50" ry="30" fill="#fde047" stroke="#ca8a04" stroke-width="2" />
+      <polygon points="-70,-90 -60,-110 -40,-100 -50,-80" fill="#e0f2fe" stroke="#38bdf8" stroke-width="2" />
+      <polygon points="-30,-85 -15,-105 0,-95 -15,-75" fill="#f87171" stroke="#ef4444" stroke-width="2" />
+      <!-- Rope Strapped to Brother (Dây thừng buộc vào người) -->
+      <line x1="-120" y1="-40" x2="-220" y2="-40" stroke="#d97706" stroke-width="6" stroke-dasharray="10 4" />
+    </g>
+  </g>
+
+  <!-- Blinding Rays of Gem Reflection (Hào quang ngũ sắc chói lòa) -->
+  <g filter="url(#insaneGlow)" opacity="0.75">
+    <line x1="960" y1="480" x2="200" y2="100" stroke="#fde047" stroke-width="4" />
+    <line x1="960" y1="480" x2="1700" y2="150" stroke="#38bdf8" stroke-width="4" />
+    <line x1="960" y1="480" x2="800" y2="50" stroke="#ec4899" stroke-width="3" />
+    <line x1="960" y1="480" x2="1200" y2="80" stroke="#a855f7" stroke-width="3" />
+  </g>
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="35" opacity="0.6" />
+</svg>

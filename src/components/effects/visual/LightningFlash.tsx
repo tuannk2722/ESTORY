@@ -1,57 +1,78 @@
+// components/effects/visual/LightningFlash.tsx
+// Phase 2: Hiệu ứng Chớp Sáng — Tia chớp chói lòa toàn màn hình kèm khả năng lặp định kỳ
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { EffectComponentProps } from "../EffectRegistry";
-import { useReaderSettings } from "@/components/ui/ThemeProvider";
 
 export default function LightningFlash({
   config,
   isActive,
   intensityMultiplier = 1,
 }: EffectComponentProps) {
-  const { settings } = useReaderSettings();
-
-  const actualIntensity = config.intensity * intensityMultiplier;
-  const durationSec = (config.duration_ms || 1200) / 1000;
-
-  // Lựa chọn màu tia chớp theo từng Theme — phải đặt TRƯỚC mọi early return
-  const flashColor = useMemo(() => {
-    switch (settings.theme) {
-      case "light":
-        return "bg-indigo-950/60";
-      case "sepia":
-        return "bg-amber-200";
-      case "dark":
-      default:
-        return "bg-white";
-    }
-  }, [settings.theme]);
+  const actualIntensity = Math.min(1.0, (config.intensity || 0.85) * intensityMultiplier);
+  const isLoop = !!config.loop;
 
   if (!isActive) return null;
 
-  // Fallback nếu người dùng bật Reduced Motion
-  if (settings.reduced_motion) {
-    return (
-      <div
-        className={`pointer-events-none fixed inset-0 z-50 ${flashColor} transition-opacity duration-300`}
-        style={{ opacity: actualIntensity * 0.25 }}
-      />
-    );
-  }
-
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{
-        opacity: [0, actualIntensity * 0.95, 0, actualIntensity * 0.65, 0],
-      }}
-      transition={{
-        duration: durationSec,
-        times: [0, 0.12, 0.3, 0.5, 1],
-        ease: "easeOut",
-      }}
-      className={`pointer-events-none fixed inset-0 z-50 ${flashColor}`}
-    />
+    <div
+      data-effect-id={config.id}
+      data-effect-type="lightning_flash"
+      className="lightning-flash-layer pointer-events-none fixed inset-0 z-50 overflow-hidden"
+      aria-hidden="true"
+    >
+      {/* Primary White/Cyan Lightning Burst */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity: isLoop
+            ? [
+              0,
+              actualIntensity * 1.0,
+              0.15,
+              actualIntensity * 0.75,
+              0,
+              0,
+              0,
+            ]
+            : [
+              0,
+              actualIntensity * 1.0,
+              0.15,
+              actualIntensity * 0.75,
+              0,
+            ],
+        }}
+        transition={{
+          duration: isLoop ? 3.6 : (config.duration_ms ? config.duration_ms / 1000 : 1.2),
+          times: isLoop ? [0, 0.04, 0.1, 0.18, 0.35, 0.7, 1] : [0, 0.08, 0.2, 0.38, 1],
+          repeat: isLoop ? Infinity : 0,
+          ease: "easeOut",
+        }}
+        className="absolute inset-0 bg-white"
+        style={{
+          boxShadow: "inset 0 0 100px rgba(56, 189, 248, 0.8)",
+        }}
+      />
+
+      {/* Secondary Cyan Atmospheric Flare */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity: isLoop
+            ? [0, 0.6 * actualIntensity, 0, 0.4 * actualIntensity, 0, 0]
+            : [0, 0.6 * actualIntensity, 0, 0.4 * actualIntensity, 0],
+        }}
+        transition={{
+          duration: isLoop ? 3.6 : (config.duration_ms ? config.duration_ms / 1000 : 1.2),
+          times: isLoop ? [0, 0.06, 0.15, 0.25, 0.45, 1] : [0, 0.1, 0.25, 0.45, 1],
+          repeat: isLoop ? Infinity : 0,
+          ease: "easeOut",
+        }}
+        className="absolute inset-0 bg-cyan-400 mix-blend-screen"
+      />
+    </div>
   );
 }

@@ -5,12 +5,30 @@
 import { ComponentType } from "react";
 import { EffectType, EffectConfig } from "@/types/story";
 import LightningFlash from "./visual/LightningFlash";
-import ParticleRain from "./visual/ParticleRain"; // CSS fallback — giữ lại để tham khảo
+import ParticleRain from "./visual/ParticleRain";
 import BgColorShift from "./visual/BgColorShift";
 import ScreenShake from "./visual/ScreenShake";
 import TextShake from "./visual/TextShake";
 import TransitionFade from "./visual/TransitionFade";
 import AudioEffectPlayer from "./audio/AudioEffectPlayer";
+import TextGrow from "./visual/TextGrow";
+import ScreenBlur from "./visual/ScreenBlur";
+import ParticleGold from "./visual/ParticleGold";
+import ParticleLeaves from "./visual/ParticleLeaves";
+import WindGust from "./visual/WindGust";
+import GlowShimmer from "./visual/GlowShimmer";
+import ParticleSnow from "./visual/ParticleSnow";
+import ParticleSmoke from "./visual/ParticleSmoke";
+import ParticleFireflies from "./visual/ParticleFireflies";
+import ParticleFire from "./visual/ParticleFire";
+import Sunbeam from "./visual/Sunbeam";
+import CandleFlicker from "./visual/CandleFlicker";
+import FloatingClouds from "./visual/FloatingClouds";
+import WaterRipple from "./visual/WaterRipple";
+import TextFadeFlashback from "./visual/TextFadeFlashback";
+import Typewriter from "./visual/Typewriter";
+import HapticVibration from "./visual/HapticVibration";
+import TransitionPageTear from "./visual/TransitionPageTear";
 
 export interface EffectComponentProps {
   config: EffectConfig;
@@ -20,22 +38,28 @@ export interface EffectComponentProps {
 
 export const EFFECT_REGISTRY: Record<EffectType, ComponentType<EffectComponentProps> | null> = {
   lightning_flash: LightningFlash,
-  particle_rain: ParticleRain, // CSS fallback — giữ lại để tham khảo
-  // particle_rain: ParticleRainTsParticles, // Dùng bản tsParticles — swap về ParticleRain nếu cần CSS fallback
+  particle_rain: ParticleRain,
   bg_color_shift: BgColorShift,
   screen_shake: ScreenShake,
   text_shake: TextShake,
-  particle_snow: null,
-  particle_fire: null,
-  particle_smoke: null,
-  particle_fireflies: null,
-  screen_blur: null,
-  text_grow: null,
-  text_fade_flashback: null,
-  typewriter: null,
-  vibration: null,
+  particle_snow: ParticleSnow,
+  particle_fire: ParticleFire,
+  particle_smoke: ParticleSmoke,
+  particle_fireflies: ParticleFireflies,
+  particle_gold: ParticleGold,
+  particle_leaves: ParticleLeaves,
+  wind_gust: WindGust,
+  glow_shimmer: GlowShimmer,
+  sunbeam: Sunbeam,
+  candle_flicker: CandleFlicker,
+  floating_clouds: FloatingClouds,
+  water_ripple: WaterRipple,
+  screen_blur: ScreenBlur,
+  text_grow: TextGrow,
+  text_fade_flashback: TextFadeFlashback,
+  typewriter: Typewriter,
+  vibration: HapticVibration,
   transition_fade: TransitionFade,
-  transition_page_tear: null,
+  transition_page_tear: TransitionPageTear,
   audio: AudioEffectPlayer,
 };
-

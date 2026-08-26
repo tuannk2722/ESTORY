@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Tempest Sky Base -->
+    <radialGradient id="cinemaBattleSkyDark" cx="50%" cy="40%" r="85%">
+      <stop offset="0%" stop-color="#1e1b4b" />
+      <stop offset="35%" stop-color="#0f172a" />
+      <stop offset="75%" stop-color="#030712" />
+      <stop offset="100%" stop-color="#000000" />
+    </radialGradient>
+
+    <!-- Mountain Earth God Flare -->
+    <radialGradient id="cinemaEarthFlare" cx="25%" cy="45%" r="45%">
+      <stop offset="0%" stop-color="#f97316" stop-opacity="0.8" />
+      <stop offset="40%" stop-color="#ea580c" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#7c2d12" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Water God Surge Flare -->
+    <radialGradient id="cinemaWaterFlare" cx="75%" cy="50%" r="45%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.8" />
+      <stop offset="40%" stop-color="#0369a1" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#082f49" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="cinemaBattleEpicGlow">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1920" height="1080" fill="url(#cinemaBattleSkyDark)" />
+  <rect width="1920" height="1080" fill="url(#cinemaEarthFlare)" />
+  <rect width="1920" height="1080" fill="url(#cinemaWaterFlare)" />
+
+  <!-- LEFT: Son Tinh Mountain Peaks & Elevated Flying Hills (Bốc Đồi Dời Núi Chặn Lũ) -->
+  <g fill="#022c22" stroke="#059669" stroke-width="2">
+    <polygon points="0,1080 0,340 300,160 550,320 780,140 940,410 940,1080" fill="#02281e" stroke="#10b981" stroke-width="3" />
+    
+    <!-- Floating Boulders with Living Hover Motion -->
+    <g transform="translate(720, 200)" filter="url(#cinemaBattleEpicGlow)" style="animation: wave-surge 4s ease-in-out infinite alternate;">
+      <polygon points="-90,0 -40,-70 50,-60 90,15 40,60 -60,50" fill="#78350f" stroke="#f59e0b" stroke-width="4" />
+      <path d="M -50,10 L 0,-30 L 50,10" stroke="#fde047" stroke-width="3.5" fill="none" />
+    </g>
+    <g transform="translate(500, 100)" filter="url(#cinemaBattleEpicGlow)" style="animation: wave-surge 3.5s 0.5s ease-in-out infinite alternate;">
+      <polygon points="-70,10 -35,-50 35,-40 70,20 25,50 -45,40" fill="#78350f" stroke="#f59e0b" stroke-width="3.5" />
+    </g>
+  </g>
+
+  <!-- RIGHT: Thuy Tinh Monstrous Tsunami Wave & Water Serpents in Real Motion -->
+  <g fill="#021422" stroke="#0284c7" stroke-width="2.5" style="animation: wave-surge 3.8s ease-in-out infinite alternate;">
+    <path d="M 880,1080 C 880,540 1000,220 1280,120 C 1540,30 1780,160 1920,90 L 1920,1080 Z" fill="#082f49" />
+    <path d="M 1000,1080 C 1080,660 1240,360 1480,240 C 1720,140 1880,260 1920,200 L 1920,1080 Z" fill="#0369a1" stroke="#38bdf8" stroke-width="4" />
+    
+    <!-- Water Dragon Serpents Gầm Thét -->
+    <path d="M 1280,420 Q 1180,290 1240,190 Q 1300,150 1380,210" fill="none" stroke="#38bdf8" stroke-width="12" stroke-linecap="round" filter="url(#cinemaBattleEpicGlow)" />
+    <path d="M 1560,350 Q 1460,210 1520,110 Q 1600,70 1680,130" fill="none" stroke="#38bdf8" stroke-width="14" stroke-linecap="round" filter="url(#cinemaBattleEpicGlow)" />
+  </g>
+
+  <!-- Center Clash Seam: Lightning Shockwave Blast (Kinh Thiên Động Địa) -->
+  <g filter="url(#cinemaBattleEpicGlow)">
+    <path d="M 780,150 L 1020,240 L 950,350 L 1200,440" stroke="#fde047" stroke-width="8" fill="none" />
+    <circle cx="980" cy="300" r="110" fill="#fef08a" opacity="0.5" />
+    <circle cx="980" cy="300" r="210" fill="none" stroke="#f97316" stroke-width="4" stroke-dasharray="18 12" />
+    <circle cx="980" cy="300" r="300" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-dasharray="26 14" />
+  </g>
+
+  <!-- Dark Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="35" opacity="0.6" />
+</svg>

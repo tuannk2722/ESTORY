@@ -1,58 +1,49 @@
+// components/effects/visual/BgColorShift.tsx
+// Phase 2: Hiệu ứng Đổi Tông Màu Nền — Chuyển sắc nền nhẹ nhàng sang tông u ám hoặc hoàng hôn
 "use client";
 
 import React, { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { EffectComponentProps } from "../EffectRegistry";
-import { useReaderSettings } from "@/components/ui/ThemeProvider";
 
 export default function BgColorShift({
   config,
   isActive,
   intensityMultiplier = 1,
 }: EffectComponentProps) {
-  const { settings } = useReaderSettings();
+  const actualIntensity = (config.intensity || 0.6) * intensityMultiplier;
+  const isLoop = !!config.loop;
+  const durationSec = config.duration_ms ? config.duration_ms / 1000 : 2.5;
 
-  const actualIntensity = config.intensity * intensityMultiplier;
-  const durationSec = (config.duration_ms || 2200) / 1000;
-
-  // Lựa chọn màu sắc chuyển đổi theo từng Theme
   const themeTint = useMemo(() => {
-    switch (settings.theme) {
-      case "light":
-        // Trên nền Light: tạo mây dông xám tro u ám nhẹ nhàng
-        return {
-          className: "bg-slate-700/25 mix-blend-multiply",
-          maxOpacity: Math.min(0.35, actualIntensity * 0.4),
-        };
-      case "sepia":
-        // Trên nền Sepia: tạo sương mù nâu sẫm ấm áp
-        return {
-          className: "bg-amber-950/20 mix-blend-multiply",
-          maxOpacity: Math.min(0.35, actualIntensity * 0.35),
-        };
-      case "dark":
-      default:
-        // Trên nền Dark: tạo màn đêm tím đen huyền bí
-        return {
-          className: "bg-indigo-950/50 mix-blend-screen",
-          maxOpacity: Math.min(0.5, actualIntensity * 0.55),
-        };
-    }
-  }, [settings.theme, actualIntensity]);
+    return {
+      className: "bg-indigo-950/70 mix-blend-multiply",
+      maxOpacity: Math.min(0.7, actualIntensity * 0.75),
+    };
+  }, [actualIntensity]);
 
-  if (settings.reduced_motion) return null;
+  if (!isActive) return null;
 
   return (
     <AnimatePresence>
-      {isActive && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: themeTint.maxOpacity }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: durationSec, ease: "easeInOut" }}
-          className={`pointer-events-none fixed inset-0 z-10 ${themeTint.className}`}
-        />
-      )}
+      <motion.div
+        data-effect-id={config.id}
+        data-effect-type="bg_color_shift"
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity: isLoop
+            ? [0.2, themeTint.maxOpacity, 0.35, themeTint.maxOpacity, 0.2]
+            : themeTint.maxOpacity,
+        }}
+        exit={{ opacity: 0 }}
+        transition={{
+          duration: isLoop ? durationSec : 0.8,
+          repeat: isLoop ? Infinity : 0,
+          ease: "easeInOut",
+        }}
+        className={`pointer-events-none fixed inset-0 z-10 ${themeTint.className}`}
+        aria-hidden="true"
+      />
     </AnimatePresence>
   );
 }

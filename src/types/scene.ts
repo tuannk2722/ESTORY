@@ -1,6 +1,7 @@
 // types/scene.ts
+import { EffectConfig } from "./story";
 
-// ─── 4 thư viện nguyên liệu — ADMIN quản lý (Phase 3) / seed JSON (Phase 1–2) ───
+// ─── 3 thư viện nguyên liệu — ADMIN quản lý (Phase 3) / seed JSON (Phase 1–2) ───
 
 export type BackgroundType = "image" | "gradient" | "particle_composition" | "video";
 
@@ -18,21 +19,12 @@ export interface ColorPalette {
   id: string;
   label: string;                  // "Hoàng cung rực rỡ", "U ám kinh dị"
   colors: {
-    primary: string;
-    secondary: string;
-    accent: string;
-    text: string;
-    background_tint: string;      // lớp phủ màu lên trên background, tạo đồng bộ tông
+    primary: string;              // Màu chủ đạo cho UI/decorations
+    secondary: string;            // Màu phụ trợ
+    accent: string;               // Màu của Drop Cap chữ hoa đầu đoạn, viền khung hội thoại dialogue-box, icon tiến trình
+    background_tint: string;      // Lớp phủ màu lên trên background (~35% opacity), tạo đồng bộ tông
   };
   mood_tags: string[];
-}
-
-export interface LayoutPreset {
-  id: string;
-  label: string;                  // "Căn giữa chuẩn", "Overlay trên ảnh", "Panel bên"
-  text_position: "center" | "bottom_overlay" | "side_panel";
-  text_max_width: string;         // VD "65ch"
-  text_backdrop_opacity: number;  // 0–1, lớp nền mờ sau chữ để đảm bảo đọc được — phải đạt WCAG AA (xem `09-non-functional-requirements.md`)
 }
 
 export interface ScenePreset {
@@ -40,9 +32,7 @@ export interface ScenePreset {
   label: string;                  // "Lễ rước dâu", "Trận thủy chiến"
   background_id: string;          // → BackgroundAsset.id
   palette_id: string;             // → ColorPalette.id
-  layout_id: string;              // → LayoutPreset.id
-  ambient_audio_src?: string;     // BGM loop nền — khác với SFX chấm phá của Effect
-  ambient_volume?: number;
+  effects?: EffectConfig[];       // Danh sách hiệu ứng không gian êm dịu (nhạc nền loop, hạt mưa, đom đóm, tuyết rơi...)
   mood_tags: string[];
 }
 
@@ -56,7 +46,7 @@ export interface Scene {
   based_on_preset_id?: string;    // optional, chỉ lưu vết "dùng preset nào" — có thể chỉnh riêng sau
   background_id: string;
   palette_id: string;
-  layout_id: string;
-  ambient_audio_src?: string;
-  ambient_volume?: number;
+  effects?: EffectConfig[];       // Danh sách hiệu ứng không gian êm dịu (nhạc nền loop, hạt mưa, đom đóm, tuyết rơi...)
 }
+
+

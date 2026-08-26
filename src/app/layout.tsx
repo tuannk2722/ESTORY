@@ -66,6 +66,7 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
+import { ConfirmProvider } from "@/components/ui/ConfirmModal";
 
 /* ── Root Layout ─────────────────────────────────────────────── */
 export default function RootLayout({
@@ -82,8 +83,10 @@ export default function RootLayout({
     >
       <body className="min-h-dvh flex flex-col bg-[var(--color-background)] text-[var(--color-foreground)] font-ui transition-colors duration-300">
         <ThemeProvider>
-          {children}
-          <Toaster position="top-center" richColors />
+          <ConfirmProvider>
+            {children}
+            <Toaster position="top-center" richColors />
+          </ConfirmProvider>
         </ThemeProvider>
       </body>
     </html>

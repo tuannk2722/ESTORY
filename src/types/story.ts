@@ -7,6 +7,14 @@ export type EffectType =
   | "particle_fire"
   | "particle_smoke"
   | "particle_fireflies"
+  | "particle_gold"       // mưa bụi vàng / châu báu lấp lánh
+  | "particle_leaves"     // lá khế / hoa khế bay lượn
+  | "wind_gust"           // luồng gió cuốn cát bụi khi chim thần hạ cánh / cất cánh
+  | "glow_shimmer"        // hào quang ngũ sắc ngọc quý rực rỡ
+  | "sunbeam"             // vệt nắng xiên qua tán lá, ánh sáng hoàng hôn
+  | "candle_flicker"      // ánh nến bập bùng, quầng lửa ấm áp
+  | "floating_clouds"     // dải mây trôi bồng bềnh qua cảnh vật
+  | "water_ripple"        // ánh trăng / mặt nước gợn sóng lấp lánh
   | "screen_shake"
   | "screen_blur"
   | "text_shake"
@@ -26,10 +34,10 @@ export interface EffectConfig {
   type: EffectType;
   category: EffectCategory;
   intensity: number;       // 0.0 – 1.0
-  duration_ms: number;
-  delay_ms?: number;       // độ trễ trước khi effect kích hoạt sau khi block vào viewport
+  duration_ms: number;     // thời lượng chạy (ms), dùng khi loop === false
+  delay_ms?: number;       // độ trễ trước khi kích hoạt (dùng cho chuỗi hiệu ứng nối tiếp)
   audio_src?: string;      // bắt buộc nếu category === "audio"
-  loop?: boolean;          // dùng cho BGM/ambient liên tục
+  loop?: boolean;          // lặp lại liên tục (cho cả Audio BGM lẫn Visual/Motion particles/không gian)
 }
 
 export interface StoryBlock {

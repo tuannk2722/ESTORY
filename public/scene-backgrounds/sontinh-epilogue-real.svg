@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Photorealistic Radiant Morning Sunrise Sky -->
+    <linearGradient id="realMorningSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="35%" stop-color="#38bdf8" />
+      <stop offset="65%" stop-color="#fb923c" />
+      <stop offset="85%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#fef08a" />
+    </linearGradient>
+
+    <!-- Golden God Ray Solar Disc -->
+    <radialGradient id="realSolarDisc" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="30%" stop-color="#fde047" stop-opacity="0.95" />
+      <stop offset="70%" stop-color="#f59e0b" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#ea580c" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Red River Reflective Surface -->
+    <linearGradient id="realRedRiver" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fdba74" stop-opacity="0.95" />
+      <stop offset="50%" stop-color="#0284c7" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#064e3b" stop-opacity="1" />
+    </linearGradient>
+
+    <filter id="realSunriseGlow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1920" height="1080" fill="url(#realMorningSky)" />
+
+  <!-- Glorious Rising Sun with Volumetric God Rays (Vầng Dương Nắng Ban Mai Rực Rỡ) -->
+  <g transform="translate(960, 460)" filter="url(#realSunriseGlow)">
+    <circle r="320" fill="url(#realSolarDisc)" />
+    <circle r="100" fill="#ffffff" />
+    <!-- Volumetric God Rays Streaming Out -->
+    <line x1="0" y1="-420" x2="0" y2="-140" stroke="#fde047" stroke-width="5" opacity="0.75" />
+    <line x1="300" y1="-300" x2="100" y2="-100" stroke="#fde047" stroke-width="5" opacity="0.75" />
+    <line x1="420" y1="0" x2="140" y2="0" stroke="#fde047" stroke-width="5" opacity="0.75" />
+    <line x1="-300" y1="-300" x2="-100" y2="-100" stroke="#fde047" stroke-width="5" opacity="0.75" />
+    <line x1="-420" y1="0" x2="-140" y2="0" stroke="#fde047" stroke-width="5" opacity="0.75" />
+  </g>
+
+  <!-- Distant Blue Mountain Horizons -->
+  <path d="M 0,560 L 280,470 L 550,520 L 800,420 L 960,370 L 1180,420 L 1440,510 L 1720,450 L 1920,540 L 1920,1080 L 0,1080 Z" fill="#0369a1" opacity="0.75" />
+
+  <!-- Majestic Ba Vi Mountain Peaks in Living Mist (Đỉnh Ba Vì Sừng Sững Uy Nghiêm) -->
+  <path d="M 0,670 L 240,520 L 480,600 L 740,430 L 960,320 L 1220,430 L 1500,580 L 1740,500 L 1920,650 L 1920,1080 L 0,1080 Z" fill="#047857" stroke="#10b981" stroke-width="2.5" />
+  
+  <!-- Lush Green Foothills (Đồi Xanh Mướt Trải Dài) -->
+  <path d="M 0,800 Q 360,690 720,760 Q 1120,700 1520,790 Q 1760,750 1920,810 L 1920,1080 L 0,1080 Z" fill="#022c22" stroke="#059669" stroke-width="2" />
+
+  <!-- Calm Reflective Red River in Living Motion (Dòng Sông Hồng Gợn Sóng Thanh Bình) -->
+  <path d="M 0,910 Q 480,860 960,890 Q 1460,850 1920,920 L 1920,1080 L 0,1080 Z" fill="url(#realRedRiver)" style="animation: wave-surge 5s ease-in-out infinite alternate;" />
+
+  <!-- Flock of Lac Birds Flying High in Living Glide Motion (Đàn Chim Lạc Tung Cánh) -->
+  <g fill="#78350f" opacity="0.9" style="animation: bird-glide 6s ease-in-out infinite alternate;">
+    <path d="M 700,240 Q 718,220 735,240 Q 752,220 770,240 Q 752,232 735,252 Q 718,232 700,240 Z" />
+    <path d="M 780,200 Q 794,185 810,200 Q 824,185 840,200 Q 824,192 810,210 Q 794,192 780,200 Z" />
+    <path d="M 860,230 Q 872,218 885,230 Q 898,218 910,230 Q 898,224 885,238 Q 872,224 860,230 Z" />
+  </g>
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="30" opacity="0.4" />
+</svg>

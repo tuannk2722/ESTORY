@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Cinematic Dark Palace Lighting -->
+    <radialGradient id="realPalaceBackdrop" cx="50%" cy="40%" r="75%">
+      <stop offset="0%" stop-color="#3d1802" />
+      <stop offset="35%" stop-color="#190901" />
+      <stop offset="70%" stop-color="#090300" />
+      <stop offset="100%" stop-color="#020100" />
+    </radialGradient>
+
+    <!-- Warm Torchlight Gradient -->
+    <radialGradient id="torchFlameGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="25%" stop-color="#fde047" stop-opacity="0.9" />
+      <stop offset="55%" stop-color="#f97316" stop-opacity="0.7" />
+      <stop offset="85%" stop-color="#dc2626" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#7f1d1d" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Golden Bronze Drum Shimmer -->
+    <radialGradient id="bronzeDrumMetal" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="25%" stop-color="#eab308" />
+      <stop offset="55%" stop-color="#ca8a04" />
+      <stop offset="80%" stop-color="#854d0e" />
+      <stop offset="100%" stop-color="#451a03" />
+    </radialGradient>
+
+    <!-- Silk Garment Gradient -->
+    <linearGradient id="royalSilk" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="40%" stop-color="#dc2626" />
+      <stop offset="100%" stop-color="#7f1d1d" />
+    </linearGradient>
+
+    <filter id="cinematicGlow">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Deep Palace Backdrop -->
+  <rect width="1920" height="1080" fill="url(#realPalaceBackdrop)" />
+
+  <!-- Intricate Dong Son Bronze Drum Sun Mandala in Background -->
+  <g transform="translate(960, 420)" opacity="0.55" filter="url(#cinematicGlow)">
+    <circle r="440" fill="none" stroke="#eab308" stroke-width="2" stroke-dasharray="10 8" />
+    <circle r="380" fill="none" stroke="#ca8a04" stroke-width="3" />
+    <circle r="320" fill="none" stroke="#eab308" stroke-width="1.5" stroke-dasharray="18 10" />
+    <circle r="240" fill="url(#bronzeDrumMetal)" opacity="0.8" />
+    <!-- 14-Ray Sun Star -->
+    <path d="M 0,-240 L 28,-80 L 170,-170 L 80,-28 L 240,0 L 80,28 L 170,170 L 28,80 L 0,240 L -28,80 L -170,170 L -80,28 L -240,0 L -80,-28 L -170,-170 L -28,-80 Z" fill="#fef08a" opacity="0.9" />
+    <circle r="50" fill="#ffffff" opacity="0.8" />
+  </g>
+
+  <!-- Massive Carved Ironwood Columns (Cột Gỗ Lim Chạm Khắc Chim Lạc) -->
+  <g fill="#1a0c02" stroke="#78350f" stroke-width="4">
+    <!-- Left Column Pair -->
+    <rect x="80" y="0" width="110" height="1080" />
+    <rect x="250" y="0" width="80" height="1080" opacity="0.75" />
+    <!-- Right Column Pair -->
+    <rect x="1730" y="0" width="110" height="1080" />
+    <rect x="1590" y="0" width="80" height="1080" opacity="0.75" />
+  </g>
+
+  <!-- Living Flickering Torches on Columns (Đuốc Hoàng Cung Sống Động) -->
+  <g filter="url(#cinematicGlow)">
+    <!-- Left Torch -->
+    <g transform="translate(190, 380)">
+      <circle cx="0" cy="0" r="160" fill="url(#torchFlameGlow)" style="animation: lantern-flicker 2.5s infinite alternate;" />
+      <polygon points="0,-40 -15,10 15,10" fill="#fef08a" />
+      <rect x="-10" y="10" width="20" height="60" fill="#78350f" stroke="#ca8a04" stroke-width="2" />
+    </g>
+    <!-- Right Torch -->
+    <g transform="translate(1730, 380)">
+      <circle cx="0" cy="0" r="160" fill="url(#torchFlameGlow)" style="animation: lantern-flicker 2.8s 0.6s infinite alternate;" />
+      <polygon points="0,-40 -15,10 15,10" fill="#fef08a" />
+      <rect x="-10" y="10" width="20" height="60" fill="#78350f" stroke="#ca8a04" stroke-width="2" />
+    </g>
+  </g>
+
+  <!-- Ornate Van Lang Throne Dais (Bệ Ngai Vàng Chạm Rồng Gốm & Chim Lạc) -->
+  <path d="M 0,860 L 520,740 L 1400,740 L 1920,860 L 1920,1080 L 0,1080 Z" fill="#120601" stroke="#451a03" stroke-width="3" />
+  <path d="M 580,740 L 680,670 L 1240,670 L 1340,740 Z" fill="#290f02" stroke="#78350f" stroke-width="3" />
+
+  <!-- Photorealistic King Hung the 18th (Vua Hùng Thứ 18 Oai Nghiêm) -->
+  <g transform="translate(860, 590)" style="animation: human-breathe 4.5s ease-in-out infinite;">
+    <!-- Royal Van Lang Headdress (Mũ Lông Chim Lạc Hoàng Gia) -->
+    <path d="M -30,-120 L -45,-190 L -25,-160 L 0,-210 L 25,-160 L 45,-190 L 30,-120 Z" fill="#fde047" stroke="#b45309" stroke-width="2" filter="url(#cinematicGlow)" />
+    <!-- King Head & Noble Face -->
+    <ellipse cx="0" cy="-80" rx="30" ry="36" fill="#d97706" stroke="#78350f" stroke-width="2" />
+    <!-- Beard & Features -->
+    <path d="M -15,-50 Q 0,-10 15,-50" fill="#451a03" />
+    <!-- Royal Red Brocade Robe with Gold Dong Son Emblems (Hoàng Bào Văn Lang) -->
+    <path d="M -70,-30 L -90,140 L 90,140 L 70,-30 Z" fill="url(#royalSilk)" stroke="#fde047" stroke-width="3" />
+    <!-- Gold Medallion Necklace -->
+    <circle cx="0" cy="10" r="22" fill="#fde047" stroke="#b45309" stroke-width="2" filter="url(#cinematicGlow)" />
+  </g>
+
+  <!-- Photorealistic Princess My Nuong (Công Chúa Mỵ Nương Tuyệt Sắc) -->
+  <g transform="translate(1080, 610)" style="animation: human-breathe 4s 0.5s ease-in-out infinite;">
+    <!-- Delicate Head & Hairpin -->
+    <ellipse cx="0" cy="-70" rx="22" ry="26" fill="#fbbf24" stroke="#b45309" stroke-width="1.5" />
+    <path d="M -25,-85 C -20,-115 20,-115 25,-85" fill="#1c1917" />
+    <!-- Golden Hairpins -->
+    <line x1="-30" y1="-95" x2="30" y2="-95" stroke="#fde047" stroke-width="3" filter="url(#cinematicGlow)" />
+    <!-- Flowing Golden & Emerald Silk Robe (Xiêm Áo Lụa Mềm Mại) -->
+    <path d="M -45,-40 L -60,130 L 60,130 L 45,-40 Z" fill="#fef08a" stroke="#ca8a04" stroke-width="2" />
+    <path d="M -25,-20 L -35,130 L 35,130 L 25,-20 Z" fill="#34d399" opacity="0.85" />
+  </g>
+
+  <!-- Golden Incense Smoke & Floating Motes (Làn Khói Trầm & Bụi Vàng Bay Lơ Lửng) -->
+  <g fill="#fde047" opacity="0.8" filter="url(#cinematicGlow)">
+    <circle cx="580" cy="380" r="4" style="animation: gem-twinkle 3s infinite alternate;" />
+    <circle cx="780" cy="290" r="5" style="animation: gem-twinkle 3.5s 0.8s infinite alternate;" />
+    <circle cx="1180" cy="350" r="4.5" style="animation: gem-twinkle 2.8s 0.4s infinite alternate;" />
+    <circle cx="1380" cy="420" r="3.5" style="animation: gem-twinkle 4s 1.2s infinite alternate;" />
+  </g>
+
+  <!-- Dark Cinematic Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="35" opacity="0.55" />
+</svg>

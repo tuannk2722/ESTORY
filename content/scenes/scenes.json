@@ -1,1 +1,417 @@
-[]
+[
+  {
+    "id": "scene-ck-01",
+    "chapter_id": "ck-ch1",
+    "start_block_id": "ck-ch1-b01",
+    "end_block_id": "ck-ch1-b06",
+    "background_id": "bg-starfruit-cottage-real",
+    "palette_id": "pal-starfruit-garden",
+    "effects": [
+      {
+        "id": "fx-floating_clouds-1787602401509",
+        "type": "floating_clouds",
+        "category": "visual",
+        "intensity": 1,
+        "duration_ms": 5000,
+        "delay_ms": 0,
+        "loop": true
+      },
+      {
+        "id": "fx-particle_fire-1787602412738",
+        "type": "particle_fire",
+        "category": "visual",
+        "intensity": 0.8,
+        "duration_ms": 3000,
+        "delay_ms": 0,
+        "loop": true
+      },
+      {
+        "id": "fx-particle_leaves-1787602425525",
+        "type": "particle_leaves",
+        "category": "visual",
+        "intensity": 1,
+        "duration_ms": 3500,
+        "delay_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-ck-02",
+    "chapter_id": "ck-ch2",
+    "start_block_id": "ck-ch2-b01",
+    "end_block_id": "ck-ch2-b05",
+    "based_on_preset_id": "preset-giant-bird-tree",
+    "background_id": "bg-giant-bird-tree",
+    "palette_id": "pal-mystic-phoenix",
+    "effects": [
+      {
+        "id": "fx-audio-scene-ck-02",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-ck-03",
+    "chapter_id": "ck-ch2",
+    "start_block_id": "ck-ch2-b06",
+    "end_block_id": "ck-ch2-b07",
+    "based_on_preset_id": "preset-treasure-island-cave",
+    "background_id": "bg-treasure-island-cave",
+    "palette_id": "pal-golden-cave",
+    "effects": [
+      {
+        "id": "fx-audio-scene-ck-03",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-ck-04",
+    "chapter_id": "ck-ch3",
+    "start_block_id": "ck-ch3-b01",
+    "end_block_id": "ck-ch3-b06",
+    "based_on_preset_id": "preset-greedy-brother-scheme",
+    "background_id": "bg-greedy-brother-scheme",
+    "palette_id": "pal-greedy-amber",
+    "effects": []
+  },
+  {
+    "id": "scene-ck-05",
+    "chapter_id": "ck-ch4",
+    "start_block_id": "ck-ch4-b01",
+    "end_block_id": "ck-ch4-b03",
+    "based_on_preset_id": "preset-gluttony-cave-haul",
+    "background_id": "bg-gluttony-cave-haul",
+    "palette_id": "pal-lust-gold",
+    "effects": [
+      {
+        "id": "fx-audio-scene-ck-05",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-ck-06",
+    "chapter_id": "ck-ch4",
+    "start_block_id": "ck-ch4-b04",
+    "end_block_id": "ck-ch4-b06",
+    "based_on_preset_id": "preset-ocean-storm-abyss",
+    "background_id": "bg-ocean-storm-abyss",
+    "palette_id": "pal-storm-doom",
+    "effects": [
+      {
+        "id": "fx-audio-scene-ck-06",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/gentle_rain_falling.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-st-01",
+    "chapter_id": "ch-son-tinh",
+    "start_block_id": "st-b01",
+    "end_block_id": "st-b03",
+    "background_id": "bg-phong-chau-palace",
+    "palette_id": "pal-royal-lac-hong",
+    "effects": [
+      {
+        "id": "fx-audio-1787677141066",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 0.3,
+        "duration_ms": 0,
+        "audio_src": "/audio/thunder-rumble.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-candle_flicker-1787602116170",
+        "type": "candle_flicker",
+        "category": "visual",
+        "intensity": 1,
+        "duration_ms": 3500,
+        "delay_ms": 0,
+        "loop": false
+      },
+      {
+        "id": "fx-particle_fireflies-1787645438255",
+        "type": "particle_fireflies",
+        "category": "visual",
+        "intensity": 0.75,
+        "duration_ms": 3000,
+        "delay_ms": 0,
+        "loop": true
+      },
+      {
+        "id": "fx-sunbeam-1787645488294",
+        "type": "sunbeam",
+        "category": "visual",
+        "intensity": 0.75,
+        "duration_ms": 2000,
+        "delay_ms": 0,
+        "loop": false
+      }
+    ]
+  },
+  {
+    "id": "scene-st-03",
+    "chapter_id": "ch-son-tinh",
+    "start_block_id": "st-b07",
+    "end_block_id": "st-b09",
+    "based_on_preset_id": "preset-wedding-procession",
+    "background_id": "bg-wedding-procession",
+    "palette_id": "pal-festive-wedding",
+    "effects": []
+  },
+  {
+    "id": "scene-st-05",
+    "chapter_id": "ch-son-tinh",
+    "start_block_id": "st-b012",
+    "end_block_id": "st-b014",
+    "based_on_preset_id": "preset-epic-battle-clash",
+    "background_id": "bg-epic-battle-clash",
+    "palette_id": "pal-epic-clash",
+    "effects": [
+      {
+        "id": "fx-audio-scene-st-05",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/thunder-rumble.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-st-06",
+    "chapter_id": "ch-son-tinh",
+    "start_block_id": "st-b015",
+    "end_block_id": "st-b016",
+    "based_on_preset_id": "preset-legend-epilogue",
+    "background_id": "bg-legend-epilogue",
+    "palette_id": "pal-eternal-legend",
+    "effects": []
+  },
+  {
+    "id": "scene-ch2-01",
+    "chapter_id": "ch2",
+    "start_block_id": "ch2-block-001",
+    "end_block_id": "ch2-block-004",
+    "based_on_preset_id": "preset-mist-cavern",
+    "background_id": "bg-mist-cavern",
+    "palette_id": "pal-misty-shadow",
+    "effects": [
+      {
+        "id": "fx-audio-scene-ch2-01",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-ch2-02",
+    "chapter_id": "ch2",
+    "start_block_id": "ch2-block-005",
+    "end_block_id": "ch2-block-008",
+    "based_on_preset_id": "preset-underground-mystery",
+    "background_id": "bg-fireflies-dark",
+    "palette_id": "pal-phosphor-green",
+    "effects": [
+      {
+        "id": "fx-audio-scene-ch2-02",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-ch3-01",
+    "chapter_id": "ch3",
+    "start_block_id": "ch3-block-001",
+    "end_block_id": "ch3-block-004",
+    "based_on_preset_id": "preset-ancient-journal",
+    "background_id": "bg-vintage-parchment",
+    "palette_id": "pal-ancient-parchment",
+    "effects": [
+      {
+        "id": "fx-audio-scene-ch3-01",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-ch4-01",
+    "chapter_id": "ch4",
+    "start_block_id": "ch4-block-001",
+    "end_block_id": "ch4-block-002",
+    "based_on_preset_id": "preset-leviathan-surge",
+    "background_id": "bg-leviathan-surge",
+    "palette_id": "pal-crimson-crisis",
+    "effects": [
+      {
+        "id": "fx-audio-scene-ch4-01",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/gentle_rain_falling.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-ch4-02",
+    "chapter_id": "ch4",
+    "start_block_id": "ch4-block-003",
+    "end_block_id": "ch4-block-004",
+    "based_on_preset_id": "preset-abyss-colossus",
+    "background_id": "bg-abyss-colossus",
+    "palette_id": "pal-ocean-abyss",
+    "effects": [
+      {
+        "id": "fx-audio-scene-ch4-02",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/thunder-rumble.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-ch5-01",
+    "chapter_id": "ch5",
+    "start_block_id": "ch5-block-001",
+    "end_block_id": "ch5-block-002",
+    "based_on_preset_id": "preset-fresnel-beam",
+    "background_id": "bg-fresnel-beam",
+    "palette_id": "pal-golden-radiance",
+    "effects": []
+  },
+  {
+    "id": "scene-ch5-02",
+    "chapter_id": "ch5",
+    "start_block_id": "ch5-block-003",
+    "end_block_id": "ch5-block-004",
+    "based_on_preset_id": "preset-dawn-peace",
+    "background_id": "bg-dawn-hope",
+    "palette_id": "pal-dawn-victory",
+    "effects": []
+  },
+  {
+    "id": "scene-097331",
+    "chapter_id": "ch1",
+    "start_block_id": "ch1-block-001",
+    "end_block_id": "ch1-block-003",
+    "background_id": "bg-rain-loop",
+    "palette_id": "pal-misty-shadow",
+    "effects": [
+      {
+        "id": "fx-sunbeam-1787711018765",
+        "type": "sunbeam",
+        "category": "visual",
+        "intensity": 0.75,
+        "duration_ms": 3000,
+        "delay_ms": 0,
+        "loop": false
+      },
+      {
+        "id": "fx-floating_clouds-1787711042165",
+        "type": "floating_clouds",
+        "category": "visual",
+        "intensity": 1,
+        "duration_ms": 3000,
+        "delay_ms": 0,
+        "loop": false
+      },
+      {
+        "id": "fx-particle_smoke-1787711069780",
+        "type": "particle_smoke",
+        "category": "visual",
+        "intensity": 1,
+        "duration_ms": 3000,
+        "delay_ms": 3000,
+        "loop": true
+      },
+      {
+        "id": "fx-wind_gust-1787711089252",
+        "type": "wind_gust",
+        "category": "motion",
+        "intensity": 0.8,
+        "duration_ms": 1500,
+        "delay_ms": 3000,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-090286",
+    "chapter_id": "ch1",
+    "start_block_id": "ch1-block-004",
+    "end_block_id": "ch1-block-008",
+    "background_id": "bg-storm-ocean",
+    "palette_id": "pal-storm-doom",
+    "effects": [
+      {
+        "id": "fx-audio-1787712147730",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 0.3,
+        "duration_ms": 0,
+        "audio_src": "/audio/thunder-rumble.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-water_ripple-1787712084257",
+        "type": "water_ripple",
+        "category": "visual",
+        "intensity": 0.75,
+        "duration_ms": 3500,
+        "delay_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "scene-236155",
+    "chapter_id": "ch1",
+    "start_block_id": "ch1-block-009",
+    "end_block_id": "ch1-block-010",
+    "background_id": "bg-fireflies-dark",
+    "palette_id": "pal-misty-shadow"
+  }
+]

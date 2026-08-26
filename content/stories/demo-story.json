@@ -23,26 +23,7 @@
           "type": "heading",
           "text": "Phần I: Điềm Báo Ngoài Khơi",
           "mood_tag": "bí ẩn",
-          "effects": [
-            {
-              "id": "eff-437542",
-              "type": "audio",
-              "category": "audio",
-              "intensity": 0.85,
-              "duration_ms": 1200,
-              "delay_ms": 0,
-              "audio_src": "/audio/gentle_rain_falling.mp3",
-              "loop": false
-            },
-            {
-              "id": "eff-537051",
-              "type": "particle_rain",
-              "category": "visual",
-              "intensity": 0.75,
-              "duration_ms": 5000,
-              "delay_ms": 0
-            }
-          ]
+          "effects": []
         },
         {
           "id": "ch1-block-002",
@@ -51,12 +32,23 @@
           "mood_tag": "u ám",
           "effects": [
             {
-              "id": "eff-102",
-              "type": "bg_color_shift",
+              "id": "eff-122230",
+              "type": "audio",
+              "category": "audio",
+              "intensity": 0.3,
+              "duration_ms": 1200,
+              "delay_ms": 0,
+              "loop": true,
+              "audio_src": "/audio/horror_atmosphe.mp3"
+            },
+            {
+              "id": "eff-153656",
+              "type": "particle_rain",
               "category": "visual",
-              "intensity": 0.8,
+              "intensity": 0.75,
               "duration_ms": 2500,
-              "delay_ms": 0
+              "delay_ms": 3000,
+              "loop": true
             }
           ]
         },
@@ -74,22 +66,23 @@
           "mood_tag": "mưa bão",
           "effects": [
             {
-              "id": "eff-495858",
-              "type": "audio",
-              "category": "audio",
-              "intensity": 0.85,
-              "duration_ms": 1200,
-              "delay_ms": 0,
-              "audio_src": "/audio/gentle_rain_falling.mp3",
-              "loop": true
-            },
-            {
-              "id": "eff-570287",
+              "id": "eff-102314",
               "type": "particle_rain",
               "category": "visual",
               "intensity": 0.75,
-              "duration_ms": 5000,
-              "delay_ms": 0
+              "duration_ms": 4100,
+              "delay_ms": 950,
+              "loop": false
+            },
+            {
+              "id": "eff-117846",
+              "type": "audio",
+              "category": "audio",
+              "intensity": 0.3,
+              "duration_ms": 4000,
+              "delay_ms": 1100,
+              "loop": false,
+              "audio_src": "/audio/gentle_rain_falling.mp3"
             }
           ]
         },
@@ -114,11 +107,32 @@
           "mood_tag": "kinh dị / cao trào",
           "effects": [
             {
-              "id": "eff-104",
+              "id": "eff-145254",
+              "type": "audio",
+              "category": "audio",
+              "intensity": 0.85,
+              "duration_ms": 1200,
+              "delay_ms": 500,
+              "loop": false,
+              "audio_src": "/audio/thunder-rumble.mp3"
+            },
+            {
+              "id": "eff-157179",
+              "type": "wind_gust",
+              "category": "motion",
+              "intensity": 1,
+              "duration_ms": 1500,
+              "delay_ms": 0,
+              "loop": false
+            },
+            {
+              "id": "eff-171157",
               "type": "lightning_flash",
               "category": "visual",
-              "intensity": 0.95,
-              "duration_ms": 1200
+              "intensity": 1,
+              "duration_ms": 1200,
+              "delay_ms": 0,
+              "loop": false
             }
           ]
         },
@@ -127,26 +141,7 @@
           "type": "paragraph",
           "text": "Ngay sau ánh chớp là một tiếng sấm nổ đinh tai nhức óc rền vang khắp vịnh biển. Chấn động khủng khiếp khiến cả ngọn tháp đá hoa cương vững chãi rung lắc dữ dội, chiếc đèn dầu trên bàn chao đảo muốn ngã nhào xuống sàn đá. Những mảnh vữa vôi cũ kỹ trên trần vòm rơi lả tả xuống sàn nhà. Lão Bảy phải bám chặt lấy lan can sắt để không bị ngã khuỵu, lồng ngực đập liên hồi như muốn vỡ tung trước sự xuất hiện phi lý của bóng người trên đỉnh tháp cao gần bốn mươi mét giữa cơn bão cuồng phong.",
           "mood_tag": "chấn động",
-          "effects": [
-            {
-              "id": "eff-105",
-              "type": "screen_shake",
-              "category": "motion",
-              "intensity": 0.85,
-              "duration_ms": 800,
-              "delay_ms": 150
-            },
-            {
-              "id": "eff-472865",
-              "type": "audio",
-              "category": "audio",
-              "intensity": 0.85,
-              "duration_ms": 1200,
-              "delay_ms": 0,
-              "audio_src": "/audio/thunder-rumble.mp3",
-              "loop": false
-            }
-          ]
+          "effects": []
         },
         {
           "id": "ch1-block-009",
@@ -155,11 +150,13 @@
           "mood_tag": "sợ hãi",
           "effects": [
             {
-              "id": "eff-107",
+              "id": "eff-261675",
               "type": "text_shake",
               "category": "visual",
-              "intensity": 0.6,
-              "duration_ms": 1000
+              "intensity": 0.65,
+              "duration_ms": 1000,
+              "delay_ms": 0,
+              "loop": false
             }
           ]
         },

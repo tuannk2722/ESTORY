@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Deep Cave Interior -->
+    <radialGradient id="realCaveInner" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#3b1502" />
+      <stop offset="35%" stop-color="#1c0a01" />
+      <stop offset="75%" stop-color="#080200" />
+      <stop offset="100%" stop-color="#010000" />
+    </radialGradient>
+
+    <!-- Radiant Mountain of Gold Glow -->
+    <radialGradient id="realGoldMountainGlow" cx="50%" cy="60%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="25%" stop-color="#fde047" stop-opacity="0.95" />
+      <stop offset="55%" stop-color="#eab308" stop-opacity="0.75" />
+      <stop offset="85%" stop-color="#ca8a04" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#78350f" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="realCaveLustGlow">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Cave Wall Backdrop -->
+  <rect width="1920" height="1080" fill="url(#realCaveInner)" />
+
+  <!-- Cave Stalactites & Rock Pillars (Nhũ Đá Hang Báu Chân Thực) -->
+  <polygon points="0,0 120,240 240,0 360,320 480,0 650,280 820,0 1000,360 1180,0 1350,260 1520,0 1700,340 1920,0 1920,1080 0,1080" fill="#0f0502" opacity="0.95" />
+
+  <!-- Mountain of Gold & Jewels Glowing Radiantly (Núi Vàng Bạc Châu Báu Ngập Tràn) -->
+  <path d="M 0,1080 L 150,750 Q 550,510 960,470 Q 1400,510 1780,750 L 1920,1080 Z" fill="url(#realGoldMountainGlow)" filter="url(#realCaveLustGlow)" />
+
+  <!-- Gold Bullions, Coins & Gem Facets in Living Twinkle Motion -->
+  <g filter="url(#realCaveLustGlow)">
+    <!-- Heaps of Pure Gold Ingots -->
+    <ellipse cx="600" cy="720" rx="230" ry="125" fill="#fde047" stroke="#ca8a04" stroke-width="4" />
+    <ellipse cx="1320" cy="740" rx="250" ry="135" fill="#fde047" stroke="#ca8a04" stroke-width="4" />
+    <ellipse cx="960" cy="800" rx="360" ry="165" fill="#eab308" stroke="#a16207" stroke-width="4" />
+    
+    <!-- Giant Glowing Diamond Crystals (Kim Cương Lấp Lánh Siêu Thực) -->
+    <polygon points="450,560 480,480 540,490 570,580 510,640" fill="#ef4444" stroke="#f87171" stroke-width="3" style="animation: gem-twinkle 3s infinite alternate;" />
+    <polygon points="1420,540 1460,450 1520,460 1560,560 1490,620" fill="#38bdf8" stroke="#93c5fd" stroke-width="3" style="animation: gem-twinkle 3.5s 0.4s infinite alternate;" />
+    <polygon points="850,420 890,340 950,350 980,430 920,490" fill="#a855f7" stroke="#d8b4fe" stroke-width="3" style="animation: gem-twinkle 2.8s 0.8s infinite alternate;" />
+  </g>
+
+  <!-- Greedy Older Brother Overloaded with Gold in Living Breathing Strain Motion -->
+  <g transform="translate(960, 680)" style="animation: human-breathe 3.5s ease-in-out infinite;">
+    <!-- Bulging Sleeves Stuffed with Gold Bullion -->
+    <ellipse cx="-80" cy="-20" rx="50" ry="32" fill="#f59e0b" stroke="#78350f" stroke-width="3.5" filter="url(#realCaveLustGlow)" />
+    <ellipse cx="80" cy="-20" rx="50" ry="32" fill="#f59e0b" stroke="#78350f" stroke-width="3.5" filter="url(#realCaveLustGlow)" />
+    
+    <!-- Bulging Pant Legs Stuffed with Heavy Gold (2 Ống Quần Nặng Trĩu) -->
+    <ellipse cx="-48" cy="90" rx="44" ry="65" fill="#f59e0b" stroke="#78350f" stroke-width="3.5" filter="url(#realCaveLustGlow)" />
+    <ellipse cx="48" cy="90" rx="44" ry="65" fill="#f59e0b" stroke="#78350f" stroke-width="3.5" filter="url(#realCaveLustGlow)" />
+
+    <!-- Straining Body & Sweating Face -->
+    <circle cx="0" cy="-90" r="26" fill="#ea580c" stroke="#7c2d12" stroke-width="2" />
+    <path d="M -32,-60 L 32,-60 L 38,40 L -38,40 Z" fill="#9a3412" stroke="#431407" stroke-width="3.5" />
+    
+    <!-- Sweat Drops & Dazed Greedy Eyes -->
+    <circle cx="-9" cy="-95" r="4.5" fill="#000000" />
+    <circle cx="9" cy="-95" r="4.5" fill="#000000" />
+
+    <!-- Colossal 9-Span Sack Stuffed Beyond Capacity (Túi Chín Gang Căng Nứt) -->
+    <g transform="translate(190, 20)" filter="url(#realCaveLustGlow)">
+      <ellipse cx="0" cy="0" rx="150" ry="130" fill="#78350f" stroke="#fde047" stroke-width="5.5" />
+      <ellipse cx="-65" cy="-75" rx="55" ry="32" fill="#fde047" stroke="#ca8a04" stroke-width="2.5" />
+      <!-- Golden Light Bursting from Sack -->
+      <polygon points="-75,-95 -65,-115 -45,-105 -55,-85" fill="#e0f2fe" stroke="#38bdf8" stroke-width="2.5" />
+      <polygon points="-35,-90 -20,-110 -5,-100 -20,-80" fill="#f87171" stroke="#ef4444" stroke-width="2.5" />
+      <line x1="-130" y1="-40" x2="-230" y2="-40" stroke="#d97706" stroke-width="7" stroke-dasharray="10 4" />
+    </g>
+  </g>
+
+  <!-- Gem Reflections & Volumetric Cavern Light Beams -->
+  <g filter="url(#realCaveLustGlow)" opacity="0.8">
+    <line x1="960" y1="470" x2="180" y2="80" stroke="#fde047" stroke-width="4.5" />
+    <line x1="960" y1="470" x2="1720" y2="130" stroke="#38bdf8" stroke-width="4.5" />
+    <line x1="960" y1="470" x2="780" y2="30" stroke="#ec4899" stroke-width="3.5" />
+    <line x1="960" y1="470" x2="1240" y2="60" stroke="#a855f7" stroke-width="3.5" />
+  </g>
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="35" opacity="0.6" />
+</svg>

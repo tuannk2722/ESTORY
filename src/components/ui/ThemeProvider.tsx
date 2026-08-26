@@ -64,16 +64,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     // 2. Tự động đồng bộ reduced_motion với prefers-reduced-motion nếu chưa có user override
     let initialReducedMotion = saved.reduced_motion;
-    if (typeof window !== "undefined" && window.matchMedia) {
-      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (initialReducedMotion === undefined || initialReducedMotion === false) {
-        initialReducedMotion = prefersReduced;
-      }
+    if (initialReducedMotion === undefined && typeof window !== "undefined" && window.matchMedia) {
+      initialReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     }
 
     const initialSettings: ReaderSettings = {
       ...saved,
-      reduced_motion: initialReducedMotion,
+      reduced_motion: initialReducedMotion ?? false,
     };
 
     // 3. Gán data-theme lên <html>

@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Morning Sky Gradient -->
+    <linearGradient id="morningSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="40%" stop-color="#bae6fd" />
+      <stop offset="75%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#fef9c3" />
+    </linearGradient>
+
+    <!-- Warm Sunlight Flare -->
+    <radialGradient id="sunFlare" cx="80%" cy="20%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+      <stop offset="30%" stop-color="#fde047" stop-opacity="0.6" />
+      <stop offset="70%" stop-color="#f59e0b" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#ea580c" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Starfruit Tree Canopy Gradient -->
+    <radialGradient id="treeGreen" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#4ade80" />
+      <stop offset="50%" stop-color="#16a34a" />
+      <stop offset="90%" stop-color="#14532d" />
+      <stop offset="100%" stop-color="#052e16" />
+    </radialGradient>
+
+    <!-- Ripe Starfruit Golden Glow -->
+    <radialGradient id="fruitGlow" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="60%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </radialGradient>
+
+    <filter id="softShimmer">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1920" height="1080" fill="url(#morningSky)" />
+  <rect width="1920" height="1080" fill="url(#sunFlare)" />
+
+  <!-- Distant Green Hills (Làng Quê Thanh Bình) -->
+  <path d="M 0,640 Q 350,540 750,600 Q 1200,520 1600,590 Q 1800,560 1920,620 L 1920,1080 L 0,1080 Z" fill="#86efac" opacity="0.6" />
+  <path d="M 0,720 Q 450,650 950,710 Q 1450,660 1920,730 L 1920,1080 L 0,1080 Z" fill="#4ade80" opacity="0.8" />
+
+  <!-- Garden Earth Ground -->
+  <path d="M 0,820 Q 500,770 1000,810 Q 1500,780 1920,830 L 1920,1080 L 0,1080 Z" fill="#2d6a4f" />
+  <path d="M 0,920 Q 600,880 1200,910 L 1920,930 L 1920,1080 L 0,1080 Z" fill="#1b4332" />
+
+  <!-- Thatched Cottage (Túp Lều Tranh Của Vợ Chồng Người Em) -->
+  <g transform="translate(260, 640)">
+    <!-- Thatch Roof (Mái lá tranh lụp xụp) -->
+    <polygon points="180,-140 -60,0 420,0" fill="#78350f" stroke="#451a03" stroke-width="3" />
+    <polygon points="180,-140 -40,0 400,0" fill="#b45309" stroke="#92400e" stroke-width="2" />
+    <polygon points="180,-130 -20,0 380,0" fill="#d97706" />
+    <!-- Mud Walls (Vách đất mộc mạc) -->
+    <rect x="0" y="0" width="360" height="220" fill="#854d0e" stroke="#5c330a" stroke-width="3" />
+    <!-- Wooden Door & Window -->
+    <rect x="130" y="50" width="100" height="170" fill="#3f2305" stroke="#1f0f00" stroke-width="2" rx="4" />
+    <rect x="30" y="50" width="60" height="60" fill="#2e1a05" stroke="#1f0f00" stroke-width="2" rx="4" />
+    <!-- Bamboo Fence (Hàng rào tre đơn sơ) -->
+    <line x1="-80" y1="180" x2="480" y2="180" stroke="#78350f" stroke-width="6" />
+    <line x1="-60" y1="140" x2="-60" y2="240" stroke="#78350f" stroke-width="5" />
+    <line x1="-20" y1="140" x2="-20" y2="240" stroke="#78350f" stroke-width="5" />
+    <line x1="420" y1="140" x2="420" y2="240" stroke="#78350f" stroke-width="5" />
+    <line x1="460" y1="140" x2="460" y2="240" stroke="#78350f" stroke-width="5" />
+  </g>
+
+  <!-- Luscious Green Starfruit Tree (Cây Khế Ngọt Trĩu Cành) -->
+  <g transform="translate(1380, 520)">
+    <!-- Twisted Gnarled Trunk (Gốc khế già cổ kính) -->
+    <path d="M -40,480 C -60,320 -100,160 -40,20 C 0,-60 120,40 160,-80 C 180,60 120,320 80,480 Z" fill="#3e2008" stroke="#1e0f04" stroke-width="4" />
+    
+    <!-- Dense Emerald Foliage Canopy (Tán lá khế xanh mướt rợp bóng) -->
+    <ellipse cx="60" cy="-160" rx="420" ry="320" fill="url(#treeGreen)" />
+    <ellipse cx="-180" cy="-60" rx="280" ry="240" fill="url(#treeGreen)" opacity="0.95" />
+    <ellipse cx="260" cy="-40" rx="300" ry="260" fill="url(#treeGreen)" opacity="0.95" />
+    <ellipse cx="60" cy="-300" rx="320" ry="220" fill="#22c55e" opacity="0.8" />
+
+    <!-- Hanging Golden Starfruits (Chùm khế ngọt vàng lúc lỉu sát đất) -->
+    <g filter="url(#softShimmer)">
+      <!-- 5-Pointed Starfruit Clusters -->
+      <g transform="translate(-160, 40) scale(1.4)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#fruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+      <g transform="translate(-120, 90) scale(1.6)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#fruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+      <g transform="translate(-50, 160) scale(1.5)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#fruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+      <g transform="translate(60, 120) scale(1.7)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#fruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+      <g transform="translate(180, 80) scale(1.6)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#fruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+      <g transform="translate(240, 140) scale(1.4)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#fruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+      <g transform="translate(0, -60) scale(1.8)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#fruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+      <g transform="translate(120, -120) scale(1.5)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#fruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+    </g>
+  </g>
+
+  <!-- Golden Sunbeams Filtering Through Leaves -->
+  <g filter="url(#softShimmer)" opacity="0.5">
+    <polygon points="1500,0 1200,900 1350,900" fill="#fef08a" />
+    <polygon points="1600,0 1450,900 1550,900" fill="#fef08a" />
+  </g>
+
+  <!-- Floating Falling Leaves & Blossom Particles -->
+  <g fill="#86efac" opacity="0.75" filter="url(#softShimmer)">
+    <circle cx="850" cy="520" r="4" />
+    <circle cx="1050" cy="620" r="5" />
+    <circle cx="1200" cy="740" r="4" />
+    <circle cx="1600" cy="680" r="5" />
+  </g>
+
+  <!-- Soft Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="25" opacity="0.35" />
+</svg>

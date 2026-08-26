@@ -7,6 +7,8 @@ import { StoryBlock, EffectConfig, EffectType } from "@/types/story";
 import { suggestEffectsForText, EffectSuggestion } from "@/lib/effectSuggestion";
 import { getEffectIcon, EFFECT_METADATA, AUDIO_EFFECT_PRESETS } from "./effect-meta";
 import EffectPicker from "./EffectPicker";
+import Popconfirm from "@/components/ui/Popconfirm";
+import { toast } from "sonner";
 import {
   GripVertical,
   Trash2,
@@ -69,7 +71,6 @@ export default function BlockEditor({
   }, []);
 
   // Auto-scroll khi kéo block sát mép trên hoặc dưới màn hình
-  // Dùng easing bậc 2 (quadratic): càng gần mép, tốc độ tăng càng nhanh -> cảm giác tự nhiên,
   React.useEffect(() => {
     if (draggedIndex === null) return;
 
@@ -136,7 +137,7 @@ export default function BlockEditor({
   // Xóa block
   const handleDeleteBlock = (blockId: string) => {
     if (blocks.length <= 1) {
-      alert("Chương truyện cần có tối thiểu 1 block.");
+      toast.error("Chương truyện cần có tối thiểu 1 block.");
       return;
     }
     const updated = blocks.filter((b) => b.id !== blockId);
@@ -144,6 +145,7 @@ export default function BlockEditor({
     if (activeBlockId === blockId && onSelectBlock) {
       onSelectBlock(null);
     }
+    toast.success("Đã xóa đoạn văn.");
   };
 
   // ===== Drag and drop reorder =====
@@ -389,19 +391,34 @@ export default function BlockEditor({
                   </div>
                 </div>
 
-                {/* Delete Button with Enhanced Hover Effect */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteBlock(block.id);
-                  }}
-                  className="p-2 rounded-lg text-muted-foreground hover:bg-red-50 hover:text-destructive hover:bg-destructive/15 border border-transparent hover:border-destructive/30 transition-all duration-200 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center shadow-xs active:scale-95 group"
-                  title="Xóa block"
-                  aria-label="Xóa block"
-                >
-                  <Trash2 className="w-4 h-4 transition-transform group-hover:scale-110" />
-                </button>
+                {/* Delete Button with Smart Popconfirm */}
+                {(() => {
+                  const isBlockEmpty =
+                    !block.text?.trim() &&
+                    (!block.effects || block.effects.length === 0) &&
+                    !block.mood_tag;
+
+                  return (
+                    <Popconfirm
+                      title="Xóa đoạn văn?"
+                      description="Đoạn văn này sẽ bị xóa khỏi chương"
+                      shouldConfirm={!isBlockEmpty}
+                      onConfirm={() => handleDeleteBlock(block.id)}
+                      variant="danger"
+                      confirmText="Xóa"
+                      cancelText="Hủy"
+                    >
+                      <button
+                        type="button"
+                        className="p-2 rounded-lg text-muted-foreground hover:bg-red-50 hover:text-destructive hover:bg-destructive/15 border border-transparent hover:border-destructive/30 transition-all duration-200 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center shadow-xs active:scale-95 group"
+                        title={isBlockEmpty ? "Xóa block trống" : "Xóa block"}
+                        aria-label="Xóa block"
+                      >
+                        <Trash2 className="w-4 h-4 transition-transform group-hover:scale-110" />
+                      </button>
+                    </Popconfirm>
+                  );
+                })()}
               </div>
 
               {/* Auto-expanding Block Text Area */}

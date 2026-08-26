@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Glorious Golden Sunset Over Ba Vi Ridge -->
+    <radialGradient id="cinemaProcessionSunset" cx="50%" cy="40%" r="80%">
+      <stop offset="0%" stop-color="#991b1b" />
+      <stop offset="35%" stop-color="#450a0a" />
+      <stop offset="70%" stop-color="#180404" />
+      <stop offset="100%" stop-color="#050101" />
+    </radialGradient>
+
+    <!-- Solar Flare Over Ba Vi Mountain -->
+    <radialGradient id="mountainSolarFlare" cx="50%" cy="55%" r="45%">
+      <stop offset="0%" stop-color="#fde047" stop-opacity="0.8" />
+      <stop offset="40%" stop-color="#f97316" stop-opacity="0.45" />
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="cinemaProcessionGlow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1920" height="1080" fill="url(#cinemaProcessionSunset)" />
+  <rect width="1920" height="1080" fill="url(#mountainSolarFlare)" />
+
+  <!-- Ba Vi Mountain Ridge Pass (Đèo Núi Ba Vì) -->
+  <path d="M 0,660 L 320,490 L 680,580 L 960,390 L 1320,530 L 1680,460 L 1920,590 L 1920,1080 L 0,1080 Z" fill="#2d0a0a" stroke="#7f1d1d" stroke-width="2.5" />
+  <path d="M 0,780 Q 480,640 1000,700 Q 1500,660 1920,760 L 1920,1080 L 0,1080 Z" fill="#180404" />
+
+  <!-- Photorealistic 9-Tusked Elephant with Ornate Carriage (Voi 9 Ngà Oai Vệ) -->
+  <g transform="translate(680, 690)" style="animation: human-breathe 5s ease-in-out infinite;" filter="url(#cinemaProcessionGlow)">
+    <path d="M -95,50 C -125,-30 -85,-100 20,-100 C 95,-100 135,-50 125,30 C 125,60 105,100 95,120 L 50,120 L 55,50 L -20,50 L -30,120 L -75,120 Z" fill="#573010" stroke="#331904" stroke-width="3" />
+    <path d="M -95,-20 C -145,-40 -165,20 -175,80 C -165,85 -155,70 -155,50 C -145,-10 -105,10 -85,10 Z" fill="#573010" stroke="#331904" stroke-width="3" />
+    
+    <!-- 9 Radiant Sharp Curved Golden Tusks (Chín Ngà Vàng Rực Rỡ) -->
+    <g stroke="#fef08a" stroke-width="4.5" fill="none" opacity="0.95">
+      <path d="M -125,10 C -155,0 -195,-5 -225,10" stroke-width="5.5" />
+      <path d="M -120,18 C -150,10 -190,5 -220,20" stroke-width="5" />
+      <path d="M -115,26 C -145,20 -185,15 -215,30" stroke-width="5" />
+      <path d="M -110,34 C -140,28 -180,25 -210,40" stroke-width="4.5" />
+      <path d="M -105,42 C -135,36 -175,35 -205,50" stroke-width="4.5" />
+    </g>
+
+    <!-- Ornate Royal Howdah Carriage with Gold Curtains -->
+    <g transform="translate(20, -145)">
+      <rect x="-65" y="0" width="130" height="75" rx="8" fill="#dc2626" stroke="#fde047" stroke-width="3.5" />
+      <polygon points="0,-45 -75,0 75,0" fill="#f59e0b" stroke="#b45309" stroke-width="2.5" />
+      <path d="M -45,10 L -45,65" stroke="#fef08a" stroke-width="3.5" />
+      <path d="M 45,10 L 45,65" stroke="#fef08a" stroke-width="3.5" />
+    </g>
+  </g>
+
+  <!-- Photorealistic 9-Maned Red Warhorse (Ngựa 9 Hồng Mao Phi Nước Kiệu) -->
+  <g transform="translate(1220, 720)" style="animation: human-breathe 4.2s 0.4s ease-in-out infinite;" filter="url(#cinemaProcessionGlow)">
+    <path d="M -65,20 C -85,-30 -55,-80 20,-80 C 75,-80 95,-40 85,40 L 55,100 L 35,100 L 48,40 L -10,40 L -25,100 L -55,100 Z" fill="#991b1b" stroke="#450a0a" stroke-width="3" />
+    <path d="M 55,-50 C 85,-90 105,-100 130,-75 C 115,-50 95,-30 70,-30 Z" fill="#991b1b" stroke="#450a0a" stroke-width="3" />
+    
+    <!-- 9 Flaming Red Manes Waving in Wind -->
+    <g stroke="#f87171" stroke-width="4.5" fill="none" opacity="0.95">
+      <path d="M 85,-80 C 65,-110 55,-95 60,-75" />
+      <path d="M 75,-70 C 55,-100 45,-85 50,-65" />
+      <path d="M 65,-60 C 45,-90 35,-75 40,-55" />
+      <path d="M 55,-50 C 35,-80 25,-65 30,-45" />
+      <path d="M 45,-40 C 25,-70 15,-55 20,-35" />
+    </g>
+  </g>
+
+  <!-- Red Festive Streamers Waving in Wind -->
+  <g stroke="#ef4444" stroke-width="4.5" fill="none" opacity="0.9">
+    <path d="M 380,500 Q 420,440 480,470 Q 520,500 560,450" />
+    <path d="M 1520,520 Q 1580,460 1640,490 Q 1700,520 1760,470" />
+  </g>
+
+  <!-- Cinematic Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="35" opacity="0.5" />
+</svg>

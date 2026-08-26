@@ -1,15 +1,289 @@
 [
   {
+    "id": "bg-sontinh-peak-video",
+    "type": "video",
+    "label": "Sơn Tinh Trên Đỉnh Ba Vì (Video Điện Ảnh)",
+    "value": "/scene-backgrounds/sample.mp4",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-epilogue-real.svg",
+    "mood_tags": ["sơn tinh", "đỉnh ba vì", "video điện ảnh", "siêu thực", "biển mây", "người thật", "dolly zoom"]
+  },
+  {
+    "id": "bg-son-thuy-rivalry-cinema",
+    "type": "image",
+    "label": "Thủy Tinh Đại Dương (Điện Ảnh)",
+    "value": "/scene-backgrounds/sontinh-thuytinh-ocean-cinema.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-thuytinh-ocean-cinema.svg",
+    "mood_tags": ["thủy tinh", "biển sâu", "điện ảnh", "người thật", "đinh ba", "sóng thần"]
+  },
+  {
+    "id": "bg-phong-chau-palace-cinema",
+    "type": "image",
+    "label": "Cung Điện Phong Châu (Điện Ảnh)",
+    "value": "/scene-backgrounds/sontinh-phongchau-cinema.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-phongchau-cinema.svg",
+    "mood_tags": ["hoàng gia", "cung điện", "điện ảnh", "vua hùng", "mỵ nương", "đuốc sáng"]
+  },
+  {
+    "id": "bg-wedding-procession-cinema",
+    "type": "image",
+    "label": "Lễ Rước Dâu Non Cao (Điện Ảnh)",
+    "value": "/scene-backgrounds/sontinh-procession-cinema.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-procession-cinema.svg",
+    "mood_tags": ["rước dâu", "voi chín ngà", "ngựa chín hồng mao", "điện ảnh", "lễ hội"]
+  },
+  {
+    "id": "bg-deluge-tempest-cinema",
+    "type": "image",
+    "label": "Thủy Thần Dâng Bão (Điện Ảnh)",
+    "value": "/scene-backgrounds/sontinh-deluge-cinema.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-deluge-cinema.svg",
+    "mood_tags": ["mưa bão", "sóng thần", "điện ảnh", "sét đánh", "hồng thủy"]
+  },
+  {
+    "id": "bg-epic-battle-clash-cinema",
+    "type": "image",
+    "label": "Đại Chiến Sơn Tinh Thủy Tinh (Điện Ảnh)",
+    "value": "/scene-backgrounds/sontinh-battle-cinema.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-battle-cinema.svg",
+    "mood_tags": ["đại chiến", "sấm chớp", "bốc đồi dời núi", "rồng nước", "điện ảnh"]
+  },
+  {
+    "id": "bg-phong-chau-palace-real",
+    "type": "image",
+    "label": "Cung Điện Phong Châu (Siêu Thực)",
+    "value": "/scene-backgrounds/sontinh-phongchau-real.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-phongchau-real.svg",
+    "mood_tags": ["hoàng gia", "cổ đại", "siêu thực", "đông sơn", "mỵ nương", "đuốc sáng"]
+  },
+  {
+    "id": "bg-son-thuy-rivalry-real",
+    "type": "image",
+    "label": "Non Cao & Biển Thẳm (Siêu Thực)",
+    "value": "/scene-backgrounds/sontinh-rivalry-real.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-rivalry-real.svg",
+    "mood_tags": ["kỳ tài", "đối lập", "siêu thực", "sơn tinh", "thủy tinh", "rồng nước"]
+  },
+  {
+    "id": "bg-wedding-procession-real",
+    "type": "image",
+    "label": "Lễ Rước Dâu Non Cao (Siêu Thực)",
+    "value": "/scene-backgrounds/sontinh-wedding-real.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-wedding-real.svg",
+    "mood_tags": ["rước dâu", "lễ vật", "siêu thực", "voi chín ngà", "ngựa chín hồng mao"]
+  },
+  {
+    "id": "bg-deluge-tempest-real",
+    "type": "image",
+    "label": "Thủy Thần Dâng Bão (Siêu Thực)",
+    "value": "/scene-backgrounds/sontinh-deluge-real.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-deluge-real.svg",
+    "mood_tags": ["mưa bão", "sóng thần", "siêu thực", "cuồng nộ", "sét đánh"]
+  },
+  {
+    "id": "bg-epic-battle-clash-real",
+    "type": "image",
+    "label": "Đại Chiến Long Trời Lở Đất (Siêu Thực)",
+    "value": "/scene-backgrounds/sontinh-battle-real.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-battle-real.svg",
+    "mood_tags": ["đại chiến", "sấm chớp", "siêu thực", "bốc đồi dời núi", "long trời lở đất"]
+  },
+  {
+    "id": "bg-legend-epilogue-real",
+    "type": "image",
+    "label": "Huyền Thoại Ngàn Năm (Siêu Thực)",
+    "value": "/scene-backgrounds/sontinh-epilogue-real.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-epilogue-real.svg",
+    "mood_tags": ["sử thi", "bình yên", "siêu thực", "núi ba vì", "bình minh"]
+  },
+  {
+    "id": "bg-starfruit-cottage-real",
+    "type": "image",
+    "label": "Túp Lều Tranh & Vườn Khế (Siêu Thực)",
+    "value": "/scene-backgrounds/caykhe-cottage-real.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/caykhe-cottage-real.svg",
+    "mood_tags": ["làng quê", "cây khế", "siêu thực", "thanh bình", "mộc mạc"]
+  },
+  {
+    "id": "bg-giant-bird-tree-real",
+    "type": "image",
+    "label": "Chim Thần Trên Cây Khế (Siêu Thực)",
+    "value": "/scene-backgrounds/caykhe-giant-bird-real.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/caykhe-giant-bird-real.svg",
+    "mood_tags": ["chim thần", "kỳ diệu", "siêu thực", "ăn khế trả vàng", "lời hứa"]
+  },
+  {
+    "id": "bg-treasure-island-cave-real",
+    "type": "image",
+    "label": "Đảo Đá Ngũ Sắc & Hang Vàng (Siêu Thực)",
+    "value": "/scene-backgrounds/caykhe-gold-island-real.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/caykhe-gold-island-real.svg",
+    "mood_tags": ["đảo vàng", "kho báu", "siêu thực", "ngũ sắc", "châu báu"]
+  },
+  {
+    "id": "bg-greedy-brother-scheme-real",
+    "type": "image",
+    "label": "Người Anh & Chiếc Túi Chín Gang (Siêu Thực)",
+    "value": "/scene-backgrounds/caykhe-greedy-scheme-real.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/caykhe-greedy-scheme-real.svg",
+    "mood_tags": ["toan tính", "lòng tham", "siêu thực", "túi chín gang", "chờ chim"]
+  },
+  {
+    "id": "bg-gluttony-cave-haul-real",
+    "type": "image",
+    "label": "Mê Mẩn Hang Vàng Nặng Trĩu (Siêu Thực)",
+    "value": "/scene-backgrounds/caykhe-treasure-cave-real.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/caykhe-treasure-cave-real.svg",
+    "mood_tags": ["hang vàng", "nhồi nhét", "siêu thực", "nặng trĩu", "hoa mắt"]
+  },
+  {
+    "id": "bg-ocean-storm-abyss-real",
+    "type": "image",
+    "label": "Quả Báo Chìm Đáy Đại Dương (Siêu Thực)",
+    "value": "/scene-backgrounds/caykhe-ocean-fall-real.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/caykhe-ocean-fall-real.svg",
+    "mood_tags": ["bão biển", "sóng thần", "siêu thực", "rơi xuống biển", "chìm sâu"]
+  },
+  {
+    "id": "bg-starfruit-cottage",
+    "type": "image",
+    "label": "Túp Lều Tranh & Vườn Khế",
+    "value": "/scene-backgrounds/caykhe-cottage.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/caykhe-cottage.svg",
+    "mood_tags": ["làng quê", "cây khế", "thanh bình", "mộc mạc"]
+  },
+  {
+    "id": "bg-giant-bird-tree",
+    "type": "image",
+    "label": "Chim Thần Trên Cây Khế",
+    "value": "/scene-backgrounds/caykhe-giant-bird.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/caykhe-giant-bird.svg",
+    "mood_tags": ["chim thần", "kỳ diệu", "ăn khế trả vàng", "lời hứa"]
+  },
+  {
+    "id": "bg-treasure-island-cave",
+    "type": "image",
+    "label": "Đảo Đá Ngũ Sắc & Hang Vàng",
+    "value": "/scene-backgrounds/caykhe-gold-island.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/caykhe-gold-island.svg",
+    "mood_tags": ["đảo vàng", "kho báu", "ngũ sắc", "châu báu"]
+  },
+  {
+    "id": "bg-greedy-brother-scheme",
+    "type": "image",
+    "label": "Người Anh & Chiếc Túi Chín Gang",
+    "value": "/scene-backgrounds/caykhe-greedy-scheme.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/caykhe-greedy-scheme.svg",
+    "mood_tags": ["toan tính", "lòng tham", "túi chín gang", "chờ chim"]
+  },
+  {
+    "id": "bg-gluttony-cave-haul",
+    "type": "image",
+    "label": "Mê Mẩn Hang Vàng Nặng Trĩu",
+    "value": "/scene-backgrounds/caykhe-treasure-cave.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/caykhe-treasure-cave.svg",
+    "mood_tags": ["hang vàng", "nhồi nhét", "nặng trĩu", "hoa mắt"]
+  },
+  {
+    "id": "bg-ocean-storm-abyss",
+    "type": "image",
+    "label": "Quả Báo Chìm Đáy Đại Dương",
+    "value": "/scene-backgrounds/caykhe-ocean-fall.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/caykhe-ocean-fall.svg",
+    "mood_tags": ["bão biển", "sóng thần", "rơi xuống biển", "chìm sâu", "quả báo"]
+  },
+  {
+    "id": "bg-phong-chau-palace",
+    "type": "image",
+    "label": "Cung Điện Phong Châu",
+    "value": "/scene-backgrounds/sontinh-phongchau.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-phongchau.svg",
+    "mood_tags": ["hoàng gia", "cổ đại", "trang trọng", "đông sơn", "mỵ nương"]
+  },
+  {
+    "id": "bg-son-thuy-rivalry",
+    "type": "image",
+    "label": "Non Cao & Biển Thẳm",
+    "value": "/scene-backgrounds/sontinh-rivalry.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-rivalry.svg",
+    "mood_tags": ["kỳ tài", "đối lập", "huyền bí", "thần thông", "sơn tinh", "thủy tinh"]
+  },
+  {
+    "id": "bg-wedding-procession",
+    "type": "image",
+    "label": "Lễ Rước Dâu Non Cao",
+    "value": "/scene-backgrounds/sontinh-wedding.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-wedding.svg",
+    "mood_tags": ["rước dâu", "lễ vật", "hoan hỉ", "voi chín ngà", "ngựa chín hồng mao"]
+  },
+  {
+    "id": "bg-deluge-tempest",
+    "type": "image",
+    "label": "Thủy Thần Dâng Bão",
+    "value": "/scene-backgrounds/sontinh-deluge.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-deluge.svg",
+    "mood_tags": ["mưa bão", "sóng thần", "cuồng nộ", "hồng thủy", "sấm sét"]
+  },
+  {
+    "id": "bg-epic-battle-clash",
+    "type": "image",
+    "label": "Đại Chiến Long Trời Lở Đất",
+    "value": "/scene-backgrounds/sontinh-battle.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-battle.svg",
+    "mood_tags": ["đại chiến", "sấm chớp", "bốc đồi dời núi", "long trời lở đất", "thần thông"]
+  },
+  {
+    "id": "bg-legend-epilogue",
+    "type": "image",
+    "label": "Huyền Thoại Ngàn Năm",
+    "value": "/scene-backgrounds/sontinh-epilogue.svg",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/sontinh-epilogue.svg",
+    "mood_tags": ["sử thi", "bình yên", "trường tồn", "núi ba vì", "bình minh"]
+  },
+  {
+    "id": "bg-dusk-abyss",
+    "type": "gradient",
+    "label": "Hoàng Hôn Tím Sẫm",
+    "value": "radial-gradient(ellipse at 50% 100%, #1e1b4b 0%, #0f172a 45%, #020617 100%)",
+    "motion": "static",
+    "mood_tags": ["hoàng hôn", "u ám", "bí ẩn", "điềm báo"]
+  },
+  {
     "id": "bg-storm-ocean",
     "type": "gradient",
     "label": "Giông Bão Đại Dương",
     "value": "linear-gradient(135deg, #050b14 0%, #0d1b2a 50%, #1b263b 100%)",
     "motion": "static",
-    "mood_tags": [
-      "kinh dị",
-      "u ám",
-      "mưa bão"
-    ]
+    "mood_tags": ["kinh dị", "u ám", "mưa bão"]
   },
   {
     "id": "bg-rain-loop",
@@ -17,12 +291,16 @@
     "label": "Mưa Đêm Ngọn Hải Đăng",
     "value": "/scene-backgrounds/rain-loop.mp4",
     "motion": "looping",
-    "poster_frame": "/scene-backgrounds/rain-poster.png",
-    "mood_tags": [
-      "mưa bão",
-      "cô độc",
-      "u ám"
-    ]
+    "poster_frame": "/scene-backgrounds/rain_poster.png",
+    "mood_tags": ["mưa bão", "cô độc", "u ám"]
+  },
+  {
+    "id": "bg-mist-cavern",
+    "type": "gradient",
+    "label": "Màn Sương Hang Đá",
+    "value": "radial-gradient(circle at 50% 80%, #1e293b 0%, #0f172a 60%, #020617 100%)",
+    "motion": "static",
+    "mood_tags": ["khói sương", "lạnh buốt", "u ám"]
   },
   {
     "id": "bg-fireflies-dark",
@@ -31,11 +309,7 @@
     "value": "fireflies_green",
     "motion": "looping",
     "poster_frame": "/scene-backgrounds/fireflies-poster.png",
-    "mood_tags": [
-      "huyền bí",
-      "rùng rợn",
-      "kỳ dị"
-    ]
+    "mood_tags": ["huyền bí", "rùng rợn", "kỳ dị"]
   },
   {
     "id": "bg-vintage-parchment",
@@ -43,11 +317,32 @@
     "label": "Trang Sách Cổ Kính",
     "value": "radial-gradient(ellipse at center, #231b14 0%, #140f0b 70%, #080605 100%)",
     "motion": "static",
-    "mood_tags": [
-      "cổ kính",
-      "hoài niệm",
-      "bí ẩn"
-    ]
+    "mood_tags": ["cổ kính", "hoài niệm", "bí ẩn"]
+  },
+  {
+    "id": "bg-leviathan-surge",
+    "type": "gradient",
+    "label": "Sóng Thần Cuồng Nộ",
+    "value": "linear-gradient(180deg, #1e1b4b 0%, #0f172a 35%, #450a0a 85%, #020617 100%)",
+    "motion": "static",
+    "mood_tags": ["sóng thần", "nguy hiểm", "hủy diệt", "cao trào"]
+  },
+  {
+    "id": "bg-abyss-colossus",
+    "type": "particle_composition",
+    "label": "Bọt Khí Vực Thẳm",
+    "value": "abyss_particles",
+    "motion": "looping",
+    "poster_frame": "/scene-backgrounds/lighthouse-night.png",
+    "mood_tags": ["quái thú", "kinh hoàng", "vực sâu"]
+  },
+  {
+    "id": "bg-fresnel-beam",
+    "type": "gradient",
+    "label": "Chùm Sáng Fresnel",
+    "value": "radial-gradient(ellipse at 50% 20%, #713f12 0%, #1c1917 50%, #0c0a09 100%)",
+    "motion": "static",
+    "mood_tags": ["ánh sáng", "sử thi", "cứu rỗi", "chiến thắng"]
   },
   {
     "id": "bg-dawn-hope",
@@ -55,11 +350,7 @@
     "label": "Bình Minh Sau Giông Tố",
     "value": "linear-gradient(180deg, #0f172a 0%, #311b42 40%, #7c2d12 75%, #f59e0b 100%)",
     "motion": "static",
-    "mood_tags": [
-      "bình yên",
-      "hy vọng",
-      "chiến thắng"
-    ]
+    "mood_tags": ["bình yên", "hy vọng", "chiến thắng"]
   },
   {
     "id": "bg-lighthouse-night",
@@ -67,10 +358,6 @@
     "label": "Hải Đăng Đêm Vắng",
     "value": "/scene-backgrounds/lighthouse-night.png",
     "motion": "static",
-    "mood_tags": [
-      "cô độc",
-      "bí ẩn",
-      "căng thẳng"
-    ]
+    "mood_tags": ["cô độc", "bí ẩn", "căng thẳng"]
   }
 ]

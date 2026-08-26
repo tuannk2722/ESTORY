@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Dark Storm Deluge Background -->
+    <radialGradient id="stormSky" cx="50%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#082f49" />
+      <stop offset="35%" stop-color="#0c1d2e" />
+      <stop offset="70%" stop-color="#050c14" />
+      <stop offset="100%" stop-color="#010408" />
+    </radialGradient>
+
+    <!-- Lightning Bolt Glow -->
+    <filter id="lightningGlow">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Water Flood Gradient -->
+    <linearGradient id="floodWater" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.9" />
+      <stop offset="40%" stop-color="#0369a1" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#021a2c" stop-opacity="1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1920" height="1080" fill="url(#stormSky)" />
+
+  <!-- Turbulent Storm Cloud Masses -->
+  <g fill="#0c2338" opacity="0.8">
+    <path d="M 0,200 C 300,100 500,250 800,160 C 1100,70 1400,220 1700,140 C 1850,100 1920,180 1920,400 L 0,400 Z" />
+    <path d="M 0,320 C 400,220 700,380 1100,260 C 1500,140 1750,300 1920,240 L 1920,500 L 0,500 Z" opacity="0.6" fill="#061524" />
+  </g>
+
+  <!-- Massive Forked Lightning Bolt Clashing Down -->
+  <g filter="url(#lightningGlow)" stroke="#f0f9ff" stroke-width="4" fill="none">
+    <path d="M 920,0 L 960,180 L 890,260 L 980,410 L 910,520 L 950,680" stroke-width="6" />
+    <!-- Secondary Branches -->
+    <path d="M 960,180 L 1050,240 L 1020,330" stroke-width="3" stroke="#38bdf8" />
+    <path d="M 980,410 L 1120,470 L 1100,560" stroke-width="3.5" stroke="#38bdf8" />
+    <path d="M 890,260 L 780,310 L 810,400" stroke-width="2.5" stroke="#38bdf8" />
+  </g>
+  <circle cx="950" cy="680" r="120" fill="#e0f2fe" opacity="0.25" filter="url(#lightningGlow)" />
+
+  <!-- Thuy Tinh Shadow Figure Riding Tsunami Wave Crest -->
+  <g transform="translate(950, 480)" filter="url(#lightningGlow)" opacity="0.85">
+    <!-- Horned Serpent / Water Lord Shadow -->
+    <path d="M -40,30 C -60,-40 -30,-80 0,-90 C 30,-80 60,-40 40,30 Z" fill="#021422" stroke="#38bdf8" stroke-width="2" />
+    <!-- Glowing Red Fury Eyes -->
+    <circle cx="-12" cy="-55" r="4" fill="#ef4444" />
+    <circle cx="12" cy="-55" r="4" fill="#ef4444" />
+    <!-- Trident of Ocean Power -->
+    <line x1="60" y1="-120" x2="40" y2="100" stroke="#38bdf8" stroke-width="4" />
+    <polygon points="60,-140 45,-110 75,-110" fill="#38bdf8" />
+    <polygon points="40,-125 30,-105 50,-105" fill="#38bdf8" />
+    <polygon points="80,-125 70,-105 90,-105" fill="#38bdf8" />
+  </g>
+
+  <!-- Monstrous Swelling Tsunami Tidal Waves (Sóng Thần Cuồn Cuộn) -->
+  <path d="M 0,620 C 350,480 650,680 950,530 C 1250,380 1550,620 1920,490 L 1920,1080 L 0,1080 Z" fill="#073a5a" opacity="0.8" />
+  <path d="M 0,720 C 400,600 750,780 1100,640 C 1450,500 1700,720 1920,620 L 1920,1080 L 0,1080 Z" fill="url(#floodWater)" />
+
+  <!-- Submerged Ancient Stilt Houses & Thatched Roofs (Nhà Cửa Ngập Trong Nước Lũ) -->
+  <g fill="#03121c" stroke="#0c4a6e" stroke-width="2">
+    <!-- Left Stilt House Sinking -->
+    <polygon points="280,720 220,770 340,770" fill="#1c0f05" />
+    <rect x="235" y="770" width="70" height="40" fill="#140b04" />
+    
+    <!-- Right Sinking Roof -->
+    <polygon points="1520,700 1450,750 1590,750" fill="#1c0f05" />
+    <rect x="1470" y="750" width="80" height="30" fill="#140b04" />
+  </g>
+
+  <!-- White Sea Foam & Water Splashes -->
+  <path d="M 0,730 Q 150,700 300,740 Q 500,680 700,730 Q 950,660 1200,720 Q 1500,650 1750,710 Q 1880,680 1920,720" stroke="#f0f9ff" stroke-width="8" stroke-dasharray="25 15" fill="none" opacity="0.85" filter="url(#lightningGlow)" />
+  <path d="M 0,820 Q 250,770 500,830 Q 800,760 1100,820 Q 1400,750 1700,810 Q 1850,780 1920,810" stroke="#e0f2fe" stroke-width="6" stroke-dasharray="20 10" fill="none" opacity="0.7" />
+
+  <!-- Heavy Diagonal Rain Streaks -->
+  <g stroke="#38bdf8" stroke-width="1.5" opacity="0.65">
+    <line x1="200" y1="0" x2="100" y2="400" />
+    <line x1="500" y1="50" x2="400" y2="450" />
+    <line x1="800" y1="0" x2="700" y2="500" />
+    <line x1="1200" y1="20" x2="1100" y2="480" />
+    <line x1="1550" y1="10" x2="1450" y2="460" />
+    <line x1="1850" y1="0" x2="1750" y2="420" />
+  </g>
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000" stroke-width="35" opacity="0.65" />
+</svg>

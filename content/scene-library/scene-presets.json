@@ -1,42 +1,887 @@
 [
   {
+    "id": "preset-sontinh-peak-video",
+    "label": "Sơn Tinh Đỉnh Ba Vì (Video Điện Ảnh)",
+    "background_id": "bg-sontinh-peak-video",
+    "palette_id": "pal-eternal-legend",
+    "mood_tags": [
+      "sơn tinh",
+      "đỉnh ba vì",
+      "video điện ảnh",
+      "siêu thực",
+      "biển mây",
+      "người thật"
+    ],
+    "effects": []
+  },
+  {
+    "id": "preset-son-thuy-rivalry-cinema",
+    "label": "Thủy Tinh Đại Dương (Điện Ảnh)",
+    "background_id": "bg-son-thuy-rivalry-cinema",
+    "palette_id": "pal-elemental-clash",
+    "mood_tags": [
+      "thủy tinh",
+      "biển sâu",
+      "điện ảnh",
+      "người thật",
+      "đinh ba",
+      "sóng thần"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-son-thuy-rivalry-cinema",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-phong-chau-court-cinema",
+    "label": "Cung Điện Phong Châu (Điện Ảnh)",
+    "background_id": "bg-phong-chau-palace-cinema",
+    "palette_id": "pal-royal-lac-hong",
+    "mood_tags": [
+      "hoàng gia",
+      "cung điện",
+      "điện ảnh",
+      "vua hùng",
+      "mỵ nương"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-phong-chau-court-cinema",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-wedding-procession-cinema",
+    "label": "Lễ Rước Dâu Non Cao (Điện Ảnh)",
+    "background_id": "bg-wedding-procession-cinema",
+    "palette_id": "pal-festive-wedding",
+    "mood_tags": [
+      "rước dâu",
+      "voi chín ngà",
+      "ngựa chín hồng mao",
+      "điện ảnh"
+    ],
+    "effects": []
+  },
+  {
+    "id": "preset-deluge-tempest-cinema",
+    "label": "Thủy Thần Dâng Bão (Điện Ảnh)",
+    "background_id": "bg-deluge-tempest-cinema",
+    "palette_id": "pal-storm-fury",
+    "mood_tags": [
+      "mưa bão",
+      "sóng thần",
+      "điện ảnh",
+      "sét đánh"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-deluge-tempest-cinema",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/gentle_rain_falling.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-deluge-tempest-cinema",
+        "type": "particle_rain",
+        "category": "visual",
+        "intensity": 0.5,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-epic-battle-clash-cinema",
+    "label": "Đại Chiến Sơn Tinh Thủy Tinh (Điện Ảnh)",
+    "background_id": "bg-epic-battle-clash-cinema",
+    "palette_id": "pal-epic-clash",
+    "mood_tags": [
+      "đại chiến",
+      "sấm chớp",
+      "bốc đồi dời núi",
+      "rồng nước",
+      "điện ảnh"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-epic-battle-clash-cinema",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/thunder-rumble.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-phong-chau-court-real",
+    "label": "Cung Điện Phong Châu (Siêu Thực)",
+    "background_id": "bg-phong-chau-palace-real",
+    "palette_id": "pal-royal-lac-hong",
+    "mood_tags": [
+      "hoàng gia",
+      "cổ đại",
+      "siêu thực",
+      "đông sơn",
+      "mỵ nương"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-phong-chau-court-real",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-son-thuy-rivalry-real",
+    "label": "Non Cao & Biển Thẳm (Siêu Thực)",
+    "background_id": "bg-son-thuy-rivalry-real",
+    "palette_id": "pal-elemental-clash",
+    "mood_tags": [
+      "kỳ tài",
+      "đối lập",
+      "siêu thực",
+      "sơn tinh",
+      "thủy tinh"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-son-thuy-rivalry-real",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-wedding-procession-real",
+    "label": "Lễ Rước Dâu Non Cao (Siêu Thực)",
+    "background_id": "bg-wedding-procession-real",
+    "palette_id": "pal-festive-wedding",
+    "mood_tags": [
+      "rước dâu",
+      "lễ vật",
+      "siêu thực",
+      "voi chín ngà",
+      "ngựa chín hồng mao"
+    ],
+    "effects": []
+  },
+  {
+    "id": "preset-deluge-tempest-real",
+    "label": "Thủy Thần Dâng Bão (Siêu Thực)",
+    "background_id": "bg-deluge-tempest-real",
+    "palette_id": "pal-storm-fury",
+    "mood_tags": [
+      "mưa bão",
+      "sóng thần",
+      "siêu thực",
+      "cuồng nộ",
+      "sét đánh"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-deluge-tempest-real",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/gentle_rain_falling.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-deluge-tempest-real",
+        "type": "particle_rain",
+        "category": "visual",
+        "intensity": 0.5,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-epic-battle-clash-real",
+    "label": "Đại Chiến Long Trời Lở Đất (Siêu Thực)",
+    "background_id": "bg-epic-battle-clash-real",
+    "palette_id": "pal-epic-clash",
+    "mood_tags": [
+      "đại chiến",
+      "sấm chớp",
+      "siêu thực",
+      "bốc đồi dời núi"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-epic-battle-clash-real",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/thunder-rumble.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-legend-epilogue-real",
+    "label": "Huyền Thoại Ngàn Năm (Siêu Thực)",
+    "background_id": "bg-legend-epilogue-real",
+    "palette_id": "pal-eternal-legend",
+    "mood_tags": [
+      "sử thi",
+      "bình yên",
+      "siêu thực",
+      "núi ba vì"
+    ],
+    "effects": []
+  },
+  {
+    "id": "preset-starfruit-cottage-real",
+    "label": "Túp Lều Tranh & Vườn Khế (Siêu Thực)",
+    "background_id": "bg-starfruit-cottage-real",
+    "palette_id": "pal-starfruit-garden",
+    "mood_tags": [
+      "làng quê",
+      "cây khế",
+      "siêu thực",
+      "thanh bình",
+      "mộc mạc"
+    ],
+    "effects": []
+  },
+  {
+    "id": "preset-giant-bird-tree-real",
+    "label": "Chim Thần Trên Cây Khế (Siêu Thực)",
+    "background_id": "bg-giant-bird-tree-real",
+    "palette_id": "pal-mystic-phoenix",
+    "mood_tags": [
+      "chim thần",
+      "kỳ diệu",
+      "siêu thực",
+      "ăn khế trả vàng"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-giant-bird-tree-real",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-giant-bird-tree-real",
+        "type": "particle_gold",
+        "category": "visual",
+        "intensity": 0.4,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-treasure-island-cave-real",
+    "label": "Đảo Đá Ngũ Sắc & Hang Vàng (Siêu Thực)",
+    "background_id": "bg-treasure-island-cave-real",
+    "palette_id": "pal-golden-cave",
+    "mood_tags": [
+      "đảo vàng",
+      "kho báu",
+      "siêu thực",
+      "ngũ sắc",
+      "châu báu"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-treasure-island-cave-real",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-treasure-island-cave-real",
+        "type": "particle_gold",
+        "category": "visual",
+        "intensity": 0.4,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-greedy-brother-scheme-real",
+    "label": "Người Anh & Chiếc Túi Chín Gang (Siêu Thực)",
+    "background_id": "bg-greedy-brother-scheme-real",
+    "palette_id": "pal-greedy-amber",
+    "mood_tags": [
+      "toan tính",
+      "lòng tham",
+      "siêu thực",
+      "túi chín gang"
+    ],
+    "effects": []
+  },
+  {
+    "id": "preset-gluttony-cave-haul-real",
+    "label": "Mê Mẩn Hang Vàng Nặng Trĩu (Siêu Thực)",
+    "background_id": "bg-gluttony-cave-haul-real",
+    "palette_id": "pal-lust-gold",
+    "mood_tags": [
+      "hang vàng",
+      "nhồi nhét",
+      "siêu thực",
+      "nặng trĩu"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-gluttony-cave-haul-real",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-gluttony-cave-haul-real",
+        "type": "particle_gold",
+        "category": "visual",
+        "intensity": 0.4,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-ocean-storm-abyss-real",
+    "label": "Quả Báo Chìm Đáy Đại Dương (Siêu Thực)",
+    "background_id": "bg-ocean-storm-abyss-real",
+    "palette_id": "pal-storm-doom",
+    "mood_tags": [
+      "bão biển",
+      "sóng thần",
+      "siêu thực",
+      "rơi xuống biển"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-ocean-storm-abyss-real",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/gentle_rain_falling.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-ocean-storm-abyss-real",
+        "type": "particle_rain",
+        "category": "visual",
+        "intensity": 0.5,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-starfruit-cottage",
+    "label": "Túp Lều Tranh & Vườn Khế",
+    "background_id": "bg-starfruit-cottage",
+    "palette_id": "pal-starfruit-garden",
+    "mood_tags": [
+      "làng quê",
+      "cây khế",
+      "thanh bình",
+      "mộc mạc"
+    ],
+    "effects": []
+  },
+  {
+    "id": "preset-giant-bird-tree",
+    "label": "Chim Thần Trên Cây Khế",
+    "background_id": "bg-giant-bird-tree",
+    "palette_id": "pal-mystic-phoenix",
+    "mood_tags": [
+      "chim thần",
+      "kỳ diệu",
+      "ăn khế trả vàng",
+      "lời hứa"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-giant-bird-tree",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-giant-bird-tree",
+        "type": "particle_gold",
+        "category": "visual",
+        "intensity": 0.4,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-treasure-island-cave",
+    "label": "Đảo Đá Ngũ Sắc & Hang Vàng",
+    "background_id": "bg-treasure-island-cave",
+    "palette_id": "pal-golden-cave",
+    "mood_tags": [
+      "đảo vàng",
+      "kho báu",
+      "ngũ sắc",
+      "châu báu"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-treasure-island-cave",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-treasure-island-cave",
+        "type": "particle_gold",
+        "category": "visual",
+        "intensity": 0.4,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-greedy-brother-scheme",
+    "label": "Người Anh & Chiếc Túi Chín Gang",
+    "background_id": "bg-greedy-brother-scheme",
+    "palette_id": "pal-greedy-amber",
+    "mood_tags": [
+      "toan tính",
+      "lòng tham",
+      "túi chín gang",
+      "chờ chim"
+    ],
+    "effects": []
+  },
+  {
+    "id": "preset-gluttony-cave-haul",
+    "label": "Mê Mẩn Hang Vàng Nặng Trĩu",
+    "background_id": "bg-gluttony-cave-haul",
+    "palette_id": "pal-lust-gold",
+    "mood_tags": [
+      "hang vàng",
+      "nhồi nhét",
+      "nặng trĩu",
+      "hoa mắt"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-gluttony-cave-haul",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-gluttony-cave-haul",
+        "type": "particle_gold",
+        "category": "visual",
+        "intensity": 0.4,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-ocean-storm-abyss",
+    "label": "Quả Báo Chìm Đáy Đại Dương",
+    "background_id": "bg-ocean-storm-abyss",
+    "palette_id": "pal-storm-doom",
+    "mood_tags": [
+      "bão biển",
+      "sóng thần",
+      "rơi xuống biển",
+      "chìm sâu",
+      "quả báo"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-ocean-storm-abyss",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/gentle_rain_falling.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-ocean-storm-abyss",
+        "type": "particle_rain",
+        "category": "visual",
+        "intensity": 0.5,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-phong-chau-court",
+    "label": "Cung Điện Phong Châu",
+    "background_id": "bg-phong-chau-palace",
+    "palette_id": "pal-royal-lac-hong",
+    "mood_tags": [
+      "hoàng gia",
+      "đông sơn",
+      "trang nghiêm",
+      "cổ đại"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-phong-chau-court",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-son-thuy-rivalry",
+    "label": "Non Cao & Biển Thẳm",
+    "background_id": "bg-son-thuy-rivalry",
+    "palette_id": "pal-elemental-clash",
+    "mood_tags": [
+      "kỳ tài",
+      "đối lập",
+      "huyền bí",
+      "thần thông"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-son-thuy-rivalry",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-wedding-procession",
+    "label": "Lễ Rước Dâu Non Cao",
+    "background_id": "bg-wedding-procession",
+    "palette_id": "pal-festive-wedding",
+    "mood_tags": [
+      "rước dâu",
+      "lễ vật",
+      "hoan hỉ",
+      "đỏ son"
+    ],
+    "effects": []
+  },
+  {
+    "id": "preset-deluge-tempest",
+    "label": "Thủy Thần Dâng Bão",
+    "background_id": "bg-deluge-tempest",
+    "palette_id": "pal-storm-fury",
+    "mood_tags": [
+      "mưa bão",
+      "sóng thần",
+      "cuồng nộ",
+      "hồng thủy"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-deluge-tempest",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/gentle_rain_falling.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-deluge-tempest",
+        "type": "particle_rain",
+        "category": "visual",
+        "intensity": 0.5,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-epic-battle-clash",
+    "label": "Đại Chiến Long Trời Lở Đất",
+    "background_id": "bg-epic-battle-clash",
+    "palette_id": "pal-epic-clash",
+    "mood_tags": [
+      "đại chiến",
+      "sấm chớp",
+      "bốc đồi dời núi",
+      "long trời lở đất"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-epic-battle-clash",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/thunder-rumble.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-legend-epilogue",
+    "label": "Huyền Thoại Ngàn Năm",
+    "background_id": "bg-legend-epilogue",
+    "palette_id": "pal-eternal-legend",
+    "mood_tags": [
+      "sử thi",
+      "bình yên",
+      "trường tồn",
+      "núi ba vì"
+    ],
+    "effects": []
+  },
+  {
+    "id": "preset-dusk-abyss",
+    "label": "Hoàng Hôn U Ám",
+    "background_id": "bg-dusk-abyss",
+    "palette_id": "pal-midnight-horror",
+    "mood_tags": [
+      "hoàng hôn",
+      "u ám",
+      "điềm báo"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-dusk-abyss",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
     "id": "preset-storm-deep-sea",
     "label": "Bão Đêm Ngoài Khơi",
     "background_id": "bg-storm-ocean",
     "palette_id": "pal-ocean-abyss",
-    "layout_id": "layout-center-standard",
-    "ambient_audio_src": "/audio/gentle_rain_falling.mp3",
-    "ambient_volume": 0.6,
-    "mood_tags": ["mưa bão", "u ám", "căng thẳng"]
+    "mood_tags": [
+      "mưa bão",
+      "u ám",
+      "căng thẳng"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-storm-deep-sea",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/gentle_rain_falling.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-storm-deep-sea",
+        "type": "particle_rain",
+        "category": "visual",
+        "intensity": 0.5,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-mist-cavern",
+    "label": "Màn Sương Lạnh Buốt",
+    "background_id": "bg-mist-cavern",
+    "palette_id": "pal-misty-shadow",
+    "mood_tags": [
+      "khói sương",
+      "lạnh buốt",
+      "u ám"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-mist-cavern",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
   },
   {
     "id": "preset-underground-mystery",
-    "label": "Tiếng Thì Thầm Dưới Hầm",
+    "label": "Lân Tinh Dưới Hầm",
     "background_id": "bg-fireflies-dark",
     "palette_id": "pal-phosphor-green",
-    "layout_id": "layout-side-panel",
-    "ambient_audio_src": "/audio/horror_atmosphe.mp3",
-    "ambient_volume": 0.5,
-    "mood_tags": ["huyền bí", "rùng rợn"]
+    "mood_tags": [
+      "huyền bí",
+      "rùng rợn",
+      "lân tinh"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-underground-mystery",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      },
+      {
+        "id": "fx-particle-preset-underground-mystery",
+        "type": "particle_fireflies",
+        "category": "visual",
+        "intensity": 0.6,
+        "duration_ms": 0,
+        "loop": true
+      }
+    ]
   },
   {
     "id": "preset-ancient-journal",
-    "label": "Hải Trình Quá Khứ",
+    "label": "Hải Trình Năm 1974",
     "background_id": "bg-vintage-parchment",
     "palette_id": "pal-ancient-parchment",
-    "layout_id": "layout-center-standard",
-    "ambient_audio_src": "",
-    "ambient_volume": 0,
-    "mood_tags": ["cổ kính", "hoài niệm"]
+    "mood_tags": [
+      "cổ kính",
+      "hoài niệm",
+      "ký ức"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-ancient-journal",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-leviathan-surge",
+    "label": "Sóng Thần Cuồng Nộ",
+    "background_id": "bg-leviathan-surge",
+    "palette_id": "pal-crimson-crisis",
+    "mood_tags": [
+      "sóng thần",
+      "nguy hiểm",
+      "cao trào"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-leviathan-surge",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/gentle_rain_falling.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-abyss-colossus",
+    "label": "Quái Thú Vực Sâu",
+    "background_id": "bg-abyss-colossus",
+    "palette_id": "pal-ocean-abyss",
+    "mood_tags": [
+      "quái thú",
+      "vực sâu",
+      "kinh hoàng"
+    ],
+    "effects": [
+      {
+        "id": "fx-audio-preset-abyss-colossus",
+        "type": "audio",
+        "category": "audio",
+        "intensity": 1,
+        "duration_ms": 0,
+        "audio_src": "/audio/thunder-rumble.mp3",
+        "loop": true
+      }
+    ]
+  },
+  {
+    "id": "preset-fresnel-beam",
+    "label": "Ánh Sáng Cứu Rỗi",
+    "background_id": "bg-fresnel-beam",
+    "palette_id": "pal-golden-radiance",
+    "mood_tags": [
+      "sử thi",
+      "ánh sáng",
+      "chiến thắng"
+    ],
+    "effects": []
   },
   {
     "id": "preset-dawn-peace",
     "label": "Bình Minh Tươi Sáng",
     "background_id": "bg-dawn-hope",
     "palette_id": "pal-dawn-victory",
-    "layout_id": "layout-center-standard",
-    "ambient_audio_src": "",
-    "ambient_volume": 0,
-    "mood_tags": ["bình yên", "hy vọng"]
+    "mood_tags": [
+      "bình yên",
+      "hy vọng",
+      "khải hoàn"
+    ],
+    "effects": []
   }
 ]

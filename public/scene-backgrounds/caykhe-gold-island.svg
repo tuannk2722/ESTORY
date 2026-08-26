@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Ocean & Sky Base Gradient -->
+    <linearGradient id="islandSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="40%" stop-color="#0ea5e9" />
+      <stop offset="70%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#bae6fd" />
+    </linearGradient>
+
+    <!-- Deep Crystal Ocean Water -->
+    <linearGradient id="crystalSea" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0369a1" />
+      <stop offset="50%" stop-color="#075985" />
+      <stop offset="100%" stop-color="#0c4a6e" />
+    </linearGradient>
+
+    <!-- Rainbow Jewel Cave Glow (Ánh Ngũ Sắc Rực Rỡ) -->
+    <radialGradient id="caveRainbowGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="25%" stop-color="#fde047" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.7" />
+      <stop offset="75%" stop-color="#ec4899" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Gold & Diamond Glow -->
+    <filter id="treasureGlow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1920" height="1080" fill="url(#islandSky)" />
+
+  <!-- Crystal Ocean Surface With Gentle Waves -->
+  <path d="M 0,620 Q 480,580 960,610 Q 1440,570 1920,620 L 1920,1080 L 0,1080 Z" fill="url(#crystalSea)" />
+  <path d="M 0,670 Q 350,640 700,660 Q 1200,630 1920,680 L 1920,1080 L 0,1080 Z" fill="#024e75" opacity="0.6" />
+
+  <!-- Solitary Five-Color Jewel Stone Island (Hòn Đảo Đá Ngũ Sắc) -->
+  <g transform="translate(960, 680)">
+    <!-- Island Rock Masses -->
+    <polygon points="-850,220 -700,-80 -450,-160 -150,-280 200,-320 550,-180 800,-60 900,220" fill="#1e293b" stroke="#334155" stroke-width="4" />
+    
+    <!-- Multi-Color Crystal Stone Formations (Đá đỏ, đá xanh, đá trắng, đá ngũ sắc) -->
+    <!-- Emerald Green Crystal Peaks -->
+    <polygon points="-650,-60 -580,-240 -500,-120" fill="#10b981" stroke="#34d399" stroke-width="3" filter="url(#treasureGlow)" />
+    <!-- Ruby Red Crystal Spires -->
+    <polygon points="-420,-140 -350,-320 -280,-180" fill="#ef4444" stroke="#f87171" stroke-width="3" filter="url(#treasureGlow)" />
+    <!-- Amethyst Purple Spires -->
+    <polygon points="380,-140 450,-340 520,-160" fill="#a855f7" stroke="#c084fc" stroke-width="3" filter="url(#treasureGlow)" />
+    <!-- Sapphire Blue Spires -->
+    <polygon points="600,-40 680,-220 740,-80" fill="#0ea5e9" stroke="#38bdf8" stroke-width="3" filter="url(#treasureGlow)" />
+
+    <!-- Massive Glowing Cave Entrance (Cửa Hang Kho Báu Thần Tiên) -->
+    <path d="M -220,160 C -240,-120 -150,-240 0,-260 C 150,-240 240,-120 220,160 Z" fill="#020617" stroke="#eab308" stroke-width="6" />
+    
+    <!-- Radiant Cave Core Light -->
+    <circle cx="0" cy="-60" r="220" fill="url(#caveRainbowGlow)" filter="url(#treasureGlow)" />
+
+    <!-- Heaps of Gold & Diamonds at Cave Entrance (Vàng bạc & Kim cương ngập lối) -->
+    <g filter="url(#treasureGlow)">
+      <!-- Gold Ingots & Coins -->
+      <ellipse cx="-80" cy="80" rx="90" ry="40" fill="#fde047" stroke="#eab308" stroke-width="3" />
+      <ellipse cx="60" cy="90" rx="110" ry="45" fill="#facc15" stroke="#ca8a04" stroke-width="3" />
+      <ellipse cx="0" cy="110" rx="140" ry="50" fill="#eab308" stroke="#a16207" stroke-width="3" />
+      <!-- Glowing Diamond Crystals -->
+      <polygon points="-50,40 -35,10 -15,10 0,40 -25,70" fill="#e0f2fe" stroke="#38bdf8" stroke-width="2" />
+      <polygon points="40,30 55,5 75,5 90,30 65,60" fill="#e0f2fe" stroke="#38bdf8" stroke-width="2" />
+      <polygon points="-10,0 5,-25 25,-25 40,0 15,30" fill="#fdf4ff" stroke="#ec4899" stroke-width="2" />
+    </g>
+  </g>
+
+  <!-- Giant Bird & Honest Brother Standing by Cave (Chim Thần & Người Em Lấy Vừa Đủ Túi 3 Gang) -->
+  <g transform="translate(560, 680)">
+    <!-- Giant Bird Resting -->
+    <ellipse cx="0" cy="0" rx="140" ry="80" fill="#3b82f6" stroke="#fde047" stroke-width="3" filter="url(#treasureGlow)" />
+    <circle cx="-110" cy="-60" r="35" fill="#06b6d4" stroke="#fde047" stroke-width="2" />
+    <polygon points="-140,-60 -190,-45 -145,-35" fill="#f59e0b" />
+    
+    <!-- Brother with Small 3-Span Bag (Người Em Xách Túi Ba Gang) -->
+    <g transform="translate(180, -20)">
+      <circle cx="0" cy="-60" r="14" fill="#d97706" />
+      <path d="M -15,-45 L 15,-45 L 20,40 L -20,40 Z" fill="#78350f" />
+      <!-- Small Brown Fabric 3-Span Bag (Túi ba gang vuông vắn) -->
+      <rect x="25" y="10" width="30" height="35" rx="4" fill="#92400e" stroke="#fde047" stroke-width="2" />
+      <line x1="20" y1="-10" x2="35" y2="10" stroke="#d97706" stroke-width="2" />
+    </g>
+  </g>
+
+  <!-- Beams of Diamond Light Piercing from Cave -->
+  <g filter="url(#treasureGlow)" opacity="0.6">
+    <polygon points="960,620 600,0 720,0" fill="#fde047" />
+    <polygon points="960,620 900,0 1020,0" fill="#ffffff" />
+    <polygon points="960,620 1200,0 1320,0" fill="#38bdf8" />
+  </g>
+
+  <!-- Sparkle Particles -->
+  <g fill="#ffffff" filter="url(#treasureGlow)">
+    <circle cx="850" cy="520" r="6" />
+    <circle cx="1080" cy="480" r="7" />
+    <circle cx="960" cy="380" r="8" />
+    <circle cx="720" cy="590" r="5" />
+    <circle cx="1250" cy="560" r="6" />
+  </g>
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="30" opacity="0.35" />
+</svg>

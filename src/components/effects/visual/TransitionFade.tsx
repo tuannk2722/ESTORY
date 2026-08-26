@@ -14,7 +14,7 @@ export default function TransitionFade({
   const [isPlaying, setIsPlaying] = useState(false);
 
   const durationSec = (config.duration_ms || 1400) / 1000;
-  const peakOpacity = Math.min(0.9, (config.intensity * intensityMultiplier) * 0.85);
+  const peakOpacity = Math.min(0.9, ((config.intensity ?? 0.75) * intensityMultiplier) * 0.85);
 
   useEffect(() => {
     if (isActive && !settings.reduced_motion) {

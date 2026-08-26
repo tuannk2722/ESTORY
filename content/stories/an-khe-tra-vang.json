@@ -1,0 +1,465 @@
+{
+  "id": "an-khe-tra-vang",
+  "title": "Cây Khế (Ăn Khế Trả Vàng)",
+  "author": "Truyện Cổ Tích Dân Gian Việt Nam",
+  "description": "Câu chuyện cổ tích giàu tính nhân văn về hai anh em, cây khế ngọt, chim thần kỳ diệu và bài học sâu sắc về lòng nhân hậu cùng sự trả giá cho thói tham lam vô đáy.",
+  "cover_image": "/covers/demo-cover.jpg",
+  "genre": [
+    "Cổ tích",
+    "Dân gian",
+    "Đạo lý",
+    "Kỳ ảo"
+  ],
+  "status": "published",
+  "view_count": 2048,
+  "chapters": [
+    {
+      "id": "ck-ch1",
+      "title": "Chương I: Người Anh Tham Lam & Túp Lều Cây Khế",
+      "order": 1,
+      "blocks": [
+        {
+          "id": "ck-ch1-b01",
+          "type": "heading",
+          "text": "Chương I: Người Anh Tham Lam & Túp Lều Cây Khế",
+          "mood_tag": "mở đầu / làng quê",
+          "effects": [
+            {
+              "id": "eff-ck-101",
+              "type": "transition_fade",
+              "category": "transition",
+              "intensity": 0.8,
+              "duration_ms": 1200,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch1-b02",
+          "type": "paragraph",
+          "text": "Một nhà kia có hai anh em, cha mẹ đều chết cả. Hai anh em chăm lo làm lụng, nên trong nhà cũng đủ ăn. Muốn cho vui cửa vui nhà, hai người cùng lấy vợ. Nhưng từ khi có vợ, người anh sinh ra lười biếng, bao nhiêu công việc khó nhọc, đều trút cả cho hai vợ chồng người em.",
+          "mood_tag": "tự sự",
+          "effects": [
+            {
+              "id": "eff-ck-102",
+              "type": "bg_color_shift",
+              "category": "visual",
+              "intensity": 0.6,
+              "duration_ms": 2000,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch1-b03",
+          "type": "paragraph",
+          "text": "Hai vợ chồng người em thức khuya dậy sớm, lại cố gắng cày cấy, làm cỏ, bỏ phân, lúa tốt hơn trước, nên đến mùa, được bội thu. Thấy thế, người anh sợ em kể công chiếm lấy phần hơn, vội bàn với vợ cho hai vợ chồng người em ra ở riêng.",
+          "mood_tag": "toan tính",
+          "effects": []
+        },
+        {
+          "id": "ck-ch1-b04",
+          "type": "paragraph",
+          "text": "Ra ở riêng với vợ, người em được người anh chia cho có một căn nhà tranh lụp xụp, trước nhà có một cây khế ngọt. Hai vợ chồng người em không phàn nàn một lời, hết vào rừng đốn củi đem ra chợ bán, lại đi gánh mướn, làm thuê.",
+          "mood_tag": "chăm chỉ / nhẫn nại",
+          "effects": [
+            {
+              "id": "eff-ck-104",
+              "type": "particle_leaves",
+              "category": "visual",
+              "intensity": 0.75,
+              "duration_ms": 4000,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch1-b05",
+          "type": "paragraph",
+          "text": "Còn người anh có bao nhiêu ruộng nương đều cho làm rẽ, để ngồi không hưởng sung sướng với vợ. Thấy em không ca thán, người anh cho em là ngu si, lại càng lên mặt, không lui tới nhà em và cũng không để ý gì đến em nữa.",
+          "mood_tag": "khinh khi",
+          "effects": []
+        },
+        {
+          "id": "ck-ch1-b06",
+          "type": "paragraph",
+          "text": "Những ngày sung sướng nhất của hai vợ chồng người em là những ngày khế chín. Quanh năm, hai vợ chồng đã chăm bón và bắt sâu, đuổi kiến cho cây khế, nên cây khế xanh mơn mởn, bóng rợp khắp mảnh vườn nhỏ bé, quả lúc lỉu cả ở những cành là sát mặt đất, trẻ lên ba cũng với tay được.",
+          "mood_tag": "bình yên / khế chín",
+          "effects": [
+            {
+              "id": "eff-ck-106a",
+              "type": "particle_leaves",
+              "category": "visual",
+              "intensity": 0.8,
+              "duration_ms": 4500,
+              "delay_ms": 0
+            },
+            {
+              "id": "eff-ck-106b",
+              "type": "bg_color_shift",
+              "category": "visual",
+              "intensity": 0.7,
+              "duration_ms": 2500,
+              "delay_ms": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ck-ch2",
+      "title": "Chương II: Chim Thần Kỳ Lạ & Lời Hứa Trả Vàng",
+      "order": 2,
+      "blocks": [
+        {
+          "id": "ck-ch2-b01",
+          "type": "heading",
+          "text": "Chương II: Chim Thần Kỳ Lạ & Lời Hứa Trả Vàng",
+          "mood_tag": "kỳ diệu",
+          "effects": [
+            {
+              "id": "eff-ck-201",
+              "type": "transition_fade",
+              "category": "transition",
+              "intensity": 0.8,
+              "duration_ms": 1200,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch2-b02",
+          "type": "paragraph",
+          "text": "Một buổi sáng, hai vợ chồng mang quang gánh và thúng bị ra gốc khế, định trèo lên hái quả đem ra chợ bán thì thấy trên ngọn cây rung động rất mạnh, như có người đang trèo. Hai vợ chồng nhìn lên thì thấy một con chim rất lớn đang ăn những quả khế chín vàng. Hai vợ chồng đứng dưới gốc cây xem chim ăn, đợi chim bay đi rồi mới trèo lên cây hái quả. Từ đấy, cứ mỗi buổi sáng tinh mơ, hai vợ chồng ra hái khế, thì đã lại thấy chim ở trên cây rồi. Thấy có người, chim vẫn cứ ăn, ung dung một lúc lâu, rồi mới vỗ cánh bay đi. Chim ăn ròng rã như thế ngót một tháng trời, cây khế vợi hẳn quả.",
+          "mood_tag": "chim thần xuất hiện",
+          "effects": [
+            {
+              "id": "eff-ck-202",
+              "type": "screen_shake",
+              "category": "motion",
+              "intensity": 0.6,
+              "duration_ms": 900,
+              "delay_ms": 100
+            }
+          ]
+        },
+        {
+          "id": "ck-ch2-b03",
+          "type": "dialogue",
+          "text": "Một hôm, đứng đợi cho chim ăn xong, người vợ nói nửa bỡn nửa thật với chim: \"Chim ơi, chim ăn như thế thì còn gì là khế của nhà tôi nữa! Cây khế nhà tôi cũng sắp hết quả rồi đấy, chim ạ!\".",
+          "mood_tag": "đối thoại",
+          "effects": []
+        },
+        {
+          "id": "ck-ch2-b04",
+          "type": "dialogue",
+          "text": "Chim bỗng nghển cổ, nheo mắt như cười, đáp lại: \"Ăn một quả, trả cục vàng! May túi ba gang, đem đi mà đựng\". Chim nhắc đi nhắc lại câu ấy ba lần, rồi mới vỗ cánh bay đi.",
+          "mood_tag": "thần chú / kỳ diệu",
+          "effects": [
+            {
+              "id": "eff-ck-204a",
+              "type": "text_grow",
+              "category": "visual",
+              "intensity": 0.85,
+              "duration_ms": 2200,
+              "delay_ms": 0
+            },
+            {
+              "id": "eff-ck-204b",
+              "type": "glow_shimmer",
+              "category": "visual",
+              "intensity": 0.8,
+              "duration_ms": 3000,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch2-b05",
+          "type": "paragraph",
+          "text": "Hai vợ chồng thấy chim biết nói đã lấy làm lạ, lại thấy chim bảo mình như thế, nhắc lại cho mình đến ba lần, nghe rõ mồn một, nên càng suy nghĩ, phân vân. Nhưng rồi hai vợ chồng cũng làm theo lời chim. Người vợ lấy vài vuông vải nâu may cho chồng một cái túi, ngang dọc đúng ba gang.",
+          "mood_tag": "túi ba gang",
+          "effects": []
+        },
+        {
+          "id": "ck-ch2-b06",
+          "type": "paragraph",
+          "text": "Sáng hôm sau, hai vợ chồng vừa ăn xong thì thấy một luồng gió mạnh cuốn cả cát bụi trước sân nhà, rồi trong chớp mắt một con chim cực kỳ lớn hạ xuống giữa sân, quay đầu vào nhà kêu lên mấy tiếng như chào hỏi. Người chồng xách cái túi ba gang ra sân, chim nằm rạp xuống, quay cổ ra hiệu cho anh ngồi lên lưng mình. Anh ngồi lên lưng chim, bám vào cổ chim thật chặt. Chim đứng dậy vươn cổ, vỗ cánh bay bổng lên trời xanh. Chim lúc bay cao, lẩn vào mây bạc; lúc bay thấp, là là trên rừng xanh, đồi núi trập trùng. Rồi chim bay ra biển cả mênh mông, sóng biếc cao ngất vật vào sườn những hòn đảo nhỏ, làm tung lên những bọt trắng xóa. Anh ngồi trên lưng chim thấy biển tuyệt mù, không biết đâu là bờ…",
+          "mood_tag": "cưỡi chim bay lượn",
+          "effects": [
+            {
+              "id": "eff-ck-206a",
+              "type": "wind_gust",
+              "category": "motion",
+              "intensity": 0.9,
+              "duration_ms": 1500,
+              "delay_ms": 0
+            },
+            {
+              "id": "eff-ck-206b",
+              "type": "audio",
+              "category": "audio",
+              "intensity": 0.7,
+              "duration_ms": 1500,
+              "delay_ms": 0,
+              "audio_src": "/audio/horror_atmosphe.mp3",
+              "loop": false
+            }
+          ]
+        },
+        {
+          "id": "ck-ch2-b07",
+          "type": "paragraph",
+          "text": "Thốt nhiên chim bay vào một hòn đảo toàn đá trắng, đá xanh, đá đỏ, đã ngũ sắc, phản chiếu ánh sáng rực rỡ, anh chưa từng thấy bao giờ. Chim bay một vòng thật rộng xung quanh đảo như muốn tìm một nơi hạ cánh, rồi bay những vòng hẹp hơn, là là trên các ngọn đá... Bay đến trước mặt cái hang rộng và sâu, chim từ từ hạ xuống. Chim ra hiệu bảo anh vào hang, muốn lấy gì thì lấy. Ở ngay cửa hang, anh đã thấy toàn những thứ đá trong như thủy tinh và hổ phách đủ các mầu; có thứ xanh như mắt mèo, có thứ đỏ ối như mặt trời, còn vàng bạc thì nhiều như sỏi đá. Thấy hang sâu và rộng, anh không dám vào sợ lạc. Anh nhặt một ít vàng và kim cương bỏ vào túi ba gang, rồi trèo lên lưng chim, ra hiệu cho chim bay về.",
+          "mood_tag": "đảo vàng châu báu",
+          "effects": [
+            {
+              "id": "eff-ck-207a",
+              "type": "particle_gold",
+              "category": "visual",
+              "intensity": 0.85,
+              "duration_ms": 4500,
+              "delay_ms": 0
+            },
+            {
+              "id": "eff-ck-207b",
+              "type": "glow_shimmer",
+              "category": "visual",
+              "intensity": 0.8,
+              "duration_ms": 3000,
+              "delay_ms": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ck-ch3",
+      "title": "Chương III: Lòng Tham Của Người Anh & Chiếc Túi Chín Gang",
+      "order": 3,
+      "blocks": [
+        {
+          "id": "ck-ch3-b01",
+          "type": "heading",
+          "text": "Chương III: Lòng Tham Của Người Anh & Chiếc Túi Chín Gang",
+          "mood_tag": "chuyển cảnh",
+          "effects": [
+            {
+              "id": "eff-ck-301",
+              "type": "transition_fade",
+              "category": "transition",
+              "intensity": 0.8,
+              "duration_ms": 1200,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch3-b02",
+          "type": "paragraph",
+          "text": "Chim tỏ vẻ vui mừng, gật gật cái đầu, vươn cổ kêu vài tiếng, rồi vỗ cánh bay lên trời xanh, bay qua biển, qua rừng, qua núi. Mặt trời mới vừa đứng bóng, chim đã hạ cánh xuống cái vườn nhỏ có cây khế ngọt. Người vợ thấy chồng về bình yên, mừng rỡ vô cùng, chạy ra vuốt lông chim, tỏ ý cảm ơn, ra hiệu mời chim bay lên cây khế giải khát. Chim bay lên cây khế ăn một lúc, rồi kêu ba tiếng như chào vợ chồng người nông dân, rồi bay đi. Từ đấy, lâu lâu chim mới lại đến ăn khế.",
+          "mood_tag": "hạnh phúc bình yên",
+          "effects": [
+            {
+              "id": "eff-ck-302",
+              "type": "bg_color_shift",
+              "category": "visual",
+              "intensity": 0.65,
+              "duration_ms": 2000,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch3-b03",
+          "type": "paragraph",
+          "text": "Tiếng đồn hai vợ chồng người em thốt nhiên giàu có bay đến tai hai vợ chồng người anh. Hai vợ chồng người anh vội vã đến chơi nhà em để dò xét. Nghe em thật thà kể chuyện, người anh gạ đổi hết tài sản của mình để lấy túp lều tranh và cây khế. Hai vợ chồng chỉ lo người em không chịu đổi, không ngờ người em vui vẻ ưng thuận ngay.",
+          "mood_tag": "đổi gia sản",
+          "effects": []
+        },
+        {
+          "id": "ck-ch3-b04",
+          "type": "paragraph",
+          "text": "Hai vợ chồng người anh mừng rỡ như mở cờ trong bụng, lập tức giao hết tài sản của mình cho em, và sáng hôm sau dọn ngay đến ở túp lều tranh trên mảnh vườn nhỏ có cây khế ngọt. Đến ở mảnh vườn chật hẹp, hai vợ chồng người anh không làm việc gì cả. Còn được ít tiền hai vợ chồng đem tiêu dần, cả ngày chỉ nằm khểnh ngoài hè, hí hửng nhìn lên cây khế, chờ chim bay đến.",
+          "mood_tag": "ngồi chờ chim",
+          "effects": []
+        },
+        {
+          "id": "ck-ch3-b05",
+          "type": "dialogue",
+          "text": "Một buổi sáng, có một luồng gió mạnh tạt vào nhà, rồi hai vợ chồng thấy ngọn cây khế rung chuyển. Hai người hớt hải chạy ra sân, vội nhìn lên cây thì quả nhiên thấy một con chim lớn đang ăn khế. Chim mới ăn vài quả, hai vợ chồng đã tru tréo lên: \"Cả nhà chúng tôi trông vào có cây khế, bây giờ chim ăn tào ăn huyệt như thế thì chúng tôi còn trông cậy vào đâu!\". Chim liền đáp: \"Ăn một quả, trả cục vàng. May túi ba gang, đem đi mà đựng\"; rồi chim bay vụt đi.",
+          "mood_tag": "tru tréo / toan tính",
+          "effects": [
+            {
+              "id": "eff-ck-305a",
+              "type": "text_shake",
+              "category": "visual",
+              "intensity": 0.75,
+              "duration_ms": 1200,
+              "delay_ms": 0
+            },
+            {
+              "id": "eff-ck-305b",
+              "type": "wind_gust",
+              "category": "motion",
+              "intensity": 0.8,
+              "duration_ms": 1200,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch3-b06",
+          "type": "paragraph",
+          "text": "Hai vợ chồng người anh mừng quá, cuống quýt vái theo chim, rồi bàn nhau may túi, cãi cọ om sòm. Mới đầu, hai người định may thật nhiều túi, sau lại sợ chim không đưa đi, nên rút cục cũng chỉ may một cái túi như người em, nhưng may to gấp ba, mỗi chiều chín gang, thành một cái tay nải lớn.",
+          "mood_tag": "túi chín gang",
+          "effects": [
+            {
+              "id": "eff-ck-306",
+              "type": "text_grow",
+              "category": "visual",
+              "intensity": 0.8,
+              "duration_ms": 2000,
+              "delay_ms": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ck-ch4",
+      "title": "Chương IV: Quả Báo Nơi Vực Biển Sâu Thẳm",
+      "order": 4,
+      "blocks": [
+        {
+          "id": "ck-ch4-b01",
+          "type": "heading",
+          "text": "Chương IV: Quả Báo Nơi Vực Biển Sâu Thẳm",
+          "mood_tag": "kịch tính / trừng phạt",
+          "effects": [
+            {
+              "id": "eff-ck-401",
+              "type": "transition_fade",
+              "category": "transition",
+              "intensity": 0.8,
+              "duration_ms": 1200,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch4-b02",
+          "type": "paragraph",
+          "text": "Sáng hôm sau, chim hạ cánh xuống sân trước túp lều tranh. Người anh đang ăn, thấy chim bay đến, bỏ cả ăn hấp tấp chạy ra, tay xách cái túi lớn trèo tót lên lưng chim, còn người vợ vái lấy vái để chim thần. Chim cất cánh bay bổng lên mây xanh, qua núi qua biển cả, rồi cũng hạ cánh xuống cái đảo khi trước.",
+          "mood_tag": "bay ra đảo",
+          "effects": [
+            {
+              "id": "eff-ck-402",
+              "type": "wind_gust",
+              "category": "motion",
+              "intensity": 0.85,
+              "duration_ms": 1400,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch4-b03",
+          "type": "paragraph",
+          "text": "Trên lưng chim bước xuống, người anh hoa cả mắt về những ánh ngũ sắc ở các loại kim cương và ngọc quý chiếu ra. Đến khi vào hang, người anh lại càng mê mẩn tâm thần, quên cả đói cả khát, cố nhặt vàng và kim cương cho thật đầy tay nải, lại buộc đầu ống quần và tay áo cho thật chặt rồi nhồi nhét đầy cả hai tay áo và hai ống quần, đến nỗi nặng quá, chàng ta cố kéo lê từng bước mà vẫn chưa ra được khỏi hang.",
+          "mood_tag": "hoa mắt mê muội",
+          "effects": [
+            {
+              "id": "eff-ck-403a",
+              "type": "screen_blur",
+              "category": "visual",
+              "intensity": 0.85,
+              "duration_ms": 2000,
+              "delay_ms": 0
+            },
+            {
+              "id": "eff-ck-403b",
+              "type": "particle_gold",
+              "category": "visual",
+              "intensity": 0.9,
+              "duration_ms": 5000,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch4-b04",
+          "type": "paragraph",
+          "text": "Chim đợi lâu quá, chốc chốc lại kêu lên vài tiếng vang cả đảo, thúc giục anh chàng ra về. Mãi gần chiều, anh ta mới kéo được cái tay nải đầy vàng và kim cương đến chỗ chim đang đợi. Muốn cho khỏi rơi, anh ta đặt tay nải dưới cánh chim, rồi lấy dây thừng buộc chặt tay nải vào lưng chim và vào cổ mình. Chim vỗ cánh bay lên, nhưng vì nặng quá, mới bay lên khỏi mặt đất một ít lại sa xuống. Sau chim cố gắng đạp hai chân thật mạnh xuống đất, vươn cổ bay bổng lên. Anh chàng ngồi trên lưng chim khấp khởi mừng thầm, cho là chỉ trong giây phút mình sẽ về đến nhà, sẽ có nhà cao cửa rộng, vườn ruộng khắp nơi, tiêu pha hết đời thật hoang toàng cũng không hết của.",
+          "mood_tag": "nặng trĩu cất cánh",
+          "effects": [
+            {
+              "id": "eff-ck-404",
+              "type": "screen_shake",
+              "category": "motion",
+              "intensity": 0.7,
+              "duration_ms": 1000,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch4-b05",
+          "type": "paragraph",
+          "text": "Lúc ấy, chim đã bay trên biển cả. Trời trở gió, những con sóng xám xì cất cao lên bằng mấy nóc nhà. Chim bay ngược gió rất là nhọc mệt, cổ gập hẳn xuống, hai cánh mỗi lúc một yếu dần. Túi vàng lớn thốt nhiên bị gió hất mạnh vào cánh chim. Chim buông xuôi hai cánh, đâm bổ từ lưng trời xuống biển. Chỉ trong chớp mắt, người anh bị sóng cuốn đi, cái túi lớn và những ống quần, tay áo chứa đầy vàng và châu báu dìm anh ta rất mau xuống đáy biển.",
+          "mood_tag": "chìm đáy biển sâu",
+          "effects": [
+            {
+              "id": "eff-ck-405a",
+              "type": "screen_shake",
+              "category": "motion",
+              "intensity": 0.95,
+              "duration_ms": 1200,
+              "delay_ms": 100
+            },
+            {
+              "id": "eff-ck-405b",
+              "type": "lightning_flash",
+              "category": "visual",
+              "intensity": 0.85,
+              "duration_ms": 1200,
+              "delay_ms": 0
+            },
+            {
+              "id": "eff-ck-405c",
+              "type": "particle_rain",
+              "category": "visual",
+              "intensity": 0.85,
+              "duration_ms": 4000,
+              "delay_ms": 0
+            }
+          ]
+        },
+        {
+          "id": "ck-ch4-b06",
+          "type": "paragraph",
+          "text": "Còn chim chỉ bị ướt lông, ướt cánh một lúc, rồi chim lại vùng lên khỏi mặt nước, bay về núi, về rừng.",
+          "mood_tag": "kết thúc / bài học",
+          "effects": [
+            {
+              "id": "eff-ck-406a",
+              "type": "bg_color_shift",
+              "category": "visual",
+              "intensity": 0.7,
+              "duration_ms": 3000,
+              "delay_ms": 0
+            },
+            {
+              "id": "eff-ck-406b",
+              "type": "transition_fade",
+              "category": "transition",
+              "intensity": 0.8,
+              "duration_ms": 1500,
+              "delay_ms": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

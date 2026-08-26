@@ -32,7 +32,7 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
   const isLastChapter = currentChapterIndex === sortedChapters.length - 1;
 
   return (
-    <div className="reader-screen min-h-screen bg-[var(--color-background)] transition-colors duration-300">
+    <div className="reader-screen min-h-screen bg-[#05070F] text-[#F8FAFC] transition-colors duration-300">
       {/* Header thanh công cụ đọc */}
       <ReaderScreenHeader
         storyId={story.id}
@@ -41,15 +41,17 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
       />
 
       {/* Khung đọc chính */}
-      <div className="max-w-2xl mx-auto px-4 py-8 md:py-12">
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 py-8 md:py-12">
         <ReaderPane
           storyId={story.id}
           chapter={chapter}
           prevChapterId={prevChapter?.id}
           nextChapterId={nextChapter?.id}
           isLastChapter={isLastChapter}
+          isPreview="false"
         />
       </div>
     </div>
   );
 }
+

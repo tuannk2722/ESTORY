@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Festive Crimson Sunset Gradient -->
+    <radialGradient id="festiveSky" cx="50%" cy="40%" r="75%">
+      <stop offset="0%" stop-color="#7f1d1d" />
+      <stop offset="35%" stop-color="#450a0a" />
+      <stop offset="70%" stop-color="#1c0404" />
+      <stop offset="100%" stop-color="#080101" />
+    </radialGradient>
+
+    <!-- Golden Sun Aura Behind Mountain Peaks -->
+    <radialGradient id="goldSunset" cx="50%" cy="60%" r="40%">
+      <stop offset="0%" stop-color="#fde047" stop-opacity="0.6" />
+      <stop offset="50%" stop-color="#f97316" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="festiveGlow">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Sky Backdrop -->
+  <rect width="1920" height="1080" fill="url(#festiveSky)" />
+  <rect width="1920" height="1080" fill="url(#goldSunset)" />
+
+  <!-- Distant Golden Mountain Ridges of Ba Vi -->
+  <path d="M 0,650 L 300,480 L 650,560 L 960,380 L 1300,520 L 1650,450 L 1920,580 L 1920,1080 L 0,1080 Z" fill="#2d0a0a" stroke="#7f1d1d" stroke-width="2" />
+  <path d="M 0,760 Q 450,620 960,680 Q 1450,640 1920,740 L 1920,1080 L 0,1080 Z" fill="#180404" />
+
+  <!-- Procession Path (Con đường rước dâu lên núi) -->
+  <path d="M 0,940 Q 500,860 1000,900 Q 1500,840 1920,920 L 1920,1080 L 0,1080 Z" fill="#0f0202" />
+
+  <!-- Nine-Tusked Elephant Silhouette (Voi Chín Ngà) -->
+  <g transform="translate(680, 680)" fill="#f59e0b" filter="url(#festiveGlow)" opacity="0.9">
+    <!-- Elephant Body -->
+    <path d="M -80,40 C -100,-20 -60,-80 20,-80 C 80,-80 110,-40 100,20 C 100,50 90,80 80,100 L 50,100 L 55,40 L -20,40 L -25,100 L -60,100 Z" fill="#b45309" />
+    <!-- Elephant Head & Trunk -->
+    <path d="M -80,-10 C -120,-30 -140,20 -150,70 C -140,75 -130,60 -130,40 C -120,-10 -90,10 -70,10 Z" fill="#b45309" />
+    <!-- 9 Radiant Golden Tusks (Chín ngà sáng rực) -->
+    <g stroke="#fef08a" stroke-width="3" fill="none">
+      <path d="M -110,15 C -130,5 -160,0 -180,10" />
+      <path d="M -105,20 C -125,12 -155,8 -175,20" />
+      <path d="M -100,25 C -120,18 -150,15 -170,30" />
+      <path d="M -95,30 C -115,25 -145,22 -165,40" />
+      <path d="M -90,35 C -110,32 -140,30 -160,50" />
+    </g>
+    <!-- Royal Howdah (Kiệu hoa rước công chúa trên lưng voi) -->
+    <rect x="-30" y="-120" width="80" height="50" rx="6" fill="#dc2626" stroke="#fde047" stroke-width="2" />
+    <polygon points="10,-140 -40,-120 60,-120" fill="#f59e0b" />
+  </g>
+
+  <!-- Nine-Maned Red Steed Silhouette (Ngựa Chín Hồng Mao) -->
+  <g transform="translate(1180, 720)" fill="#dc2626" filter="url(#festiveGlow)" opacity="0.9">
+    <!-- Horse Body & Head -->
+    <path d="M -50,20 C -70,-20 -40,-60 10,-60 C 50,-60 70,-30 60,30 L 40,80 L 25,80 L 35,30 L -10,30 L -20,80 L -40,80 Z" fill="#991b1b" />
+    <path d="M 40,-40 C 60,-70 80,-80 100,-60 C 90,-40 70,-20 50,-20 Z" fill="#991b1b" />
+    <!-- 9 Red Flaming Manes (Chín hồng mao rực đỏ) -->
+    <path d="M 60,-65 C 45,-90 35,-80 40,-60" stroke="#f87171" stroke-width="3" fill="none" />
+    <path d="M 50,-55 C 35,-80 25,-70 30,-50" stroke="#f87171" stroke-width="3" fill="none" />
+    <path d="M 40,-45 C 25,-70 15,-60 20,-40" stroke="#f87171" stroke-width="3" fill="none" />
+    <path d="M 30,-35 C 15,-60 5,-50 10,-30" stroke="#f87171" stroke-width="3" fill="none" />
+  </g>
+
+  <!-- Floating Festival Lanterns & Red Flower Petals -->
+  <g filter="url(#festiveGlow)">
+    <circle cx="350" cy="420" r="12" fill="#f59e0b" opacity="0.85" />
+    <circle cx="520" cy="310" r="8" fill="#ef4444" opacity="0.9" />
+    <circle cx="890" cy="240" r="14" fill="#fde047" opacity="0.8" />
+    <circle cx="1080" cy="290" r="10" fill="#f59e0b" opacity="0.9" />
+    <circle cx="1420" cy="380" r="12" fill="#ef4444" opacity="0.85" />
+    <circle cx="1650" cy="450" r="16" fill="#fde047" opacity="0.75" />
+  </g>
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000" stroke-width="30" opacity="0.55" />
+</svg>

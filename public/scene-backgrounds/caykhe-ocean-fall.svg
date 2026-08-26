@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Wild Storm Tempest Sky Gradient -->
+    <radialGradient id="stormAbyssSky" cx="50%" cy="30%" r="85%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="40%" stop-color="#0f172a" />
+      <stop offset="75%" stop-color="#030712" />
+      <stop offset="100%" stop-color="#000000" />
+    </radialGradient>
+
+    <!-- Raging Ocean Wave Gradient -->
+    <linearGradient id="abyssWaves" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0369a1" />
+      <stop offset="35%" stop-color="#082f49" />
+      <stop offset="75%" stop-color="#020617" />
+      <stop offset="100%" stop-color="#000000" />
+    </linearGradient>
+
+    <filter id="stormGlow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1920" height="1080" fill="url(#stormAbyssSky)" />
+
+  <!-- Thunderstorm Lightning Flash Clashing in Clouds -->
+  <g filter="url(#stormGlow)" stroke="#f0f9ff" stroke-width="4" fill="none">
+    <path d="M 680,0 L 740,160 L 670,240 L 790,380 L 720,490 L 780,620" stroke-width="5" />
+    <path d="M 740,160 L 840,210 L 820,300" stroke-width="2.5" stroke="#38bdf8" />
+    <path d="M 670,240 L 580,310 L 610,400" stroke-width="2.5" stroke="#38bdf8" />
+  </g>
+  <circle cx="740" cy="200" r="140" fill="#e0f2fe" opacity="0.2" filter="url(#stormGlow)" />
+
+  <!-- Raging Giant Mountain-High Ocean Waves (Sóng biển xám xịt cao bằng mấy nóc nhà) -->
+  <path d="M 0,620 C 350,440 680,680 1020,480 C 1350,320 1680,590 1920,420 L 1920,1080 L 0,1080 Z" fill="#0c4a6e" opacity="0.8" />
+  <path d="M 0,720 C 450,560 820,790 1200,600 C 1580,450 1780,680 1920,580 L 1920,1080 L 0,1080 Z" fill="url(#abyssWaves)" />
+
+  <!-- White Sea Foam & Water Splashes Crashing -->
+  <path d="M 0,730 Q 250,660 500,740 Q 800,640 1100,730 Q 1400,620 1700,720 Q 1850,680 1920,730" stroke="#f0f9ff" stroke-width="8" stroke-dasharray="25 15" fill="none" opacity="0.85" filter="url(#stormGlow)" />
+  <path d="M 0,840 Q 300,780 600,850 Q 950,760 1300,840 Q 1650,750 1920,830" stroke="#bae6fd" stroke-width="6" stroke-dasharray="20 10" fill="none" opacity="0.7" />
+
+  <!-- Giant Divine Bird Breaking Free & Soaring Up (Chim Thần Nghiêng Cánh Vùng Lên Bay Về Rừng) -->
+  <g transform="translate(1380, 260)" filter="url(#stormGlow)">
+    <!-- Wings Spread Flying High -->
+    <path d="M -120,40 C -240,-120 -380,-160 -480,-100 C -440,0 -300,80 -160,80 Z" fill="#3b82f6" stroke="#60a5fa" stroke-width="3" />
+    <path d="M 80,40 C 200,-100 340,-130 440,-80 C 400,10 280,80 140,80 Z" fill="#3b82f6" stroke="#60a5fa" stroke-width="3" />
+    
+    <!-- Bird Body -->
+    <ellipse cx="0" cy="30" rx="140" ry="70" fill="#0284c7" stroke="#38bdf8" stroke-width="3" />
+    <circle cx="-130" cy="-30" r="35" fill="#06b6d4" stroke="#fde047" stroke-width="2" />
+    <polygon points="-160,-30 -220,-20 -165,-10" fill="#f59e0b" />
+    
+    <!-- Long Graceful Feathers Flying Upwards -->
+    <path d="M 120,60 Q 260,120 320,240 Q 280,240 180,160 Z" fill="#f59e0b" stroke="#fde047" stroke-width="2" />
+  </g>
+
+  <!-- Greedy Brother & Giant Heavy Gold Sack Plunging into Ocean Abyss (Người Anh & Túi Vàng Chìm Đáy Biển Sâu) -->
+  <g transform="translate(680, 680)" filter="url(#stormGlow)">
+    <!-- Giant Heavy 9-Span Gold Sack Dragging Him Down (Túi vàng nặng kéo chìm) -->
+    <ellipse cx="40" cy="120" rx="110" ry="90" fill="#78350f" stroke="#fde047" stroke-width="4" />
+    <circle cx="40" cy="120" r="40" fill="#fde047" opacity="0.6" />
+    
+    <!-- Scattered Gold Coins Falling into Ocean Depths -->
+    <g fill="#fde047">
+      <circle cx="-20" cy="180" r="8" />
+      <circle cx="80" cy="220" r="7" />
+      <circle cx="20" cy="260" r="9" />
+      <circle cx="120" cy="280" r="6" />
+      <circle cx="-60" cy="240" r="8" />
+    </g>
+
+    <!-- Brother Sinking Upside Down Flailing (Người anh chới với giữa sóng dữ) -->
+    <g transform="translate(-20, 20) rotate(140)">
+      <circle cx="0" cy="-60" r="18" fill="#ea580c" stroke="#7c2d12" stroke-width="2" />
+      <path d="M -20,-40 L 20,-40 L 25,40 L -25,40 Z" fill="#9a3412" stroke="#431407" stroke-width="3" />
+      <!-- Flailing Arms -->
+      <line x1="-20" y1="-30" x2="-60" y2="-70" stroke="#ea580c" stroke-width="6" stroke-linecap="round" />
+      <line x1="20" y1="-30" x2="60" y2="-70" stroke="#ea580c" stroke-width="6" stroke-linecap="round" />
+    </g>
+
+    <!-- Water Splash Vortex Dragging Everything Down (Xoáy nước chìm sâu) -->
+    <ellipse cx="0" cy="240" rx="180" ry="40" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="16 8" />
+    <ellipse cx="0" cy="300" rx="120" ry="25" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-dasharray="12 6" />
+  </g>
+
+  <!-- Heavy Diagonal Rain Streaks -->
+  <g stroke="#38bdf8" stroke-width="1.5" opacity="0.65">
+    <line x1="200" y1="0" x2="100" y2="400" />
+    <line x1="600" y1="50" x2="500" y2="450" />
+    <line x1="1000" y1="0" x2="900" y2="500" />
+    <line x1="1400" y1="20" x2="1300" y2="480" />
+    <line x1="1750" y1="10" x2="1650" y2="460" />
+  </g>
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="35" opacity="0.65" />
+</svg>

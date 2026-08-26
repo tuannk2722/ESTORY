@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Left Mountain Sky (Ba Vi Dawn Light) -->
+    <linearGradient id="realMountainSky" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" />
+      <stop offset="40%" stop-color="#022c22" />
+      <stop offset="85%" stop-color="#01140e" />
+      <stop offset="100%" stop-color="#000000" />
+    </linearGradient>
+
+    <!-- Right Ocean Storm Sky (East Sea Deluge) -->
+    <linearGradient id="realOceanSky" x1="100%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#0369a1" />
+      <stop offset="40%" stop-color="#082f49" />
+      <stop offset="85%" stop-color="#021422" />
+      <stop offset="100%" stop-color="#000000" />
+    </linearGradient>
+
+    <!-- Divine Mountain Aura -->
+    <radialGradient id="sonTinhAura" cx="30%" cy="40%" r="45%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.45" />
+      <stop offset="60%" stop-color="#047857" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#064e3b" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Divine Ocean Whirlpool Aura -->
+    <radialGradient id="thuyTinhAura" cx="70%" cy="40%" r="45%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.45" />
+      <stop offset="60%" stop-color="#0284c7" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#0369a1" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="realElementalGlow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Left & Right Split Backdrops -->
+  <rect x="0" y="0" width="960" height="1080" fill="url(#realMountainSky)" />
+  <rect x="960" y="0" width="960" height="1080" fill="url(#realOceanSky)" />
+  <rect x="0" y="0" width="960" height="1080" fill="url(#sonTinhAura)" />
+  <rect x="960" y="0" width="960" height="1080" fill="url(#thuyTinhAura)" />
+
+  <!-- LEFT: Living Misty Ba Vi Mountain Ridges & Rolling Golden Rice Terraces -->
+  <g fill="#022c22" stroke="#059669" stroke-width="2">
+    <!-- Moving Mist Clouds Over Mountain -->
+    <path d="M 0,380 Q 250,300 600,360 Q 850,320 960,380 L 960,520 L 0,520 Z" fill="#065f46" opacity="0.45" style="animation: cloud-drift 8s ease-in-out infinite alternate;" />
+    <!-- Towering Ba Vi Mountain Peak (Đỉnh Tản Viên Sừng Sững) -->
+    <polygon points="0,1080 0,520 280,310 540,460 760,260 960,480 960,1080" fill="#011f18" stroke="#10b981" stroke-width="3" />
+    <!-- Golden Rice Terraces on Mountain Slope (Ruộng Lúa Vàng Bát Ngát) -->
+    <path d="M 50,720 Q 250,660 550,710 Q 750,680 960,740 L 960,1080 L 50,1080 Z" fill="#713f12" />
+    <path d="M 120,780 Q 300,740 600,770 Q 800,750 960,810" stroke="#fde047" stroke-width="8" fill="none" opacity="0.85" filter="url(#realElementalGlow)" />
+  </g>
+
+  <!-- Photorealistic Son Tinh (Chúa Non Cao Cơ Bắp Uy Dũng Chỉ Tay Mọc Núi) -->
+  <g transform="translate(480, 520)" style="animation: human-breathe 4s ease-in-out infinite;" filter="url(#realElementalGlow)">
+    <!-- Muscular Torso & Tan Skin (Cơ Bắp Vạm Vỡ) -->
+    <ellipse cx="0" cy="-60" rx="22" ry="26" fill="#d97706" />
+    <path d="M -45,-30 L -30,60 L 30,60 L 45,-30 Z" fill="#b45309" stroke="#78350f" stroke-width="2" />
+    <!-- Broad Shoulders & Muscular Arms -->
+    <ellipse cx="-45" cy="-20" rx="16" ry="14" fill="#d97706" />
+    <ellipse cx="45" cy="-20" rx="16" ry="14" fill="#d97706" />
+    <!-- Left Arm Pointing to Rising Mountain (Tay Trỏ Mọc Núi) -->
+    <line x1="-45" y1="-20" x2="-110" y2="-70" stroke="#d97706" stroke-width="12" stroke-linecap="round" />
+    <circle cx="-110" cy="-70" r="14" fill="#fde047" filter="url(#realElementalGlow)" />
+    <!-- Bronze Van Lang Warrior Belt & Loincloth (Thắt Lưng Đồng & Khố Lạc Việt) -->
+    <rect x="-35" y="45" width="70" height="15" fill="#fde047" stroke="#b45309" stroke-width="2" />
+    <polygon points="-25,60 25,60 15,130 -15,130" fill="#78350f" stroke="#ca8a04" stroke-width="2" />
+  </g>
+
+  <!-- RIGHT: Living Turbulent East Sea Waves & Water Serpents -->
+  <g fill="#082f49" stroke="#0ea5e9" stroke-width="2" style="animation: wave-surge 4s ease-in-out infinite alternate;">
+    <path d="M 960,480 C 1120,380 1350,560 1580,410 C 1750,290 1880,460 1920,380 L 1920,1080 L 960,1080 Z" fill="#021f35" />
+    <path d="M 960,650 C 1180,540 1420,720 1680,580 C 1820,500 1900,640 1920,590 L 1920,1080 L 960,1080 Z" fill="#034166" stroke="#38bdf8" stroke-width="3" />
+  </g>
+
+  <!-- Photorealistic Thuy Tinh (Chúa Vùng Nước Thẳm Oai Nghiêm Cưỡi Sóng Thần) -->
+  <g transform="translate(1440, 490)" style="animation: human-breathe 4.2s 0.6s ease-in-out infinite;" filter="url(#realElementalGlow)">
+    <!-- Cyan Sheen Skin & Ocean Robes -->
+    <ellipse cx="0" cy="-60" rx="22" ry="26" fill="#0284c7" />
+    <path d="M -40,-30 L -30,60 L 30,60 L 40,-30 Z" fill="#075985" stroke="#38bdf8" stroke-width="2" />
+    <!-- Raising Ocean Trident (Giương Đinh Ba Biển Sâu) -->
+    <line x1="35" y1="-20" x2="80" y2="-120" stroke="#38bdf8" stroke-width="6" />
+    <polygon points="80,-140 65,-110 95,-110" fill="#e0f2fe" />
+    <polygon points="60,-125 50,-105 70,-105" fill="#e0f2fe" />
+    <polygon points="100,-125 90,-105 110,-105" fill="#e0f2fe" />
+    <!-- Coiling Water Dragon Tendrils (Rồng Nước Uốn Lượn Quanh Thân) -->
+    <path d="M -90,60 Q -60,-40 -20,-80 Q 40,-60 80,20 Q 120,60 160,10" fill="none" stroke="#38bdf8" stroke-width="8" stroke-linecap="round" opacity="0.85" filter="url(#realElementalGlow)" />
+  </g>
+
+  <!-- Energy Collision Seam Down the Middle -->
+  <line x1="960" y1="0" x2="960" y2="1080" stroke="#fde047" stroke-width="3" opacity="0.5" stroke-dasharray="14 10" filter="url(#realElementalGlow)" />
+  <circle cx="960" cy="500" r="70" fill="#fde047" opacity="0.2" filter="url(#realElementalGlow)" />
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="35" opacity="0.5" />
+</svg>

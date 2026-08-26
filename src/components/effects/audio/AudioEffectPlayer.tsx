@@ -12,66 +12,133 @@ export default function AudioEffectPlayer({
 }: EffectComponentProps) {
   const { settings } = useReaderSettings();
   const soundRef = useRef<Howl | null>(null);
+  const stopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const durationTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const currentSrcRef = useRef<string | null>(null);
 
   useEffect(() => {
-    // Kiểm tra audio có được bật không
+    // Hủy các timer dập tắt âm thanh đang chờ từ lần render trước để tránh giết nhầm âm thanh mới
+    if (stopTimeoutRef.current) {
+      clearTimeout(stopTimeoutRef.current);
+      stopTimeoutRef.current = null;
+    }
+    if (durationTimerRef.current) {
+      clearTimeout(durationTimerRef.current);
+      durationTimerRef.current = null;
+    }
+
     const isAudioEnabled =
       settings.effects_enabled &&
       settings.effects_by_category?.audio !== false;
 
     if (!isActive || !config.audio_src || !isAudioEnabled) {
-      if (soundRef.current) {
-        soundRef.current.stop();
+      if (soundRef.current && soundRef.current.playing()) {
+        const sound = soundRef.current;
+        sound.fade(sound.volume(), 0, 350);
+        stopTimeoutRef.current = setTimeout(() => {
+          sound.stop();
+          stopTimeoutRef.current = null;
+        }, 350);
       }
       return;
     }
 
-    const volume = Math.max(0.1, Math.min(1.0, config.intensity * intensityMultiplier));
+    const targetVolume = Math.max(0.05, Math.min(1.0, (config.intensity ?? 0.8) * intensityMultiplier));
 
     try {
-      if (!soundRef.current) {
-        soundRef.current = new Howl({
+      // Nếu đổi file audio hoặc chưa có Howl instance
+      if (currentSrcRef.current !== config.audio_src || !soundRef.current) {
+        if (soundRef.current) {
+          soundRef.current.stop();
+          soundRef.current.unload();
+        }
+
+        currentSrcRef.current = config.audio_src;
+        const newSound = new Howl({
           src: [config.audio_src],
-          volume,
+          volume: targetVolume,
           loop: !!config.loop,
-          html5: false, // Dùng Web Audio API cho hiệu ứng SFX ngắn, chính xác và nhanh
-          format: ["mp3", "wav"],
+          html5: false, // Dùng Web Audio API cho hiệu ứng SFX độ trễ thấp
+          format: ["mp3", "wav", "ogg"],
           onloaderror: (_id, error) => {
-            // Không làm crash ứng dụng nếu audio chưa tải được
             console.info("Audio effect placeholder loaded:", config.audio_src, error);
           },
           onplayerror: (_id, error) => {
-            // Trình duyệt chặn autoplay khi user chưa tương tác
-            soundRef.current?.once("unlock", () => {
-              soundRef.current?.play();
+            newSound.once("unlock", () => {
+              newSound.play();
             });
           },
         });
+
+        soundRef.current = newSound;
+        newSound.play();
       } else {
-        soundRef.current.volume(volume);
+        // Đã có instance: cập nhật volume và loop
+        const sound = soundRef.current;
+        sound.loop(!!config.loop);
+        sound.volume(targetVolume);
+        if (!sound.playing()) {
+          sound.play();
+        }
       }
 
-      soundRef.current.play();
-
-      if (!config.loop && config.duration_ms) {
-        const timer = setTimeout(() => {
-          if (soundRef.current) {
-            soundRef.current.fade(volume, 0, 400);
-            setTimeout(() => soundRef.current?.stop(), 400);
+      // Xử lý tự ngắt sau duration_ms nếu loop === false và duration_ms > 0
+      if (!config.loop && config.duration_ms && config.duration_ms > 0) {
+        durationTimerRef.current = setTimeout(() => {
+          if (soundRef.current && soundRef.current.playing()) {
+            const sound = soundRef.current;
+            sound.fade(sound.volume(), 0, 400);
+            stopTimeoutRef.current = setTimeout(() => {
+              sound.stop();
+              stopTimeoutRef.current = null;
+            }, 400);
           }
         }, config.duration_ms);
-        return () => clearTimeout(timer);
       }
     } catch (err) {
       console.warn("Audio playback error:", err);
     }
 
     return () => {
-      if (soundRef.current) {
-        soundRef.current.stop();
+      if (durationTimerRef.current) {
+        clearTimeout(durationTimerRef.current);
+        durationTimerRef.current = null;
       }
     };
-  }, [isActive, config.audio_src, config.intensity, config.loop, config.duration_ms, intensityMultiplier, settings.effects_enabled, settings.effects_by_category?.audio]);
+  }, [
+    isActive,
+    config.audio_src,
+    config.intensity,
+    config.loop,
+    config.duration_ms,
+    intensityMultiplier,
+    settings.effects_enabled,
+    settings.effects_by_category?.audio,
+  ]);
+
+  // Cleanup khi component bị unmount hoàn toàn
+  useEffect(() => {
+    return () => {
+      if (stopTimeoutRef.current) {
+        clearTimeout(stopTimeoutRef.current);
+        stopTimeoutRef.current = null;
+      }
+      if (durationTimerRef.current) {
+        clearTimeout(durationTimerRef.current);
+        durationTimerRef.current = null;
+      }
+      if (soundRef.current) {
+        const sound = soundRef.current;
+        sound.fade(sound.volume(), 0, 300);
+        setTimeout(() => {
+          sound.stop();
+          sound.unload();
+        }, 300);
+        soundRef.current = null;
+        currentSrcRef.current = null;
+      }
+    };
+  }, []);
 
   return null;
 }

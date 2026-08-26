@@ -1,36 +1,47 @@
+// components/effects/visual/TextShake.tsx
+// Phase 2: Hiệu ứng Rung Chữ — Đoạn văn rung lắc nhẹ thể hiện sự sợ hãi, hét lớn
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { EffectComponentProps } from "../EffectRegistry";
-import { useReaderSettings } from "@/components/ui/ThemeProvider";
 
 export default function TextShake({
   config,
   isActive,
   intensityMultiplier = 1,
 }: EffectComponentProps) {
-  const { settings } = useReaderSettings();
   const [isShaking, setIsShaking] = useState(false);
+  const isLoop = !!config.loop;
 
   useEffect(() => {
-    if (isActive && !settings.reduced_motion) {
-      setIsShaking(true);
-      const timer = setTimeout(() => {
-        setIsShaking(false);
-      }, config.duration_ms || 800);
-      return () => clearTimeout(timer);
-    } else {
+    if (!isActive) {
       setIsShaking(false);
+      return;
     }
-  }, [isActive, config.duration_ms, settings.reduced_motion]);
+
+    setIsShaking(true);
+
+    let timer: NodeJS.Timeout | null = null;
+    if (!isLoop && config.duration_ms && config.duration_ms > 0) {
+      timer = setTimeout(() => {
+        setIsShaking(false);
+      }, config.duration_ms);
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isActive, config.duration_ms, isLoop]);
 
   useEffect(() => {
-    // Tìm block tương ứng với effect
-    const blockEl = document.querySelector(`[data-has-effect="${config.id}"]`) || document.querySelector(".story-block.active");
+    // Tìm block tương ứng với effect hoặc story-block đang active
+    const blockEl =
+      document.querySelector(`[data-has-effect*="${config.id}"]`) ||
+      document.querySelector(".story-block.active") ||
+      document.querySelector(".story-block");
     if (!blockEl) return;
 
     if (isShaking) {
-      const intensity = config.intensity * intensityMultiplier;
       (blockEl as HTMLElement).style.animation = `text-shake 0.15s ease-in-out infinite`;
       (blockEl as HTMLElement).style.display = "block";
     } else {
@@ -40,7 +51,7 @@ export default function TextShake({
     return () => {
       if (blockEl) (blockEl as HTMLElement).style.animation = "";
     };
-  }, [isShaking, config.id, config.intensity, intensityMultiplier]);
+  }, [isShaking, config.id]);
 
   return null;
 }

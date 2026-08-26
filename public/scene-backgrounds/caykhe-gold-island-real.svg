@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Ocean & Sky Base -->
+    <linearGradient id="realIslandSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="35%" stop-color="#0ea5e9" />
+      <stop offset="70%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#bae6fd" />
+    </linearGradient>
+
+    <linearGradient id="realCrystalSea" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0369a1" />
+      <stop offset="50%" stop-color="#075985" />
+      <stop offset="100%" stop-color="#0c4a6e" />
+    </linearGradient>
+
+    <!-- Rainbow Jewel Cave Glow -->
+    <radialGradient id="realCaveRainbowGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="25%" stop-color="#fde047" stop-opacity="0.95" />
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.75" />
+      <stop offset="75%" stop-color="#ec4899" stop-opacity="0.55" />
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="realTreasureGlow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1920" height="1080" fill="url(#realIslandSky)" />
+
+  <!-- Living Ocean Surface with Wave Surge Animation -->
+  <path d="M 0,620 Q 480,570 960,600 Q 1440,560 1920,620 L 1920,1080 L 0,1080 Z" fill="url(#realCrystalSea)" style="animation: wave-surge 4.5s ease-in-out infinite alternate;" />
+
+  <!-- Five-Color Jewel Stone Island (Hòn Đảo Đá Ngũ Sắc Sừng Sững) -->
+  <g transform="translate(960, 680)">
+    <!-- Island Base Rock Masses -->
+    <polygon points="-860,220 -710,-90 -460,-170 -160,-290 210,-330 560,-190 810,-70 910,220" fill="#1e293b" stroke="#334155" stroke-width="4" />
+    
+    <!-- Multi-Color Crystal Stone Formations in Living Twinkle (Đá Quý Ngũ Sắc Lấp Lánh) -->
+    <polygon points="-660,-60 -590,-250 -510,-130" fill="#10b981" stroke="#34d399" stroke-width="3" filter="url(#realTreasureGlow)" style="animation: gem-twinkle 3s infinite alternate;" />
+    <polygon points="-430,-150 -360,-330 -290,-190" fill="#ef4444" stroke="#f87171" stroke-width="3" filter="url(#realTreasureGlow)" style="animation: gem-twinkle 3.5s 0.6s infinite alternate;" />
+    <polygon points="390,-150 460,-350 530,-170" fill="#a855f7" stroke="#c084fc" stroke-width="3" filter="url(#realTreasureGlow)" style="animation: gem-twinkle 3.2s 0.3s infinite alternate;" />
+    <polygon points="610,-40 690,-230 750,-90" fill="#0ea5e9" stroke="#38bdf8" stroke-width="3" filter="url(#realTreasureGlow)" style="animation: gem-twinkle 4s 0.8s infinite alternate;" />
+
+    <!-- Massive Glowing Cave Entrance (Cửa Hang Kho Báu Sâu Thẳm) -->
+    <path d="M -230,160 C -250,-120 -160,-250 0,-270 C 160,-250 250,-120 230,160 Z" fill="#020617" stroke="#eab308" stroke-width="6" />
+    
+    <!-- Radiant Cave Core Light with Pulsing Shimmer -->
+    <circle cx="0" cy="-60" r="230" fill="url(#realCaveRainbowGlow)" filter="url(#realTreasureGlow)" style="animation: gem-twinkle 2.5s infinite alternate;" />
+
+    <!-- Heaps of Pure Gold & Cut Diamonds at Cave Entrance -->
+    <g filter="url(#realTreasureGlow)">
+      <ellipse cx="-80" cy="80" rx="100" ry="45" fill="#fde047" stroke="#eab308" stroke-width="3" />
+      <ellipse cx="60" cy="90" rx="120" ry="50" fill="#facc15" stroke="#ca8a04" stroke-width="3" />
+      <ellipse cx="0" cy="110" rx="150" ry="55" fill="#eab308" stroke="#a16207" stroke-width="3" />
+      <!-- Faceted Diamond Crystals -->
+      <polygon points="-50,40 -35,10 -15,10 0,40 -25,70" fill="#e0f2fe" stroke="#38bdf8" stroke-width="2" />
+      <polygon points="40,30 55,5 75,5 90,30 65,60" fill="#e0f2fe" stroke="#38bdf8" stroke-width="2" />
+      <polygon points="-10,0 5,-25 25,-25 40,0 15,30" fill="#fdf4ff" stroke="#ec4899" stroke-width="2" />
+    </g>
+  </g>
+
+  <!-- Giant Bird & Honest Brother in Living Breathing Motion -->
+  <g transform="translate(560, 680)">
+    <ellipse cx="0" cy="0" rx="150" ry="85" fill="#3b82f6" stroke="#fde047" stroke-width="3.5" filter="url(#realTreasureGlow)" style="animation: human-breathe 4.5s ease-in-out infinite;" />
+    
+    <!-- Honest Brother with 3-Span Bag (Người Em Lấy Đúng 1 Túi Ba Gang) -->
+    <g transform="translate(185, -20)" style="animation: human-breathe 4s ease-in-out infinite;">
+      <circle cx="0" cy="-60" r="15" fill="#d97706" />
+      <path d="M -16,-45 L 16,-45 L 20,40 L -20,40 Z" fill="#78350f" stroke="#451a03" stroke-width="2" />
+      <rect x="25" y="10" width="32" height="38" rx="4" fill="#92400e" stroke="#fde047" stroke-width="2" />
+    </g>
+  </g>
+
+  <!-- Diamond Prismatic Light Beams Streaming from Cave -->
+  <g filter="url(#realTreasureGlow)" opacity="0.65">
+    <polygon points="960,620 580,0 720,0" fill="#fde047" />
+    <polygon points="960,620 880,0 1020,0" fill="#ffffff" />
+    <polygon points="960,620 1180,0 1340,0" fill="#38bdf8" />
+  </g>
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="30" opacity="0.35" />
+</svg>

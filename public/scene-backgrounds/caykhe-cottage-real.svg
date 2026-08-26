@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Morning Sky Gradient -->
+    <linearGradient id="realVillageSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="35%" stop-color="#38bdf8" />
+      <stop offset="70%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#fef9c3" />
+    </linearGradient>
+
+    <!-- Morning Sun Flare -->
+    <radialGradient id="morningSunFlare" cx="80%" cy="15%" r="55%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="25%" stop-color="#fde047" stop-opacity="0.75" />
+      <stop offset="65%" stop-color="#f59e0b" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#ea580c" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Starfruit Canopy Depth Gradient -->
+    <radialGradient id="realTreeCanopy" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#4ade80" />
+      <stop offset="45%" stop-color="#16a34a" />
+      <stop offset="85%" stop-color="#14532d" />
+      <stop offset="100%" stop-color="#052e16" />
+    </radialGradient>
+
+    <!-- Ripe Golden Starfruit Gradient -->
+    <radialGradient id="realStarfruitGlow" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="30%" stop-color="#fef08a" />
+      <stop offset="70%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </radialGradient>
+
+    <filter id="realCottageGlow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1920" height="1080" fill="url(#realVillageSky)" />
+  <rect width="1920" height="1080" fill="url(#morningSunFlare)" />
+
+  <!-- Distant Rolling Hills in Living Mist (Đồi Xanh Quê Hương) -->
+  <path d="M 0,630 Q 380,530 780,590 Q 1240,510 1640,580 Q 1820,550 1920,610 L 1920,1080 L 0,1080 Z" fill="#86efac" opacity="0.65" style="animation: cloud-drift 10s ease-in-out infinite alternate;" />
+  <path d="M 0,710 Q 480,640 980,700 Q 1480,650 1920,720 L 1920,1080 L 0,1080 Z" fill="#22c55e" opacity="0.8" />
+
+  <!-- Earth Soil Ground -->
+  <path d="M 0,810 Q 520,760 1020,800 Q 1520,770 1920,820 L 1920,1080 L 0,1080 Z" fill="#2d6a4f" />
+  <path d="M 0,910 Q 620,870 1220,900 L 1920,920 L 1920,1080 L 0,1080 Z" fill="#1b4332" />
+
+  <!-- Photorealistic Thatched Cottage (Túp Lều Tranh Vách Đất Chân Thực) -->
+  <g transform="translate(240, 630)">
+    <!-- Thatch Straw Layers (Mái Lá Tranh Dày Dặn Từng Lớp) -->
+    <polygon points="190,-150 -70,10 450,10" fill="#78350f" stroke="#451a03" stroke-width="4" />
+    <polygon points="190,-150 -50,10 430,10" fill="#b45309" stroke="#92400e" stroke-width="3" />
+    <polygon points="190,-140 -30,10 410,10" fill="#d97706" />
+    <!-- Straw Fringe Details -->
+    <path d="M -70,10 L 450,10" stroke="#fde047" stroke-width="3" stroke-dasharray="8 4" />
+    <!-- Mud Walls (Vách Đất Nện Mộc Mạc) -->
+    <rect x="-10" y="10" width="400" height="230" fill="#854d0e" stroke="#5c330a" stroke-width="4" />
+    <!-- Dark Wood Door & Lattice Window -->
+    <rect x="140" y="60" width="110" height="180" fill="#3f2305" stroke="#1f0f00" stroke-width="3" rx="4" />
+    <rect x="30" y="60" width="70" height="70" fill="#2e1a05" stroke="#1f0f00" stroke-width="3" rx="4" />
+    <!-- Bamboo Fence (Hàng Rào Tre) -->
+    <line x1="-90" y1="190" x2="490" y2="190" stroke="#78350f" stroke-width="7" />
+  </g>
+
+  <!-- Living Luscious Starfruit Tree (Cây Khế Ngọt Cổ Thụ Đung Đưa Trong Gió Sớm) -->
+  <g transform="translate(1360, 500)" style="animation: tree-sway 6s ease-in-out infinite alternate;">
+    <!-- Old Gnarled Trunk with Bark Texture (Gốc Khế Già) -->
+    <path d="M -45,500 C -70,330 -110,170 -45,20 C 0,-60 130,40 170,-90 C 190,60 130,330 85,500 Z" fill="#3e2008" stroke="#1e0f04" stroke-width="5" />
+    
+    <!-- Dense Living Green Canopy (Tán Lá Khế Xum Xuê Rợp Bóng) -->
+    <ellipse cx="60" cy="-170" rx="440" ry="340" fill="url(#realTreeCanopy)" />
+    <ellipse cx="-190" cy="-70" rx="300" ry="250" fill="url(#realTreeCanopy)" opacity="0.95" />
+    <ellipse cx="280" cy="-50" rx="320" ry="270" fill="url(#realTreeCanopy)" opacity="0.95" />
+    <ellipse cx="60" cy="-320" rx="340" ry="230" fill="#22c55e" opacity="0.85" />
+
+    <!-- Hanging Golden Ripe Starfruits (Chùm Khế Vàng Mọng Nước Lúc Lỉu) -->
+    <g filter="url(#realCottageGlow)">
+      <g transform="translate(-170, 40) scale(1.6)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#realStarfruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+      <g transform="translate(-60, 170) scale(1.7)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#realStarfruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+      <g transform="translate(70, 130) scale(1.9)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#realStarfruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+      <g transform="translate(200, 90) scale(1.7)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#realStarfruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+      <g transform="translate(10, -70) scale(2.0)">
+        <polygon points="0,-16 5,-5 16,0 5,5 0,16 -5,5 -16,0 -5,-5" fill="url(#realStarfruitGlow)" stroke="#fef08a" stroke-width="1.5" />
+      </g>
+    </g>
+  </g>
+
+  <!-- Golden Sunbeams Streaming Through Leaves (Tia Nắng Ban Mai Chiếu Rọi) -->
+  <g filter="url(#realCottageGlow)" opacity="0.65">
+    <polygon points="1520,0 1220,920 1380,920" fill="#fef08a" />
+    <polygon points="1640,0 1480,920 1590,920" fill="#fef08a" />
+  </g>
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="30" opacity="0.35" />
+</svg>

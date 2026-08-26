@@ -1,55 +1,62 @@
+// components/effects/visual/ParticleRain.tsx
+// Phase 2: Hiệu ứng Mưa Rơi — Giọt mưa dạ quang rơi tức thì và liên tục
 "use client";
 
 import React, { useMemo } from "react";
 import { EffectComponentProps } from "../EffectRegistry";
-import { useReaderSettings } from "@/components/ui/ThemeProvider";
 
 export default function ParticleRain({
   config,
   isActive,
   intensityMultiplier = 1,
 }: EffectComponentProps) {
-  const { settings } = useReaderSettings();
-
-  const actualIntensity = config.intensity * intensityMultiplier;
-  const dropCount = Math.max(20, Math.min(65, Math.floor(45 * actualIntensity)));
-
-  // Bảng màu giọt mưa tương thích theo từng Theme
-  const rainGradient = useMemo(() => {
-    switch (settings.theme) {
-      case "light":
-        // Trên nền giấy trắng: giọt mưa màu xanh biển thẫm + xám chì tương phản cao
-        return "bg-gradient-to-b from-transparent via-slate-600/60 to-blue-900/90 shadow-xs";
-      case "sepia":
-        // Trên nền giấy kem Sepia: giọt mưa màu nâu hổ phách sẫm cổ kính
-        return "bg-gradient-to-b from-transparent via-amber-950/50 to-stone-800/85";
-      case "dark":
-      default:
-        // Trên nền đen OLED: giọt mưa phát sáng xanh dạ quang sắc nét
-        return "bg-gradient-to-b from-transparent via-cyan-300/60 to-blue-400/90 drop-shadow-[0_0_2px_rgba(56,189,248,0.5)]";
-    }
-  }, [settings.theme]);
+  const actualIntensity = (config.intensity ?? 0.75) * intensityMultiplier;
+  const dropCount = Math.max(30, Math.min(80, Math.floor(55 * actualIntensity)));
 
   const drops = useMemo(() => {
-    return Array.from({ length: dropCount }).map((_, i) => ({
-      id: i,
-      left: `${(i * 100) / dropCount + (Math.random() * 3 - 1.5)}%`,
-      delay: `${Math.random() * 1.8}s`,
-      duration: `${0.55 + Math.random() * 0.35}s`,
-      opacity: 0.35 + Math.random() * 0.55 * actualIntensity,
-      height: `${20 + Math.random() * 30}px`,
-      width: Math.random() > 0.6 ? "2px" : "1.5px",
-    }));
+    return Array.from({ length: dropCount }).map((_, i) => {
+      const duration = 0.5 + (i % 5) * 0.08;
+      // Dùng negative delay để mưa phủ kín màn hình ngay từ frame 0
+      const negativeDelay = -((i * 0.17) % duration);
+      const opacity = 0.45 + (i % 4) * 0.12 * actualIntensity;
+      const height = 24 + (i % 6) * 8;
+      const width = i % 3 === 0 ? "2px" : "1.5px";
+      const left = `${(i * 100) / dropCount + ((i * 7) % 5) - 2.5}%`;
+
+      return {
+        id: i,
+        left,
+        delay: `${negativeDelay.toFixed(2)}s`,
+        duration: `${duration.toFixed(2)}s`,
+        opacity,
+        height: `${height}px`,
+        width,
+      };
+    });
   }, [dropCount, actualIntensity]);
 
-  if (!isActive || settings.reduced_motion) return null;
+  if (!isActive) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-30 overflow-hidden">
+    <div
+      data-effect-id={config.id}
+      data-effect-type="particle_rain"
+      className="particle-rain-layer pointer-events-none fixed inset-0 z-20 overflow-hidden"
+      aria-hidden="true"
+    >
+      {/* Light mist overlay on bottom */}
+      <div
+        className="absolute bottom-0 inset-x-0 h-36 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(56, 189, 248, 0.12) 0%, transparent 100%)",
+        }}
+      />
+
       {drops.map((drop) => (
         <div
           key={drop.id}
-          className={`absolute rounded-full animate-rain ${rainGradient}`}
+          className="absolute rounded-full animate-rain-fall"
           style={{
             left: drop.left,
             width: drop.width,
@@ -59,23 +66,13 @@ export default function ParticleRain({
             animationDelay: drop.delay,
             animationIterationCount: "infinite",
             animationTimingFunction: "linear",
-            top: "-50px",
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(56, 189, 248, 0.85) 60%, rgba(186, 230, 253, 1) 100%)",
+            boxShadow: "0 0 3px rgba(56, 189, 248, 0.6)",
+            top: "-60px",
           }}
         />
       ))}
-      <style jsx>{`
-        @keyframes rainDrop {
-          0% {
-            transform: translateY(0vh);
-          }
-          100% {
-            transform: translateY(112vh);
-          }
-        }
-        .animate-rain {
-          animation-name: rainDrop;
-        }
-      `}</style>
     </div>
   );
 }

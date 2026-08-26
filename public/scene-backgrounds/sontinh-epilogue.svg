@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Radiant Morning Sunrise Sky -->
+    <linearGradient id="morningSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0369a1" />
+      <stop offset="35%" stop-color="#0284c7" />
+      <stop offset="65%" stop-color="#fb923c" />
+      <stop offset="85%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#fef08a" />
+    </linearGradient>
+
+    <!-- Golden Sun Orb Glow -->
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="30%" stop-color="#fde047" stop-opacity="0.9" />
+      <stop offset="70%" stop-color="#f59e0b" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#ea580c" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Calm River Gradient (Sông Hồng êm đềm) -->
+    <linearGradient id="calmRiver" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fdba74" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#0284c7" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#034133" stop-opacity="1" />
+    </linearGradient>
+
+    <filter id="epilogueGlow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Radiant Sky Base -->
+  <rect width="1920" height="1080" fill="url(#morningSky)" />
+
+  <!-- Glorious Rising Sun Behind Mountains -->
+  <g transform="translate(960, 480)" filter="url(#epilogueGlow)">
+    <circle r="300" fill="url(#sunGlow)" />
+    <circle r="90" fill="#fef08a" />
+    <!-- Sun Rays Streaming Out -->
+    <line x1="0" y1="-380" x2="0" y2="-120" stroke="#fde047" stroke-width="4" opacity="0.6" />
+    <line x1="270" y1="-270" x2="90" y2="-90" stroke="#fde047" stroke-width="4" opacity="0.6" />
+    <line x1="380" y1="0" x2="120" y2="0" stroke="#fde047" stroke-width="4" opacity="0.6" />
+    <line x1="-270" y1="-270" x2="-90" y2="-90" stroke="#fde047" stroke-width="4" opacity="0.6" />
+    <line x1="-380" y1="0" x2="-120" y2="0" stroke="#fde047" stroke-width="4" opacity="0.6" />
+  </g>
+
+  <!-- Distant Blue Mountain Horizons -->
+  <path d="M 0,580 L 250,490 L 520,540 L 780,440 L 960,390 L 1150,440 L 1400,530 L 1680,470 L 1920,560 L 1920,1080 L 0,1080 Z" fill="#075985" opacity="0.75" />
+
+  <!-- Majestic Ba Vi Mountain Peaks (Sừng Sững Non Cao) -->
+  <path d="M 0,690 L 220,540 L 450,620 L 720,450 L 960,340 L 1200,450 L 1480,600 L 1720,520 L 1920,670 L 1920,1080 L 0,1080 Z" fill="#064e3b" stroke="#10b981" stroke-width="2" />
+  
+  <!-- Lush Green Foothills (Đồi Xanh Mướt Trải Dài) -->
+  <path d="M 0,820 Q 350,710 700,780 Q 1100,720 1500,810 Q 1750,770 1920,830 L 1920,1080 L 0,1080 Z" fill="#022c22" stroke="#047857" stroke-width="2" />
+
+  <!-- Calm Flowing River (Dòng Sông Hồng Bình Yên) -->
+  <path d="M 0,930 Q 450,880 960,910 Q 1450,870 1920,940 L 1920,1080 L 0,1080 Z" fill="url(#calmRiver)" />
+
+  <!-- Birds Flying In Dawn Sky (Đàn Chim Lạc Tung Bay) -->
+  <g fill="#78350f" opacity="0.85">
+    <path d="M 680,260 Q 695,245 710,260 Q 725,245 740,260 Q 725,255 710,270 Q 695,255 680,260 Z" />
+    <path d="M 750,220 Q 762,208 775,220 Q 787,208 800,220 Q 787,215 775,228 Q 762,215 750,220 Z" />
+    <path d="M 830,250 Q 840,240 850,250 Q 860,240 870,250 Q 860,246 850,256 Q 840,246 830,250 Z" />
+  </g>
+
+  <!-- Golden Floating Light Specks -->
+  <g filter="url(#epilogueGlow)" fill="#fef08a" opacity="0.75">
+    <circle cx="320" cy="450" r="4" />
+    <circle cx="580" cy="380" r="5" />
+    <circle cx="890" cy="520" r="3.5" />
+    <circle cx="1120" cy="480" r="4.5" />
+    <circle cx="1450" cy="390" r="5" />
+    <circle cx="1680" cy="460" r="3" />
+  </g>
+
+  <!-- Soft Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000" stroke-width="25" opacity="0.4" />
+</svg>

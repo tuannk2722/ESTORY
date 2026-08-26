@@ -4,7 +4,6 @@ import path from "path";
 import {
   BackgroundAsset,
   ColorPalette,
-  LayoutPreset,
   ScenePreset,
   Scene,
 } from "@/types/scene";
@@ -31,10 +30,6 @@ export class JsonSceneLibraryRepository implements SceneLibraryRepository {
 
   async getPalettes(): Promise<ColorPalette[]> {
     return this.readJsonFile<ColorPalette[]>("palettes.json", []);
-  }
-
-  async getLayouts(): Promise<LayoutPreset[]> {
-    return this.readJsonFile<LayoutPreset[]>("layouts.json", []);
   }
 
   async getScenePresets(): Promise<ScenePreset[]> {

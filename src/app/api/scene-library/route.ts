@@ -1,22 +1,20 @@
 // app/api/scene-library/route.ts
-// Phase 2: Route Handler nạp 4 thư viện mẫu Scene (US-2.7, US-2.8)
+// Phase 2: Route Handler nạp 3 thư viện mẫu Scene (US-2.7, US-2.8)
 
 import { NextResponse } from "next/server";
 import { sceneLibraryRepository } from "@/lib/repositories";
 
 export async function GET() {
   try {
-    const [backgrounds, palettes, layouts, scenePresets] = await Promise.all([
+    const [backgrounds, palettes, scenePresets] = await Promise.all([
       sceneLibraryRepository.getBackgrounds(),
       sceneLibraryRepository.getPalettes(),
-      sceneLibraryRepository.getLayouts(),
       sceneLibraryRepository.getScenePresets(),
     ]);
 
     return NextResponse.json({
       backgrounds,
       palettes,
-      layouts,
       scenePresets,
     });
   } catch (error) {

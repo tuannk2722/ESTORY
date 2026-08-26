@@ -1,15 +1,211 @@
 [
   {
+    "id": "pal-starfruit-garden",
+    "label": "Vườn Khế Quê Hương",
+    "colors": {
+      "primary": "#22C55E",
+      "secondary": "#14532D",
+      "accent": "#FACC15",
+      "background_tint": "rgba(5, 30, 15, 0.82)"
+    },
+    "mood_tags": [
+      "làng quê",
+      "cây khế",
+      "thanh bình",
+      "mộc mạc"
+    ]
+  },
+  {
+    "id": "pal-mystic-phoenix",
+    "label": "Chim Thần Kỳ Ảo",
+    "colors": {
+      "primary": "#38BDF8",
+      "secondary": "#0C4A6E",
+      "accent": "#FDE047",
+      "background_tint": "rgba(3, 20, 35, 0.85)"
+    },
+    "mood_tags": [
+      "chim thần",
+      "kỳ diệu",
+      "ăn khế trả vàng",
+      "lời hứa"
+    ]
+  },
+  {
+    "id": "pal-golden-cave",
+    "label": "Đảo Vàng Châu Báu",
+    "colors": {
+      "primary": "#F59E0B",
+      "secondary": "#78350F",
+      "accent": "#FDE047",
+      "background_tint": "rgba(25, 15, 3, 0.88)"
+    },
+    "mood_tags": [
+      "đảo vàng",
+      "kho báu",
+      "ngũ sắc",
+      "châu báu"
+    ]
+  },
+  {
+    "id": "pal-greedy-amber",
+    "label": "Toan Tính Lòng Tham",
+    "colors": {
+      "primary": "#D97706",
+      "secondary": "#451A03",
+      "accent": "#F97316",
+      "background_tint": "rgba(30, 12, 4, 0.88)"
+    },
+    "mood_tags": [
+      "toan tính",
+      "lòng tham",
+      "túi chín gang",
+      "chờ chim"
+    ]
+  },
+  {
+    "id": "pal-lust-gold",
+    "label": "Mê Muội Vàng Bạc",
+    "colors": {
+      "primary": "#FBBF24",
+      "secondary": "#713F12",
+      "accent": "#FDE047",
+      "background_tint": "rgba(30, 18, 2, 0.9)"
+    },
+    "mood_tags": [
+      "hang vàng",
+      "nhồi nhét",
+      "nặng trĩu",
+      "hoa mắt"
+    ]
+  },
+  {
+    "id": "pal-storm-doom",
+    "label": "Quả Báo Biển Sâu",
+    "colors": {
+      "primary": "#0EA5E9",
+      "secondary": "#0F172A",
+      "accent": "#38BDF8",
+      "background_tint": "rgba(2, 10, 22, 0.92)"
+    },
+    "mood_tags": [
+      "bão biển",
+      "sóng thần",
+      "rơi xuống biển",
+      "chìm sâu",
+      "quả báo"
+    ]
+  },
+  {
+    "id": "pal-royal-lac-hong",
+    "label": "Hoàng Gia Lạc Hồng",
+    "colors": {
+      "primary": "#E2B714",
+      "secondary": "#78350F",
+      "accent": "#DC2626",
+      "background_tint": "rgba(20, 10, 5, 0.85)"
+    },
+    "mood_tags": [
+      "hoàng gia",
+      "đông sơn",
+      "trang nghiêm",
+      "cổ đại"
+    ]
+  },
+  {
+    "id": "pal-elemental-clash",
+    "label": "Non Cao & Biển Thẳm",
+    "colors": {
+      "primary": "#10B981",
+      "secondary": "#064E3B",
+      "accent": "#0EA5E9",
+      "background_tint": "rgba(4, 25, 20, 0.86)"
+    },
+    "mood_tags": [
+      "kỳ tài",
+      "đối lập",
+      "huyền bí",
+      "thần thông"
+    ]
+  },
+  {
+    "id": "pal-festive-wedding",
+    "label": "Lễ Rước Dâu Rộn Rã",
+    "colors": {
+      "primary": "#EF4444",
+      "secondary": "#7F1D1D",
+      "accent": "#F59E0B",
+      "background_tint": "rgba(30, 5, 5, 0.85)"
+    },
+    "mood_tags": [
+      "rước dâu",
+      "lễ hội",
+      "hoan hỉ",
+      "đỏ son"
+    ]
+  },
+  {
+    "id": "pal-storm-fury",
+    "label": "Cuồng Phong Thủy Thần",
+    "colors": {
+      "primary": "#38BDF8",
+      "secondary": "#0C4A6E",
+      "accent": "#E0F2FE",
+      "background_tint": "rgba(2, 15, 30, 0.9)"
+    },
+    "mood_tags": [
+      "mưa bão",
+      "sóng thần",
+      "cuồng nộ",
+      "hồng thủy"
+    ]
+  },
+  {
+    "id": "pal-epic-clash",
+    "label": "Đại Chiến Long Trời Lở Đất",
+    "colors": {
+      "primary": "#F97316",
+      "secondary": "#1E1B4B",
+      "accent": "#38BDF8",
+      "background_tint": "rgba(10, 5, 25, 0.88)"
+    },
+    "mood_tags": [
+      "đại chiến",
+      "sấm chớp",
+      "bốc đồi dời núi",
+      "long trời lở đất"
+    ]
+  },
+  {
+    "id": "pal-eternal-legend",
+    "label": "Sơn Hà Xã Tắc",
+    "colors": {
+      "primary": "#10B981",
+      "secondary": "#065F46",
+      "accent": "#F59E0B",
+      "background_tint": "rgba(2, 20, 15, 0.8)"
+    },
+    "mood_tags": [
+      "sử thi",
+      "bình yên",
+      "trường tồn",
+      "huyền thoại"
+    ]
+  },
+  {
     "id": "pal-midnight-horror",
     "label": "Màn Đêm U Ám",
     "colors": {
       "primary": "#3B82F6",
       "secondary": "#1E293B",
       "accent": "#E2B714",
-      "text": "#F8FAFC",
       "background_tint": "rgba(5, 7, 15, 0.85)"
     },
-    "mood_tags": ["u ám", "kinh dị", "căng thẳng"]
+    "mood_tags": [
+      "u ám",
+      "kinh dị",
+      "căng thẳng"
+    ]
   },
   {
     "id": "pal-ocean-abyss",
@@ -18,34 +214,13 @@
       "primary": "#0EA5E9",
       "secondary": "#0F172A",
       "accent": "#38BDF8",
-      "text": "#F0F9FF",
       "background_tint": "rgba(3, 15, 30, 0.88)"
     },
-    "mood_tags": ["mưa bão", "bí ẩn", "nguy hiểm"]
-  },
-  {
-    "id": "pal-ancient-parchment",
-    "label": "Sách Cổ Nâu Trầm",
-    "colors": {
-      "primary": "#B45309",
-      "secondary": "#3E2723",
-      "accent": "#D97706",
-      "text": "#F4EEDD",
-      "background_tint": "rgba(24, 18, 12, 0.9)"
-    },
-    "mood_tags": ["cổ kính", "hoài niệm", "ký ức"]
-  },
-  {
-    "id": "pal-dawn-victory",
-    "label": "Bình Minh Khải Hoàn",
-    "colors": {
-      "primary": "#F59E0B",
-      "secondary": "#451A03",
-      "accent": "#FDE047",
-      "text": "#FFFBEB",
-      "background_tint": "rgba(20, 10, 5, 0.82)"
-    },
-    "mood_tags": ["bình yên", "hy vọng", "chiến thắng"]
+    "mood_tags": [
+      "mưa bão",
+      "bí ẩn",
+      "nguy hiểm"
+    ]
   },
   {
     "id": "pal-phosphor-green",
@@ -54,9 +229,88 @@
       "primary": "#10B981",
       "secondary": "#064E3B",
       "accent": "#34D399",
-      "text": "#ECFDF5",
       "background_tint": "rgba(2, 20, 12, 0.86)"
     },
-    "mood_tags": ["huyền bí", "rùng rợn", "kỳ dị"]
+    "mood_tags": [
+      "huyền bí",
+      "rùng rợn",
+      "kỳ dị"
+    ]
+  },
+  {
+    "id": "pal-misty-shadow",
+    "label": "Khói Sương Lạnh Buốt",
+    "colors": {
+      "primary": "#64748B",
+      "secondary": "#1E293B",
+      "accent": "#94A3B8",
+      "background_tint": "rgba(10, 15, 26, 0.88)"
+    },
+    "mood_tags": [
+      "khói sương",
+      "lạnh lẽo",
+      "u ám"
+    ]
+  },
+  {
+    "id": "pal-ancient-parchment",
+    "label": "Sách Cổ Nâu Trầm",
+    "colors": {
+      "primary": "#B45309",
+      "secondary": "#3E2723",
+      "accent": "#D97706",
+      "background_tint": "rgba(24, 18, 12, 0.9)"
+    },
+    "mood_tags": [
+      "cổ kính",
+      "hoài niệm",
+      "ký ức"
+    ]
+  },
+  {
+    "id": "pal-crimson-crisis",
+    "label": "Bão Tố Nguy Kịch",
+    "colors": {
+      "primary": "#EF4444",
+      "secondary": "#450A0A",
+      "accent": "#F87171",
+      "background_tint": "rgba(25, 5, 5, 0.9)"
+    },
+    "mood_tags": [
+      "nguy kịch",
+      "kịch tính",
+      "sóng thần",
+      "hủy diệt"
+    ]
+  },
+  {
+    "id": "pal-golden-radiance",
+    "label": "Quang Huy Rực Rỡ",
+    "colors": {
+      "primary": "#F59E0B",
+      "secondary": "#292524",
+      "accent": "#FDE047",
+      "background_tint": "rgba(20, 15, 5, 0.85)"
+    },
+    "mood_tags": [
+      "ánh sáng",
+      "sử thi",
+      "cứu rỗi"
+    ]
+  },
+  {
+    "id": "pal-dawn-victory",
+    "label": "Bình Minh Khải Hoàn",
+    "colors": {
+      "primary": "#F59E0B",
+      "secondary": "#451A03",
+      "accent": "#FDE047",
+      "background_tint": "rgba(20, 10, 5, 0.82)"
+    },
+    "mood_tags": [
+      "bình yên",
+      "hy vọng",
+      "chiến thắng"
+    ]
   }
 ]

@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Tempest Sky Gradient -->
+    <radialGradient id="battleSky" cx="50%" cy="40%" r="80%">
+      <stop offset="0%" stop-color="#1e1b4b" />
+      <stop offset="30%" stop-color="#0f172a" />
+      <stop offset="70%" stop-color="#050814" />
+      <stop offset="100%" stop-color="#000205" />
+    </radialGradient>
+
+    <!-- Mountain Earth God Glow -->
+    <radialGradient id="earthGlow" cx="25%" cy="45%" r="45%">
+      <stop offset="0%" stop-color="#f97316" stop-opacity="0.65" />
+      <stop offset="40%" stop-color="#ea580c" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#7c2d12" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Water God Surge Glow -->
+    <radialGradient id="waterSurge" cx="75%" cy="50%" r="45%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.65" />
+      <stop offset="40%" stop-color="#0369a1" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#082f49" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="battleGlow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1920" height="1080" fill="url(#battleSky)" />
+  <rect width="1920" height="1080" fill="url(#earthGlow)" />
+  <rect width="1920" height="1080" fill="url(#waterSurge)" />
+
+  <!-- LEFT: Son Tinh Towering Mountain Peaks & Floating Boulders (Bốc Đồi Dời Núi) -->
+  <g fill="#022c22" stroke="#047857" stroke-width="2">
+    <!-- Colossal Ba Vi Mountain Ridge Rising Above Water -->
+    <polygon points="0,1080 0,380 280,180 520,340 740,150 920,420 920,1080" fill="#034133" />
+    <!-- Jagged Ridge Layers -->
+    <polygon points="0,1080 0,520 220,340 440,490 680,290 850,560 850,1080" fill="#02281e" stroke="#10b981" stroke-width="2.5" />
+    
+    <!-- Floating Elevated Hills (Quả đồi bay trên không trung chặn lũ) -->
+    <g transform="translate(680, 220)" filter="url(#battleGlow)">
+      <polygon points="-80,0 -40,-60 40,-50 80,10 30,50 -50,40" fill="#78350f" stroke="#f59e0b" stroke-width="3" />
+      <!-- Magical Earth Runes / Roots -->
+      <path d="M -40,10 L 0,-20 L 40,10" stroke="#fde047" stroke-width="2" fill="none" />
+    </g>
+    <g transform="translate(480, 120)" filter="url(#battleGlow)">
+      <polygon points="-60,10 -30,-40 30,-30 60,15 20,40 -40,30" fill="#78350f" stroke="#f59e0b" stroke-width="2.5" />
+    </g>
+  </g>
+
+  <!-- Son Tinh Silhouette On Mountain Peak Raising Divine Staff (Sơn Tinh Uy Dũng) -->
+  <g transform="translate(680, 290)" filter="url(#battleGlow)">
+    <circle cx="0" cy="-60" r="18" fill="#fde047" />
+    <!-- Body & Royal Mountain Cape -->
+    <path d="M -20,-40 C -40,0 -30,40 -15,70 L 15,70 C 30,40 40,0 20,-40 Z" fill="#b45309" stroke="#fde047" stroke-width="2" />
+    <path d="M -20,-30 L -70,20 L -30,40 Z" fill="#ea580c" />
+    <!-- Divine Staff Channeling Mountain Power -->
+    <line x1="20" y1="-20" x2="60" y2="-120" stroke="#fde047" stroke-width="5" />
+    <circle cx="60" cy="-120" r="14" fill="#fef08a" />
+    <circle cx="60" cy="-120" r="35" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 4" />
+  </g>
+
+  <!-- RIGHT: Thuy Tinh Monstrous Tsunami Wave & Water Beast Legion (Sóng Thần Gầm Rú) -->
+  <g fill="#021422" stroke="#0284c7" stroke-width="2">
+    <!-- Giant Curling Ocean Wave 100ft High -->
+    <path d="M 850,1080 C 850,560 980,240 1250,140 C 1500,50 1750,180 1920,110 L 1920,1080 Z" fill="#082f49" />
+    <path d="M 980,1080 C 1050,680 1200,380 1450,260 C 1680,160 1850,280 1920,220 L 1920,1080 Z" fill="#0369a1" stroke="#38bdf8" stroke-width="3" />
+    
+    <!-- Water Monster Tentacles / Serpents Rising (Thủy Quái Xung Trận) -->
+    <path d="M 1250,450 Q 1150,320 1200,220 Q 1250,180 1320,240" fill="none" stroke="#38bdf8" stroke-width="8" stroke-linecap="round" filter="url(#battleGlow)" />
+    <path d="M 1520,380 Q 1420,240 1480,140 Q 1550,100 1620,160" fill="none" stroke="#38bdf8" stroke-width="10" stroke-linecap="round" filter="url(#battleGlow)" />
+  </g>
+
+  <!-- Center Clash Seam: Lightning Bolt & Energy Shockwave (Kinh Thiên Động Địa) -->
+  <g filter="url(#battleGlow)">
+    <!-- Golden vs Blue Energy Blast -->
+    <path d="M 740,170 L 980,260 L 910,360 L 1150,450" stroke="#fde047" stroke-width="6" fill="none" />
+    <circle cx="960" cy="310" r="90" fill="#fef08a" opacity="0.4" />
+    
+    <!-- Shockwave Rings -->
+    <circle cx="960" cy="310" r="180" fill="none" stroke="#f97316" stroke-width="3" stroke-dasharray="16 10" />
+    <circle cx="960" cy="310" r="260" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="24 12" />
+  </g>
+
+  <!-- Flying Spark Particles (Orange Fire & Cyan Water) -->
+  <g filter="url(#battleGlow)">
+    <circle cx="820" cy="220" r="5" fill="#f97316" />
+    <circle cx="890" cy="180" r="4" fill="#fde047" />
+    <circle cx="1080" cy="200" r="6" fill="#38bdf8" />
+    <circle cx="1180" cy="310" r="5" fill="#e0f2fe" />
+    <circle cx="940" cy="480" r="4.5" fill="#f97316" />
+    <circle cx="1020" cy="520" r="5.5" fill="#38bdf8" />
+  </g>
+
+  <!-- Heavy Vignette Border -->
+  <rect width="1920" height="1080" fill="none" stroke="#000" stroke-width="35" opacity="0.6" />
+</svg>

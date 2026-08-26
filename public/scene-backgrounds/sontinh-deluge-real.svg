@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Dark Storm Deluge Background -->
+    <radialGradient id="realDelugeSky" cx="50%" cy="30%" r="85%">
+      <stop offset="0%" stop-color="#0c4a6e" />
+      <stop offset="40%" stop-color="#082f49" />
+      <stop offset="75%" stop-color="#020617" />
+      <stop offset="100%" stop-color="#000000" />
+    </radialGradient>
+
+    <!-- Lightning Bolt White-Cyan Glow -->
+    <filter id="realLightningGlow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Flood Water Abyss -->
+    <linearGradient id="realFloodWater" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.9" />
+      <stop offset="40%" stop-color="#0369a1" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#021422" stop-opacity="1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1920" height="1080" fill="url(#realDelugeSky)" />
+
+  <!-- Raging Storm Cloud Layers in Motion -->
+  <g fill="#082f49" opacity="0.85">
+    <path d="M 0,200 C 350,80 600,240 950,140 C 1300,40 1600,220 1920,120 L 1920,450 L 0,450 Z" style="animation: cloud-drift 10s ease-in-out infinite alternate;" />
+  </g>
+
+  <!-- Realistic Gigantic Forked Lightning Bolt (Tia Chớp Chân Thực Giáng Xuống Mặt Sóng) -->
+  <g filter="url(#realLightningGlow)" stroke="#f0f9ff" stroke-width="5" fill="none">
+    <path d="M 940,0 L 980,190 L 900,270 L 1000,420 L 930,540 L 970,690" stroke-width="7" />
+    <path d="M 980,190 L 1080,260 L 1050,350" stroke-width="3.5" stroke="#38bdf8" />
+    <path d="M 1000,420 L 1150,480 L 1120,580" stroke-width="4" stroke="#38bdf8" />
+  </g>
+  <circle cx="970" cy="690" r="160" fill="#e0f2fe" opacity="0.3" filter="url(#realLightningGlow)" />
+
+  <!-- Thuy Tinh Lord Shadow on Wave Crest -->
+  <g transform="translate(970, 480)" filter="url(#realLightningGlow)" opacity="0.9">
+    <circle cx="0" cy="-60" r="22" fill="#0284c7" stroke="#38bdf8" stroke-width="2" />
+    <path d="M -40,-35 L 40,-35 L 45,60 L -45,60 Z" fill="#034166" stroke="#38bdf8" stroke-width="2.5" />
+    <!-- Ocean Trident -->
+    <line x1="50" y1="-130" x2="35" y2="90" stroke="#38bdf8" stroke-width="5" />
+    <polygon points="50,-150 35,-120 65,-120" fill="#e0f2fe" />
+    <!-- Glowing Red Eyes -->
+    <circle cx="-8" cy="-62" r="3.5" fill="#ef4444" />
+    <circle cx="8" cy="-62" r="3.5" fill="#ef4444" />
+  </g>
+
+  <!-- Monstrous Swelling Ocean Waves in Real Motion (Sóng Thần Cao Ngút Ngàn) -->
+  <g style="animation: wave-surge 3.5s ease-in-out infinite alternate;">
+    <path d="M 0,600 C 380,440 700,680 1020,510 C 1340,340 1660,600 1920,460 L 1920,1080 L 0,1080 Z" fill="#053b5c" opacity="0.85" />
+    <path d="M 0,700 C 440,560 800,770 1180,620 C 1540,460 1780,700 1920,590 L 1920,1080 L 0,1080 Z" fill="url(#realFloodWater)" />
+  </g>
+
+  <!-- Crashing White Foam Crests (Bọt Biển Trắng Xóa) -->
+  <path d="M 0,710 Q 250,660 500,730 Q 850,650 1200,720 Q 1550,640 1920,710" stroke="#f8fafc" stroke-width="10" stroke-dasharray="25 15" fill="none" filter="url(#realLightningGlow)" />
+  <path d="M 0,810 Q 300,760 650,830 Q 1000,750 1400,820 Q 1700,770 1920,810" stroke="#e0f2fe" stroke-width="7" stroke-dasharray="20 10" fill="none" opacity="0.8" />
+
+  <!-- Diagonal Torrential Rain Streaks -->
+  <g stroke="#38bdf8" stroke-width="2" opacity="0.75">
+    <line x1="250" y1="0" x2="150" y2="420" />
+    <line x1="650" y1="30" x2="550" y2="450" />
+    <line x1="1050" y1="0" x2="950" y2="520" />
+    <line x1="1450" y1="20" x2="1350" y2="480" />
+    <line x1="1800" y1="0" x2="1700" y2="460" />
+  </g>
+
+  <!-- Dark Vignette -->
+  <rect width="1920" height="1080" fill="none" stroke="#000000" stroke-width="35" opacity="0.65" />
+</svg>
