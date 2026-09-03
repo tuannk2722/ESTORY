@@ -264,12 +264,16 @@ body {
   width: 100%;
   height: 3px;
   background-color: var(--color-border);
-  z-index: 100;
+  z-index: 50;
 }
 .progress-bar-fill {
+  width: 100%;
   height: 100%;
   background-color: var(--color-accent);
-  transition: width 0.15s ease-out;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.15s ease-out;
+  will-change: transform;
 }
 
 /* Dialogue Box — Cố định phong cách Dark Glassmorphism trên nền truyện */
@@ -623,8 +627,6 @@ body {
     transition: none !important;
   }
   @keyframes lightning-flash  { from { opacity: 0; } to { opacity: 0; } }
-  @keyframes screen-shake     { from { transform: none; } to { transform: none; } }
-  @keyframes text-shake       { from { transform: none; } to { transform: none; } }
   @keyframes fade-in          { from { opacity: 1; } to { opacity: 1; } }
   @keyframes accent-glow      { from { box-shadow: none; } to { box-shadow: none; } }
 }

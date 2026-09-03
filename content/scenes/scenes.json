@@ -1,42 +1,5 @@
 [
   {
-    "id": "scene-ck-01",
-    "chapter_id": "ck-ch1",
-    "start_block_id": "ck-ch1-b01",
-    "end_block_id": "ck-ch1-b06",
-    "background_id": "bg-starfruit-cottage-real",
-    "palette_id": "pal-starfruit-garden",
-    "effects": [
-      {
-        "id": "fx-floating_clouds-1787602401509",
-        "type": "floating_clouds",
-        "category": "visual",
-        "intensity": 1,
-        "duration_ms": 5000,
-        "delay_ms": 0,
-        "loop": true
-      },
-      {
-        "id": "fx-particle_fire-1787602412738",
-        "type": "particle_fire",
-        "category": "visual",
-        "intensity": 0.8,
-        "duration_ms": 3000,
-        "delay_ms": 0,
-        "loop": true
-      },
-      {
-        "id": "fx-particle_leaves-1787602425525",
-        "type": "particle_leaves",
-        "category": "visual",
-        "intensity": 1,
-        "duration_ms": 3500,
-        "delay_ms": 0,
-        "loop": true
-      }
-    ]
-  },
-  {
     "id": "scene-ck-02",
     "chapter_id": "ck-ch2",
     "start_block_id": "ck-ch2-b01",
@@ -125,92 +88,6 @@
         "loop": true
       }
     ]
-  },
-  {
-    "id": "scene-st-01",
-    "chapter_id": "ch-son-tinh",
-    "start_block_id": "st-b01",
-    "end_block_id": "st-b03",
-    "background_id": "bg-phong-chau-palace",
-    "palette_id": "pal-royal-lac-hong",
-    "effects": [
-      {
-        "id": "fx-audio-1787677141066",
-        "type": "audio",
-        "category": "audio",
-        "intensity": 0.3,
-        "duration_ms": 0,
-        "audio_src": "/audio/thunder-rumble.mp3",
-        "loop": true
-      },
-      {
-        "id": "fx-candle_flicker-1787602116170",
-        "type": "candle_flicker",
-        "category": "visual",
-        "intensity": 1,
-        "duration_ms": 3500,
-        "delay_ms": 0,
-        "loop": false
-      },
-      {
-        "id": "fx-particle_fireflies-1787645438255",
-        "type": "particle_fireflies",
-        "category": "visual",
-        "intensity": 0.75,
-        "duration_ms": 3000,
-        "delay_ms": 0,
-        "loop": true
-      },
-      {
-        "id": "fx-sunbeam-1787645488294",
-        "type": "sunbeam",
-        "category": "visual",
-        "intensity": 0.75,
-        "duration_ms": 2000,
-        "delay_ms": 0,
-        "loop": false
-      }
-    ]
-  },
-  {
-    "id": "scene-st-03",
-    "chapter_id": "ch-son-tinh",
-    "start_block_id": "st-b07",
-    "end_block_id": "st-b09",
-    "based_on_preset_id": "preset-wedding-procession",
-    "background_id": "bg-wedding-procession",
-    "palette_id": "pal-festive-wedding",
-    "effects": []
-  },
-  {
-    "id": "scene-st-05",
-    "chapter_id": "ch-son-tinh",
-    "start_block_id": "st-b012",
-    "end_block_id": "st-b014",
-    "based_on_preset_id": "preset-epic-battle-clash",
-    "background_id": "bg-epic-battle-clash",
-    "palette_id": "pal-epic-clash",
-    "effects": [
-      {
-        "id": "fx-audio-scene-st-05",
-        "type": "audio",
-        "category": "audio",
-        "intensity": 1,
-        "duration_ms": 0,
-        "audio_src": "/audio/thunder-rumble.mp3",
-        "loop": true
-      }
-    ]
-  },
-  {
-    "id": "scene-st-06",
-    "chapter_id": "ch-son-tinh",
-    "start_block_id": "st-b015",
-    "end_block_id": "st-b016",
-    "based_on_preset_id": "preset-legend-epilogue",
-    "background_id": "bg-legend-epilogue",
-    "palette_id": "pal-eternal-legend",
-    "effects": []
   },
   {
     "id": "scene-ch2-01",
@@ -333,73 +210,18 @@
     "effects": []
   },
   {
-    "id": "scene-097331",
-    "chapter_id": "ch1",
-    "start_block_id": "ch1-block-001",
-    "end_block_id": "ch1-block-003",
-    "background_id": "bg-rain-loop",
-    "palette_id": "pal-misty-shadow",
+    "id": "scene-226508",
+    "chapter_id": "ck-ch1",
+    "start_block_id": "ck-ch1-b01",
+    "end_block_id": "ck-ch1-b06",
+    "background_id": "bg-starfruit-cottage-real",
+    "palette_id": "pal-starfruit-garden",
     "effects": [
       {
-        "id": "fx-sunbeam-1787711018765",
-        "type": "sunbeam",
-        "category": "visual",
-        "intensity": 0.75,
-        "duration_ms": 3000,
-        "delay_ms": 0,
-        "loop": false
-      },
-      {
-        "id": "fx-floating_clouds-1787711042165",
-        "type": "floating_clouds",
+        "id": "fx-particle_leaves-c55dd25c",
+        "type": "particle_leaves",
         "category": "visual",
         "intensity": 1,
-        "duration_ms": 3000,
-        "delay_ms": 0,
-        "loop": false
-      },
-      {
-        "id": "fx-particle_smoke-1787711069780",
-        "type": "particle_smoke",
-        "category": "visual",
-        "intensity": 1,
-        "duration_ms": 3000,
-        "delay_ms": 3000,
-        "loop": true
-      },
-      {
-        "id": "fx-wind_gust-1787711089252",
-        "type": "wind_gust",
-        "category": "motion",
-        "intensity": 0.8,
-        "duration_ms": 1500,
-        "delay_ms": 3000,
-        "loop": true
-      }
-    ]
-  },
-  {
-    "id": "scene-090286",
-    "chapter_id": "ch1",
-    "start_block_id": "ch1-block-004",
-    "end_block_id": "ch1-block-008",
-    "background_id": "bg-storm-ocean",
-    "palette_id": "pal-storm-doom",
-    "effects": [
-      {
-        "id": "fx-audio-1787712147730",
-        "type": "audio",
-        "category": "audio",
-        "intensity": 0.3,
-        "duration_ms": 0,
-        "audio_src": "/audio/thunder-rumble.mp3",
-        "loop": true
-      },
-      {
-        "id": "fx-water_ripple-1787712084257",
-        "type": "water_ripple",
-        "category": "visual",
-        "intensity": 0.75,
         "duration_ms": 3500,
         "delay_ms": 0,
         "loop": true
@@ -407,11 +229,110 @@
     ]
   },
   {
-    "id": "scene-236155",
+    "id": "scene-48deb744-b4bf-4021-9c52-f85076464a71",
+    "chapter_id": "ch-son-tinh",
+    "start_block_id": "st-b01",
+    "end_block_id": "st-b04",
+    "based_on_preset_id": "preset-sontinh-peak-video",
+    "background_id": "bg-wedding-procession-cinema",
+    "palette_id": "pal-eternal-legend",
+    "effects": [
+      {
+        "intensity": 0.3,
+        "duration_ms": 0,
+        "delay_ms": 0,
+        "loop": true,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "category": "audio",
+        "id": "fx-audio-2ae2a16f",
+        "type": "audio"
+      },
+      {
+        "intensity": 0.75,
+        "duration_ms": 4000,
+        "delay_ms": 0,
+        "loop": true,
+        "id": "fx-sunbeam-1864103d",
+        "type": "sunbeam",
+        "category": "visual"
+      },
+      {
+        "intensity": 0.75,
+        "duration_ms": 2000,
+        "delay_ms": 0,
+        "loop": true,
+        "id": "fx-particle_rain-619fa953",
+        "type": "particle_rain",
+        "category": "visual"
+      },
+      {
+        "intensity": 0.8,
+        "duration_ms": 3500,
+        "delay_ms": 0,
+        "loop": true,
+        "id": "fx-candle_flicker-27e1d49c",
+        "type": "candle_flicker",
+        "category": "visual"
+      }
+    ]
+  },
+  {
+    "id": "scene-347c9652-ff77-4019-b6dd-b149845fb296",
+    "chapter_id": "ch1",
+    "start_block_id": "ch1-block-001",
+    "end_block_id": "ch1-block-003",
+    "background_id": "bg-lighthouse-night",
+    "palette_id": "pal-misty-shadow",
+    "effects": [
+      {
+        "intensity": 1,
+        "duration_ms": 3000,
+        "delay_ms": 0,
+        "loop": true,
+        "id": "fx-particle_smoke-275dbb3e",
+        "type": "particle_smoke",
+        "category": "visual"
+      }
+    ]
+  },
+  {
+    "id": "scene-f02851ea-3f27-46df-9c70-c7cec2424838",
+    "chapter_id": "ch1",
+    "start_block_id": "ch1-block-004",
+    "end_block_id": "ch1-block-008",
+    "based_on_preset_id": "preset-mist-cavern",
+    "background_id": "bg-mist-cavern",
+    "palette_id": "pal-misty-shadow",
+    "effects": [
+      {
+        "intensity": 1,
+        "duration_ms": 2500,
+        "delay_ms": 0,
+        "loop": true,
+        "id": "fx-bg_color_shift-67010c9b",
+        "type": "bg_color_shift",
+        "category": "visual"
+      }
+    ]
+  },
+  {
+    "id": "scene-f9df85df-3b9c-4aac-afd2-b187dc461c94",
     "chapter_id": "ch1",
     "start_block_id": "ch1-block-009",
     "end_block_id": "ch1-block-010",
-    "background_id": "bg-fireflies-dark",
-    "palette_id": "pal-misty-shadow"
+    "background_id": "bg-storm-ocean",
+    "palette_id": "pal-misty-shadow",
+    "effects": [
+      {
+        "intensity": 0.35,
+        "duration_ms": 0,
+        "delay_ms": 0,
+        "loop": true,
+        "audio_src": "/audio/horror_atmosphe.mp3",
+        "category": "audio",
+        "id": "fx-audio-114f6905",
+        "type": "audio"
+      }
+    ]
   }
 ]

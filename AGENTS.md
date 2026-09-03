@@ -1,16 +1,16 @@
-<!-- BEGIN:nextjs-agent-rules -->
-
+@AGENTS.md
 # Hướng dẫn dự án My Storytelling App
 
 Dự án Web ứng dụng Scroll-based Storytelling cho sách/truyện, xây dựng bằng Next.js 14 (App Router) + TypeScript + Tailwind CSS + GSAP ScrollTrigger.
 
 ## 1. Lệnh thường dùng:
-- Chạy môi trường Dev: `pnpm run dev`
-- Build sản phẩm: `pnpm run build`
+- Chạy môi trường Dev: `pnpm dev`
+- Build sản phẩm: `pnpm build`
 - Kiểm tra lỗi type: `pnpm run typecheck`
 
 ## 2. Nguồn tài liệu bắt buộc tuân thủ (Source of Truth):
 - Mọi logic và kiến trúc BẮT BUỘC phải đọc và tuân thủ các file trong thư mục `docs/`:
+  - Thiết kế & Wireframe: Đọc `docs/04-ui-ux-design.md`
 - Trước khi code một module mới, AI PHẢI đọc file doc tương ứng trước.
 
 ## 3. Tiêu chuẩn Thiết kế & UI/UX (UI/UX Pro Max):
@@ -36,9 +36,11 @@ Dự án Web ứng dụng Scroll-based Storytelling cho sách/truyện, xây d�
 - Sau khi hoàn thành 1 task, rà lại checklist ở `09-non-functional-requirements.md` (performance, accessibility, responsive, code style, security) trước khi coi là xong.
 - Khi task liên quan tới bối cảnh/màu nền/nhạc nền trải dài nhiều block (không phải hiệu ứng chấm phá 1 block) — kể cả khi bối cảnh đó có nền tự chuyển động (video loop, particle) — đó là **Scene**, không phải **Effect**. Đọc `08-effects-and-scenes.md` mục 8.3 → 8.8 trước khi code, và không nhét logic Scene vào `EffectConfig`/`EffectRegistry.ts`.
 - Khi tạo/sửa 1 `BackgroundAsset` có `motion: "looping"` (video/particle tự chuyển động), luôn bắt buộc kèm `poster_frame` và đảm bảo component render kiểm tra `reduced_motion` để fallback đúng — xem `08-effects-and-scenes.md` mục 8.4.
+- **Phân tầng hiển thị Text-First Z-Index:** Luôn duy trì thứ tự: Văn bản truyện (`z-20`) > Toàn bộ hiệu ứng/hạt (`z-[5]`) > Nền & Palette (`z-0`). Floating Action Dock cố định tại `z-[60]`, Modals tại `z-[80]`, Preview portal tại `z-[90]`, ConfirmModal tại `z-[100]`. Tất cả hiệu ứng hình ảnh/hạt bắt buộc có `pointer-events-none`.
 - Nếu chưa có đủ tham số đầu vào (VD: thiếu `targetAudience`, `genre`, `keyThemes`), hãy hỏi lại user để bổ sung trước khi gọi skill.
 
----
-← Về `00-INDEX.md` | Trước: `11-phase3-technical-roadmap.md` | (Hết bộ tài liệu)
+- Khi task liên quan tới đăng nhập, navbar theo trạng thái auth, luồng "trở thành author", Author Dashboard, hoặc wizard tạo/sửa truyện — đọc `12-auth-and-author-management.md` trước, kèm wireframe tương ứng ở `04b-page-layouts.md` mục 6–7 và user stories `07-user-stories-phase3.md` US-3.14 → US-3.17. Toàn bộ nhóm này thuộc Phase 3, không lùi về Phase 1–2.
 
-<!-- END:nextjs-agent-rules -->
+---
+← Về `00-INDEX.md` | Trước: `12-auth-and-author-management.md` | (Hết bộ tài liệu)
+

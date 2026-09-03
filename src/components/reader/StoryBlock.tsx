@@ -1,54 +1,38 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
-import { StoryBlock as IStoryBlock } from "@/types/story";
-import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import type { StoryBlock as IStoryBlock } from "@/types/story";
 import EffectLayer from "../effects/EffectLayer";
 
 export interface StoryBlockProps {
   block: IStoryBlock;
   isFirstParagraph?: boolean;
   storyFontClass?: string;
-  onBlockVisible?: (blockId: string) => void;
-  isPaused?: boolean;
+  isActive: boolean;
+  reducedMotion?: boolean;
 }
 
 /**
- * Render 1 block và kích hoạt hiệu ứng khi khối văn bản cuộn vào viewport
+ * Render một block; container Reader chịu trách nhiệm chọn active block.
  */
 export default function StoryBlock({
   block,
   isFirstParagraph = false,
   storyFontClass = "story-font-cormorant",
-  onBlockVisible,
-  isPaused = false,
+  isActive,
+  reducedMotion,
 }: StoryBlockProps) {
-  const blockRef = useRef<HTMLDivElement>(null);
-  const entry = useIntersectionObserver(blockRef, {
-    threshold: 0,
-    rootMargin: "-25% 0px -35% 0px",
-  });
-
-  const isIntersecting = !!entry?.isIntersecting;
-  const isEffectActive = isIntersecting && !isPaused;
-
-  useEffect(() => {
-    if (isEffectActive && onBlockVisible) {
-      onBlockVisible(block.id);
-    }
-  }, [isEffectActive, block.id, onBlockVisible]);
-
   return (
     <div
-      ref={blockRef}
       id={block.id}
-      data-block-id={block.id}
+      data-reader-block-id={block.id}
       data-has-effect={block.effects?.map((e) => e.id).join(" ")}
-      className={`story-block relative z-20 my-10 md:my-14 transition-all duration-700 ${isIntersecting ? "opacity-100 active" : "opacity-75"
-        }`}
+      className={`story-block relative z-20 my-10 md:my-14${isActive ? " active" : ""}`}
     >
-      {/* Lớp kích hoạt hiệu ứng - chỉ kích hoạt khi không bị modal tạm dừng */}
-      <EffectLayer effects={block.effects} isActive={isEffectActive} />
+      <EffectLayer
+        effects={block.effects}
+        isActive={isActive}
+        reducedMotion={reducedMotion}
+      />
 
       {/* Render văn bản theo type */}
       {block.type === "heading" && (

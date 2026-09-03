@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { settingsStore } from "@/lib/settingsStore";
-import { RESUME_COMMIT_THRESHOLDS, ReadingStatus } from "@/types/settings";
+import { calculateScrollProgress } from "@/lib/reader/readerMetrics";
+import { RESUME_COMMIT_THRESHOLDS, type ReadingStatus } from "@/types/settings";
 
 interface UseResumeCommitProps {
   storyId: string;
@@ -13,13 +14,17 @@ interface UseResumeCommitProps {
   isPaused?: boolean;
 }
 
+interface LatestReadingState extends UseResumeCommitProps {
+  isLastChapter: boolean;
+  isLastBlock: boolean;
+  isPaused: boolean;
+}
+
+const SAVE_DEBOUNCE_MS = 1_000;
+
 /**
- * Hook theo dõi hành vi đọc thực sự (time spent + scroll progress)
- * và chỉ commit resumeReading khi reader đọc đủ threshold.
- *
- * Nguyên tắc cốt lõi (Section 5 & 11 trong plan):
- *   Current navigation ≠ Confirmed reading progress
- *   → Mở chapter mới nhưng chưa thực sự đọc → không ghi đè resume chapter.
+ * Chỉ xác nhận chapter là "đang đọc" sau khi reader đạt ngưỡng thời gian/cuộn.
+ * Sau đó, block mới nhất được lưu với debounce 1 giây theo US-1.6.
  */
 export function useResumeCommit({
   storyId,
@@ -30,97 +35,124 @@ export function useResumeCommit({
   isPaused = false,
 }: UseResumeCommitProps) {
   const committedRef = useRef(false);
-  const startTimeRef = useRef<number>(Date.now());
-  const chapterIdRef = useRef(chapterId);
+  const startTimeRef = useRef(0);
+  const saveTimerRef = useRef<number | null>(null);
+  const intervalRef = useRef<number | null>(null);
+  const latestRef = useRef<LatestReadingState>({
+    storyId,
+    chapterId,
+    activeBlockId,
+    isLastChapter,
+    isLastBlock,
+    isPaused,
+  });
 
-  // Reset khi chapter thay đổi
   useEffect(() => {
-    if (chapterIdRef.current !== chapterId) {
-      committedRef.current = false;
-      startTimeRef.current = Date.now();
-      chapterIdRef.current = chapterId;
-    }
-  }, [chapterId]);
+    latestRef.current = {
+      storyId,
+      chapterId,
+      activeBlockId,
+      isLastChapter,
+      isLastBlock,
+      isPaused,
+    };
+  }, [activeBlockId, chapterId, isLastBlock, isLastChapter, isPaused, storyId]);
+
+  const persistLatest = useCallback(() => {
+    const latest = latestRef.current;
+    if (!committedRef.current || latest.isPaused || !latest.activeBlockId) return;
+
+    const scrollProgress = calculateScrollProgress(
+      window.scrollY,
+      document.documentElement.scrollHeight,
+      window.innerHeight
+    );
+    const status: ReadingStatus =
+      latest.isLastChapter && latest.isLastBlock ? "completed" : "reading";
+    const updatedAt = Date.now();
+
+    settingsStore.saveResumeReading(latest.storyId, {
+      chapter_id: latest.chapterId,
+      block_id: latest.activeBlockId,
+      progress: scrollProgress,
+      updated_at: updatedAt,
+    });
+    settingsStore.saveProgress({
+      story_id: latest.storyId,
+      chapter_id: latest.chapterId,
+      block_id: latest.activeBlockId,
+      status,
+      updated_at: new Date(updatedAt).toISOString(),
+    });
+  }, []);
+
+  const scheduleSave = useCallback(() => {
+    if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = window.setTimeout(() => {
+      saveTimerRef.current = null;
+      persistLatest();
+    }, SAVE_DEBOUNCE_MS);
+  }, [persistLatest]);
 
   const commitIfReady = useCallback(() => {
-    if (committedRef.current || isPaused || !activeBlockId) return;
+    const latest = latestRef.current;
+    if (committedRef.current || latest.isPaused || !latest.activeBlockId) return;
 
-    const timeSpent = Date.now() - startTimeRef.current;
-    const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight - windowHeight;
-    const scrollProgress = documentHeight > 0
-      ? Math.min(1, Math.max(0, window.scrollY / documentHeight))
-      : 0;
+    const timeThresholdMet =
+      Date.now() - startTimeRef.current >= RESUME_COMMIT_THRESHOLDS.TIME_SPENT_MS;
+    const scrollThresholdMet =
+      calculateScrollProgress(
+        window.scrollY,
+        document.documentElement.scrollHeight,
+        window.innerHeight
+      ) >= RESUME_COMMIT_THRESHOLDS.SCROLL_PROGRESS;
 
-    const timeThresholdMet = timeSpent >= RESUME_COMMIT_THRESHOLDS.TIME_SPENT_MS;
-    const scrollThresholdMet = scrollProgress >= RESUME_COMMIT_THRESHOLDS.SCROLL_PROGRESS;
-
-    if (timeThresholdMet || scrollThresholdMet) {
-      committedRef.current = true;
-      const status: ReadingStatus = isLastChapter && isLastBlock ? "completed" : "reading";
-
-      settingsStore.saveResumeReading(storyId, {
-        chapter_id: chapterId,
-        block_id: activeBlockId,
-        progress: scrollProgress,
-        updated_at: Date.now(),
-      });
-
-      settingsStore.saveProgress({
-        story_id: storyId,
-        chapter_id: chapterId,
-        block_id: activeBlockId,
-        status,
-        updated_at: new Date().toISOString(),
-      });
+    if (!timeThresholdMet && !scrollThresholdMet) return;
+    committedRef.current = true;
+    if (intervalRef.current) {
+      window.clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-  }, [storyId, chapterId, activeBlockId, isLastChapter, isLastBlock, isPaused]);
+    scheduleSave();
+  }, [scheduleSave]);
 
-  // Kiểm tra scroll threshold trên mỗi scroll event
   useEffect(() => {
-    if (committedRef.current || isPaused) return;
+    committedRef.current = false;
+    startTimeRef.current = Date.now();
+    if (saveTimerRef.current) {
+      window.clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+  }, [chapterId, storyId]);
 
-    const onScroll = () => commitIfReady();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+  useEffect(() => {
+    if (committedRef.current) scheduleSave();
+  }, [activeBlockId, isLastBlock, isLastChapter, scheduleSave]);
+
+  useEffect(() => {
+    if (isPaused) return;
+    window.addEventListener("scroll", commitIfReady, { passive: true });
+    intervalRef.current = window.setInterval(commitIfReady, 2_000);
+    return () => {
+      window.removeEventListener("scroll", commitIfReady);
+      if (intervalRef.current) {
+        window.clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, [commitIfReady, isPaused]);
 
-  // Kiểm tra time threshold bằng interval (mỗi 2s)
   useEffect(() => {
-    if (committedRef.current || isPaused) return;
-
-    const intervalId = setInterval(() => {
-      commitIfReady();
-    }, 2000);
-
-    return () => clearInterval(intervalId);
-  }, [commitIfReady, isPaused]);
-
-  // Cập nhật block_id mới nhất nếu đã committed (giữ vị trí đọc mới nhất khi cuộn tiếp)
-  useEffect(() => {
-    if (!committedRef.current || isPaused || !activeBlockId) return;
-
-    const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight - windowHeight;
-    const scrollProgress = documentHeight > 0
-      ? Math.min(1, Math.max(0, window.scrollY / documentHeight))
-      : 0;
-
-    const status: ReadingStatus = isLastChapter && isLastBlock ? "completed" : "reading";
-
-    settingsStore.saveResumeReading(storyId, {
-      chapter_id: chapterId,
-      block_id: activeBlockId,
-      progress: scrollProgress,
-      updated_at: Date.now(),
-    });
-
-    settingsStore.saveProgress({
-      story_id: storyId,
-      chapter_id: chapterId,
-      block_id: activeBlockId,
-      status,
-      updated_at: new Date().toISOString(),
-    });
-  }, [storyId, chapterId, activeBlockId, isLastChapter, isLastBlock, isPaused]);
+    const flushPendingSave = () => {
+      if (!saveTimerRef.current) return;
+      window.clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+      persistLatest();
+    };
+    window.addEventListener("pagehide", flushPendingSave);
+    return () => {
+      window.removeEventListener("pagehide", flushPendingSave);
+      flushPendingSave();
+    };
+  }, [persistLatest]);
 }

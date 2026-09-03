@@ -34,6 +34,8 @@ export interface EffectComponentProps {
   config: EffectConfig;
   isActive: boolean;
   intensityMultiplier?: number;
+  /** Effective playback mode supplied by the Reader/preview boundary. */
+  reducedMotion?: boolean;
 }
 
 export const EFFECT_REGISTRY: Record<EffectType, ComponentType<EffectComponentProps> | null> = {

@@ -1,8 +1,6 @@
-// components/scenes/SceneAmbientAudio.tsx
-// Phase 2: Wrap Howler.js cho ambient_audio_src (loop nền, tách biệt khỏi AudioEffectPlayer)
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MutableRefObject } from "react";
 import { Howl } from "howler";
 
 export interface SceneAmbientAudioProps {
@@ -14,6 +12,8 @@ export interface SceneAmbientAudioProps {
   durationMs?: number;
 }
 
+const CROSSFADE_MS = 800;
+
 export default function SceneAmbientAudio({
   audioSrc,
   volume = 0.5,
@@ -24,114 +24,132 @@ export default function SceneAmbientAudio({
 }: SceneAmbientAudioProps) {
   const soundRef = useRef<Howl | null>(null);
   const currentSrcRef = useRef<string | null>(null);
-  const durationTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const retiredSoundsRef = useRef(new Set<Howl>());
+  const timersRef = useRef(new Set<ReturnType<typeof setTimeout>>());
+  const actionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const durationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shouldPlayRef = useRef(false);
 
   useEffect(() => {
-    if (durationTimerRef.current) {
-      clearTimeout(durationTimerRef.current);
-      durationTimerRef.current = null;
-    }
+    shouldPlayRef.current = Boolean(audioSrc && isActive && !isPaused && volume > 0);
+  }, [audioSrc, isActive, isPaused, volume]);
 
-    // Nếu không có audioSrc hoặc không active / đang bị pause
+  useEffect(() => {
+    const clearTrackedTimer = (
+      timerRef: MutableRefObject<ReturnType<typeof setTimeout> | null>
+    ) => {
+      if (!timerRef.current) return;
+      clearTimeout(timerRef.current);
+      timersRef.current.delete(timerRef.current);
+      timerRef.current = null;
+    };
+
+    const schedule = (callback: () => void, delay: number) => {
+      const timer = setTimeout(() => {
+        timersRef.current.delete(timer);
+        callback();
+      }, delay);
+      timersRef.current.add(timer);
+      return timer;
+    };
+
+    const retire = (sound: Howl) => {
+      retiredSoundsRef.current.add(sound);
+      sound.fade(sound.volume(), 0, CROSSFADE_MS);
+      schedule(() => {
+        sound.stop();
+        sound.unload();
+        retiredSoundsRef.current.delete(sound);
+      }, CROSSFADE_MS);
+    };
+
+    clearTrackedTimer(actionTimerRef);
+    clearTrackedTimer(durationTimerRef);
+
     if (!audioSrc || !isActive || isPaused) {
-      if (soundRef.current && soundRef.current.playing()) {
-        const sound = soundRef.current;
-        sound.fade(sound.volume(), 0, 800);
-        const timeout = setTimeout(() => {
-          sound.pause();
-        }, 800);
-        return () => clearTimeout(timeout);
+      const currentSound = soundRef.current;
+      if (currentSound?.playing()) {
+        currentSound.fade(currentSound.volume(), 0, CROSSFADE_MS);
+        actionTimerRef.current = schedule(() => {
+          currentSound.pause();
+          actionTimerRef.current = null;
+        }, CROSSFADE_MS);
       }
       return;
     }
 
-    // Nếu audioSrc thay đổi hoặc sound chưa khởi tạo
     if (currentSrcRef.current !== audioSrc || !soundRef.current) {
-      // Dọn dẹp sound cũ với crossfade 1400ms
-      if (soundRef.current) {
-        const oldSound = soundRef.current;
-        oldSound.fade(oldSound.volume(), 0, 1400);
-        setTimeout(() => {
-          oldSound.stop();
-          oldSound.unload();
-        }, 1400);
-      }
+      if (soundRef.current) retire(soundRef.current);
 
-      currentSrcRef.current = audioSrc;
-      const newSound = new Howl({
+      const nextSound = new Howl({
         src: [audioSrc],
         html5: true,
-        loop: !!loop,
+        loop,
         volume: 0,
-        onloaderror: (_id, err) => {
-          console.warn(`[SceneAmbientAudio] Error loading audio: ${audioSrc}`, err);
+        onloaderror: (_id, error) => {
+          console.warn(`[SceneAmbientAudio] Cannot load ${audioSrc}`, error);
         },
-        onplayerror: (_id, err) => {
-          console.warn(`[SceneAmbientAudio] Autoplay blocked or play error:`, err);
+        onplayerror: (_id, error) => {
+          console.warn("[SceneAmbientAudio] Playback was blocked", error);
+          nextSound.once("unlock", () => {
+            if (
+              shouldPlayRef.current &&
+              soundRef.current === nextSound &&
+              !nextSound.playing()
+            ) {
+              nextSound.play();
+            }
+          });
         },
       });
 
-      soundRef.current = newSound;
-
-      try {
-        newSound.play();
-        newSound.fade(0, volume, 1400);
-      } catch (err) {
-        console.warn("[SceneAmbientAudio] Failed to start ambient audio:", err);
-      }
-    } else if (soundRef.current) {
-      // Đang dùng sound hiện tại, cập nhật volume hoặc resume nếu đang paused
-      const sound = soundRef.current;
-      sound.loop(!!loop);
-      if (!sound.playing()) {
-        try {
-          sound.play();
-          sound.fade(0, volume, 1400);
-        } catch {
-          // Ignore autoplay restriction
-        }
+      soundRef.current = nextSound;
+      currentSrcRef.current = audioSrc;
+      nextSound.play();
+      nextSound.fade(0, volume, CROSSFADE_MS);
+    } else {
+      const currentSound = soundRef.current;
+      currentSound.loop(loop);
+      if (!currentSound.playing()) {
+        currentSound.volume(0);
+        currentSound.play();
+        currentSound.fade(0, volume, CROSSFADE_MS);
       } else {
-        sound.fade(sound.volume(), volume, 600);
+        currentSound.fade(currentSound.volume(), volume, 300);
       }
     }
 
-    // Xử lý tự tắt sau durationMs nếu loop === false
     if (!loop && durationMs && durationMs > 0) {
-      durationTimerRef.current = setTimeout(() => {
-        if (soundRef.current && soundRef.current.playing()) {
-          const sound = soundRef.current;
-          sound.fade(sound.volume(), 0, 1000);
-          setTimeout(() => {
-            sound.stop();
-          }, 1000);
-        }
-      }, durationMs);
-    }
-
-    return () => {
-      if (durationTimerRef.current) {
-        clearTimeout(durationTimerRef.current);
+      const stopAfterMs = Math.max(1, Number(durationMs));
+      durationTimerRef.current = schedule(() => {
+        const currentSound = soundRef.current;
+        if (!currentSound?.playing()) return;
+        currentSound.fade(currentSound.volume(), 0, CROSSFADE_MS);
+        actionTimerRef.current = schedule(() => {
+          currentSound.stop();
+          actionTimerRef.current = null;
+        }, CROSSFADE_MS);
         durationTimerRef.current = null;
-      }
-    };
-  }, [audioSrc, volume, isActive, isPaused, loop, durationMs]);
+      }, stopAfterMs);
+    }
+  }, [audioSrc, durationMs, isActive, isPaused, loop, volume]);
 
-  // Unmount cleanup
-  useEffect(() => {
-    return () => {
-      if (soundRef.current) {
-        const sound = soundRef.current;
-        sound.fade(sound.volume(), 0, 600);
-        setTimeout(() => {
-          sound.stop();
-          sound.unload();
-        }, 600);
-        soundRef.current = null;
-        currentSrcRef.current = null;
-      }
-    };
-  }, []);
+  useEffect(
+    () => () => {
+      timersRef.current.forEach(clearTimeout);
+      timersRef.current.clear();
+      soundRef.current?.stop();
+      soundRef.current?.unload();
+      retiredSoundsRef.current.forEach((sound) => {
+        sound.stop();
+        sound.unload();
+      });
+      retiredSoundsRef.current.clear();
+      soundRef.current = null;
+      currentSrcRef.current = null;
+    },
+    []
+  );
 
   return null;
 }
-

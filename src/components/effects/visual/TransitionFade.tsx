@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { EffectComponentProps } from "../EffectRegistry";
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
@@ -9,26 +8,13 @@ export default function TransitionFade({
   config,
   isActive,
   intensityMultiplier = 1,
+  reducedMotion = false,
 }: EffectComponentProps) {
   const { settings } = useReaderSettings();
-  const [isPlaying, setIsPlaying] = useState(false);
-
   const durationSec = (config.duration_ms || 1400) / 1000;
   const peakOpacity = Math.min(0.9, ((config.intensity ?? 0.75) * intensityMultiplier) * 0.85);
 
-  useEffect(() => {
-    if (isActive && !settings.reduced_motion) {
-      setIsPlaying(true);
-      const timer = setTimeout(() => {
-        setIsPlaying(false);
-      }, (config.duration_ms || 1400));
-      return () => clearTimeout(timer);
-    } else {
-      setIsPlaying(false);
-    }
-  }, [isActive, config.duration_ms, settings.reduced_motion]);
-
-  if (!isPlaying || settings.reduced_motion) return null;
+  if (!isActive || reducedMotion) return null;
 
   // Lớp màn phủ phù hợp với từng theme
   const themeBgColor =

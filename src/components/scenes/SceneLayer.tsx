@@ -1,16 +1,16 @@
-// components/scenes/SceneLayer.tsx
-// Phase 2: Render tầng bối cảnh (Scene), tách biệt hoàn toàn với /components/effects (docs/08-effects-and-scenes.md)
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
-import { Scene, BackgroundAsset, ColorPalette } from "@/types/scene";
-import SceneBackground from "./SceneBackground";
-import SceneAmbientAudio from "./SceneAmbientAudio";
+import React, { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { EFFECT_REGISTRY } from "@/components/effects/EffectRegistry";
-import { EFFECT_METADATA } from "@/components/editor/effect-meta";
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
 import { useMobileDetect } from "@/hooks/useMobileDetect";
-import { AnimatePresence, motion } from "framer-motion";
+import { EFFECT_METADATA } from "@/lib/effects/effectCatalog";
+import { isEffectAllowedWithReducedMotion } from "@/lib/effects/effectPlayback";
+import { calculateEffectVolume } from "@/lib/reader/readerMetrics";
+import type { BackgroundAsset, ColorPalette, Scene } from "@/types/scene";
+import SceneAmbientAudio from "./SceneAmbientAudio";
+import SceneBackground from "./SceneBackground";
 
 export interface SceneLayerProps {
   scene?: Scene | null;
@@ -21,9 +21,104 @@ export interface SceneLayerProps {
   children?: React.ReactNode;
 }
 
+interface SceneVisualEffectsProps {
+  effects: NonNullable<Scene["effects"]>;
+  intensityMultiplier: number;
+  reducedMotion: boolean;
+}
+
+function createImmediateEffectsMap(effects: NonNullable<Scene["effects"]>) {
+  return effects.reduce<Record<string, boolean>>((map, effect, index) => {
+    if (!effect.delay_ms || effect.delay_ms <= 0) {
+      map[effect.id || `${effect.type}-${index}`] = true;
+    }
+    return map;
+  }, {});
+}
+
 /**
- * Wrapper nhận Scene đang active và render background/palette/audio/visual effects
+ * The parent keys this component by the effective scene configuration. This
+ * gives each scene/settings change a clean lifecycle without resetting state
+ * synchronously from an effect.
  */
+function SceneVisualEffects({
+  effects,
+  intensityMultiplier,
+  reducedMotion,
+}: SceneVisualEffectsProps) {
+  const [activeEffectsMap, setActiveEffectsMap] = useState(() =>
+    createImmediateEffectsMap(effects)
+  );
+
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    effects.forEach((effect, index) => {
+      const effectKey = effect.id || `${effect.type}-${index}`;
+      const delay = Math.max(0, effect.delay_ms ?? 0);
+      const duration =
+        effect.duration_ms && effect.duration_ms > 0
+          ? effect.duration_ms
+          : EFFECT_METADATA[effect.type]?.defaultDurationMs || 3500;
+
+      if (delay > 0) {
+        timers.push(
+          setTimeout(() => {
+            setActiveEffectsMap((current) => ({
+              ...current,
+              [effectKey]: true,
+            }));
+          }, delay)
+        );
+      }
+
+      if (effect.loop === false) {
+        timers.push(
+          setTimeout(() => {
+            setActiveEffectsMap((current) => ({
+              ...current,
+              [effectKey]: false,
+            }));
+          }, delay + duration)
+        );
+      }
+    });
+
+    return () => timers.forEach(clearTimeout);
+  }, [effects]);
+
+  return (
+    <AnimatePresence mode="sync">
+      {effects.map((effect, index) => {
+        const effectKey = effect.id || `${effect.type}-${index}`;
+        if (!activeEffectsMap[effectKey]) return null;
+
+        const Component = EFFECT_REGISTRY[effect.type];
+        if (!Component) return null;
+
+        return (
+          <motion.div
+            key={effectKey}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="fixed inset-0 z-[5] overflow-hidden pointer-events-none"
+          >
+            <Component
+              config={effect}
+              isActive
+              intensityMultiplier={intensityMultiplier}
+              reducedMotion={reducedMotion}
+            />
+          </motion.div>
+        );
+      })}
+    </AnimatePresence>
+  );
+}
+
+/** Renders the active scene independently from block-level effects. */
 export default function SceneLayer({
   scene,
   backgroundAsset,
@@ -34,86 +129,69 @@ export default function SceneLayer({
 }: SceneLayerProps) {
   const { settings } = useReaderSettings();
   const isMobile = useMobileDetect();
-  const [activeEffectsMap, setActiveEffectsMap] = useState<Record<string, boolean>>({});
+  const totalIntensityMultiplier =
+    (settings.intensity_multiplier ?? 1) * (isMobile ? 0.5 : 1);
 
-  const mobileScale = isMobile ? 0.5 : 1.0;
-  const totalIntensityMultiplier = (settings.intensity_multiplier ?? 1.0) * mobileScale;
+  const audioEffect = useMemo(
+    () =>
+      scene?.effects?.find(
+        (effect) => effect.type === "audio" || effect.category === "audio"
+      ),
+    [scene?.effects]
+  );
 
-  // Trích xuất hiệu ứng âm thanh nền (Ambient Audio) từ scene.effects
-  const audioEffect = useMemo(() => {
-    return scene?.effects?.find((e) => e.type === "audio" || e.category === "audio");
-  }, [scene?.effects]);
+  const enabledVisualEffects = useMemo(
+    () =>
+      (scene?.effects ?? []).filter(
+        (effect) =>
+          effect.type !== "audio" &&
+          effect.category !== "audio" &&
+          settings.effects_by_category?.[effect.category] !== false
+      ),
+    [scene?.effects, settings.effects_by_category]
+  );
 
-  // Trích xuất các hiệu ứng không gian êm dịu (Hạt mưa, đom đóm, tuyết, bụi vàng...) từ scene.effects
-  const visualEffects = useMemo(() => {
-    return scene?.effects?.filter((e) => e.type !== "audio" && e.category !== "audio") || [];
-  }, [scene?.effects]);
+  const playableVisualEffects = useMemo(
+    () =>
+      enabledVisualEffects.filter(
+        (effect) =>
+          !reducedMotion || isEffectAllowedWithReducedMotion(effect)
+      ),
+    [enabledVisualEffects, reducedMotion]
+  );
 
-  // Quản lý vòng đời (Lifecycle) của các hiệu ứng visual trong Scene: delay_ms và duration_ms khi loop === false
-  useEffect(() => {
-    if (!settings.effects_enabled || visualEffects.length === 0) {
-      setActiveEffectsMap({});
-      return;
-    }
+  const visualEffectsKey = useMemo(
+    () =>
+      playableVisualEffects
+        .map(
+          (effect) =>
+            `${effect.id}-${effect.type}-${effect.loop}-${effect.delay_ms}-${effect.duration_ms}`
+        )
+        .join("|"),
+    [playableVisualEffects]
+  );
 
-    const timers: NodeJS.Timeout[] = [];
-    const initialMap: Record<string, boolean> = {};
-
-    visualEffects.forEach((eff, idx) => {
-      const effKey = eff.id || `${eff.type}-${idx}`;
-      const isCatEnabled = settings.effects_by_category?.[eff.category] !== false;
-      if (!isCatEnabled) return;
-
-      const delay = eff.delay_ms && eff.delay_ms > 0 ? eff.delay_ms : 0;
-      const isLoop = eff.loop !== false;
-      const meta = EFFECT_METADATA[eff.type];
-      const duration =
-        eff.duration_ms && eff.duration_ms > 0
-          ? eff.duration_ms
-          : meta?.defaultDurationMs || 3500;
-
-      if (delay > 0) {
-        const startTimer = setTimeout(() => {
-          setActiveEffectsMap((prev) => ({ ...prev, [effKey]: true }));
-        }, delay);
-        timers.push(startTimer);
-      } else {
-        initialMap[effKey] = true;
-      }
-
-      // Nếu loop === false, tự động tắt hiệu ứng sau khi hết thời lượng duration
-      if (!isLoop) {
-        const stopTimer = setTimeout(() => {
-          setActiveEffectsMap((prev) => ({ ...prev, [effKey]: false }));
-        }, delay + duration);
-        timers.push(stopTimer);
-      }
-    });
-
-    setActiveEffectsMap(initialMap);
-
-    return () => {
-      timers.forEach(clearTimeout);
-    };
-  }, [scene?.id, scene?.effects, visualEffects, settings.effects_enabled, settings.effects_by_category]);
-
-  // CSS variables động cho ColorPalette (giữ cố định màu chữ chính theo theme, chỉ áp dụng accent/primary/secondary)
   const paletteStyle = useMemo<React.CSSProperties>(() => {
     if (!colorPalette) return {};
     return {
       "--color-primary": colorPalette.colors.primary,
       "--color-secondary": colorPalette.colors.secondary,
       "--color-accent": colorPalette.colors.accent,
-      // Lưu ý: Không ghi đè --color-foreground để màu chữ truyện luôn giữ cố định theo Reader Theme (Dark/Light/Sepia)
     } as React.CSSProperties;
   }, [colorPalette]);
 
+  const crossfadeDuration = reducedMotion ? 0 : 0.8;
+  const ambientVolume = calculateEffectVolume(
+    audioEffect?.intensity,
+    settings.intensity_multiplier,
+    0.5
+  );
+
   return (
     <div
-      className="scene-layer relative w-full min-h-screen transition-colors duration-1000 ease-out"
+      className="scene-layer relative w-full min-h-screen transition-colors duration-700 ease-out"
       style={paletteStyle}
     >
-      {/* 1. Background Layer với Cinematic Crossfade ~1200ms */}
       <AnimatePresence mode="sync">
         {backgroundAsset && (
           <motion.div
@@ -122,10 +200,10 @@ export default function SceneLayer({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{
-              duration: reducedMotion ? 0.1 : 1.2,
+              duration: crossfadeDuration,
               ease: [0.4, 0, 0.2, 1],
             }}
-            className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+            className="fixed inset-0 z-0 overflow-hidden pointer-events-none"
           >
             <SceneBackground
               asset={backgroundAsset}
@@ -135,7 +213,6 @@ export default function SceneLayer({
         )}
       </AnimatePresence>
 
-      {/* 2. Color Palette Cinematic Color Grading & Ambient Atmosphere với Crossfade ~1200ms */}
       <AnimatePresence mode="sync">
         {colorPalette && (
           <motion.div
@@ -144,14 +221,13 @@ export default function SceneLayer({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{
-              duration: reducedMotion ? 0.1 : 1.2,
+              duration: crossfadeDuration,
               ease: [0.4, 0, 0.2, 1],
             }}
-            className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+            className="fixed inset-0 z-0 overflow-hidden pointer-events-none"
           >
-            {/* 2a. Color Wash (Nhuộm sắc độ vào Background bằng mix-blend-mode) */}
             <div
-              className="absolute inset-0 pointer-events-none transition-colors duration-1000 ease-out"
+              className="absolute inset-0 pointer-events-none"
               style={{
                 backgroundColor: colorPalette.colors.primary,
                 mixBlendMode: "color",
@@ -159,8 +235,6 @@ export default function SceneLayer({
               }}
               aria-hidden="true"
             />
-
-            {/* 2b. Atmospheric Gradient & Depth Tint: Tạo chiều sâu khí quyển và tăng tương phản chữ */}
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
@@ -169,8 +243,6 @@ export default function SceneLayer({
               }}
               aria-hidden="true"
             />
-
-            {/* 2c. Ambient Lighting Aura: Ánh sáng môi trường viền trên/dưới theo màu primary & secondary */}
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
@@ -182,48 +254,25 @@ export default function SceneLayer({
         )}
       </AnimatePresence>
 
-      {/* 3. Ambient Visual Effects (Hạt không gian nhẹ nhàng: mưa, tuyết, đom đóm, bụi vàng, nắng, nến, mây, sóng...) */}
-      <AnimatePresence mode="sync">
-        {settings.effects_enabled &&
-          visualEffects.map((eff, idx) => {
-            const effKey = eff.id || `${eff.type}-${idx}`;
-            const isEffectActive = !!activeEffectsMap[effKey];
-            const isCatEnabled = settings.effects_by_category?.[eff.category] !== false;
-            if (!isEffectActive || !isCatEnabled) return null;
+      {/* Reduced motion keeps the poster/static background and removes animated effects. */}
+      {settings.effects_enabled &&
+        playableVisualEffects.length > 0 && (
+          <SceneVisualEffects
+            key={`${scene?.id ?? "scene"}:${visualEffectsKey}`}
+            effects={playableVisualEffects}
+            intensityMultiplier={totalIntensityMultiplier}
+            reducedMotion={reducedMotion}
+          />
+        )}
 
-            const Comp = EFFECT_REGISTRY[eff.type];
-            if (!Comp) return null;
-
-            return (
-              <motion.div
-                key={effKey}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  duration: reducedMotion ? 0.1 : 1.0,
-                  ease: "easeInOut",
-                }}
-                className="fixed inset-0 pointer-events-none z-[5] overflow-hidden"
-              >
-                <Comp
-                  config={eff}
-                  isActive={isEffectActive}
-                  intensityMultiplier={totalIntensityMultiplier}
-                />
-              </motion.div>
-            );
-          })}
-      </AnimatePresence>
-
-      {/* 4. Ambient Audio (Nhạc nền êm dịu) */}
       {audioEffect?.audio_src && (
         <SceneAmbientAudio
           audioSrc={audioEffect.audio_src}
-          volume={audioEffect.intensity ?? 0.5}
+          volume={ambientVolume}
           isActive={
             settings.effects_enabled &&
-            settings.effects_by_category?.audio !== false
+            settings.effects_by_category?.audio !== false &&
+            ambientVolume > 0
           }
           isPaused={isAudioPaused}
           loop={audioEffect.loop !== false}
@@ -231,13 +280,9 @@ export default function SceneLayer({
         />
       )}
 
-      {/* 5. Khung đọc chính: Cố định vị trí trung tâm chuẩn mực, luôn ở tầng cao nhất (z-20) trên các hiệu ứng */}
       <div className="relative z-20 w-full max-w-2xl mx-auto">
         {children}
       </div>
     </div>
   );
 }
-
-
-

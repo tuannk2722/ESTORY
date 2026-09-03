@@ -28,36 +28,36 @@
         {
           "id": "ch1-block-002",
           "type": "paragraph",
-          "text": "Hoàng hôn buông xuống trên mỏm đá Vọng Hải mang theo một sự tĩnh lặng đến rợn ngời. Gió biển chiều nay bỗng nhiên ngừng thổi một cách kỳ quái, để lại mặt nước phẳng lặng như một tấm gương đen khổng lồ trải dài đến vô tận. Từ phía chân trời xa xăm, những đám mây màu tím sẫm cuồn cuộn dâng lên từ đáy vịnh, nuốt chửng những tia sáng le lói cuối cùng của một ngày tàn. Ngọn hải đăng cổ kính này được xây dựng từ thời Pháp thuộc hơn một trăm năm trước, nằm trơ trọi trên mỏm đá cô độc cách đất liền gần mười hải lý. Suốt ba mươi năm gắn bó với ngọn tháp đá sừng sững giữa muôn trùng sóng gió, lão Bảy – người gác đèn già nua với làn da sạm đen vì nắng gió – chưa từng chứng kiến một buổi chiều nào ngột ngạt và nặng nề đến thế.",
+          "text": "Hoàng hôn buông xuống trên mỏm đá Vọng Hải mang theo một sự tĩnh lặng đến rợn ngời. Gió biển chiều nay bỗng nhiên ngừng thổi một cách kỳ quái, để lại mặt nước phẳng lặng như một tấm gương đen khổng lồ trải dài đến vô tận. Từ phía chân trời xa xăm, những đám mây màu tím sẫm cuồn cuộn dâng lên từ đáy vịnh, nuốt chửng những tia sáng le lói cuối cùng của một ngày tàn. Ngọn hải đăng cổ kính này được xây dựng từ thời Pháp thuộc hơn một trăm năm trước, nằm trơ trọi trên mỏm đá cô độc cách đất liền gần mười hải lý. Suốt ba mươi năm gắn bó với ngọn tháp đá sừng sững giữa muôn trùng sóng gió, lão Bảy – người gác đèn già nua với làn da sạm đen vì nắng gió – chưa từng chứng kiến một buổi chiều nào ngột ngạt và nặng nề đến thế. ",
           "mood_tag": "u ám",
-          "effects": [
-            {
-              "id": "eff-122230",
-              "type": "audio",
-              "category": "audio",
-              "intensity": 0.3,
-              "duration_ms": 1200,
-              "delay_ms": 0,
-              "loop": true,
-              "audio_src": "/audio/horror_atmosphe.mp3"
-            },
-            {
-              "id": "eff-153656",
-              "type": "particle_rain",
-              "category": "visual",
-              "intensity": 0.75,
-              "duration_ms": 2500,
-              "delay_ms": 3000,
-              "loop": true
-            }
-          ]
+          "effects": []
         },
         {
           "id": "ch1-block-003",
           "type": "paragraph",
           "text": "Áp kế treo trên vách đá của phòng điều khiển đã tụt dốc không phanh từ giữa trưa, kim đồng hồ rung bần bật như đang cảnh báo một thảm họa sắp giáng xuống. Nước biển dưới chân vách đá rút ra xa một cách bất thường, để lộ những rạn đá ngầm lởm chởm phủ đầy rong rêu đen đúa và xác của hàng ngàn con ốc biển đang bốc lên mùi hôi nồng nặc. Những đàn mòng biển vốn dĩ tấp nập chao liệng quanh tháp canh giờ đây đã biến mất không còn một bóng dáng, dường như trực giác loài vật đã mách bảo chúng tìm nơi ẩn náu sâu trong những hốc đá kín gió từ trước khi màn đêm buông xuống.",
           "mood_tag": "bí ẩn",
-          "effects": []
+          "effects": [
+            {
+              "intensity": 0.35,
+              "duration_ms": 2000,
+              "delay_ms": 0,
+              "loop": true,
+              "audio_src": "/audio/horror_atmosphe.mp3",
+              "id": "fx-audio-0d29e888",
+              "type": "audio",
+              "category": "audio"
+            },
+            {
+              "intensity": 0.8,
+              "duration_ms": 1500,
+              "delay_ms": 0,
+              "loop": true,
+              "id": "fx-wind_gust-9776aae1",
+              "type": "wind_gust",
+              "category": "motion"
+            }
+          ]
         },
         {
           "id": "ch1-block-004",
@@ -66,23 +66,69 @@
           "mood_tag": "mưa bão",
           "effects": [
             {
-              "id": "eff-102314",
-              "type": "particle_rain",
-              "category": "visual",
-              "intensity": 0.75,
-              "duration_ms": 4100,
-              "delay_ms": 950,
-              "loop": false
+              "intensity": 0.85,
+              "duration_ms": 1200,
+              "delay_ms": 0,
+              "loop": false,
+              "id": "fx-lightning_flash-77685f26",
+              "type": "lightning_flash",
+              "category": "visual"
             },
             {
-              "id": "eff-117846",
+              "intensity": 0.35,
+              "duration_ms": 0,
+              "delay_ms": 1000,
+              "loop": true,
+              "audio_src": "/audio/gentle_rain_falling.mp3",
+              "id": "fx-audio-9b4b7783",
               "type": "audio",
-              "category": "audio",
-              "intensity": 0.3,
-              "duration_ms": 4000,
-              "delay_ms": 1100,
+              "category": "audio"
+            },
+            {
+              "intensity": 0.7,
+              "duration_ms": 2000,
+              "delay_ms": 0,
+              "loop": true,
+              "id": "fx-particle_rain-21a8fc70",
+              "type": "particle_rain",
+              "category": "visual"
+            },
+            {
+              "intensity": 1,
+              "duration_ms": 1500,
+              "delay_ms": 0,
+              "loop": true,
+              "id": "fx-wind_gust-c80bf581",
+              "type": "wind_gust",
+              "category": "motion"
+            },
+            {
+              "intensity": 1,
+              "duration_ms": 2000,
+              "delay_ms": 700,
               "loop": false,
-              "audio_src": "/audio/gentle_rain_falling.mp3"
+              "audio_src": "/audio/thunder-rumble.mp3",
+              "id": "fx-audio-557d9430",
+              "type": "audio",
+              "category": "audio"
+            },
+            {
+              "intensity": 1,
+              "duration_ms": 1500,
+              "delay_ms": 0,
+              "loop": false,
+              "id": "fx-particle_smoke-b64bbafd",
+              "type": "particle_smoke",
+              "category": "visual"
+            },
+            {
+              "intensity": 0.75,
+              "duration_ms": 3500,
+              "delay_ms": 1150,
+              "loop": true,
+              "id": "fx-water_ripple-a9873a0a",
+              "type": "water_ripple",
+              "category": "visual"
             }
           ]
         },
@@ -91,7 +137,17 @@
           "type": "paragraph",
           "text": "Lão Bảy khẽ rùng mình, đôi bàn tay gầy guộc châm lại bấc ngọn đèn dầu trên bàn gỗ lim đã lên nước bóng lộn. Tiếng mưa rơi ràn rạt bên ngoài dường như đang cố gắng vùi dập tất cả mọi thanh âm của sự sống con người. Lão khoác lên mình chiếc áo mưa cánh dơi dày cộm bằng vải bạt, với lấy chiếc đèn bão rồi từng bước leo lên cầu thang xoắn ốc bằng gang đúc dẫn lên đỉnh tháp. Ngọn thấu kính Fresnel khổng lồ xoay tròn nhịp nhàng, phóng ra luồng ánh sáng vàng rực quét ngang màn mưa mịt mù, cố gắng soi rọi luồng tàu cho bất kỳ con thuyền xấu số nào còn lạc lối ngoài khơi xa.",
           "mood_tag": "căng thẳng",
-          "effects": []
+          "effects": [
+            {
+              "intensity": 0.8,
+              "duration_ms": 3500,
+              "delay_ms": 0,
+              "loop": true,
+              "id": "fx-candle_flicker-9a7eab3e",
+              "type": "candle_flicker",
+              "category": "visual"
+            }
+          ]
         },
         {
           "id": "ch1-block-006",
@@ -107,32 +163,23 @@
           "mood_tag": "kinh dị / cao trào",
           "effects": [
             {
-              "id": "eff-145254",
-              "type": "audio",
-              "category": "audio",
-              "intensity": 0.85,
+              "intensity": 1,
               "duration_ms": 1200,
-              "delay_ms": 500,
+              "delay_ms": 0,
               "loop": false,
-              "audio_src": "/audio/thunder-rumble.mp3"
-            },
-            {
-              "id": "eff-157179",
-              "type": "wind_gust",
-              "category": "motion",
-              "intensity": 1,
-              "duration_ms": 1500,
-              "delay_ms": 0,
-              "loop": false
-            },
-            {
-              "id": "eff-171157",
+              "id": "fx-lightning_flash-b0fdd389",
               "type": "lightning_flash",
-              "category": "visual",
+              "category": "visual"
+            },
+            {
               "intensity": 1,
-              "duration_ms": 1200,
-              "delay_ms": 0,
-              "loop": false
+              "duration_ms": 2000,
+              "delay_ms": 1000,
+              "loop": false,
+              "audio_src": "/audio/thunder-rumble.mp3",
+              "id": "fx-audio-6932e35b",
+              "type": "audio",
+              "category": "audio"
             }
           ]
         },
@@ -150,13 +197,13 @@
           "mood_tag": "sợ hãi",
           "effects": [
             {
-              "id": "eff-261675",
-              "type": "text_shake",
-              "category": "visual",
               "intensity": 0.65,
               "duration_ms": 1000,
               "delay_ms": 0,
-              "loop": false
+              "loop": false,
+              "id": "fx-text_shake-af9626cf",
+              "type": "text_shake",
+              "category": "visual"
             }
           ]
         },
@@ -167,7 +214,8 @@
           "mood_tag": "lơ lửng / bí ẩn",
           "effects": []
         }
-      ]
+      ],
+      "status": "published"
     },
     {
       "id": "ch2",
@@ -277,7 +325,8 @@
           "mood_tag": "kết thúc hồi hộp",
           "effects": []
         }
-      ]
+      ],
+      "status": "published"
     },
     {
       "id": "ch3",
@@ -351,7 +400,8 @@
             }
           ]
         }
-      ]
+      ],
+      "status": "published"
     },
     {
       "id": "ch4",
@@ -439,7 +489,8 @@
             }
           ]
         }
-      ]
+      ],
+      "status": "published"
     },
     {
       "id": "ch5",
@@ -520,7 +571,8 @@
             }
           ]
         }
-      ]
+      ],
+      "status": "published"
     }
   ]
 }

@@ -1,37 +1,59 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef } from "react";
+import { calculateScrollProgress } from "@/lib/reader/readerMetrics";
 
 export default function ProgressBar() {
-  const [progress, setProgress] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const fillRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const calculateScroll = () => {
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight - windowHeight;
-      if (documentHeight <= 0) return setProgress(0);
+    let animationFrame = 0;
 
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const pct = Math.min(100, Math.max(0, (scrollTop / documentHeight) * 100));
-      setProgress(pct);
+    const updateProgress = () => {
+      animationFrame = 0;
+      const progress = calculateScrollProgress(
+        window.scrollY || document.documentElement.scrollTop,
+        document.documentElement.scrollHeight,
+        window.innerHeight
+      );
+      fillRef.current?.style.setProperty("transform", `scaleX(${progress})`);
+      trackRef.current?.setAttribute(
+        "aria-valuenow",
+        String(Math.round(progress * 100))
+      );
     };
 
-    window.addEventListener("scroll", calculateScroll, { passive: true });
-    calculateScroll();
+    const scheduleUpdate = () => {
+      if (animationFrame) return;
+      animationFrame = window.requestAnimationFrame(updateProgress);
+    };
 
-    return () => window.removeEventListener("scroll", calculateScroll);
+    const resizeObserver = new ResizeObserver(scheduleUpdate);
+    resizeObserver.observe(document.documentElement);
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    scheduleUpdate();
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
   }, []);
 
   return (
-    <div className="progress-bar-track">
-      <div
-        className="progress-bar-fill"
-        style={{ width: `${progress}%` }}
-        role="progressbar"
-        aria-valuenow={Math.round(progress)}
-        aria-valuemin={0}
-        aria-valuemax={100}
-      />
+    <div
+      ref={trackRef}
+      className="progress-bar-track"
+      role="progressbar"
+      aria-label="Tiến trình đọc chương"
+      aria-valuenow={0}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    >
+      <div ref={fillRef} className="progress-bar-fill" aria-hidden="true" />
     </div>
   );
 }

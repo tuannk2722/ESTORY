@@ -1,7 +1,12 @@
 import { notFound } from "next/navigation";
-import { storyRepository } from "@/lib/repositories";
+import {
+  sceneLibraryRepository,
+  sceneRepository,
+  storyRepository,
+} from "@/lib/repositories";
 import ReaderPane from "@/components/reader/ReaderPane";
 import ReaderScreenHeader from "@/components/reader/ReaderScreenHeader";
+import ProgressBar from "@/components/reader/ProgressBar";
 
 interface ReaderPageProps {
   params: Promise<{ storyId: string; chapterId: string }>;
@@ -9,7 +14,7 @@ interface ReaderPageProps {
 
 export default async function ReaderPage({ params }: ReaderPageProps) {
   const { storyId, chapterId } = await params;
-  const story = await storyRepository.getById(storyId);
+  const story = await storyRepository.getPublicById(storyId);
 
   if (!story) {
     notFound();
@@ -30,9 +35,17 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
       ? sortedChapters[currentChapterIndex + 1]
       : null;
   const isLastChapter = currentChapterIndex === sortedChapters.length - 1;
+  const [scenes, backgrounds, palettes] = await Promise.all([
+    sceneRepository.getByChapterId(chapter.id),
+    sceneLibraryRepository.getBackgrounds(),
+    sceneLibraryRepository.getPalettes(),
+  ]);
 
   return (
     <div className="reader-screen min-h-screen bg-[#05070F] text-[#F8FAFC] transition-colors duration-300">
+
+      <ProgressBar />
+
       {/* Header thanh công cụ đọc */}
       <ReaderScreenHeader
         storyId={story.id}
@@ -48,10 +61,11 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
           prevChapterId={prevChapter?.id}
           nextChapterId={nextChapter?.id}
           isLastChapter={isLastChapter}
-          isPreview="false"
+          scenes={scenes}
+          sceneLibrary={{ backgrounds, palettes, scenePresets: [] }}
+          isPreview={false}
         />
       </div>
     </div>
   );
 }
-

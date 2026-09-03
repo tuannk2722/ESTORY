@@ -6,7 +6,7 @@ import { Bookmark } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function BookmarksLibraryPage() {
-  const stories = await storyRepository.getAll();
+  const stories = await storyRepository.getAllPublic();
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] transition-colors duration-300">

@@ -10,4 +10,5 @@ export interface SceneRepository {
   getByChapterId(chapterId: string): Promise<Scene[]>;
   save(scene: Scene): Promise<void>;
   delete(sceneId: string): Promise<void>;
+  replaceChapterScenes(chapterId: string, scenes: Scene[]): Promise<void>;
 }

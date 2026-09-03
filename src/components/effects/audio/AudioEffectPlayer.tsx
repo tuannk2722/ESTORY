@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { Howl } from "howler";
 import { EffectComponentProps } from "../EffectRegistry";
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
+import { calculateEffectVolume } from "@/lib/reader/readerMetrics";
 
 export default function AudioEffectPlayer({
   config,
@@ -43,7 +44,15 @@ export default function AudioEffectPlayer({
       return;
     }
 
-    const targetVolume = Math.max(0.05, Math.min(1.0, (config.intensity ?? 0.8) * intensityMultiplier));
+    const targetVolume = calculateEffectVolume(
+      config.intensity,
+      intensityMultiplier
+    );
+
+    if (targetVolume === 0) {
+      soundRef.current?.stop();
+      return;
+    }
 
     try {
       // Nếu đổi file audio hoặc chưa có Howl instance
@@ -60,10 +69,10 @@ export default function AudioEffectPlayer({
           loop: !!config.loop,
           html5: false, // Dùng Web Audio API cho hiệu ứng SFX độ trễ thấp
           format: ["mp3", "wav", "ogg"],
-          onloaderror: (_id, error) => {
-            console.info("Audio effect placeholder loaded:", config.audio_src, error);
+          onloaderror: () => {
+            console.info("Audio effect placeholder could not be loaded:", config.audio_src);
           },
-          onplayerror: (_id, error) => {
+          onplayerror: () => {
             newSound.once("unlock", () => {
               newSound.play();
             });

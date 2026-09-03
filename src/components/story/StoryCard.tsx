@@ -1,27 +1,32 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Bookmark, Sparkles, User } from "lucide-react";
 import { Story } from "@/types/story";
 import { settingsStore } from "@/lib/settingsStore";
+import { useHydrated } from "@/hooks/useHydrated";
 
 export interface StoryCardProps {
   story: Story;
 }
 
 export default function StoryCard({ story }: StoryCardProps) {
-  const [isBookmarked, setIsBookmarked] = useState(false);
-
-  useEffect(() => {
-    setIsBookmarked(settingsStore.isBookmarked(story.id));
-  }, [story.id]);
+  const isHydrated = useHydrated();
+  const [bookmarkOverride, setBookmarkOverride] = useState<{
+    storyId: string;
+    value: boolean;
+  } | null>(null);
+  const isBookmarked =
+    bookmarkOverride?.storyId === story.id
+      ? bookmarkOverride.value
+      : isHydrated && settingsStore.isBookmarked(story.id);
 
   const handleToggleBookmark = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const nextState = settingsStore.toggleBookmark(story.id);
-    setIsBookmarked(nextState);
+    setBookmarkOverride({ storyId: story.id, value: nextState });
   };
 
   return (

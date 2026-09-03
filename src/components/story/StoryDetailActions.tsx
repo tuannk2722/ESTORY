@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { Play, Bookmark, ArrowRight } from "lucide-react";
 import { Story, Chapter } from "@/types/story";
 import { settingsStore } from "@/lib/settingsStore";
-import { ReadingProgress } from "@/types/settings";
+import { useHydrated } from "@/hooks/useHydrated";
+import { resolvePublicReadingTarget } from "@/lib/reader/publicReadingTarget";
 
 export interface StoryDetailActionsProps {
   story: Story;
@@ -16,32 +17,34 @@ export default function StoryDetailActions({
   story,
   firstChapter,
 }: StoryDetailActionsProps) {
-  const [progress, setProgress] = useState<ReadingProgress | null>(null);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-
-  useEffect(() => {
+  const isHydrated = useHydrated();
+  const [bookmarkOverride, setBookmarkOverride] = useState<boolean | null>(null);
+  const readingTarget = useMemo(() => {
+    if (!isHydrated) return null;
     const resume = settingsStore.getResumeReading(story.id);
-    if (resume) {
-      setProgress({
-        story_id: story.id,
-        chapter_id: resume.chapter_id,
-        block_id: resume.block_id,
-        status: "reading",
-        updated_at: new Date(resume.updated_at).toISOString(),
-      });
-    } else {
-      setProgress(settingsStore.getProgress(story.id));
-    }
-    setIsBookmarked(settingsStore.isBookmarked(story.id));
-  }, [story.id]);
+    const progress = settingsStore.getProgress(story.id);
+
+    return resolvePublicReadingTarget(
+      story.chapters,
+      resume && { chapterId: resume.chapter_id, blockId: resume.block_id },
+      progress && {
+        chapterId: progress.chapter_id,
+        blockId: progress.block_id,
+      }
+    );
+  }, [isHydrated, story.chapters, story.id]);
+  const isBookmarked =
+    bookmarkOverride ?? (isHydrated && settingsStore.isBookmarked(story.id));
 
   const handleToggleBookmark = () => {
     const next = settingsStore.toggleBookmark(story.id);
-    setIsBookmarked(next);
+    setBookmarkOverride(next);
   };
 
-  const continueUrl = progress
-    ? `/stories/${story.id}/${progress.chapter_id}#${progress.block_id}`
+  const continueUrl = readingTarget
+    ? `/stories/${story.id}/${readingTarget.chapterId}${
+        readingTarget.blockId ? `#${readingTarget.blockId}` : ""
+      }`
     : firstChapter
     ? `/stories/${story.id}/${firstChapter.id}`
     : null;
@@ -54,7 +57,7 @@ export default function StoryDetailActions({
           href={continueUrl}
           className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-ui font-semibold transition-all duration-200 shadow-lg hover:shadow-blue-500/25 min-h-[44px]"
         >
-          {progress ? (
+          {readingTarget ? (
             <>
               <ArrowRight className="w-5 h-5" />
               <span>Đọc Tiếp</span>

@@ -12,7 +12,7 @@ interface StoryDetailPageProps {
 
 export default async function StoryDetailPage({ params }: StoryDetailPageProps) {
   const { storyId } = await params;
-  const story = await storyRepository.getById(storyId);
+  const story = await storyRepository.getPublicById(storyId);
 
   if (!story) {
     notFound();

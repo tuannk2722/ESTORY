@@ -1,30 +1,48 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { Story } from "@/types/story";
 import { settingsStore } from "@/lib/settingsStore";
 import { ReadingProgress } from "@/types/settings";
 import { ArrowRight, BookOpen, Clock, Sparkles } from "lucide-react";
+import { useHydrated } from "@/hooks/useHydrated";
+import { resolvePublicReadingTarget } from "@/lib/reader/publicReadingTarget";
 
 export interface ReadingListClientProps {
   stories: Story[];
 }
 
 export default function ReadingListClient({ stories }: ReadingListClientProps) {
-  const [progressList, setProgressList] = useState<ReadingProgress[]>([]);
-  const [isMounted, setIsMounted] = useState(false);
+  const isHydrated = useHydrated();
+  const progressList = useMemo<ReadingProgress[]>(
+    () =>
+      isHydrated
+        ? settingsStore
+            .getAllProgress()
+            .filter((progress) => progress.status === "reading")
+            .filter((progress) => {
+              const story = stories.find(
+                (candidate) => candidate.id === progress.story_id
+              );
+              return Boolean(
+                story &&
+                  resolvePublicReadingTarget(story.chapters, {
+                    chapterId: progress.chapter_id,
+                    blockId: progress.block_id,
+                  })
+              );
+            })
+            .sort(
+              (a, b) =>
+                new Date(b.updated_at).getTime() -
+                new Date(a.updated_at).getTime()
+            )
+        : [],
+    [isHydrated, stories]
+  );
 
-  useEffect(() => {
-    const all = settingsStore.getAllProgress();
-    const reading = all
-      .filter((p) => p.status === "reading")
-      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-    setProgressList(reading);
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) {
+  if (!isHydrated) {
     return (
       <div className="glass-card p-12 text-center text-[var(--color-muted-foreground)]">
         Đang tải tiến trình đọc...
@@ -54,18 +72,27 @@ export default function ReadingListClient({ stories }: ReadingListClientProps) {
     <div className="space-y-4">
       {progressList.map((prog) => {
         const story = stories.find((s) => s.id === prog.story_id);
-        const chapter = story?.chapters.find((ch) => ch.id === prog.chapter_id);
+        const readingTarget = resolvePublicReadingTarget(
+          story?.chapters ?? [],
+          { chapterId: prog.chapter_id, blockId: prog.block_id }
+        );
+        const chapter = story?.chapters.find(
+          (ch) => ch.id === readingTarget?.chapterId
+        );
         const storyTitle = story?.title || prog.story_id;
-        const chapterTitle = chapter?.title || prog.chapter_id;
+        const chapterTitle = chapter?.title || readingTarget?.chapterId;
 
         // Tính % tiến trình ước lượng dựa trên vị trí block trong chapter
         let progressPct = 0;
         if (chapter && chapter.blocks.length > 0) {
-          const blockIndex = chapter.blocks.findIndex((b) => b.id === prog.block_id);
+          const blockIndex = chapter.blocks.findIndex(
+            (b) => b.id === readingTarget?.blockId
+          );
           const chapterIndex =
             story?.chapters
+              .slice()
               .sort((a, b) => a.order - b.order)
-              .findIndex((ch) => ch.id === prog.chapter_id) ?? 0;
+              .findIndex((ch) => ch.id === readingTarget?.chapterId) ?? 0;
           const totalChapters = story?.chapters.length ?? 1;
           // Tiến trình tổng = (chương hiện tại / tổng chương) + (block / blocks * 1/tổng chương)
           const chapterProgress =
@@ -78,7 +105,9 @@ export default function ReadingListClient({ stories }: ReadingListClientProps) {
         return (
           <Link
             key={prog.story_id}
-            href={`/stories/${prog.story_id}/${prog.chapter_id}#${prog.block_id}`}
+            href={`/stories/${prog.story_id}/${readingTarget?.chapterId}${
+              readingTarget?.blockId ? `#${readingTarget.blockId}` : ""
+            }`}
             className="group block glass-card p-5 md:p-6 rounded-xl border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-all duration-300 bg-[var(--color-card)]/80 hover:bg-[var(--color-card)] hover:-translate-y-0.5 hover:shadow-lg cursor-pointer space-y-3"
           >
             {/* Header: Tiêu đề bên trái, Badge & Thời gian flex justify-end trên Desktop */}

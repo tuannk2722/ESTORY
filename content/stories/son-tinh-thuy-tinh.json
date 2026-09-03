@@ -23,18 +23,7 @@
           "type": "heading",
           "text": "Hồi I: Cung Điện Phong Châu — Kén Rể Mỵ Nương",
           "mood_tag": "hoàng gia",
-          "effects": [
-            {
-              "id": "eff-498220",
-              "type": "audio",
-              "category": "audio",
-              "intensity": 0.85,
-              "duration_ms": 1200,
-              "delay_ms": 0,
-              "loop": true,
-              "audio_src": "/audio/gentle_rain_falling.mp3"
-            }
-          ]
+          "effects": []
         },
         {
           "id": "st-b02",
@@ -43,19 +32,29 @@
           "mood_tag": "tươi sáng",
           "effects": [
             {
-              "id": "eff-st-02",
-              "type": "bg_color_shift",
-              "category": "visual",
               "intensity": 0.7,
-              "duration_ms": 2500,
-              "delay_ms": 0
+              "duration_ms": 3500,
+              "delay_ms": 0,
+              "loop": true,
+              "id": "fx-particle_leaves-6b7c6b9f",
+              "type": "particle_leaves",
+              "category": "visual"
+            },
+            {
+              "intensity": 1,
+              "duration_ms": 1500,
+              "delay_ms": 0,
+              "loop": true,
+              "id": "fx-wind_gust-de798273",
+              "type": "wind_gust",
+              "category": "motion"
             }
           ]
         },
         {
           "id": "st-b03",
           "type": "paragraph",
-          "text": "Mỵ Nương được vua cha yêu thương rất mực. Nhà vua muốn kén cho nàng một người chồng thật xứng đáng.",
+          "text": "Mỵ Nương được vua cha yêu thương rất mực. Nhà vua muốn kén cho nàng một người chồng thật xứng đáng. mưa\n",
           "mood_tag": "trang trọng",
           "effects": []
         },
@@ -64,14 +63,23 @@
           "type": "paragraph",
           "text": "Một hôm có hai chàng trai đến, xin ra mắt nhà vua để cầu hôn. Một người ở vùng núi Ba Vì, tuấn tú và tài giỏi khác thường: chỉ tay về phía đông, phía đông biến thành đồng lúa xanh, chỉ tay về phía tây, phía tây mọc lên hàng dãy núi. Nhân dân trong vùng gọi chàng là Sơn Tinh.",
           "mood_tag": "kỳ ảo / non cao",
+          "effects": []
+        },
+        {
+          "id": "st-b06",
+          "type": "paragraph",
+          "text": "Một người là chúa của miền non cao, một người là chúa của vùng nước thẳm, cả hai đều xứng đáng làm rể vua Hùng cả. Hùng Vương băn khoăn không biết nhận lời ai, từ chối ai. Nhà vua cho mời các quan lạc hầu vào bàn mà vẫn không tìm được kế hay.",
+          "mood_tag": "băn khoăn",
           "effects": [
             {
-              "id": "eff-st-04",
-              "type": "text_grow",
-              "category": "visual",
-              "intensity": 0.8,
-              "duration_ms": 2000,
-              "delay_ms": 0
+              "intensity": 0.5,
+              "duration_ms": 0,
+              "delay_ms": 0,
+              "loop": true,
+              "audio_src": "/audio/thunder-rumble.mp3",
+              "id": "fx-audio-2d36f7fa",
+              "type": "audio",
+              "category": "audio"
             }
           ]
         },
@@ -80,237 +88,31 @@
           "type": "paragraph",
           "text": "Còn một người ở mãi tận miền biển Đông tài giỏi cũng không kém: gọi gió, gió đến, hò ma, ma tới – Chàng này tên gọi là Thủy Tinh.",
           "mood_tag": "huyền bí / biển sâu",
-          "effects": [
-            {
-              "id": "eff-st-05a",
-              "type": "bg_color_shift",
-              "category": "visual",
-              "intensity": 0.75,
-              "duration_ms": 2000,
-              "delay_ms": 0
-            },
-            {
-              "id": "eff-st-05b",
-              "type": "text_shake",
-              "category": "visual",
-              "intensity": 0.6,
-              "duration_ms": 1000,
-              "delay_ms": 0
-            }
-          ]
-        },
-        {
-          "id": "st-b06",
-          "type": "paragraph",
-          "text": "Một người là chúa của miền non cao, một người là chúa của vùng nước thẳm, cả hai đều xứng đáng làm rể vua Hùng cả. Hùng Vương băn khoăn không biết nhận lời ai, từ chối ai. Nhà vua cho mời các quan lạc hầu vào bàn mà vẫn không tìm được kế hay.",
-          "mood_tag": "băn khoăn",
           "effects": []
         },
         {
           "id": "st-b07",
           "type": "dialogue",
-          "text": "Cuối cùng, Hùng Vương phán rằng: \"Hai người đều vừa ý ta cả, nhưng ta chỉ có một người con gái, biết gả cho người nào? Ngày mai, nếu ai đem đồ sính lễ đến đây trước: một trăm ván cơm nếp, hai trăm nệp bánh chưng, voi chín ngà, gà chín cựa, ngựa chín hồng mao, thì được rước dâu về.\"",
+          "text": "Cuối cùng, Hùng Vương phán rằng: \"Hai người đều vừa ý ta cả, nhưng ta chỉ có một người con gái, biết gả cho người nào? Ngày mai, nếu ai đem đồ sính lễ đến đây trước: một trăm ván cơm nếp, hai trăm nệp bánh chưng, voi chín ngà, gà chín cựa, ngựa chín hồng mao, thì được rước dâu về.\" mưa",
           "mood_tag": "thách cưới",
-          "effects": [
-            {
-              "id": "eff-st-07",
-              "type": "text_grow",
-              "category": "visual",
-              "intensity": 0.75,
-              "duration_ms": 2200,
-              "delay_ms": 0
-            }
-          ]
+          "effects": []
         },
         {
           "id": "st-b08",
           "type": "paragraph",
           "text": "Sáng sớm hôm sau, Sơn Tinh đã đem đầy đủ lễ vật đến trước và được phép đưa dâu về núi.",
           "mood_tag": "rước dâu",
-          "effects": [
-            {
-              "id": "eff-st-08",
-              "type": "bg_color_shift",
-              "category": "visual",
-              "intensity": 0.65,
-              "duration_ms": 2000,
-              "delay_ms": 0
-            }
-          ]
+          "effects": []
         },
         {
           "id": "st-b09",
           "type": "paragraph",
           "text": "Thủy Tinh đến sau, không lấy được vợ, đùng đùng nổi giận, đem quân đuổi theo, một hai đòi cướp lại Mỵ Nương.",
           "mood_tag": "phẫn nộ",
-          "effects": [
-            {
-              "id": "eff-st-09a",
-              "type": "text_shake",
-              "category": "visual",
-              "intensity": 0.75,
-              "duration_ms": 1200,
-              "delay_ms": 0
-            },
-            {
-              "id": "eff-st-09b",
-              "type": "audio",
-              "category": "audio",
-              "intensity": 0.85,
-              "duration_ms": 1200,
-              "delay_ms": 0,
-              "audio_src": "/audio/thunder-rumble.mp3",
-              "loop": false
-            }
-          ]
-        },
-        {
-          "id": "st-b010",
-          "type": "heading",
-          "text": "Hồi II: Kinh Thiên Động Địa — Thủy Thần Dâng Nước",
-          "mood_tag": "bão tố / xung đột",
-          "effects": [
-            {
-              "id": "eff-st-10",
-              "type": "lightning_flash",
-              "category": "visual",
-              "intensity": 0.95,
-              "duration_ms": 1400,
-              "delay_ms": 0
-            }
-          ]
-        },
-        {
-          "id": "st-b011",
-          "type": "paragraph",
-          "text": "Thủy Tinh hô ma, gọi gió, làm thành dông bão đùng đùng rung chuyển cả đất trời, dâng nước sông lên cuồn cuộn tiến đánh Sơn Tinh. Nước ngập lúa, ngập đồng rồi ngập nhà, ngập cửa.",
-          "mood_tag": "mưa bão / hồng thủy",
-          "effects": [
-            {
-              "id": "eff-st-11a",
-              "type": "screen_shake",
-              "category": "motion",
-              "intensity": 0.9,
-              "duration_ms": 1000,
-              "delay_ms": 100
-            },
-            {
-              "id": "eff-st-11b",
-              "type": "particle_rain",
-              "category": "visual",
-              "intensity": 0.85,
-              "duration_ms": 5000,
-              "delay_ms": 0
-            },
-            {
-              "id": "eff-st-11c",
-              "type": "audio",
-              "category": "audio",
-              "intensity": 0.85,
-              "duration_ms": 10000,
-              "delay_ms": 0,
-              "loop": true,
-              "audio_src": "/audio/gentle_rain_falling.mp3"
-            }
-          ]
-        },
-        {
-          "id": "st-b012",
-          "type": "paragraph",
-          "text": "Sơn Tinh không hề nao núng, dùng phép màu bốc từng quả đồi, di từng dãy núi chặn đứng dòng nước lũ.",
-          "mood_tag": "thần thông / quả cảm",
-          "effects": [
-            {
-              "id": "eff-st-12a",
-              "type": "text_grow",
-              "category": "visual",
-              "intensity": 0.85,
-              "duration_ms": 2000,
-              "delay_ms": 0
-            },
-            {
-              "id": "eff-st-12b",
-              "type": "screen_shake",
-              "category": "motion",
-              "intensity": 0.75,
-              "duration_ms": 800,
-              "delay_ms": 0
-            }
-          ]
-        },
-        {
-          "id": "st-b013",
-          "type": "paragraph",
-          "text": "Nước dâng lên cao bao nhiêu, Sơn Tinh lại làm cho đồi, núi mọc cao lên bấy nhiêu.",
-          "mood_tag": "quyết liệt",
-          "effects": [
-            {
-              "id": "eff-st-13a",
-              "type": "lightning_flash",
-              "category": "visual",
-              "intensity": 0.9,
-              "duration_ms": 1200,
-              "delay_ms": 0
-            },
-            {
-              "id": "eff-st-13b",
-              "type": "bg_color_shift",
-              "category": "visual",
-              "intensity": 0.8,
-              "duration_ms": 2500,
-              "delay_ms": 0
-            }
-          ]
-        },
-        {
-          "id": "st-b014",
-          "type": "paragraph",
-          "text": "Hai bên đánh nhau ròng rã mấy tháng trời liền, cuối cùng Thủy Tinh đuối sức phải rút quân về.",
-          "mood_tag": "chiến thắng",
-          "effects": [
-            {
-              "id": "eff-st-14",
-              "type": "text_shake",
-              "category": "visual",
-              "intensity": 0.6,
-              "duration_ms": 1000,
-              "delay_ms": 0
-            }
-          ]
-        },
-        {
-          "id": "st-b015",
-          "type": "heading",
-          "text": "Hồi III: Bản Trường Ca Ngàn Năm",
-          "mood_tag": "huyền thoại",
-          "effects": [
-            {
-              "id": "eff-st-15",
-              "type": "transition_fade",
-              "category": "transition",
-              "intensity": 0.8,
-              "duration_ms": 1500,
-              "delay_ms": 0
-            }
-          ]
-        },
-        {
-          "id": "st-b016",
-          "type": "paragraph",
-          "text": "Từ đó, oán ngày càng thêm nặng, thù ngày càng thêm sâu, không năm nào Thủy Tinh không làm mưa làm bão, dâng nước lên đánh Sơn Tinh và lần nào Thủy Tinh cũng thua, phải bỏ chạy.",
-          "mood_tag": "sử thi / trường tồn",
-          "effects": [
-            {
-              "id": "eff-st-16",
-              "type": "bg_color_shift",
-              "category": "visual",
-              "intensity": 0.7,
-              "duration_ms": 3000,
-              "delay_ms": 0
-            }
-          ]
+          "effects": []
         }
-      ]
+      ],
+      "status": "published"
     }
   ]
 }

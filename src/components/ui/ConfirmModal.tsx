@@ -13,7 +13,6 @@ import React, {
 import { createPortal } from "react-dom";
 import {
   AlertTriangle,
-  AlertCircle,
   Info,
   CheckCircle2,
   Trash2,

@@ -2,69 +2,37 @@
 // Phase 2: Hiệu ứng Phóng To Chữ — Chữ phồng to đột ngột nhấn mạnh âm thanh khủng khiếp
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { EffectComponentProps } from "../EffectRegistry";
 
 export default function TextGrow({
   config,
   isActive,
 }: EffectComponentProps) {
-  const [active, setActive] = useState(false);
-  const isLoop = !!config.loop;
-
   useEffect(() => {
-    if (!isActive) {
-      setActive(false);
-      const blockEl =
-        document.querySelector(`[data-has-effect*="${config.id}"]`) ||
-        document.querySelector(".story-block.active") ||
-        document.querySelector(".story-block");
-      if (blockEl) {
-        blockEl.classList.remove("scale-[1.05]", "font-semibold");
-      }
-      return;
-    }
+    const blockEl =
+      document.querySelector(`[data-has-effect*="${config.id}"]`) ||
+      document.querySelector(".story-block.active") ||
+      document.querySelector(".story-block");
+    if (!blockEl) return;
 
-    const delay = config.delay_ms || 0;
-    const startTimer = setTimeout(() => {
-      setActive(true);
-      const blockEl =
-        document.querySelector(`[data-has-effect*="${config.id}"]`) ||
-        document.querySelector(".story-block.active") ||
-        document.querySelector(".story-block");
-      if (blockEl) {
-        blockEl.classList.add("scale-[1.05]", "transition-transform", "duration-500", "font-semibold");
-      }
-    }, delay);
-
-    let endTimer: NodeJS.Timeout | null = null;
-    if (!isLoop && config.duration_ms && config.duration_ms > 0) {
-      endTimer = setTimeout(() => {
-        setActive(false);
-        const blockEl =
-          document.querySelector(`[data-has-effect*="${config.id}"]`) ||
-          document.querySelector(".story-block.active") ||
-          document.querySelector(".story-block");
-        if (blockEl) {
-          blockEl.classList.remove("scale-[1.05]", "font-semibold");
-        }
-      }, delay + config.duration_ms);
+    if (isActive) {
+      blockEl.classList.add(
+        "scale-[1.05]",
+        "transition-transform",
+        "duration-500",
+        "font-semibold"
+      );
+    } else {
+      blockEl.classList.remove("scale-[1.05]", "font-semibold");
     }
 
     return () => {
-      clearTimeout(startTimer);
-      if (endTimer) clearTimeout(endTimer);
-      const blockEl =
-        document.querySelector(`[data-has-effect*="${config.id}"]`) ||
-        document.querySelector(".story-block.active") ||
-        document.querySelector(".story-block");
-      if (blockEl) {
-        blockEl.classList.remove("scale-[1.05]", "font-semibold");
-      }
+      blockEl.classList.remove("scale-[1.05]", "font-semibold");
     };
-  }, [isActive, config, isLoop]);
+  }, [isActive, config.id]);
 
-  if (!active) return null;
+  if (!isActive) return null;
 
   return (
     <div

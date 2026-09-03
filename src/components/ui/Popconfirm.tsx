@@ -4,7 +4,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { AlertCircle, Trash2, AlertTriangle, Info, X } from "lucide-react";
+import { Trash2, AlertTriangle, Info, X } from "lucide-react";
 
 export type PopconfirmVariant = "danger" | "warning" | "info";
 
@@ -85,10 +85,7 @@ export default function Popconfirm({
 
   // Cập nhật vị trí khi mở, resize hoặc cuộn trang
   useEffect(() => {
-    if (!isOpen) {
-      setCoords(null);
-      return;
-    }
+    if (!isOpen) return;
 
     updatePosition();
     const animId = requestAnimationFrame(updatePosition);
@@ -155,32 +152,29 @@ export default function Popconfirm({
     }
 
     // Cần xác nhận -> Mở Popconfirm
+    setCoords(null);
     setIsOpen((prev) => !prev);
   };
 
   const handleConfirmClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setCoords(null);
     setIsOpen(false);
     onConfirm();
   };
 
   const handleCancelClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setCoords(null);
     setIsOpen(false);
     if (onCancel) onCancel();
   };
 
   // Clone trigger element để gán ref & onClick
   const triggerElement = React.cloneElement(children, {
-    // @ts-expect-error ref assignment on cloned element
-    ref: (node: HTMLElement | null) => {
-      triggerRef.current = node;
-      const { ref } = children as any;
-      if (typeof ref === "function") ref(node);
-      else if (ref) ref.current = node;
-    },
+    ref: triggerRef,
     onClick: handleTriggerClick,
-  });
+  } as React.HTMLAttributes<HTMLElement> & { ref: React.RefObject<HTMLElement | null> });
 
   const getVariantStyles = () => {
     switch (variant) {
@@ -215,6 +209,8 @@ export default function Popconfirm({
   const popoverNode = isOpen && coords && (
     <div
       ref={popoverRef}
+      role="alertdialog"
+      aria-modal="false"
       style={{
         position: "fixed",
         top: `${coords.top}px`,
@@ -241,7 +237,7 @@ export default function Popconfirm({
         <button
           type="button"
           onClick={handleCancelClick}
-          className="absolute top-2.5 right-2.5 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors cursor-pointer"
+          className="absolute right-1 top-1 flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
           aria-label="Đóng"
         >
           <X className="w-3 h-3" />
@@ -253,14 +249,14 @@ export default function Popconfirm({
         <button
           type="button"
           onClick={handleCancelClick}
-          className="px-2.5 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border/60 text-xs font-medium cursor-pointer transition-colors min-h-[30px]"
+          className="min-h-11 cursor-pointer rounded-lg border border-border/60 bg-secondary px-2.5 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
         >
           {cancelText}
         </button>
         <button
           type="button"
           onClick={handleConfirmClick}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors min-h-[30px] ${variantStyle.btnColor}`}
+          className={`min-h-11 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none ${variantStyle.btnColor}`}
         >
           {confirmText}
         </button>

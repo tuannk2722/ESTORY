@@ -6,12 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/run-typescript-tests.cjs"
   },
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",
-    "@tsparticles/react": "^4.3.2",
-    "@tsparticles/slim": "^4.3.2",
     "clsx": "^2.1.1",
     "framer-motion": "^13.1.1",
     "gsap": "^3.15.0",
@@ -22,8 +22,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "sonner": "^2.0.8",
-    "tailwind-merge": "^3.6.0",
-    "tsparticles": "^4.3.2"
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

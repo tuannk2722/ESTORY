@@ -17,7 +17,7 @@ export default function HapticVibration({
       try {
         const pattern = config.intensity > 0.7 ? [60, 40, 60] : [40];
         navigator.vibrate(pattern);
-      } catch (err) {
+      } catch {
         // Silently ignore if blocked by browser policy
       }
     }

@@ -289,3 +289,6 @@ export function suggestEffectsForText(text: string): EffectSuggestion[] {
     (a, b) => b.confidence - a.confidence
   );
 }
+
+export const detectEffectKeywords = suggestEffectsForText;
+

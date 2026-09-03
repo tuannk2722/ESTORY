@@ -22,8 +22,6 @@ export default function ParticleFire({
   isActive,
   intensityMultiplier = 1,
 }: EffectComponentProps) {
-  if (!isActive) return null;
-
   const actualIntensity = (config.intensity ?? 0.75) * intensityMultiplier;
   const count = Math.max(12, Math.min(32, Math.round(26 * actualIntensity)));
 
@@ -55,6 +53,8 @@ export default function ParticleFire({
       };
     });
   }, []);
+
+  if (!isActive) return null;
 
   const activeSparks = sparks.slice(0, count);
 

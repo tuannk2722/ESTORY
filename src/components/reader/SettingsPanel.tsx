@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   X,
   Moon,
@@ -26,6 +26,52 @@ export interface SettingsPanelProps {
 export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const { settings, updateSettings, setTheme } = useReaderSettings();
   const [isFontOpen, setIsFontOpen] = useState(false);
+  const panelRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab" || !panelRef.current) return;
+
+      const focusable = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+        )
+      );
+      if (focusable.length === 0) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousBodyOverflow;
+      previouslyFocused?.focus();
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -54,17 +100,26 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Drawer Panel */}
-      <aside className="glass-card font-editor relative w-full max-w-md h-full bg-[var(--color-card)]/95 shadow-2xl border-l border-[var(--color-border)] p-6 overflow-y-auto z-10 flex flex-col justify-between animate-fade-in">
+      <aside
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="reader-settings-title"
+        className="glass-card font-editor relative w-full max-w-md h-full bg-[var(--color-card)]/95 shadow-2xl border-l border-[var(--color-border)] p-6 overflow-y-auto z-10 flex flex-col justify-between animate-fade-in"
+      >
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border)]">
-            <h3 className="font-editor text-xl font-bold text-[var(--color-foreground)] flex items-center gap-2">
+            <h3 id="reader-settings-title" className="font-editor text-xl font-bold text-[var(--color-foreground)] flex items-center gap-2">
               <span>Cài Đặt Đọc Truyện</span>
             </h3>
             <button
+              ref={closeButtonRef}
+              type="button"
               onClick={onClose}
               className="p-2 rounded-full hover:bg-[var(--color-muted)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
               aria-label="Đóng bảng cài đặt"
@@ -80,7 +135,9 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             </label>
             <div className="grid grid-cols-3 gap-2">
               <button
+                type="button"
                 onClick={() => setTheme("dark")}
+                aria-pressed={settings.theme === "dark"}
                 className={`flex flex-col items-center gap-2 p-3 rounded-lg border transition-all cursor-pointer min-h-[44px] ${settings.theme === "dark"
                   ? "border-[var(--color-accent)] bg-blue-950/30 text-[var(--color-accent)] font-semibold shadow-sm"
                   : "border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
@@ -91,7 +148,9 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               </button>
 
               <button
+                type="button"
                 onClick={() => setTheme("light")}
+                aria-pressed={settings.theme === "light"}
                 className={`flex flex-col items-center gap-2 p-3 rounded-lg border transition-all cursor-pointer min-h-[44px] ${settings.theme === "light"
                   ? "border-[var(--color-accent)] bg-amber-100/40 text-[var(--color-accent)] font-semibold shadow-sm"
                   : "border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
@@ -102,7 +161,9 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               </button>
 
               <button
+                type="button"
                 onClick={() => setTheme("sepia")}
+                aria-pressed={settings.theme === "sepia"}
                 className={`flex flex-col items-center gap-2 p-3 rounded-lg border transition-all cursor-pointer min-h-[44px] ${settings.theme === "sepia"
                   ? "border-[var(--color-accent)] bg-amber-900/20 text-[var(--color-accent)] font-semibold shadow-sm"
                   : "border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
@@ -122,8 +183,10 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             <div className="grid grid-cols-4 gap-2">
               {(["sm", "md", "lg", "xl"] as const).map((size) => (
                 <button
+                  type="button"
                   key={size}
                   onClick={() => updateSettings({ font_size: size })}
+                  aria-pressed={settings.font_size === size}
                   className={`py-2 rounded-lg border text-sm font-editor transition-all cursor-pointer min-h-[44px] ${settings.font_size === size
                     ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white font-semibold"
                     : "border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
@@ -145,6 +208,9 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               <button
                 type="button"
                 onClick={() => setIsFontOpen(!isFontOpen)}
+                aria-expanded={isFontOpen}
+                aria-haspopup="listbox"
+                aria-controls="reader-font-options"
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer min-h-[44px] ${isFontOpen
                   ? "border-[var(--color-primary)] bg-[var(--color-background)] shadow-xs ring-2 ring-[var(--color-primary)]/20"
                   : "border-[var(--color-border)] bg-[var(--color-background)] hover:border-[var(--color-primary)]/70 hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
@@ -166,18 +232,25 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                     className="fixed inset-0 z-20"
                     onClick={() => setIsFontOpen(false)}
                   />
-                  <div className="absolute left-0 right-0 top-full mt-1.5 p-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)]/95 backdrop-blur-md shadow-xl z-30 space-y-0.5 animate-fade-in">
+                  <div
+                    id="reader-font-options"
+                    role="listbox"
+                    aria-label="Font chữ truyện"
+                    className="absolute left-0 right-0 top-full mt-1.5 p-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)]/95 backdrop-blur-md shadow-xl z-30 space-y-0.5 animate-fade-in"
+                  >
                     {STORY_FONT_OPTIONS.map(({ id, label, className }) => {
                       const isSelected = settings.font_family === id;
                       return (
                         <button
                           key={id}
                           type="button"
+                          role="option"
+                          aria-selected={isSelected}
                           onClick={() => {
                             updateSettings({ font_family: id });
                             setIsFontOpen(false);
                           }}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer min-h-[40px] ${className} ${isSelected
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer min-h-[44px] ${className} ${isSelected
                             ? "bg-[var(--color-primary)] text-white font-medium shadow-xs"
                             : "hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
                             }`}
@@ -275,12 +348,15 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           {settings.effects_enabled && (
             <div className="space-y-2 pt-2 border-t border-[var(--color-border)]">
               <div className="flex justify-between items-center text-sm font-editor">
-                <span className="text-[var(--color-foreground)]">Cường độ hiệu ứng:</span>
+                <label htmlFor="reader-effect-intensity" className="text-[var(--color-foreground)]">
+                  Cường độ hiệu ứng:
+                </label>
                 <span className="font-semibold text-[var(--color-accent)]">
                   {Math.round((settings.intensity_multiplier ?? 1) * 100)}%
                 </span>
               </div>
               <input
+                id="reader-effect-intensity"
                 type="range"
                 min="0"
                 max="100"

@@ -4,6 +4,7 @@ import { Bookmark } from "@/types/bookmark";
 
 export interface ISettingsStore {
   getSettings(): ReaderSettings;
+  getReducedMotionOverride(): boolean | null;
   saveSettings(settings: Partial<ReaderSettings>): ReaderSettings;
   getProgress(storyId: string): ReadingProgress | null;
   getAllProgress(): ReadingProgress[];
@@ -35,6 +36,7 @@ const STORAGE_KEYS = {
   PROGRESS: "story_reading_progress",
   BOOKMARKS: "story_bookmarks",
   RESUME_READING: "story_resume_reading",
+  REDUCED_MOTION_OVERRIDE: "story_reduced_motion_override",
 } as const;
 
 export class LocalStorageSettingsStore implements ISettingsStore {
@@ -57,6 +59,12 @@ export class LocalStorageSettingsStore implements ISettingsStore {
     }
   }
 
+  getReducedMotionOverride(): boolean | null {
+    if (!this.isClient()) return null;
+    const raw = localStorage.getItem(STORAGE_KEYS.REDUCED_MOTION_OVERRIDE);
+    return raw === "true" ? true : raw === "false" ? false : null;
+  }
+
   saveSettings(newSettings: Partial<ReaderSettings>): ReaderSettings {
     const current = this.getSettings();
     const updated: ReaderSettings = {
@@ -71,6 +79,12 @@ export class LocalStorageSettingsStore implements ISettingsStore {
     if (this.isClient()) {
       try {
         localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
+        if (Object.prototype.hasOwnProperty.call(newSettings, "reduced_motion")) {
+          localStorage.setItem(
+            STORAGE_KEYS.REDUCED_MOTION_OVERRIDE,
+            String(Boolean(newSettings.reduced_motion))
+          );
+        }
       } catch (error) {
         console.error("Failed to save settings to localStorage:", error);
       }
