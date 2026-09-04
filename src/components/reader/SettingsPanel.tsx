@@ -188,7 +188,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                   onClick={() => updateSettings({ font_size: size })}
                   aria-pressed={settings.font_size === size}
                   className={`py-2 rounded-lg border text-sm font-editor transition-all cursor-pointer min-h-[44px] ${settings.font_size === size
-                    ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white font-semibold"
+                    ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)] font-semibold"
                     : "border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
                     }`}
                 >
@@ -251,7 +251,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                             setIsFontOpen(false);
                           }}
                           className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer min-h-[44px] ${className} ${isSelected
-                            ? "bg-[var(--color-primary)] text-white font-medium shadow-xs"
+                            ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)] font-medium shadow-xs"
                             : "hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
                             }`}
                         >

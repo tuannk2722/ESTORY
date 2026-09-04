@@ -14,14 +14,22 @@
   --color-foreground:       #F8FAFC; /* Chữ trắng ngà rõ nét */
   --color-card:             #0E1426; /* Nền thẻ mờ Glassmorphism */
   --color-card-foreground:  #F1F5F9;
-  --color-primary:          #3B82F6; /* Xanh hoàng gia */
-  --color-primary-hover:    #2563EB;
+  --color-primary:          #3B82F6; /* Dùng được như text trên nền dark */
+  --color-primary-hover:    #60A5FA;
+  --color-primary-foreground: #0F172A;
   --color-secondary:        #1E293B;
   --color-secondary-foreground: #94A3B8;
   --color-accent:           #E2B714; /* Vàng kim điểm nhấn & Drop Cap */
   --color-accent-hover:     #F0C93A;
+  --color-accent-foreground: #1C1917;
   --color-muted:            #1E293B;
   --color-muted-foreground: #94A3B8; /* Chữ phụ / mô tả */
+  --color-destructive:      #F87171;
+  --color-destructive-foreground: #450A0A;
+  --color-success:          #34D399;
+  --color-success-foreground: #052E16;
+  --color-warning:          #FBBF24;
+  --color-warning-foreground: #451A03;
   --color-border:           rgba(255, 255, 255, 0.1);
   --color-ring:             #38BDF8; /* Viền sáng khi focus */
   --color-editor-action:    #2563EB;
@@ -46,12 +54,20 @@
   --color-card-foreground:  #18181B;
   --color-primary:          #2563EB;
   --color-primary-hover:    #1D4ED8;
+  --color-primary-foreground: #FFFFFF;
   --color-secondary:        #E2E8F0;
   --color-secondary-foreground: #475569;
   --color-accent:           #B45309; /* Màu hổ phách */
   --color-accent-hover:     #92400E;
+  --color-accent-foreground: #FFFFFF;
   --color-muted:            #F1F5F9;
-  --color-muted-foreground: #64748B;
+  --color-muted-foreground: #5B677A;
+  --color-destructive:      #B91C1C;
+  --color-destructive-foreground: #FFFFFF;
+  --color-success:          #047857;
+  --color-success-foreground: #FFFFFF;
+  --color-warning:          #92400E;
+  --color-warning-foreground: #FFFFFF;
   --color-border:           #E2E8F0;
   --color-ring:             #2563EB;
   --color-editor-action:    #1D4ED8;
@@ -73,14 +89,22 @@
   --color-foreground:       #2C2416; /* Mực nâu đậm */
   --color-card:             #EAE2CC;
   --color-card-foreground:  #2C2416;
-  --color-primary:          #B45309;
+  --color-primary:          #A54A08;
   --color-primary-hover:    #92400E;
+  --color-primary-foreground: #FFFFFF;
   --color-secondary:        #DDD5BC;
-  --color-secondary-foreground: #786C55;
-  --color-accent:           #D97706;
-  --color-accent-hover:     #B45309;
+  --color-secondary-foreground: #665B45;
+  --color-accent:           #92400E;
+  --color-accent-hover:     #78350F;
+  --color-accent-foreground: #FFFFFF;
   --color-muted:            #E8DFC8;
-  --color-muted-foreground: #786C55;
+  --color-muted-foreground: #665B45;
+  --color-destructive:      #B91C1C;
+  --color-destructive-foreground: #FFFFFF;
+  --color-success:          #047857;
+  --color-success-foreground: #FFFFFF;
+  --color-warning:          #92400E;
+  --color-warning-foreground: #FFFFFF;
   --color-border:           rgba(44, 36, 22, 0.15);
   --color-ring:             #B45309;
   --color-editor-action:    #92400E;
@@ -108,12 +132,23 @@
   --color-card-foreground:    var(--color-card-foreground);
   --color-primary:            var(--color-primary);
   --color-primary-hover:      var(--color-primary-hover);
+  --color-primary-foreground: var(--color-primary-foreground);
   --color-secondary:          var(--color-secondary);
+  --color-secondary-foreground: var(--color-secondary-foreground);
   --color-accent:             var(--color-accent);
+  --color-accent-hover:       var(--color-accent-hover);
+  --color-accent-foreground:  var(--color-accent-foreground);
   --color-muted:              var(--color-muted);
   --color-muted-foreground:   var(--color-muted-foreground);
+  --color-destructive:        var(--color-destructive);
+  --color-destructive-foreground: var(--color-destructive-foreground);
+  --color-success:            var(--color-success);
+  --color-success-foreground: var(--color-success-foreground);
+  --color-warning:            var(--color-warning);
+  --color-warning-foreground: var(--color-warning-foreground);
   --color-border:             var(--color-border);
   --color-ring:               var(--color-ring);
+  --color-overlay:            var(--color-overlay);
   --color-editor-action:      var(--color-editor-action);
   --color-editor-action-hover: var(--color-editor-action-hover);
   --color-editor-action-foreground: var(--color-editor-action-foreground);

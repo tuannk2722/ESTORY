@@ -99,7 +99,7 @@ export default function ResumeReadingModal({
           {/* Nút Chính: Đọc tiếp resume chapter */}
           <button
             onClick={onResume}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-ui font-semibold text-sm transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 cursor-pointer min-h-[44px]"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-foreground)] font-ui font-semibold text-sm transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 cursor-pointer min-h-[44px]"
           >
             <span>Đọc tiếp</span>
             <ArrowRight className="w-4 h-4" />

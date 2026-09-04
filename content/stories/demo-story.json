@@ -23,7 +23,17 @@
           "type": "heading",
           "text": "Phần I: Điềm Báo Ngoài Khơi",
           "mood_tag": "bí ẩn",
-          "effects": []
+          "effects": [
+            {
+              "intensity": 1,
+              "duration_ms": 1200,
+              "delay_ms": 0,
+              "loop": false,
+              "id": "fx-transition_fade-f294efde",
+              "type": "transition_fade",
+              "category": "transition"
+            }
+          ]
         },
         {
           "id": "ch1-block-002",

@@ -59,7 +59,7 @@ export default function ReadingListClient({ stories }: ReadingListClientProps) {
         </p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-ui font-medium text-sm transition-colors shadow-md min-h-[44px]"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-foreground)] font-ui font-medium text-sm transition-colors shadow-md min-h-[44px]"
         >
           <span>Khám phá thư viện truyện</span>
           <ArrowRight className="w-4 h-4" />

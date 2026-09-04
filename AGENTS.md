@@ -1,46 +1,114 @@
-@AGENTS.md
-# Hướng dẫn dự án My Storytelling App
+# My Storytelling App — Agent Instructions
 
-Dự án Web ứng dụng Scroll-based Storytelling cho sách/truyện, xây dựng bằng Next.js 14 (App Router) + TypeScript + Tailwind CSS + GSAP ScrollTrigger.
+Scroll-based storytelling application built with Next.js 16
+(App Router), TypeScript, Tailwind CSS, GSAP and Framer Motion.
 
-## 1. Lệnh thường dùng:
-- Chạy môi trường Dev: `pnpm dev`
-- Build sản phẩm: `pnpm build`
-- Kiểm tra lỗi type: `pnpm run typecheck`
+## 1. Source of Truth
 
-## 2. Nguồn tài liệu bắt buộc tuân thủ (Source of Truth):
-- Mọi logic và kiến trúc BẮT BUỘC phải đọc và tuân thủ các file trong thư mục `docs/`:
-  - Thiết kế & Wireframe: Đọc `docs/04-ui-ux-design.md`
-- Trước khi code một module mới, AI PHẢI đọc file doc tương ứng trước.
+Project behavior, architecture, schemas, UI rules and requirements are
+defined under `docs/`.
 
-## 3. Tiêu chuẩn Thiết kế & UI/UX (UI/UX Pro Max):
-- Sử dụng bảng màu và cặp font chữ chuẩn từ skill `ui-ux-pro-max`.
-- Mọi tương tác click/touch phải có kích thước tối thiểu 44px (`min-h-[44px] min-w-[44px]`).
-- Đảm bảo độ tương phản văn bản đạt chuẩn WCAG AA (tối thiểu 4.5:1).
-- Tôn trọng `@media (prefers-reduced-motion: reduce)` để người đọc không bị say chuyển động.
-- Không dùng emoji làm icon chính, ưu tiên dùng bộ icon SVG (như `lucide-react`).
+Before working on a task:
 
-# 4 — Ghi Chú Cho AI Assistant Khi Làm Việc Với Bộ Tài Liệu Này
+1. Read `docs/00-INDEX.md`.
+2. Use it to identify the documents relevant to the current task.
+3. Read those documents before modifying code.
 
-> Xem `00-INDEX.md` để biết thứ tự ưu tiên và điều hướng. **Đọc file này trước khi bắt đầu bất kỳ task nào**, cùng với `01-tech-stack.md` và `02-data-schema.md`.
+- Do not read the entire documentation set by default.
+- Use `docs/00-INDEX.md` to identify only the documents and sections
+  relevant to the current task.
+- Prefer targeted sections over reading large unrelated files in full.
+- Do not re-read unchanged documentation during the same task unless
+  context recovery or conflict verification requires it.
+- Do not duplicate information from authoritative docs into TASK.md or
+  implementation plans; reference the source instead.
 
----
+- Do not duplicate project documentation in this file.
 
-- Khi bắt đầu 1 task, luôn xác định đang ở **Phase nào** (1, 2, hay 3) và chỉ implement đúng phạm vi Phase đó trừ khi được yêu cầu khác. Tham khảo `05-user-stories-phase1.md`, `06-user-stories-phase2.md`, `07-user-stories-phase3.md`.
-- Khi tạo effect component mới, luôn theo đúng interface `EffectConfig` ở `02-data-schema.md` mục 2.1 và đăng ký vào `EffectRegistry.ts` (xem `03-file-structure.md`).
-- Khi tạo/sửa bất kỳ chỗ nào truy cập dữ liệu truyện hoặc settings, luôn đi qua `StoryRepository`/`settingsStore` — **không bao giờ** gọi thẳng file system hoặc localStorage trong component/page, kể cả ở Phase 1. Xem `11-phase3-technical-roadmap.md` mục 9.2.
-- Khi quyết định màu sắc/font/spacing/motion preset, tra cứu qua skill `ui-ux-pro-max` trước (`04-ui-ux-design.md`) thay vì tự bịa.
-- Khi không chắc 1 quyết định UI/UX nhỏ, tự quyết theo gu thẩm mỹ tốt (có tham khảo skill) và ghi chú lại trong code comment — không cần dừng lại hỏi. Nhưng khi quyết định ảnh hưởng tới **kiến trúc/data schema/Repository interface**, nên hỏi lại trước khi code.
-- Khi thực hiện refactor Phase 3, luôn theo nguyên tắc **strangler pattern** ở `11-phase3-technical-roadmap.md` — không viết lại `/components/reader` hay `/components/effects`, mỗi bước vẫn phải giữ app chạy được (deployable).
-- Trước khi thêm bất kỳ tính năng/thư viện/công nghệ nào không được nêu rõ trong task, kiểm tra `10-out-of-scope.md` để chắc chắn không nằm ngoài phạm vi.
-- Sau khi hoàn thành 1 task, rà lại checklist ở `09-non-functional-requirements.md` (performance, accessibility, responsive, code style, security) trước khi coi là xong.
-- Khi task liên quan tới bối cảnh/màu nền/nhạc nền trải dài nhiều block (không phải hiệu ứng chấm phá 1 block) — kể cả khi bối cảnh đó có nền tự chuyển động (video loop, particle) — đó là **Scene**, không phải **Effect**. Đọc `08-effects-and-scenes.md` mục 8.3 → 8.8 trước khi code, và không nhét logic Scene vào `EffectConfig`/`EffectRegistry.ts`.
-- Khi tạo/sửa 1 `BackgroundAsset` có `motion: "looping"` (video/particle tự chuyển động), luôn bắt buộc kèm `poster_frame` và đảm bảo component render kiểm tra `reduced_motion` để fallback đúng — xem `08-effects-and-scenes.md` mục 8.4.
-- **Phân tầng hiển thị Text-First Z-Index:** Luôn duy trì thứ tự: Văn bản truyện (`z-20`) > Toàn bộ hiệu ứng/hạt (`z-[5]`) > Nền & Palette (`z-0`). Floating Action Dock cố định tại `z-[60]`, Modals tại `z-[80]`, Preview portal tại `z-[90]`, ConfirmModal tại `z-[100]`. Tất cả hiệu ứng hình ảnh/hạt bắt buộc có `pointer-events-none`.
-- Nếu chưa có đủ tham số đầu vào (VD: thiếu `targetAudience`, `genre`, `keyThemes`), hãy hỏi lại user để bổ sung trước khi gọi skill.
+- If the current task conflicts with documented behavior, do not silently
+choose one. Report the conflict or update the documentation when the
+task explicitly introduces a new decision.
 
-- Khi task liên quan tới đăng nhập, navbar theo trạng thái auth, luồng "trở thành author", Author Dashboard, hoặc wizard tạo/sửa truyện — đọc `12-auth-and-author-management.md` trước, kèm wireframe tương ứng ở `04b-page-layouts.md` mục 6–7 và user stories `07-user-stories-phase3.md` US-3.14 → US-3.17. Toàn bộ nhóm này thuộc Phase 3, không lùi về Phase 1–2.
 
----
-← Về `00-INDEX.md` | Trước: `12-auth-and-author-management.md` | (Hết bộ tài liệu)
+## 2. Task Workflow
 
+Before implementation:
+
+- Determine the current project Phase and task scope.
+- Read the relevant documentation.
+- Inspect the existing implementation before proposing changes.
+- Do not implement unrelated improvements outside the requested scope.
+
+For long-running or multi-phase tasks:
+- maintain `.codex/TASK.md` as recoverable temporary task state.
+- update it at meaningful phase boundaries, not after every small edit.
+- keep permanent architectural/domain decisions in project documentation
+- Do not copy large documentation sections, source code, git diffs, or
+conversation history into TASK.md.
+- Before starting a new major phase, ensure the task can be reconstructed
+from TASK.md + authoritative docs + current code/git state.
+
+For small UI/UX implementation details that do not affect architecture,
+schema, or public contracts, make a reasonable decision using the
+project UI/UX guidance without unnecessarily blocking on clarification.
+
+Ask before making an unrequested decision that materially changes:
+- architecture
+- data schema
+- repository contracts
+- public interfaces
+- project scope
+
+
+## 3. Hard Invariants
+
+- Story persistence must go through `StoryRepository`.
+- Settings persistence must go through `settingsStore`.
+- Components/pages must not directly access persistence mechanisms when
+  an approved abstraction exists.
+- Scene and Effect are separate domain concepts. Scene behavior must not
+  be implemented through `EffectConfig` / `EffectRegistry`.
+- Respect the currently documented project Phase and out-of-scope rules.
+- Do not introduce libraries, technologies, or architectural patterns
+  outside the documented stack without explicit task justification.
+- Follow the documented accessibility, responsive, reduced-motion and
+  UI/UX requirements.
+
+
+## 4. Validation
+
+Before considering an implementation task complete:
+
+- Review the relevant non-functional requirements.
+- Run the checks appropriate to the modified scope.
+- At minimum, ensure TypeScript errors have not been introduced.
+- Run build/tests when required by the task or affected subsystem.
+- Inspect `git diff` for unintended changes.
+
+Common commands:
+
+`pnpm dev`
+`pnpm build`
+`pnpm run typecheck`
+
+
+## 5. Context Recovery
+
+Conversation history is not the source of truth for project behavior.
+
+If task context appears incomplete, ambiguous, compacted, or interrupted:
+
+1. Do not guess previous decisions.
+2. Do not immediately modify code.
+3. Read `.codex/TASK.md` if it exists.
+4. Read the authoritative project documents referenced by the task.
+5. Inspect `git status`, `git diff`, and relevant modified files.
+6. Reconstruct the current goal, completed work, remaining work,
+   constraints, and next step.
+7. Report information that conflicts or cannot be verified.
+8. Continue implementation only after task state is sufficiently
+   reconstructed.
+
+Long-term architectural decisions, domain rules, and requirements must
+be persisted in project documentation, not only in conversation history
+or `.codex/TASK.md`.
