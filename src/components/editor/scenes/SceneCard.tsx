@@ -2,11 +2,11 @@
 
 import React from "react";
 import {
-  BackgroundAsset,
-  ColorPalette,
-  Scene,
-  ScenePreset,
-} from "@/types/scene";
+  LegacyBackgroundAsset as BackgroundAsset,
+  LegacyColorPalette as ColorPalette,
+  LegacyScene as Scene,
+  LegacyScenePreset as ScenePreset,
+} from "@/types/scene-legacy";
 import { SceneRangeStatus } from "@/lib/scenes/sceneSelectors";
 import {
   AlertTriangle,

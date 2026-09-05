@@ -3,7 +3,7 @@
 // Re-export compatibility bridge mapping to @/lib/scenes/* and @/lib/effects/*
 
 import { EffectConfig } from "@/types/story";
-import { Scene } from "@/types/scene";
+import { LegacyScene as Scene } from "@/types/scene-legacy";
 import { EFFECT_METADATA } from "@/lib/effects/effectCatalog";
 import { findSceneOverlap } from "@/lib/scenes/sceneRange";
 

@@ -2,24 +2,24 @@
 // Factory functions for creating, initializing, and cloning EffectConfig objects
 
 import { EffectConfig, EffectType } from "@/types/story";
-import { EFFECT_METADATA } from "./effectCatalog";
+import { EFFECT_MANIFEST } from "./effect-manifest";
 import { createEffectId } from "@/lib/editor/ids";
 
 /**
- * Khởi tạo EffectConfig hoàn chỉnh với giá trị mặc định chuẩn từ effectCatalog
+ * Khởi tạo EffectConfig hoàn chỉnh với giá trị mặc định chuẩn từ technical manifest
  */
 export function createEffectConfig(
   type: EffectType,
   overrides?: Partial<EffectConfig>
 ): EffectConfig {
-  const meta = EFFECT_METADATA[type];
+  const meta = EFFECT_MANIFEST[type];
   const id = overrides?.id || createEffectId(type);
 
   return {
-    intensity: overrides?.intensity ?? meta?.defaultIntensity ?? 0.75,
-    duration_ms: overrides?.duration_ms ?? meta?.defaultDurationMs ?? 2000,
-    delay_ms: overrides?.delay_ms ?? meta?.defaultDelayMs ?? 0,
-    loop: overrides?.loop ?? (type === "audio" ? true : false),
+    intensity: overrides?.intensity ?? meta.defaults.intensity,
+    duration_ms: overrides?.duration_ms ?? meta.defaults.duration_ms,
+    delay_ms: overrides?.delay_ms ?? meta.defaults.delay_ms,
+    loop: overrides?.loop ?? meta.defaults.loop,
     audio_src: overrides?.audio_src,
     audio_asset_id: overrides?.audio_asset_id,
     ...overrides,

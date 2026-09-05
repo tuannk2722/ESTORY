@@ -346,6 +346,12 @@ export type BackgroundRenderData =
       kind: "particle_composition";
       composition_key: string;               // phải có trong ParticleCompositionRegistry
       config: Record<string, unknown>;        // validate theo schema của composition_key
+    }
+  | {
+      kind: "radial_gradient";
+      shape: "circle" | "ellipse";
+      center: { x: number; y: number };        // tọa độ chuẩn hóa 0..1
+      stops: Array<{ color: string; position: number }>;
     };
 
 export type BackgroundType = BackgroundRenderData["kind"];
@@ -427,6 +433,7 @@ Quy tắc bất biến:
 - `ScenePreset` mới chỉ được developer seed/import bằng script. Admin được Preview, sửa metadata/thumbnail/status và remove khỏi catalog; admin **không** có preset builder.
 - Background global và Palette có vòng đời `draft → active → archived`. “Remove” là archive mặc định; hard-delete record chỉ khi `activated_at = null`. Storage cleanup vẫn phải reference-audit riêng.
 - Background theo kind phải validate bằng discriminated schema. Không nhận raw CSS hoặc particle JSON tùy ý; particle dùng `composition_key` đã đăng ký trong code.
+- Gradient tuyến tính giữ `kind: "gradient"` + `angle_deg`. Radial dùng `kind: "radial_gradient"`, `shape`, `center` và ≥2 stops có position tăng không giảm trong 0..1; extent cố định `farthest-corner`. Đây là bổ sung đã được duyệt ngày 2026-09-05 để giữ bốn nền radial legacy, thuộc schema version 1 trước khi có dữ liệu snapshot production.
 - Các Scene trong cùng Chapter không chồng lấn. Repository/service nhận cả `storyId` và `chapterId`; không tin `chapterId` đơn lẻ từ client.
 
 Chi tiết render/admin/phân kỳ ở `08-effects-and-scenes.md` mục 8.3 → 8.8; UI ở `04b-page-layouts.md` mục 8. Prisma mapping ở `11-phase3-technical-roadmap.md` mục 9.4b.

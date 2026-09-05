@@ -18,7 +18,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
     const { storyId, chapterId } = await params;
     const [story, scenes] = await Promise.all([
       storyRepository.getById(storyId),
-      sceneRepository.getByChapterId(chapterId),
+      sceneRepository.getLegacyByChapter(storyId, chapterId),
     ]);
 
     if (!story) {

@@ -2,7 +2,7 @@
 // Pure reducer and domain action types for Story Editor State Management
 
 import { Chapter, StoryBlock, EffectConfig } from "@/types/story";
-import { Scene } from "@/types/scene";
+import { LegacyScene as Scene } from "@/types/scene-legacy";
 import { createBlockId } from "./ids";
 import {
   updateScenesAfterBlockDelete,

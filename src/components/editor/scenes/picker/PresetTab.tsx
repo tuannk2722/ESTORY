@@ -4,7 +4,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { ScenePreset, BackgroundAsset, ColorPalette } from "@/types/scene";
+import { LegacyScenePreset as ScenePreset, LegacyBackgroundAsset as BackgroundAsset, LegacyColorPalette as ColorPalette } from "@/types/scene-legacy";
 import {
   Sparkles,
   Eye,

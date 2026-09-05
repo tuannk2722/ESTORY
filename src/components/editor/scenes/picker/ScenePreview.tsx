@@ -4,7 +4,7 @@
 
 import React, { useEffect, useId, useMemo, useRef } from "react";
 import { ArrowLeft, Check, Palette } from "lucide-react";
-import type { BackgroundAsset, ColorPalette, Scene } from "@/types/scene";
+import type { LegacyBackgroundAsset as BackgroundAsset, LegacyColorPalette as ColorPalette } from "@/types/scene-legacy";
 import type { EffectConfig, StoryBlock as StoryBlockType } from "@/types/story";
 import { STORY_FONT_OPTIONS } from "@/types/settings";
 import SceneLayer from "@/components/scenes/SceneLayer";
@@ -12,6 +12,7 @@ import StoryBlock from "@/components/reader/StoryBlock";
 import ReaderPlaybackStatus from "@/components/reader/ReaderPlaybackStatus";
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
 import { useActiveReaderBlock } from "@/hooks/useActiveReaderBlock";
+import { resolveLegacyScene } from "@/lib/scenes/scene-mappers";
 
 export interface ScenePreviewProps {
   isOpen: boolean;
@@ -78,19 +79,19 @@ function ScenePreviewDialog({
     previewBlockIds[0] ?? null
   );
 
-  const previewScene = useMemo<Scene>(() => {
+  const previewRenderConfig = useMemo(() => {
+    if (!background || !palette) return null;
     const audio = ambientAudio?.audio_src ? [ambientAudio] : [];
-
-    return {
+    return resolveLegacyScene({
       id: "scene-picker-live-preview",
       chapter_id: "scene-picker-preview",
       start_block_id: previewBlocks[0]?.id ?? "preview-start",
       end_block_id: previewBlocks.at(-1)?.id ?? "preview-end",
-      background_id: background?.id ?? "",
-      palette_id: palette?.id ?? "",
+      background_id: background.id,
+      palette_id: palette.id,
       effects: [...audio, ...effects],
-    };
-  }, [ambientAudio, background?.id, effects, palette?.id, previewBlocks]);
+    }, [background], [palette]).render_config;
+  }, [ambientAudio, background, effects, palette, previewBlocks]);
 
   const firstParagraphId = previewBlocks.find(
     (block) => block.type === "paragraph"
@@ -206,9 +207,7 @@ function ScenePreviewDialog({
       </header>
 
       <SceneLayer
-        scene={previewScene}
-        backgroundAsset={background}
-        colorPalette={palette}
+        renderConfig={previewRenderConfig}
         reducedMotion={reducedMotion}
       >
         <div id="effect-portal-root" className="pointer-events-none" />

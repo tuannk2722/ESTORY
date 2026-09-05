@@ -5,7 +5,7 @@
 
 import React, { useCallback } from "react";
 import { SceneDraft } from "@/lib/scenes/sceneDraft";
-import { BackgroundAsset, ColorPalette } from "@/types/scene";
+import { LegacyBackgroundAsset as BackgroundAsset, LegacyColorPalette as ColorPalette } from "@/types/scene-legacy";
 import { EffectConfig } from "@/types/story";
 import { BackgroundPicker } from "./BackgroundPicker";
 import { PalettePicker } from "./PalettePicker";

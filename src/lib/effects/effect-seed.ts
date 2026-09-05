@@ -1,0 +1,30 @@
+import type { EffectType } from '@/types/story';
+
+// Initial JSON-era presentation values, preserved for migration and compatibility.
+export const EFFECT_PRESENTATION_SEED = {
+  sunbeam: { label: "Vệt Nắng Xiên (Sunbeam)", description: "Tia nắng vàng ấm áp xiên qua kẽ lá, ánh sáng hoàng hôn bồng bềnh" },
+  candle_flicker: { label: "Ánh Nến Lập Lòe (Candle Flicker)", description: "Quầng lửa ấm áp bập bùng, tàn đóm nến bay lập lòe trong đêm" },
+  floating_clouds: { label: "Mây Trôi Bồng Bềnh (Floating Clouds)", description: "Dải mây trắng và sương khói trôi lơ lửng ngang qua khung cảnh" },
+  water_ripple: { label: "Mặt Nước Gợn Sóng (Water Ripple)", description: "Gợn sóng nước lấp lánh phản quang ánh trăng và ngọc bích" },
+  lightning_flash: { label: "Chớp Sáng (Lightning Flash)", description: "Chớp trắng chói lòa toàn màn hình khi có sấm sét, cao trào" },
+  particle_rain: { label: "Mưa Rơi (Particle Rain)", description: "Hạt mưa rơi xối xả phủ khắp khung đọc truyện" },
+  particle_snow: { label: "Tuyết Rơi (Particle Snow)", description: "Bông tuyết trắng trôi lững lờ trong không khí giá lạnh" },
+  particle_fire: { label: "Tàn Lửa Cháy (Particle Fire)", description: "Đốm lửa và tàn tro bốc lên rực cháy" },
+  particle_smoke: { label: "Khói Sương (Particle Smoke)", description: "Làn khói mờ mịt, sương lạnh trườn qua mặt đá" },
+  particle_fireflies: { label: "Lân Tinh / Đom Đóm", description: "Những đốm sáng lân tinh xanh lục ma mị trôi lơ lửng" },
+  particle_gold: { label: "Bụi Vàng Châu Báu (Gold Sparkles)", description: "Mưa bụi vàng óng ánh và kim cương rơi lấp lánh" },
+  particle_leaves: { label: "Lá Bay Rợp Vườn (Falling Leaves)", description: "Những chiếc lá khế xanh mướt và cánh hoa rơi lượn" },
+  wind_gust: { label: "Luồng Gió Cuộn (Wind Gust)", description: "Cơn gió lốc mạnh cuốn cát bụi khi chim thần cất cánh" },
+  glow_shimmer: { label: "Hào Quang Ngũ Sắc (Glow Shimmer)", description: "Ánh sáng ngũ sắc rực rỡ từ ngọc quý và hang báu" },
+  bg_color_shift: { label: "Đổi Tông Màu Nền", description: "Chuyển sắc nền nhẹ nhàng sang tông u ám hoặc hoàng hôn" },
+  screen_blur: { label: "Mờ Ảo (Screen Blur)", description: "Màn hình mờ dần tạo cảm giác choáng váng, hoa mắt" },
+  text_shake: { label: "Rung Chữ (Text Shake)", description: "Đoạn văn rung lắc nhẹ thể hiện sự sợ hãi, hét lớn" },
+  text_grow: { label: "Phóng To Chữ (Text Grow)", description: "Chữ phồng to đột ngột nhấn mạnh âm thanh khủng khiếp" },
+  text_fade_flashback: { label: "Hồi Ức (Flashback)", description: "Hiệu ứng mờ dần màu sepia thể hiện ký ức năm xưa" },
+  typewriter: { label: "Đánh Máy (Typewriter)", description: "Từng ký tự hiện ra như đang gõ máy chữ hoặc chép nhật ký" },
+  screen_shake: { label: "Rung Màn Hình (Screen Shake)", description: "Toàn bộ khung nhìn rung lắc mạnh khi nổ hoặc sấm giáng" },
+  vibration: { label: "Rung Thiết Bị (Haptic Vibration)", description: "Kích hoạt rung nhẹ trên điện thoại hỗ trợ Vibration API" },
+  transition_fade: { label: "Chuyển Cảnh Mờ (Fade)", description: "Chuyển cảnh mượt mà mở đầu hoặc kết thúc phân đoạn" },
+  transition_page_tear: { label: "Xé Trang (Page Tear)", description: "Hiệu ứng rách giấy/xé trang chuyển sang chương mới" },
+  audio: { label: "Âm Thanh (Audio)", description: "Hiệu ứng âm thanh hoặc nhạc nền cho đoạn văn / bối cảnh" },
+} satisfies Record<EffectType, { label: string; description: string }>;

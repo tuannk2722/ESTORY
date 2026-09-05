@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useMemo } from "react";
-import { Scene, SceneLibraryData } from "@/types/scene";
+import { LegacyScene as Scene, LegacySceneLibraryData as SceneLibraryData } from "@/types/scene-legacy";
 import { StoryBlock } from "@/types/story";
 import { ChevronLeft, ChevronRight, Layers, Plus } from "lucide-react";
 import { buildBlockIndexMap } from "@/lib/scenes/sceneRange";

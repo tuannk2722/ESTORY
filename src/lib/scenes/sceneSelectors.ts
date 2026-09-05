@@ -2,7 +2,7 @@
 // O(1) selectors and lookup map builders for Scenes and Blocks
 
 import { StoryBlock } from "@/types/story";
-import { Scene } from "@/types/scene";
+import { LegacyScene as Scene } from "@/types/scene-legacy";
 import { findSceneOverlap, validateSceneRange } from "./sceneRange";
 
 export interface SceneBlockInfo {

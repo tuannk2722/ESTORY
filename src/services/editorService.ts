@@ -2,13 +2,13 @@
 
 import { createHash } from "node:crypto";
 import { Chapter, EffectConfig, EffectType, StoryBlock } from "@/types/story";
-import { Scene } from "@/types/scene";
+import { LegacyScene as Scene } from "@/types/scene-legacy";
 import {
   sceneLibraryRepository,
   sceneRepository,
   storyRepository,
 } from "@/lib/repositories";
-import { EFFECT_METADATA } from "@/lib/effects/effectCatalog";
+import { EFFECT_MANIFEST } from "@/lib/effects/effect-manifest";
 import {
   buildBlockIndexMap,
   findSceneOverlap,
@@ -103,7 +103,7 @@ function validateEffects(
       effectIds.add(effect.id);
     }
 
-    const metadata = EFFECT_METADATA[effect.type as EffectType];
+    const metadata = EFFECT_MANIFEST[effect.type as EffectType];
     if (!metadata) {
       errors.push(`${label} có loại không được hỗ trợ.`);
     } else if (effect.category !== metadata.category) {
@@ -228,7 +228,7 @@ export async function saveEditorSnapshot(
   return withSaveLock(`${storyId}:${chapterId}`, async () => {
   const [story, existingScenes, backgrounds, palettes, presets] = await Promise.all([
     storyRepository.getById(storyId),
-    sceneRepository.getByChapterId(chapterId),
+    sceneRepository.getLegacyByChapter(storyId, chapterId),
     sceneLibraryRepository.getBackgrounds(),
     sceneLibraryRepository.getPalettes(),
     sceneLibraryRepository.getScenePresets(),
@@ -274,14 +274,15 @@ export async function saveEditorSnapshot(
 
   await storyRepository.save(updatedStory);
   try {
-    await sceneRepository.replaceChapterScenes(chapterId, snapshot.scenes);
+    await sceneRepository.replaceLegacyChapterScenes(storyId, chapterId, snapshot.scenes);
   } catch (error) {
-    const rollback = await Promise.allSettled([
-      storyRepository.save(story),
-      sceneRepository.replaceChapterScenes(chapterId, existingScenes),
-    ]);
-    if (rollback.some((result) => result.status === "rejected")) {
-      console.error("Editor aggregate rollback was incomplete", rollback);
+    try {
+      // Scene membership/ranges are checked against persisted chapter blocks.
+      // Restore those blocks before restoring the old scene ranges.
+      await storyRepository.save(story);
+      await sceneRepository.replaceLegacyChapterScenes(storyId, chapterId, existingScenes);
+    } catch (rollbackError) {
+      console.error("Editor aggregate rollback was incomplete", rollbackError);
     }
     throw error;
   }

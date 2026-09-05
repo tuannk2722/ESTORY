@@ -1,7 +1,7 @@
 // src/lib/scenes/sceneDraft.ts
 // Canonical SceneDraft domain model and round-trip converters between Scene, ScenePreset, and SceneDraft
 
-import { Scene, ScenePreset } from "@/types/scene";
+import { LegacyScene as Scene, LegacyScenePreset as ScenePreset } from "@/types/scene-legacy";
 import { EffectConfig } from "@/types/story";
 import { createSceneId } from "@/lib/editor/ids";
 import { cloneEffectConfig } from "@/lib/effects/effectFactory";

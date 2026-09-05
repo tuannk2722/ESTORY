@@ -36,7 +36,7 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
       : null;
   const isLastChapter = currentChapterIndex === sortedChapters.length - 1;
   const [scenes, backgrounds, palettes] = await Promise.all([
-    sceneRepository.getByChapterId(chapter.id),
+    sceneRepository.getLegacyByChapter(storyId, chapter.id),
     sceneLibraryRepository.getBackgrounds(),
     sceneLibraryRepository.getPalettes(),
   ]);

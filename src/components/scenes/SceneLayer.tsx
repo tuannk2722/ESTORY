@@ -8,26 +8,25 @@ import { useMobileDetect } from "@/hooks/useMobileDetect";
 import { EFFECT_METADATA } from "@/lib/effects/effectCatalog";
 import { isEffectAllowedWithReducedMotion } from "@/lib/effects/effectPlayback";
 import { calculateEffectVolume } from "@/lib/reader/readerMetrics";
-import type { BackgroundAsset, ColorPalette, Scene } from "@/types/scene";
+import type { SceneRenderConfig } from "@/types/scene";
+import { renderConfigToPresentation } from "@/lib/scenes/scene-presentation";
 import SceneAmbientAudio from "./SceneAmbientAudio";
 import SceneBackground from "./SceneBackground";
 
 export interface SceneLayerProps {
-  scene?: Scene | null;
-  backgroundAsset?: BackgroundAsset;
-  colorPalette?: ColorPalette;
+  renderConfig?: SceneRenderConfig | null;
   reducedMotion?: boolean;
   isAudioPaused?: boolean;
   children?: React.ReactNode;
 }
 
 interface SceneVisualEffectsProps {
-  effects: NonNullable<Scene["effects"]>;
+  effects: SceneRenderConfig["ambient_effects"];
   intensityMultiplier: number;
   reducedMotion: boolean;
 }
 
-function createImmediateEffectsMap(effects: NonNullable<Scene["effects"]>) {
+function createImmediateEffectsMap(effects: SceneRenderConfig["ambient_effects"]) {
   return effects.reduce<Record<string, boolean>>((map, effect, index) => {
     if (!effect.delay_ms || effect.delay_ms <= 0) {
       map[effect.id || `${effect.type}-${index}`] = true;
@@ -120,13 +119,18 @@ function SceneVisualEffects({
 
 /** Renders the active scene independently from block-level effects. */
 export default function SceneLayer({
-  scene,
-  backgroundAsset,
-  colorPalette,
+  renderConfig,
   reducedMotion = false,
   isAudioPaused = false,
   children,
 }: SceneLayerProps) {
+  const presentation = useMemo(
+    () => renderConfig ? renderConfigToPresentation(renderConfig) : null,
+    [renderConfig]
+  );
+  const backgroundAsset = presentation?.background;
+  const colorPalette = presentation?.palette;
+  const sceneEffects = renderConfig?.ambient_effects;
   const { settings } = useReaderSettings();
   const isMobile = useMobileDetect();
   const totalIntensityMultiplier =
@@ -134,21 +138,21 @@ export default function SceneLayer({
 
   const audioEffect = useMemo(
     () =>
-      scene?.effects?.find(
+      sceneEffects?.find(
         (effect) => effect.type === "audio" || effect.category === "audio"
       ),
-    [scene?.effects]
+    [sceneEffects]
   );
 
   const enabledVisualEffects = useMemo(
     () =>
-      (scene?.effects ?? []).filter(
+      (sceneEffects ?? []).filter(
         (effect) =>
           effect.type !== "audio" &&
           effect.category !== "audio" &&
           settings.effects_by_category?.[effect.category] !== false
       ),
-    [scene?.effects, settings.effects_by_category]
+    [sceneEffects, settings.effects_by_category]
   );
 
   const playableVisualEffects = useMemo(
@@ -239,14 +243,16 @@ export default function SceneLayer({
               className="absolute inset-0 pointer-events-none"
               style={{
                 background: `radial-gradient(circle at 50% 35%, transparent 15%, ${colorPalette.colors.background_tint} 85%)`,
-                opacity: 0.88,
+                opacity: presentation?.tintOpacity ?? 0.88,
               }}
               aria-hidden="true"
             />
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
-                background: `linear-gradient(to bottom, ${colorPalette.colors.primary}33 0%, transparent 25%, transparent 75%, ${colorPalette.colors.secondary}66 100%)`,
+                background: presentation
+                  ? `linear-gradient(to bottom, color-mix(in srgb, ${colorPalette.colors.primary} 20%, transparent) 0%, transparent 25%, transparent 75%, color-mix(in srgb, ${colorPalette.colors.secondary} 40%, transparent) 100%)`
+                  : `linear-gradient(to bottom, ${colorPalette.colors.primary}33 0%, transparent 25%, transparent 75%, ${colorPalette.colors.secondary}66 100%)`,
               }}
               aria-hidden="true"
             />
@@ -258,7 +264,7 @@ export default function SceneLayer({
       {settings.effects_enabled &&
         playableVisualEffects.length > 0 && (
           <SceneVisualEffects
-            key={`${scene?.id ?? "scene"}:${visualEffectsKey}`}
+            key={visualEffectsKey}
             effects={playableVisualEffects}
             intensityMultiplier={totalIntensityMultiplier}
             reducedMotion={reducedMotion}

@@ -4,7 +4,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { ColorPalette } from "@/types/scene";
+import { LegacyColorPalette as ColorPalette } from "@/types/scene-legacy";
 import { Palette, Check } from "lucide-react";
 import SearchableCombobox, { ComboboxOption } from "@/components/ui/SearchableCombobox";
 

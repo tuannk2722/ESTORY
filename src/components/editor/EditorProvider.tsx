@@ -10,7 +10,7 @@ import React, {
   useMemo,
 } from "react";
 import { Chapter, StoryBlock, EffectConfig } from "@/types/story";
-import { Scene } from "@/types/scene";
+import { LegacyScene as Scene } from "@/types/scene-legacy";
 import {
   EditorState,
   editorReducer,

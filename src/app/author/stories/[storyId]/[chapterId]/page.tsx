@@ -37,7 +37,7 @@ export default async function EditorPage({ params }: EditorPageProps) {
 
   // 3. Preload song song Scenes đúng của targetChapter và Thư viện mẫu Scene
   const [scenes, backgrounds, palettes, scenePresets] = await Promise.all([
-    sceneRepository.getByChapterId(targetChapter.id),
+    sceneRepository.getLegacyByChapter(storyId, targetChapter.id),
     sceneLibraryRepository.getBackgrounds(),
     sceneLibraryRepository.getPalettes(),
     sceneLibraryRepository.getScenePresets(),

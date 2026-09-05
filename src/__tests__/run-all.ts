@@ -1,5 +1,13 @@
 import "./reader-metrics.test";
 import "./public-access.test";
 import "./effect-playback.test";
+import "./effect-manifest.test";
+import "./scene-contracts.test";
+import { runSceneRepositoryTests } from "./scene-repository.test";
 
-console.log("Reader, effect playback, and public-access tests completed successfully");
+runSceneRepositoryTests().then(() => {
+  console.log("All Reader, Effect, Scene and repository tests completed successfully");
+}).catch((error: unknown) => {
+  console.error(error);
+  process.exitCode = 1;
+});

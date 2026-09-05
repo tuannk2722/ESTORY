@@ -10,7 +10,7 @@
 
 Toàn bộ nội dung file này thuộc **Phase 3**, vì đều cần danh tính người dùng thật (`AppUser`, `Role`) và quyền sở hữu truyện (`authorId`) — những thứ **chưa tồn tại** ở Phase 1–2 (`02-data-schema.md` mục 2.5: `types/user.ts` "CHƯA dùng ở Phase 1–2"). 
 
-**Không tự ý lùi các trang mô tả dưới đây về Phase 1–2** — nếu 1 task yêu cầu làm sớm hơn (VD: demo UI tĩnh không cần auth thật), phải hỏi lại trước khi code, vì đây là quyết định ảnh hưởng kiến trúc (xem `14-ai-assistant-guidelines.md`).
+**Không tự ý lùi các trang mô tả dưới đây về Phase 1–2** — nếu 1 task yêu cầu làm sớm hơn (VD: demo UI tĩnh không cần auth thật), phải hỏi lại trước khi code, vì đây là quyết định ảnh hưởng kiến trúc.
 
 ---
 
@@ -186,4 +186,4 @@ Khớp `IntegrationsSection.tsx` (`03-file-structure.md`), hiện trong `Profile
 - **Không có bước "xin phê duyệt" nào khác:** không giống luồng "trở thành author" (mục 12.2, tự nâng role), connect Freesound là hành động app-level đơn thuần, không ảnh hưởng `Role`.
 
 ---
-← Về `00-INDEX.md` | Trước: `11-phase3-technical-roadmap.md` | Tiếp theo: `14-ai-assistant-guidelines.md`
+← Về `00-INDEX.md` | Trước: `11-phase3-technical-roadmap.md`

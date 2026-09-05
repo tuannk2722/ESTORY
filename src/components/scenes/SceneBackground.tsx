@@ -4,7 +4,8 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { BackgroundAsset } from "@/types/scene";
+import { LegacyBackgroundAsset as BackgroundAsset } from "@/types/scene-legacy";
+import { isParticleCompositionKey, PARTICLE_COMPOSITION_REGISTRY } from "@/lib/scenes/particle-composition-registry";
 
 export interface SceneBackgroundProps {
   asset?: BackgroundAsset;
@@ -175,7 +176,9 @@ export default function SceneBackground({
             className="w-full h-full"
             style={{
               background:
-                "radial-gradient(ellipse at center, #0f172a 0%, #020617 100%)",
+                isParticleCompositionKey(asset.value)
+                  ? PARTICLE_COMPOSITION_REGISTRY[asset.value].background
+                  : "radial-gradient(ellipse at center, #0f172a 0%, #020617 100%)",
             }}
           />
         </div>

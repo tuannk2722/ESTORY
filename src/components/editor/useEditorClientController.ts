@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Story } from "@/types/story";
-import { Scene, SceneLibraryData } from "@/types/scene";
+import { LegacyScene as Scene, LegacySceneLibraryData as SceneLibraryData } from "@/types/scene-legacy";
 import {
   buildBlockIndexMap,
   findSceneOverlap,

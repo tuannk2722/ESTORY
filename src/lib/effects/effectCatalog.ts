@@ -1,33 +1,9 @@
-// src/lib/effects/effectCatalog.ts
-// Shared domain metadata catalog for all Effect types across Reader and Editor
-
-import { EffectType, EffectCategory } from "@/types/story";
-import {
-  Zap,
-  CloudRain,
-  Snowflake,
-  Flame,
-  CloudFog,
-  Sparkles,
-  Activity,
-  EyeOff,
-  Vibrate,
-  Maximize2,
-  History,
-  Keyboard,
-  Palette,
-  Layers,
-  FileMinus2,
-  Volume2,
-  Coins,
-  Leaf,
-  Wind,
-  Gem,
-  Sun,
-  Waves,
-  Cloud,
-  type LucideIcon,
-} from "lucide-react";
+// Compatibility projection for Phase 2 consumers; technical values come only from the manifest.
+import type { EffectType, EffectCategory } from '@/types/story';
+import type { LucideIcon } from 'lucide-react';
+import { EFFECT_MANIFEST, EFFECT_TYPES, isEffectAllowedInScope } from './effect-manifest';
+import { EFFECT_PRESENTATION_SEED } from './effect-seed';
+import { EFFECT_ICONS } from './effect-icons';
 
 export interface EffectMeta {
   type: EffectType;
@@ -47,258 +23,16 @@ export const EFFECT_CATEGORIES: { id: EffectCategory; label: string }[] = [
   { id: "transition", label: "Chuyển Cảnh" },
 ];
 
-export const EFFECT_METADATA: Record<EffectType, EffectMeta> = {
-  sunbeam: {
-    type: "sunbeam",
-    category: "visual",
-    label: "Vệt Nắng Xiên (Sunbeam)",
-    description: "Tia nắng vàng ấm áp xiên qua kẽ lá, ánh sáng hoàng hôn bồng bềnh",
-    icon: Sun,
-    defaultIntensity: 0.75,
-    defaultDurationMs: 4000,
-    defaultDelayMs: 0,
-  },
-  candle_flicker: {
-    type: "candle_flicker",
-    category: "visual",
-    label: "Ánh Nến Lập Lòe (Candle Flicker)",
-    description: "Quầng lửa ấm áp bập bùng, tàn đóm nến bay lập lòe trong đêm",
-    icon: Flame,
-    defaultIntensity: 0.8,
-    defaultDurationMs: 3500,
-    defaultDelayMs: 0,
-  },
-  floating_clouds: {
-    type: "floating_clouds",
-    category: "visual",
-    label: "Mây Trôi Bồng Bềnh (Floating Clouds)",
-    description: "Dải mây trắng và sương khói trôi lơ lửng ngang qua khung cảnh",
-    icon: Cloud,
-    defaultIntensity: 0.7,
-    defaultDurationMs: 5000,
-    defaultDelayMs: 0,
-  },
-  water_ripple: {
-    type: "water_ripple",
-    category: "visual",
-    label: "Mặt Nước Gợn Sóng (Water Ripple)",
-    description: "Gợn sóng nước lấp lánh phản quang ánh trăng và ngọc bích",
-    icon: Waves,
-    defaultIntensity: 0.75,
-    defaultDurationMs: 3500,
-    defaultDelayMs: 0,
-  },
-  lightning_flash: {
-    type: "lightning_flash",
-    category: "visual",
-    label: "Chớp Sáng (Lightning Flash)",
-    description: "Chớp trắng chói lòa toàn màn hình khi có sấm sét, cao trào",
-    icon: Zap,
-    defaultIntensity: 0.85,
-    defaultDurationMs: 1200,
-    defaultDelayMs: 0,
-  },
-  particle_rain: {
-    type: "particle_rain",
-    category: "visual",
-    label: "Mưa Rơi (Particle Rain)",
-    description: "Hạt mưa rơi xối xả phủ khắp khung đọc truyện",
-    icon: CloudRain,
-    defaultIntensity: 0.75,
-    defaultDurationMs: 2000,
-    defaultDelayMs: 0,
-  },
-  particle_snow: {
-    type: "particle_snow",
-    category: "visual",
-    label: "Tuyết Rơi (Particle Snow)",
-    description: "Bông tuyết trắng trôi lững lờ trong không khí giá lạnh",
-    icon: Snowflake,
-    defaultIntensity: 0.7,
-    defaultDurationMs: 3000,
-    defaultDelayMs: 0,
-  },
-  particle_fire: {
-    type: "particle_fire",
-    category: "visual",
-    label: "Tàn Lửa Cháy (Particle Fire)",
-    description: "Đốm lửa và tàn tro bốc lên rực cháy",
-    icon: Flame,
-    defaultIntensity: 0.8,
-    defaultDurationMs: 3000,
-    defaultDelayMs: 0,
-  },
-  particle_smoke: {
-    type: "particle_smoke",
-    category: "visual",
-    label: "Khói Sương (Particle Smoke)",
-    description: "Làn khói mờ mịt, sương lạnh trườn qua mặt đá",
-    icon: CloudFog,
-    defaultIntensity: 0.7,
-    defaultDurationMs: 3000,
-    defaultDelayMs: 0,
-  },
-  particle_fireflies: {
-    type: "particle_fireflies",
-    category: "visual",
-    label: "Lân Tinh / Đom Đóm",
-    description: "Những đốm sáng lân tinh xanh lục ma mị trôi lơ lửng",
-    icon: Sparkles,
-    defaultIntensity: 0.75,
-    defaultDurationMs: 3000,
-    defaultDelayMs: 0,
-  },
-  particle_gold: {
-    type: "particle_gold",
-    category: "visual",
-    label: "Bụi Vàng Châu Báu (Gold Sparkles)",
-    description: "Mưa bụi vàng óng ánh và kim cương rơi lấp lánh",
-    icon: Coins,
-    defaultIntensity: 0.8,
-    defaultDurationMs: 3000,
-    defaultDelayMs: 0,
-  },
-  particle_leaves: {
-    type: "particle_leaves",
-    category: "visual",
-    label: "Lá Bay Rợp Vườn (Falling Leaves)",
-    description: "Những chiếc lá khế xanh mướt và cánh hoa rơi lượn",
-    icon: Leaf,
-    defaultIntensity: 0.7,
-    defaultDurationMs: 3500,
-    defaultDelayMs: 0,
-  },
-  wind_gust: {
-    type: "wind_gust",
-    category: "motion",
-    label: "Luồng Gió Cuộn (Wind Gust)",
-    description: "Cơn gió lốc mạnh cuốn cát bụi khi chim thần cất cánh",
-    icon: Wind,
-    defaultIntensity: 0.8,
-    defaultDurationMs: 1500,
-    defaultDelayMs: 0,
-  },
-  glow_shimmer: {
-    type: "glow_shimmer",
-    category: "visual",
-    label: "Hào Quang Ngũ Sắc (Glow Shimmer)",
-    description: "Ánh sáng ngũ sắc rực rỡ từ ngọc quý và hang báu",
-    icon: Gem,
-    defaultIntensity: 0.75,
-    defaultDurationMs: 3000,
-    defaultDelayMs: 0,
-  },
-  bg_color_shift: {
-    type: "bg_color_shift",
-    category: "visual",
-    label: "Đổi Tông Màu Nền",
-    description: "Chuyển sắc nền nhẹ nhàng sang tông u ám hoặc hoàng hôn",
-    icon: Palette,
-    defaultIntensity: 0.6,
-    defaultDurationMs: 2500,
-    defaultDelayMs: 0,
-  },
-  screen_blur: {
-    type: "screen_blur",
-    category: "visual",
-    label: "Mờ Ảo (Screen Blur)",
-    description: "Màn hình mờ dần tạo cảm giác choáng váng, hoa mắt",
-    icon: EyeOff,
-    defaultIntensity: 0.5,
-    defaultDurationMs: 1500,
-    defaultDelayMs: 0,
-  },
-  text_shake: {
-    type: "text_shake",
-    category: "visual",
-    label: "Rung Chữ (Text Shake)",
-    description: "Đoạn văn rung lắc nhẹ thể hiện sự sợ hãi, hét lớn",
-    icon: Activity,
-    defaultIntensity: 0.65,
-    defaultDurationMs: 1000,
-    defaultDelayMs: 0,
-  },
-  text_grow: {
-    type: "text_grow",
-    category: "visual",
-    label: "Phóng To Chữ (Text Grow)",
-    description: "Chữ phồng to đột ngột nhấn mạnh âm thanh khủng khiếp",
-    icon: Maximize2,
-    defaultIntensity: 0.8,
-    defaultDurationMs: 1800,
-    defaultDelayMs: 0,
-  },
-  text_fade_flashback: {
-    type: "text_fade_flashback",
-    category: "visual",
-    label: "Hồi Ức (Flashback)",
-    description: "Hiệu ứng mờ dần màu sepia thể hiện ký ức năm xưa",
-    icon: History,
-    defaultIntensity: 0.6,
-    defaultDurationMs: 2500,
-    defaultDelayMs: 0,
-  },
-  typewriter: {
-    type: "typewriter",
-    category: "visual",
-    label: "Đánh Máy (Typewriter)",
-    description: "Từng ký tự hiện ra như đang gõ máy chữ hoặc chép nhật ký",
-    icon: Keyboard,
-    defaultIntensity: 0.8,
-    defaultDurationMs: 3000,
-    defaultDelayMs: 0,
-  },
-  screen_shake: {
-    type: "screen_shake",
-    category: "motion",
-    label: "Rung Màn Hình (Screen Shake)",
-    description: "Toàn bộ khung nhìn rung lắc mạnh khi nổ hoặc sấm giáng",
-    icon: Activity,
-    defaultIntensity: 0.85,
-    defaultDurationMs: 800,
-    defaultDelayMs: 150,
-  },
-  vibration: {
-    type: "vibration",
-    category: "motion",
-    label: "Rung Thiết Bị (Haptic Vibration)",
-    description: "Kích hoạt rung nhẹ trên điện thoại hỗ trợ Vibration API",
-    icon: Vibrate,
-    defaultIntensity: 0.6,
-    defaultDurationMs: 400,
-    defaultDelayMs: 0,
-  },
-  transition_fade: {
-    type: "transition_fade",
-    category: "transition",
-    label: "Chuyển Cảnh Mờ (Fade)",
-    description: "Chuyển cảnh mượt mà mở đầu hoặc kết thúc phân đoạn",
-    icon: Layers,
-    defaultIntensity: 0.75,
-    defaultDurationMs: 1200,
-    defaultDelayMs: 0,
-  },
-  transition_page_tear: {
-    type: "transition_page_tear",
-    category: "transition",
-    label: "Xé Trang (Page Tear)",
-    description: "Hiệu ứng rách giấy/xé trang chuyển sang chương mới",
-    icon: FileMinus2,
-    defaultIntensity: 0.75,
-    defaultDurationMs: 1500,
-    defaultDelayMs: 0,
-  },
-  audio: {
-    type: "audio",
-    category: "audio",
-    label: "Âm Thanh (Audio)",
-    description: "Hiệu ứng âm thanh hoặc nhạc nền cho đoạn văn / bối cảnh",
-    icon: Volume2,
-    defaultIntensity: 0.75,
-    defaultDurationMs: 0,
-    defaultDelayMs: 0,
-  },
-};
+export const EFFECT_METADATA = Object.fromEntries(EFFECT_TYPES.map(type => {
+  const definition = EFFECT_MANIFEST[type];
+  return [type, {
+    type, category: definition.category, ...EFFECT_PRESENTATION_SEED[type],
+    icon: EFFECT_ICONS[definition.icon_key],
+    defaultIntensity: definition.defaults.intensity,
+    defaultDurationMs: definition.defaults.duration_ms,
+    defaultDelayMs: definition.defaults.delay_ms,
+  }];
+})) as Record<EffectType, EffectMeta>;
 
 export const AUDIO_EFFECT_PRESETS = [
   { label: "Tiếng Mưa Rơi (Gentle Rain)", src: "/audio/gentle_rain_falling.mp3" },
@@ -306,29 +40,12 @@ export const AUDIO_EFFECT_PRESETS = [
   { label: "Không Khí U Ám (Horror Atmosphere)", src: "/audio/horror_atmosphe.mp3" },
 ];
 
-/** Effects that describe an ambient scene rather than a single text block. */
-const SCENE_EFFECT_TYPES = new Set<EffectType>([
-  "sunbeam",
-  "candle_flicker",
-  "floating_clouds",
-  "water_ripple",
-  "particle_rain",
-  "particle_snow",
-  "particle_fire",
-  "particle_smoke",
-  "particle_fireflies",
-  "particle_gold",
-  "particle_leaves",
-  "wind_gust",
-  "glow_shimmer",
-  "bg_color_shift",
-]);
-
+// Legacy visual picker helper: audio has its own control.
 export function isSceneEffectType(type: EffectType) {
-  return SCENE_EFFECT_TYPES.has(type);
+  return type !== 'audio' && isEffectAllowedInScope(type, 'scene');
 }
 
 export function getEffectIcon(type: EffectType, category?: EffectCategory): LucideIcon {
-  if (category === "audio" || type === "audio") return Volume2;
-  return EFFECT_METADATA[type]?.icon || Zap;
+  if (category === 'audio' || type === 'audio') return EFFECT_ICONS.Volume2;
+  return EFFECT_METADATA[type]?.icon || EFFECT_ICONS.Zap;
 }

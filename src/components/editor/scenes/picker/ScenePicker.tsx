@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Layers } from "lucide-react";
-import { Scene, SceneLibraryData, ScenePreset } from "@/types/scene";
+import { LegacyScene as Scene, LegacySceneLibraryData as SceneLibraryData, LegacyScenePreset as ScenePreset } from "@/types/scene-legacy";
 import { StoryBlock } from "@/types/story";
 import {
   SceneDraft,

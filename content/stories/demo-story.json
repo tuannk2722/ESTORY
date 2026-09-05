@@ -40,7 +40,17 @@
           "type": "paragraph",
           "text": "Hoàng hôn buông xuống trên mỏm đá Vọng Hải mang theo một sự tĩnh lặng đến rợn ngời. Gió biển chiều nay bỗng nhiên ngừng thổi một cách kỳ quái, để lại mặt nước phẳng lặng như một tấm gương đen khổng lồ trải dài đến vô tận. Từ phía chân trời xa xăm, những đám mây màu tím sẫm cuồn cuộn dâng lên từ đáy vịnh, nuốt chửng những tia sáng le lói cuối cùng của một ngày tàn. Ngọn hải đăng cổ kính này được xây dựng từ thời Pháp thuộc hơn một trăm năm trước, nằm trơ trọi trên mỏm đá cô độc cách đất liền gần mười hải lý. Suốt ba mươi năm gắn bó với ngọn tháp đá sừng sững giữa muôn trùng sóng gió, lão Bảy – người gác đèn già nua với làn da sạm đen vì nắng gió – chưa từng chứng kiến một buổi chiều nào ngột ngạt và nặng nề đến thế. ",
           "mood_tag": "u ám",
-          "effects": []
+          "effects": [
+            {
+              "intensity": 0.6,
+              "duration_ms": 2500,
+              "delay_ms": 0,
+              "loop": true,
+              "id": "fx-bg_color_shift-50aba28a",
+              "type": "bg_color_shift",
+              "category": "visual"
+            }
+          ]
         },
         {
           "id": "ch1-block-003",

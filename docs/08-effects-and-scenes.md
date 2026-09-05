@@ -82,7 +82,7 @@ Curated ScenePreset
 
 ### 8.3.1. Validation trước khi tạo snapshot
 
-- Background dùng discriminated schema theo `kind`; gradient không nhận raw CSS, particle không nhận raw JSON mà dùng `composition_key` đã đăng ký.
+- Background dùng discriminated schema theo `kind`; gradient tuyến tính (`gradient`) và radial (`radial_gradient`) dùng typed fields theo `02-data-schema.md` mục 2.9, không nhận raw CSS; particle không nhận raw JSON mà dùng `composition_key` đã đăng ký.
 - `motion: "looping"` bắt buộc `poster_frame`.
 - Palette tint lưu cả `color` và `opacity`; mọi màu phải parse được và Preview đạt contrast theo `09-non-functional-requirements.md`.
 - Ambient effect phải active ở thời điểm chọn và technical manifest cho phép scope `scene`; tối đa một audio ambient, không trùng type, audio phải `loop: true`.

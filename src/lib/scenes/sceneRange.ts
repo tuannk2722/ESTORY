@@ -2,7 +2,7 @@
 // Pure domain algorithms for Scene Range normalization, validation, collision detection, and reconciliation
 
 import { StoryBlock } from "@/types/story";
-import { Scene } from "@/types/scene";
+import { LegacyScene as Scene } from "@/types/scene-legacy";
 
 export type SceneRangeValidation =
   | {

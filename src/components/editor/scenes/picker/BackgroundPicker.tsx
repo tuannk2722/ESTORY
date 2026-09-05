@@ -4,7 +4,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { BackgroundAsset } from "@/types/scene";
+import { LegacyBackgroundAsset as BackgroundAsset } from "@/types/scene-legacy";
 import { Check, Film, Sparkles, Search, ChevronDown } from "lucide-react";
 import SearchInput, { matchesSearch } from "@/components/ui/SearchInput";
 

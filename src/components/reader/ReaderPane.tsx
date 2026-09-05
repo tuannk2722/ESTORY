@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Chapter } from "@/types/story";
-import { Scene, SceneLibraryData } from "@/types/scene";
+import { LegacyScene as Scene, LegacySceneLibraryData as SceneLibraryData } from "@/types/scene-legacy";
 import { buildBlockIndexMap } from "@/lib/scenes/sceneRange";
 import { buildSceneByBlockId } from "@/lib/scenes/sceneSelectors";
 import { scrollToEditorBlock } from "@/lib/editor/scrollToBlock";
@@ -13,6 +13,7 @@ import { useResumeCommit } from "@/hooks/useResumeCommit";
 import { useActiveReaderBlock } from "@/hooks/useActiveReaderBlock";
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
 import { STORY_FONT_OPTIONS } from "@/types/settings";
+import { resolveLegacyScene } from "@/lib/scenes/scene-mappers";
 
 const EMPTY_LIBRARY: SceneLibraryData = {
   backgrounds: [],
@@ -148,12 +149,18 @@ export default function ReaderPane({
   const activeScene = activeBlockId
     ? sceneByBlockId.get(activeBlockId)?.scene || null
     : null;
-  const activeBackground = activeScene
-    ? backgroundMap.get(activeScene.background_id)
-    : undefined;
-  const activePalette = activeScene
-    ? paletteMap.get(activeScene.palette_id)
-    : undefined;
+  const activeRenderConfig = useMemo(
+    () => {
+      if (!activeScene) return null;
+      const background = backgroundMap.get(activeScene.background_id);
+      const palette = paletteMap.get(activeScene.palette_id);
+      // Client-side legacy fetches complete independently. Wait until both
+      // ingredients are present before resolving the runtime snapshot.
+      if (!background || !palette) return null;
+      return resolveLegacyScene(activeScene, [background], [palette]).render_config;
+    },
+    [activeScene, backgroundMap, paletteMap]
+  );
   const fontSizeClass = `font-size-${settings.font_size || "lg"}`;
   const fontFamilyClass =
     STORY_FONT_OPTIONS.find((font) => font.id === settings.font_family)?.className ||
@@ -211,9 +218,7 @@ export default function ReaderPane({
   return (
     <div className="reader-pane relative w-full min-h-screen">
       <SceneLayer
-        scene={activeScene}
-        backgroundAsset={activeBackground}
-        colorPalette={activePalette}
+        renderConfig={activeRenderConfig}
         reducedMotion={reducedMotion}
       >
         <div id="effect-portal-root" className="pointer-events-none" />

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { ArrowLeft, Layers, ListOrdered, Loader2, Save } from "lucide-react";
 import { Story } from "@/types/story";
-import { Scene, SceneLibraryData } from "@/types/scene";
+import { LegacyScene as Scene, LegacySceneLibraryData as SceneLibraryData } from "@/types/scene-legacy";
 import { EditorProvider } from "./EditorProvider";
 import { useEditorClientController } from "./useEditorClientController";
 import BlockEditor from "./blocks/BlockEditor";

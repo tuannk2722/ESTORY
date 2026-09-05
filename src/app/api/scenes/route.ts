@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const scenes = await sceneRepository.getByChapterId(chapterId);
+    const scenes = await sceneRepository.getLegacyByChapter(storyId, chapterId);
     return NextResponse.json(scenes);
   } catch (error) {
     console.error("Failed to get scenes:", error);

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import type { Scene } from "@/types/scene";
+import type { LegacyScene as Scene } from "@/types/scene-legacy";
 import type { Chapter } from "@/types/story";
 
 export interface UseEditorSaverOptions {
