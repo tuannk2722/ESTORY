@@ -1,0 +1,42 @@
+{
+  "counts": {
+    "stories": 3,
+    "chapters": 10,
+    "blocks": 64,
+    "block_effects": 68,
+    "scenes": 17,
+    "backgrounds": 41,
+    "palettes": 20,
+    "scene_presets": 39
+  },
+  "source_files": [
+    {
+      "path": "content/stories/an-khe-tra-vang.json",
+      "sha256": "adf1cb2e530b74695b60fef433762a7ebfe64dd09a7ad6c8f4e61316e0f766e8"
+    },
+    {
+      "path": "content/stories/demo-story.json",
+      "sha256": "17b884edaae9ac5ade22c863613b0bcacaf34f6eee979aeefd24538a630e5d55"
+    },
+    {
+      "path": "content/stories/son-tinh-thuy-tinh.json",
+      "sha256": "0c4973959200572b893218422cdac5b221a90f330dfb448645af666b348da224"
+    },
+    {
+      "path": "content/scenes/scenes.json",
+      "sha256": "beca774c0d40fb61077d5926f0f25dcf24f00f5cd99ed81b1fd57717be894397"
+    },
+    {
+      "path": "content/scene-library/backgrounds.json",
+      "sha256": "5d011807dacc401e5f5d99e70e9812db3b98844013ab79fc9158b8076e5ae853"
+    },
+    {
+      "path": "content/scene-library/palettes.json",
+      "sha256": "901f8aedcc30397f41ecbdcc3278c4deeffbb14d93f69a012b79993d8751713a"
+    },
+    {
+      "path": "content/scene-library/scene-presets.json",
+      "sha256": "db5e7354a2cacf6e9b0d1ca85f5dbecdddcbc466e63d4774933737641744d47e"
+    }
+  ]
+}

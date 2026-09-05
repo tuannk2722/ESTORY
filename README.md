@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# My Storytelling App
 
-## Getting Started
+Ứng dụng đọc và soạn truyện với hiệu ứng theo đoạn văn, dùng Next.js App Router.
+Đọc [docs/00-INDEX.md](docs/00-INDEX.md) trước khi thay đổi code.
 
-First, run the development server:
+## Môi trường
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
+- Node.js **24 LTS**; `.nvmrc` và `package.json.engines` cùng pin major 24.
+- pnpm **10.33.0**, được pin bằng `packageManager` trong `package.json`.
+- Chỉ giữ `pnpm-lock.yaml`; không dùng npm/yarn/bun để cài dependencies.
+
+Chọn Node 24 bằng trình quản lý Node đang dùng (`nvm install` rồi `nvm use`
+nếu hỗ trợ `.nvmrc`), hoặc cài bản Node 24 LTS từ
+[nodejs.org](https://nodejs.org/en/download).
+Kiểm tra `node --version` và `pnpm --version` trước khi chạy:
+
+```sh
+pnpm install --frozen-lockfile
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mở <http://localhost:3000>. Trên PowerShell, dùng `pnpm.cmd` nếu execution policy
+chặn script `pnpm.ps1`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Kiểm tra
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sh
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm baseline:counts
+pnpm build
+```
 
-## Learn More
+`baseline:counts` chỉ đọc seed JSON, in số lượng và SHA-256 của từng file sau
+khi chuẩn hóa JSON. Script không ghi dữ liệu hay hardcode counts vào runtime;
+đây chưa phải bước validate/migrate dữ liệu Phase 3.
 
-To learn more about Next.js, take a look at the following resources:
+[GitHub Actions](.github/workflows/ci.yml) chạy trên push, pull request và khi
+kích hoạt thủ công: kiểm tra một lockfile → frozen install → lint → typecheck
+→ test → seed counts → production build. Job `Node 24 validation` phải xanh
+trước khi merge; cấu hình required status check trong branch protection của
+GitHub nếu repository chưa bật.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Import repository với thư mục chứa `package.json` này làm Root Directory.
+`engines.node = ">=24 <25"` chọn Node 24 cho build/runtime theo
+[quy tắc override của Vercel](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions).
+Giữ Node.js Version trong Project Settings ở `24.x`. Bật
+`ENABLE_EXPERIMENTAL_COREPACK=1` cho các môi trường deploy để Vercel dùng đúng
+`pnpm@10.33.0` từ `packageManager`, theo
+[hướng dẫn Corepack](https://vercel.com/docs/builds/configure-a-build#corepack).
+Sau đó dùng install command `pnpm install --frozen-lockfile` và build command
+`pnpm build`; xác nhận cả hai phiên bản trong build log của deployment.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Kết quả kiểm tra P3-00 được lưu ở
+[docs/verification/p3-00.md](docs/verification/p3-00.md).

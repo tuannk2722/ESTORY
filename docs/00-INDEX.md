@@ -33,7 +33,6 @@ Nếu nội dung giữa các file mâu thuẫn nhau, ưu tiên theo thứ tự:
 | `10-out-of-scope.md` | Những gì KHÔNG được tự ý làm theo từng phase | Luôn kiểm tra trước khi thêm tính năng ngoài yêu cầu |
 | `11-phase3-technical-roadmap.md` | Chi tiết kỹ thuật refactor lên production: Repository pattern, DB migrate, Prisma schema đầy đủ (bao gồm mở rộng Scene System) | Khi làm task thuộc Phase 3 (kỹ thuật sâu) |
 | `12-auth-and-author-management.md` | Navbar theo trạng thái đăng nhập, luồng "trở thành author", Author Dashboard, wizard tạo/sửa truyện, rule publish/unpublish chương độc lập với duyệt truyện, dự trữ schema thống kê author | Khi task liên quan đăng nhập/navbar, quản lý truyện của tác giả (tạo mới, sửa, danh sách chương, gửi duyệt) |
-| `14-ai-assistant-guidelines.md` | Ghi chú vận hành dành riêng cho AI assistant khi làm việc với bộ tài liệu này | Luôn đọc trước khi bắt đầu bất kỳ task nào |
 
 ---
 
@@ -65,4 +64,4 @@ Xây dựng một web app đọc truyện, nơi **hiệu ứng hình ảnh/âm t
 - **Task: bất kỳ việc gì thuộc Phase 3 (DB, Auth, API...)** → đọc `01`, `02`, `07`, `11` đầy đủ trước khi code.
 - **Task: không chắc có nằm trong scope không** → kiểm tra `10-out-of-scope.md` trước.
 
-Xem chi tiết quy tắc vận hành ở `14-ai-assistant-guidelines.md`.
+Xem chi tiết quy tắc vận hành ở `AGENTS.md`.

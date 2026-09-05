@@ -2,13 +2,18 @@
   "name": "my-storytelling-app",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node scripts/run-typescript-tests.cjs"
+    "test": "node scripts/run-typescript-tests.cjs",
+    "baseline:counts": "node scripts/baseline-counts.mjs"
   },
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",
