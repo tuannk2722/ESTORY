@@ -90,7 +90,7 @@ export default function StoryCard({ story }: StoryCardProps) {
 
           <Link
             href={`/stories/${story.id}`}
-            className="block w-full text-center py-2.5 px-4 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-ui text-sm font-semibold transition-colors shadow-md min-h-[44px] flex items-center justify-center"
+            className="block w-full text-center py-2.5 px-4 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-foreground)] font-ui text-sm font-semibold transition-colors shadow-md min-h-[44px] flex items-center justify-center"
           >
             Đọc Truyện →
           </Link>

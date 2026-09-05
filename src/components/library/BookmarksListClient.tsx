@@ -52,7 +52,7 @@ export default function BookmarksListClient({
         </p>
         <Link
           href="/"
-          className="inline-flex min-h-11 items-center gap-2 px-6 py-2.5 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-ui font-medium text-sm transition-colors shadow-md"
+          className="inline-flex min-h-11 items-center gap-2 px-6 py-2.5 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-foreground)] font-ui font-medium text-sm transition-colors shadow-md"
         >
           <span>Khám phá và lưu truyện</span>
           <ArrowRight className="w-4 h-4" aria-hidden="true" />

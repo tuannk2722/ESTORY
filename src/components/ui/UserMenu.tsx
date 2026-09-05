@@ -59,11 +59,13 @@ export default function UserMenu() {
           }`}
         aria-label="Mở menu người dùng và cài đặt"
         aria-expanded={isOpen}
+        aria-controls="user-settings-popover"
       >
         <div className="w-8 h-8 rounded-full bg-[var(--color-secondary)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-foreground)]">
-          <User className="w-4 h-4 text-[var(--color-accent)]" />
+          <User aria-hidden="true" className="w-4 h-4 text-[var(--color-accent)]" />
         </div>
         <ChevronDown
+          aria-hidden="true"
           className={`w-3.5 h-3.5 text-[var(--color-muted-foreground)] transition-transform duration-200 ${isOpen ? "rotate-180 text-[var(--color-accent)]" : ""
             }`}
         />
@@ -71,11 +73,11 @@ export default function UserMenu() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-2xl p-4 z-50 animate-fade-in space-y-4">
+        <div id="user-settings-popover" className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-2xl p-4 z-50 animate-fade-in space-y-4">
           {/* Header Thông tin người dùng */}
           <div className="flex items-center gap-3 pb-3 border-b border-[var(--color-border)]">
             <div className="w-10 h-10 rounded-full bg-[var(--color-secondary)] border border-[var(--color-border)] flex items-center justify-center flex-shrink-0">
-              <User className="w-5 h-5 text-[var(--color-accent)]" />
+              <User aria-hidden="true" className="w-5 h-5 text-[var(--color-accent)]" />
             </div>
             <div className="min-w-0 flex-1">
               <h4 className="font-display text-sm font-bold text-[var(--color-foreground)] truncate">
@@ -89,9 +91,9 @@ export default function UserMenu() {
 
           {/* 1. Bộ chuyển đổi Giao diện (Theme Selector) */}
           <div className="space-y-2">
-            <label className="font-ui text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+            <p className="font-ui text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
               Giao Diện
-            </label>
+            </p>
             <div className="grid grid-cols-3 gap-1.5">
               {themes.map(({ id, label, icon: Icon }) => {
                 const isActive = settings.theme === id;
@@ -102,14 +104,15 @@ export default function UserMenu() {
                       setTheme(id);
                       setIsOpen(false);
                     }}
+                    aria-pressed={isActive}
                     className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-xs font-ui transition-all cursor-pointer min-h-[44px] ${isActive
                       ? "border-[var(--color-accent)] bg-[var(--color-accent)]/15 text-[var(--color-accent)] font-semibold shadow-xs"
                       : "border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
                       }`}
                   >
                     <div className="flex items-center gap-1">
-                      <Icon className="w-4 h-4" />
-                      {isActive && <Check className="w-3 h-3 text-[var(--color-accent)]" />}
+                      <Icon aria-hidden="true" className="w-4 h-4" />
+                      {isActive && <Check aria-hidden="true" className="w-3 h-3 text-[var(--color-accent)]" />}
                     </div>
                     <span className="text-[11px] leading-tight text-center">{label}</span>
                   </button>
@@ -125,9 +128,9 @@ export default function UserMenu() {
                 alert("Tính năng Đăng nhập tài khoản sẽ có mặt trong Phase 3.");
                 setIsOpen(false);
               }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-ui font-semibold transition-colors shadow-xs cursor-pointer min-h-[40px]"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-foreground)] text-xs font-ui font-semibold transition-colors shadow-xs cursor-pointer min-h-[44px]"
             >
-              <LogIn className="w-4 h-4" />
+              <LogIn aria-hidden="true" className="w-4 h-4" />
               <span>Đăng nhập / Đăng ký</span>
             </button>
           </div>

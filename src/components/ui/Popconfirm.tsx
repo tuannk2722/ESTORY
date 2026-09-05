@@ -190,7 +190,7 @@ export default function Popconfirm({
           icon: Info,
           iconColor: "text-primary",
           iconBg: "bg-primary/10 border-primary/20",
-          btnColor: "bg-primary hover:bg-primary-hover text-white shadow-xs shadow-primary/25",
+          btnColor: "bg-primary hover:bg-primary-hover text-primary-foreground shadow-xs shadow-primary/25",
         };
       case "danger":
       default:
