@@ -3,6 +3,8 @@
 > Xem `00-INDEX.md` cho thứ tự ưu tiên & điều hướng. Dùng khi tạo file/thư mục mới hoặc cần biết code nên đặt ở đâu.
 >
 > **Quy ước đường dẫn:** codebase hiện dùng `src/`. Mọi path `/app`, `/components`, `/lib`, `/services`, `/types` bên dưới được hiểu là `/src/app`, `/src/components`, `/src/lib`, `/src/services`, `/src/types`; `/content`, `/public`, `/prisma`, `/scripts`, `/docs`, `/.codex` nằm ở project root.
+>
+> Cây dưới đây gồm cả file hiện có và vị trí dự kiến theo phase, không phải inventory. Trước khi tạo/move file, dùng `rg --files src` để tìm implementation thật (editor đã chia các thư mục `blocks/`, `effects/`, `scenes/`, `timeline/`). Trạng thái đã triển khai xem `docs/verification/`; không tạo lại file chỉ vì tên/vị trí trong sơ đồ khác code.
 
 ---
 
@@ -109,7 +111,7 @@
   01-tech-stack.md                 → Stack công nghệ & ràng buộc kỹ thuật
   02-data-schema.md                → TypeScript domain model & data schema
   03-file-structure.md             → File này — cấu trúc thư mục & quy tắc đặt file
-  ...                              → Toàn bộ bộ tài liệu kiến trúc (00 → 14)
+  ...                              → Các tài liệu còn lại theo 00-INDEX.md
 
 /.agents/skills/ui-ux-pro-max/     → skill thiết kế (nằm ở workspace root `../.agents/`), xem `04-ui-ux-design.md`
 ```
