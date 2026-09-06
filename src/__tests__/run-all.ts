@@ -3,6 +3,7 @@ import "./public-access.test";
 import "./effect-playback.test";
 import "./effect-manifest.test";
 import "./scene-contracts.test";
+import "./database-foundation.test";
 import { runSceneRepositoryTests } from "./scene-repository.test";
 
 runSceneRepositoryTests().then(() => {

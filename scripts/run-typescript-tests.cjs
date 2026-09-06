@@ -30,4 +30,4 @@ function compileTypeScript(module, filename) {
 
 require.extensions[".ts"] = compileTypeScript;
 require.extensions[".tsx"] = compileTypeScript;
-require(path.join(projectRoot, "src", "__tests__", "run-all.ts"));
+require(path.resolve(projectRoot, process.argv[2] ?? "src/__tests__/run-all.ts"));

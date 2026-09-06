@@ -42,7 +42,7 @@
           "mood_tag": "u ám",
           "effects": [
             {
-              "intensity": 0.6,
+              "intensity": 1,
               "duration_ms": 2500,
               "delay_ms": 0,
               "loop": true,

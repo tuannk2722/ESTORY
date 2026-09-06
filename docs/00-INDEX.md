@@ -22,7 +22,7 @@ Khi docs mâu thuẫn, giữ thứ tự ưu tiên:
 
 Nếu vẫn chưa phân xử được, nêu mâu thuẫn trước khi code phần phụ thuộc; không tự đổi logic/thuật toán/contract đã chốt.
 
-- **Tiến độ đã xác minh:** [verification/](verification/), nhất là [P3-00](verification/p3-00.md) và [P3-01](verification/p3-01.md); đối chiếu git/code khi tiếp tục. Checkbox trong user stories là tiêu chí, không phải bảng tiến độ tự cập nhật.
+- **Tiến độ đã xác minh:** [verification/](verification/), gồm [P3-00](verification/p3-00.md), [P3-01](verification/p3-01.md) và [P3-02](verification/p3-02.md); đối chiếu git/code khi tiếp tục. Checkbox trong user stories là tiêu chí, không phải bảng tiến độ tự cập nhật.
 - **Trạng thái task tạm:** `.codex/TASK.md` nếu có, theo AGENTS. Runbook/task state chỉ điều phối công việc; không thay nguồn quyết định và không chép lại schema/rule.
 - **Stack/version đang cài:** `package.json`, `pnpm-lock.yaml`, `.nvmrc`. Lệnh local/CI/deploy: README.
 

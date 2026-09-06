@@ -1,0 +1,2 @@
+# Do not edit manually; commit this file with the migrations.
+provider = "postgresql"

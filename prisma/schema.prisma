@@ -1,0 +1,368 @@
+// Source: docs/11-phase3-technical-roadmap.md sections 9.4, 9.4b, 9.4c.
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Auth.js (NextAuth) standard models — bắt buộc khi dùng Prisma Adapter ───
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── User & Role ───
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  role          Role      @default(READER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // ─── Freesound credential SERVER-ONLY (ciphertext at-rest) & quota cá nhân — mục 2.5, 2.11 ───
+  freesoundAccessTokenCiphertext  String? // không expose qua AppUser/session/API/log
+  freesoundRefreshTokenCiphertext String? // không expose qua AppUser/session/API/log
+  freesoundTokenExpiresAt         DateTime?
+  freesoundUsername               String?
+  freesoundImportQuotaLimit       Int       @default(0)
+  freesoundImportQuotaUsed        Int       @default(0)
+  freesoundQuotaResetAt           DateTime?
+  aiBackgroundQuotaLimit          Int       @default(0)
+  aiBackgroundQuotaUsed           Int       @default(0)
+  aiBackgroundQuotaResetAt        DateTime?
+
+  accounts             Account[]
+  sessions             Session[]
+  stories              Story[]                         @relation("StoryAuthor")
+  reviewedStories      Story[]                         @relation("StoryReviewer")
+  progress             ReadingProgress[]
+  bookmarks            Bookmark[]
+  settings             UserSettings?
+  audioAssets          AudioAsset[]
+  backgroundAssets     BackgroundAsset[]               @relation("PersonalBackgroundAssets")
+  aiGenerationSessions AiBackgroundGenerationSession[]
+}
+
+enum Role {
+  READER
+  AUTHOR
+  ADMIN
+}
+
+// ─── Story & Kiểm duyệt (Mục 2.7) ───
+model Story {
+  id              String      @id @default(cuid())
+  slug            String      @unique
+  title           String
+  description     String
+  coverUrl        String?
+  genre           String[]
+  viewCount       Int         @default(0)
+  status          StoryStatus @default(DRAFT)
+  submittedAt     DateTime?
+  reviewedAt      DateTime?
+  rejectionReason String?
+
+  authorId     String
+  author       User    @relation("StoryAuthor", fields: [authorId], references: [id])
+  reviewedById String?
+  reviewedBy   User?   @relation("StoryReviewer", fields: [reviewedById], references: [id])
+
+  chapters  Chapter[]
+  bookmarks Bookmark[]
+  progress  ReadingProgress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt, id])
+  @@index([authorId, updatedAt, id])
+  @@index([status, submittedAt, id])
+  @@index([reviewedById])
+}
+
+enum StoryStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+  ARCHIVED
+}
+
+model Chapter {
+  id        String        @id @default(cuid())
+  storyId   String
+  story     Story         @relation(fields: [storyId], references: [id])
+  title     String
+  order     Int
+  status    ChapterStatus @default(DRAFT) // độc lập với Story.status, chỉ có hiệu lực reader khi Story.status = PUBLISHED — 12-auth-and-author-management.md mục 12.7.3/12.7.4
+  viewCount Int           @default(0) // dự trữ cho StoryStats, 02-data-schema.md mục 2.10 — không bắt buộc có UI ngay
+  blocks    StoryBlock[]
+  scenes    Scene[] // 1 chapter có nhiều Scene, dải block không chồng lấn — xem mục 9.4b
+
+  @@index([storyId, order])
+  @@index([storyId, status, order])
+}
+
+enum ChapterStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model StoryBlock {
+  id        String   @id @default(cuid())
+  chapterId String
+  chapter   Chapter  @relation(fields: [chapterId], references: [id])
+  type      String // "paragraph" | "dialogue" | "heading"
+  text      String
+  moodTag   String?
+  order     Int
+  effects   Effect[]
+
+  @@index([chapterId, order])
+}
+
+model Effect {
+  id           String      @id @default(cuid())
+  blockId      String
+  block        StoryBlock  @relation(fields: [blockId], references: [id])
+  type         String // khớp EffectType (Mục 2.1) / EffectDefinition.effectId (Mục 2.6)
+  category     String // "visual" | "audio" | "motion" | "transition"
+  intensity    Float
+  durationMs   Int
+  delayMs      Int?
+  audioSrc     String?
+  audioAssetId String?
+  audioAsset   AudioAsset? @relation(fields: [audioAssetId], references: [id], onDelete: SetNull)
+  loop         Boolean     @default(false)
+
+  @@index([audioAssetId])
+  @@index([blockId])
+}
+
+// ─── Bookmark & Reading Progress (Mục 2.3, 2.4) — 2 trang riêng biệt "Đang đọc" / "Đã lưu" ───
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  storyId   String
+  user      User     @relation(fields: [userId], references: [id])
+  story     Story    @relation(fields: [storyId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, storyId])
+  @@index([userId, createdAt, id])
+  @@index([storyId])
+}
+
+model ReadingProgress {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  storyId   String
+  story     Story         @relation(fields: [storyId], references: [id])
+  chapterId String
+  blockId   String
+  status    ReadingStatus @default(READING)
+  updatedAt DateTime      @updatedAt
+
+  @@unique([userId, storyId])
+  @@index([userId, status, updatedAt, id])
+  @@index([storyId])
+}
+
+enum ReadingStatus {
+  READING
+  COMPLETED
+}
+
+model UserSettings {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  effectsEnabled      Boolean  @default(true)
+  effectsByCategory   Json     @default("{\"visual\":true,\"audio\":true,\"motion\":true,\"transition\":true}") // parse thành Record<EffectCategory, boolean> bằng Zod
+  intensityMultiplier Float    @default(1.0)
+  reducedMotion       Boolean  @default(false)
+  fontSize            String   @default("md")
+  fontFamily          String   @default("cormorant")
+  theme               String   @default("dark")
+  updatedAt           DateTime @updatedAt
+}
+
+// ─── Effect Library do admin quản lý (Mục 2.6) ───
+model EffectDefinition {
+  effectId    String                    @id // khớp EffectType/technical manifest
+  label       String
+  description String?
+  isActive    Boolean                   @default(true)
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+  keywords    EffectKeywordSuggestion[]
+
+  @@index([isActive, effectId])
+}
+
+model EffectKeywordSuggestion {
+  id                String           @id @default(cuid())
+  keyword           String
+  normalizedKeyword String
+  effectId          String
+  effect            EffectDefinition @relation(fields: [effectId], references: [effectId], onDelete: Cascade)
+  weight            Int              @default(50) // service validate 1..100
+
+  @@unique([effectId, normalizedKeyword])
+  @@index([normalizedKeyword])
+}
+
+enum CatalogStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model BackgroundAsset {
+  id               String        @id @default(cuid())
+  label            String
+  render           Json // BackgroundRenderSnapshot discriminated; validate bằng Zod/registry
+  moodTags         String[]
+  status           CatalogStatus @default(DRAFT)
+  activatedAt      DateTime? // null mới đủ điều kiện xét hard delete
+  scope            String        @default("global") // global | personal
+  source           String        @default("admin_upload")
+  generationPrompt String?
+  ownerId          String?
+  owner            User?         @relation("PersonalBackgroundAssets", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([scope, status])
+  @@index([ownerId, status])
+}
+
+model ColorPalette {
+  id                    String        @id @default(cuid())
+  label                 String
+  primary               String
+  secondary             String
+  accent                String
+  backgroundTintColor   String
+  backgroundTintOpacity Float         @default(0.35)
+  moodTags              String[]
+  status                CatalogStatus @default(DRAFT)
+  activatedAt           DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@index([status])
+}
+
+model ScenePreset {
+  id             String        @id // stable ID do developer import package cung cấp
+  label          String
+  description    String?
+  thumbnailUrl   String?
+  moodTags       String[]
+  status         CatalogStatus @default(DRAFT)
+  activatedAt    DateTime?
+  renderConfig   Json // SceneRenderConfig schema_version=1; runtime source
+  sourceVersion  Int           @default(1)
+  sourceChecksum String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  scenes         Scene[] // provenance only
+
+  @@index([status])
+}
+
+model Scene {
+  id              String       @id @default(cuid())
+  chapterId       String
+  chapter         Chapter      @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  startBlockId    String
+  endBlockId      String
+  basedOnPresetId String?
+  basedOnPreset   ScenePreset? @relation(fields: [basedOnPresetId], references: [id], onDelete: SetNull)
+  renderConfig    Json // deep snapshot; Reader không resolve catalog ID
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([chapterId])
+  @@index([basedOnPresetId])
+}
+
+model AudioAsset {
+  id                     String   @id @default(cuid())
+  ownerId                String
+  owner                  User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  source                 String // "freesound" | "upload"
+  title                  String
+  url                    String // luôn trỏ về file đã lưu ở R2/Supabase — KHÔNG bao giờ trỏ thẳng domain Freesound
+  durationMs             Int
+  freesoundId            String? // chỉ có khi source = "freesound", tránh import trùng
+  license                String? // "cc0" | "cc-by" | "cc-by-nc" ...
+  attributionAuthorName  String?
+  attributionSourceUrl   String?
+  attributionLicenseName String?
+  createdAt              DateTime @default(now())
+  usedByEffects          Effect[]
+
+  @@unique([ownerId, freesoundId])
+  @@index([ownerId, createdAt])
+}
+
+model AiBackgroundGenerationSession {
+  id             String    @id @default(cuid())
+  ownerId        String
+  owner          User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  originalPrompt String
+  seedA          Int
+  seedB          Int
+  hashA          String?
+  hashB          String?
+  status         String // reserved | partial | ready | committed | failed | expired
+  expiresAt      DateTime
+  createdAt      DateTime  @default(now())
+  committedAt    DateTime?
+
+  @@index([ownerId, status])
+  @@index([expiresAt])
+}

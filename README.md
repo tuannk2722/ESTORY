@@ -37,8 +37,10 @@ khi chuẩn hóa JSON. Script không ghi dữ liệu hay hardcode counts vào ru
 đây chưa phải bước validate/migrate dữ liệu Phase 3.
 
 [GitHub Actions](.github/workflows/ci.yml) chạy trên push, pull request và khi
-kích hoạt thủ công: kiểm tra một lockfile → frozen install → lint → typecheck
-→ test → seed counts → production build. Job `Node 24 validation` phải xanh
+kích hoạt thủ công: kiểm tra một lockfile → frozen install
+→ Prisma format/validate → lint/typecheck/test → seed counts → production build
+→ browser bundle check. Job `PostgreSQL foundation` chạy migration và integration
+test trên PostgreSQL 17 tạm của CI. Cả hai job phải xanh
 trước khi merge; cấu hình required status check trong branch protection của
 GitHub nếu repository chưa bật.
 
@@ -56,3 +58,11 @@ Sau đó dùng install command `pnpm install --frozen-lockfile` và build comman
 
 Kết quả kiểm tra P3-00 được lưu ở
 [docs/verification/p3-00.md](docs/verification/p3-00.md).
+
+## PostgreSQL + Prisma (P3-02)
+
+App hiện vẫn dùng JSON. Prisma 7.10.0 đã được pin; `install` và `build` tự generate
+client, không tự chạy migration. Cấu hình Neon dev/preview/prod, lệnh migration,
+kiểm tra database và rollback: [prisma/README.md](prisma/README.md).
+Copy [.env.example](.env.example) sang `.env.local` để đặt connection strings.
+Kết quả/gate còn thiếu: [docs/verification/p3-02.md](docs/verification/p3-02.md).
