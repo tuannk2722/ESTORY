@@ -23,9 +23,13 @@
     "db:migrate:status": "prisma migrate status",
     "db:check-empty": "node scripts/check-empty-database.mjs",
     "test:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/database.integration.ts",
+    "test:auth:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/auth.integration.ts",
+    "test:auth:http": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/auth-http.integration.ts",
+    "auth:bootstrap-admin": "node --conditions=react-server scripts/run-typescript-tests.cjs scripts/bootstrap-admin.ts",
     "test:client-bundle": "node scripts/check-client-bundle.mjs"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "2.11.3",
     "@next/env": "16.3.1",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
@@ -36,6 +40,7 @@
     "howler": "^2.2.4",
     "lucide-react": "^1.33.0",
     "next": "16.3.1",
+    "next-auth": "5.0.0-beta.32",
     "next-themes": "^0.4.6",
     "pg": "8.23.0",
     "react": "19.2.8",

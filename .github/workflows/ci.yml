@@ -82,3 +82,6 @@ jobs:
       - run: pnpm db:migrate:status
       - run: pnpm exec prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code
       - run: pnpm test:db
+      - run: pnpm test:auth:db
+      - run: pnpm build
+      - run: pnpm test:auth:http

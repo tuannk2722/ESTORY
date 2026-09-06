@@ -9,6 +9,7 @@ import {
 } from "@/lib/repositories";
 import EditorClient from "@/components/editor/EditorClient";
 import { createEditorRevision } from "@/services/editorService";
+import { requirePageRole } from "@/lib/auth/page-guards";
 
 
 interface EditorPageProps {
@@ -17,6 +18,8 @@ interface EditorPageProps {
 
 export default async function EditorPage({ params }: EditorPageProps) {
   const { storyId, chapterId } = await params;
+  // Legacy JSON has no verified owner until the P3-04/P3-06 migration/guards.
+  await requirePageRole("admin", `/author/stories/${encodeURIComponent(storyId)}/${encodeURIComponent(chapterId)}`);
 
   // 1. Tải Story trước để xác thực sự tồn tại và danh sách chapters
   const story = await storyRepository.getById(storyId);

@@ -3,6 +3,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { storyRepository, sceneRepository } from "@/lib/repositories";
+import { requireRole } from "@/lib/auth/guards";
+import { AuthAccessError } from "@/lib/auth/policy";
+import { serverEnv } from "@/lib/env";
 import {
   createEditorRevision,
   saveEditorSnapshot,
@@ -15,6 +18,8 @@ interface RouteParams {
 
 export async function GET(_req: NextRequest, { params }: RouteParams) {
   try {
+    // Temporary legacy boundary: ownership arrives with P3-06 commands.
+    await requireRole("admin");
     const { storyId, chapterId } = await params;
     const [story, scenes] = await Promise.all([
       storyRepository.getById(storyId),
@@ -42,6 +47,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
       revision: createEditorRevision(chapter, scenes || []),
     });
   } catch (error) {
+    if (error instanceof AuthAccessError) return NextResponse.json(error.body, { status: error.status });
     console.error("Failed to get editor snapshot:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
@@ -52,6 +58,9 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 
 export async function PUT(req: NextRequest, { params }: RouteParams) {
   try {
+    await requireRole("admin");
+    // Auth.js protects its own POSTs; this content mutation needs its own origin check.
+    if (req.headers.get("origin") !== new URL(serverEnv.AUTH_URL!).origin) throw new AuthAccessError(403);
     const { storyId, chapterId } = await params;
     const body: unknown = await req.json();
 
@@ -100,6 +109,8 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       revision: result.revision,
     });
   } catch (error) {
+    if (error instanceof AuthAccessError) return NextResponse.json(error.body, { status: error.status });
+    if (error instanceof SyntaxError) return NextResponse.json({ error: { code: "INVALID_JSON", message: "Invalid JSON body" } }, { status: 400 });
     console.error("Failed to save editor snapshot:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

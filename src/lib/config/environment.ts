@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { authEnvironmentShape } from "./auth-environment";
 
 // Pure parser shared by the server-only entry point, CLI config and tests.
 // Never include input values in configuration errors: URLs contain credentials.
@@ -25,6 +26,7 @@ const optionalPostgresUrl = z.preprocess(
 );
 
 const environmentSchema = z.object({
+  ...authEnvironmentShape,
   DATABASE_URL: optionalPostgresUrl,
   DIRECT_URL: optionalPostgresUrl,
   SHADOW_DATABASE_URL: optionalPostgresUrl,
@@ -50,10 +52,10 @@ const environmentSchema = z.object({
   // Until the corresponding adapters and cutover gates exist, reject flags
   // that would otherwise silently claim the app is using Prisma.
   for (const key of ["PHASE3_STORY_READ_SOURCE", "PHASE3_STORY_WRITE_SOURCE", "PHASE3_SCENE_READ_SOURCE"] as const) {
-    if (env[key] !== "json") ctx.addIssue({ code: "custom", path: [key], message: "Prisma cutover is not available in P3-02" });
+    if (env[key] !== "json") ctx.addIssue({ code: "custom", path: [key], message: "Prisma cutover is not available yet" });
   }
   if (env.PHASE3_SHADOW_READ !== "false") {
-    ctx.addIssue({ code: "custom", path: ["PHASE3_SHADOW_READ"], message: "Shadow reads are not available in P3-02" });
+    ctx.addIssue({ code: "custom", path: ["PHASE3_SHADOW_READ"], message: "Shadow reads are not available yet" });
   }
 });
 
