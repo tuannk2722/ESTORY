@@ -68,7 +68,7 @@ export type StoryStatus = "draft" | "pending_review" | "published" | "rejected" 
 export interface Story {
   id: string;                 // slug, dùng làm route param
   title: string;
-  author: string;             // Phase 1–2: tên chuỗi tự do. Phase 3: đổi thành authorId
+  author: string;             // byline public; Prisma map từ authorDisplayName, tách khỏi authorId ownership
   description: string;
   cover_image?: string;
   genre: string[];

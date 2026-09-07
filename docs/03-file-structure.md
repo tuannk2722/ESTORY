@@ -126,7 +126,8 @@
   /repositories
     prisma-story-repository.ts     → implement StoryRepository bằng Prisma
     prisma-scene-repository.ts     → query Scene bằng cả storyId + chapterId; trả render_config snapshot
-    prisma-effect-admin-repository.ts → EffectDefinition overlay + keyword CRUD; không chứa renderer/defaults
+    effect-admin-repository.ts       → P3-05 read contract cho EffectDefinition overlay + keyword; P3-12 mở rộng mutation có guard
+    prisma-effect-admin-repository.ts → Prisma implementation; không chứa renderer/defaults
     prisma-scene-catalog-repository.ts → global Background/Palette/curated Preset, filter lifecycle/scope
     prisma-background-asset-repository.ts → personal BackgroundAsset theo owner (mục 8.10)
     prisma-audio-asset-repository.ts      → implement AudioAssetRepository (mục 8.9) — `08-effects-and-scenes.md` mục 8.7

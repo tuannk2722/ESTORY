@@ -76,7 +76,7 @@ export type StoryStatus = "draft" | "pending_review" | "published" | "rejected" 
 export interface Story {
   id: string;                 // slug, dùng làm route param
   title: string;
-  author: string;             // Phase 1–2: tên chuỗi tự do. Phase 3: đổi thành authorId (xem mục 2.7 / 11)
+  author: string;             // byline public; Prisma map từ Story.authorDisplayName, KHÔNG phải owner ID
   description: string;
   cover_image?: string;
   genre: string[];
@@ -85,6 +85,13 @@ export interface Story {
   chapters: Chapter[];
 }
 ```
+
+Từ Phase 3, attribution và ownership là hai dữ liệu khác nhau: Prisma
+`Story.authorDisplayName` lưu snapshot byline public tương ứng `Story.author` ở domain,
+còn `Story.authorId` là quan hệ tới `User` chỉ dùng cho ownership/authorization.
+Repository không expose internal `Story.id`/`authorId` thay cho slug/byline và không suy
+ownership từ chuỗi tác giả. Migration legacy phải backfill chính xác
+`authorDisplayName` từ JSON; đổi tên profile sau này không tự hồi tố byline đã lưu.
 
 ## 2.2. Ví dụ file nội dung (`/content/stories/demo-story.json`)
 

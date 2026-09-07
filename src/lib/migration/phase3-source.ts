@@ -32,7 +32,7 @@ const chapterSchema = z.strictObject({
 const storySchema = z.strictObject({
   id: nonEmpty,
   title: z.string(),
-  author: z.string(),
+  author: nonEmpty,
   description: z.string(),
   cover_image: z.string().optional(),
   genre: z.array(z.string()),

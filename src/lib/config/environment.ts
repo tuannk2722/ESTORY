@@ -49,13 +49,22 @@ const environmentSchema = z.object({
       ctx.addIssue({ code: "custom", path: ["SHADOW_DATABASE_URL"], message: "Shadow database must be separate from the application database" });
     }
   }
-  // Until the corresponding adapters and cutover gates exist, reject flags
-  // that would otherwise silently claim the app is using Prisma.
-  for (const key of ["PHASE3_STORY_READ_SOURCE", "PHASE3_STORY_WRITE_SOURCE", "PHASE3_SCENE_READ_SOURCE"] as const) {
-    if (env[key] !== "json") ctx.addIssue({ code: "custom", path: [key], message: "Prisma cutover is not available yet" });
+  if (env.PHASE3_STORY_WRITE_SOURCE !== "json") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["PHASE3_STORY_WRITE_SOURCE"],
+      message: "Prisma writes are not available yet",
+    });
   }
-  if (env.PHASE3_SHADOW_READ !== "false") {
-    ctx.addIssue({ code: "custom", path: ["PHASE3_SHADOW_READ"], message: "Shadow reads are not available yet" });
+  const prismaReadEnabled = env.PHASE3_STORY_READ_SOURCE === "prisma"
+    || env.PHASE3_SCENE_READ_SOURCE === "prisma"
+    || env.PHASE3_SHADOW_READ === "true";
+  if (prismaReadEnabled && !env.DATABASE_URL) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["DATABASE_URL"],
+      message: "Prisma and shadow reads require DATABASE_URL",
+    });
   }
 });
 

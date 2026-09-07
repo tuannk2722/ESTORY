@@ -36,7 +36,7 @@ Khớp `AuthMenu.tsx` (`03-file-structure.md`), wireframe 2 trạng thái ở `0
 
 Luồng cụ thể:
 1. User (role `reader`) bấm "✍️ Viết truyện" trên navbar → vào wizard `/author/stories/new` (mục 12.5).
-2. User điền xong Bước 1 + Bước 2, bấm "Lưu" → Route Handler gọi `StoryCommandService.createStoryWithChapters()` để tạo `Story` (status `draft`, `authorId` = user hiện tại) + các `Chapter` liên quan.
+2. User điền xong Bước 1 + Bước 2, bấm "Lưu" → Route Handler gọi `StoryCommandService.createStoryWithChapters()` để tạo `Story` (status `draft`, `authorId` = user hiện tại, `authorDisplayName` = byline không rỗng được chốt tại thời điểm tạo) + các `Chapter` liên quan. Không dùng email làm byline public; đổi tên profile không tự sửa hồi tố truyện đã có.
 3. **Chỉ khi lưu THÀNH CÔNG** (record đã tồn tại trong DB), server-side đổi `User.role` từ `reader` → `author` trong cùng transaction. Nếu user rời trang giữa chừng mà chưa lưu → role giữ nguyên `reader`.
 4. Sau khi lưu, redirect tới `/author/stories/[storyId]` (không phải `/author` dashboard) để user tiếp tục thêm nội dung ngay — dashboard chỉ cần khi có ≥ 2 truyện trở lên.
 5. Từ lần sau, navbar tự hiển thị "📚 Truyện của tôi" vì `session.user.role === "author"`.

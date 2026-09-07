@@ -8,7 +8,7 @@ Mỗi US phải đạt checklist **và các rule/validation trong mục được
 
 Nguồn: [11](11-phase3-technical-roadmap.md) §9.2/9.2.1.
 
-- [ ] `PrismaStoryRepository` implement contract hiện có; chọn implementation tại `src/lib/repositories/index.ts`, UI không biết JSON/DB.
+- [ ] `PrismaStoryRepository` implement contract hiện có; chọn implementation tại `src/lib/repositories/index.ts`, UI không biết JSON/DB. Public byline map từ `authorDisplayName`, còn `authorId` chỉ dùng ownership và không bị expose thay cho slug/byline.
 - [ ] Giữ consumer cũ; riêng Reader chuyển read-model theo §9.2.1 khi cutover, chỉ thay data flow bắt buộc.
 
 ## US-3.2 — Database & migration

@@ -27,10 +27,17 @@ for (const key of ["DATABASE_URL", "DIRECT_URL", "SHADOW_DATABASE_URL"]) {
     });
   }
 }
-for (const key of ["PHASE3_STORY_READ_SOURCE", "PHASE3_STORY_WRITE_SOURCE", "PHASE3_SCENE_READ_SOURCE"]) {
-  for (const value of ["prisma", "typo", ""]) assert.throws(() => parseEnvironment({ [key]: value }));
+for (const key of ["PHASE3_STORY_READ_SOURCE", "PHASE3_SCENE_READ_SOURCE"]) {
+  assert.throws(() => parseEnvironment({ [key]: "prisma" }), /DATABASE_URL/);
+  assert.doesNotThrow(() => parseEnvironment({ DATABASE_URL: url, [key]: "prisma" }));
+  for (const value of ["typo", ""]) assert.throws(() => parseEnvironment({ [key]: value }));
 }
-for (const value of ["true", "1", "FALSE", ""]) assert.throws(() => parseEnvironment({ PHASE3_SHADOW_READ: value }));
+for (const value of ["prisma", "typo", ""]) {
+  assert.throws(() => parseEnvironment({ DATABASE_URL: url, PHASE3_STORY_WRITE_SOURCE: value }));
+}
+assert.throws(() => parseEnvironment({ PHASE3_SHADOW_READ: "true" }), /DATABASE_URL/);
+assert.doesNotThrow(() => parseEnvironment({ DATABASE_URL: url, PHASE3_SHADOW_READ: "true" }));
+for (const value of ["1", "FALSE", ""]) assert.throws(() => parseEnvironment({ PHASE3_SHADOW_READ: value }));
 
 for (const codec of [databaseJson.sceneRenderConfig, databaseJson.presetRenderConfig]) {
   const input = snapshotConfig();

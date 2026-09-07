@@ -37,10 +37,10 @@ all application databases. Prisma may reset its contents. The env parser rejects
 the same database target as either configured application URL, including Neon
 pooled/direct aliases.
 
-The four `PHASE3_*` flags default to JSON/false. Invalid values and unsupported
-Prisma/shadow cutovers fail at startup. Missing URLs are allowed for the current
-JSON app and offline generation; importing the Prisma singleton requires a valid
-`DATABASE_URL`. Later read/write stages must enable their adapters explicitly.
+The four `PHASE3_*` flags default to JSON/false. P3-05 permits Prisma Story/Scene
+reads and safe shadow reads only when `DATABASE_URL` exists; Prisma writes remain
+rejected at startup. Missing URLs are allowed for the default JSON app and offline
+generation; importing the Prisma singleton requires a valid `DATABASE_URL`.
 
 ## Initial migration on an empty development database
 
@@ -161,3 +161,10 @@ The second apply is an idempotency gate, not a retry after an unexplained failur
 the first failure, inspect the safe error, and rerun dry-run after resolving it. Keep the
 environment restore point until verify passes. Runtime repositories remain on JSON during
 P3-04, so do not enable Prisma read/write flags as part of this operation.
+
+P3-05 adds the additive migration
+`20260907000000_story_author_display_name`. It separates the public byline from the
+authenticated owner relation. On a database that already completed P3-04, deploy this
+migration and rerun P3-04 apply twice plus verify so the temporary non-null backfill is
+replaced by the exact JSON `author` value. New read parity checks run with
+`pnpm test:reads:db` and roll back their fixtures.

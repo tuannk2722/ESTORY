@@ -90,17 +90,18 @@ enum Role {
 
 // ─── Story & Kiểm duyệt (Mục 2.7) ───
 model Story {
-  id              String      @id @default(cuid())
-  slug            String      @unique
-  title           String
-  description     String
-  coverUrl        String?
-  genre           String[]
-  viewCount       Int         @default(0)
-  status          StoryStatus @default(DRAFT)
-  submittedAt     DateTime?
-  reviewedAt      DateTime?
-  rejectionReason String?
+  id                String      @id @default(cuid())
+  slug              String      @unique
+  title             String
+  authorDisplayName String
+  description       String
+  coverUrl          String?
+  genre             String[]
+  viewCount         Int         @default(0)
+  status            StoryStatus @default(DRAFT)
+  submittedAt       DateTime?
+  reviewedAt        DateTime?
+  rejectionReason   String?
 
   authorId     String
   author       User    @relation("StoryAuthor", fields: [authorId], references: [id])

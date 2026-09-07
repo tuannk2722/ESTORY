@@ -72,6 +72,12 @@ export interface ChapterCommandService {
 
 Trong HTTP/domain boundary, `storyId` luôn là slug công khai (`Story.id` trong TypeScript), không phải khóa chính Prisma. `PrismaStoryRepository` resolve slug sang `Story.id` nội bộ gần data source; route param và DTO không được expose hoặc chấp nhận khóa chính này thay cho slug.
 
+Public byline cũng tách khỏi ownership: repository map Prisma
+`Story.authorDisplayName → Story.author`; `authorId` chỉ phục vụ
+`getAllForAuthor`/DAL/authz và không được dùng thay byline. Legacy migration backfill
+byline từ JSON thay vì suy từ `User.name`; Story tạo mới phải ghi một byline không rỗng
+có chủ đích và không dùng email làm fallback public.
+
 ### 9.2.1. Lộ trình tách read-model cho trang đọc chương
 
 - **Phase 1–2:** `/stories/[storyId]/[chapterId]/page.tsx` tiếp tục dùng `getPublicById(storyId)`. JSON đang lưu nguyên Story trong một file nên tách method sớm không giảm disk I/O/JSON parse đáng kể.
@@ -180,6 +186,7 @@ model Story {
   id              String       @id @default(cuid())
   slug            String       @unique
   title           String
+  authorDisplayName String      // public byline snapshot; tách khỏi authorId ownership
   description     String
   coverUrl        String?
   genre           String[]

@@ -24,7 +24,7 @@ async function run() {
       const settings = await tx.userSettings.create({ data: { userId: user.id } });
       assert.deepEqual(databaseJson.effectsByCategory.read(settings.effectsByCategory), { visual: true, audio: true, motion: true, transition: true });
 
-      const story = await tx.story.create({ data: { slug: `foundation-${suffix}`, title: "Foundation", description: "Transaction rollback test", genre: ["test"], authorId: user.id } });
+      const story = await tx.story.create({ data: { slug: `foundation-${suffix}`, title: "Foundation", authorDisplayName: "Foundation author", description: "Transaction rollback test", genre: ["test"], authorId: user.id } });
       assert.equal(story.status, "DRAFT");
       const chapter = await tx.chapter.create({ data: { storyId: story.id, title: "Chapter", order: 1 } });
       assert.equal(chapter.status, "DRAFT");

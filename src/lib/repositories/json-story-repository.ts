@@ -30,7 +30,7 @@ export class JsonStoryRepository implements StoryRepository {
       const dirPath = this.getStoriesDirectory();
       await fs.mkdir(dirPath, { recursive: true });
       const files = await fs.readdir(dirPath);
-      const jsonFiles = files.filter((file) => file.endsWith(".json"));
+      const jsonFiles = files.filter((file) => file.endsWith(".json")).sort();
 
       const stories: Story[] = [];
       for (const file of jsonFiles) {

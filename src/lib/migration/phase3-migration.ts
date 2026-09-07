@@ -157,6 +157,7 @@ export async function applyPhase3MigrationTransaction(
     const data = {
       slug: story.id,
       title: story.title,
+      authorDisplayName: story.author,
       description: story.description,
       coverUrl: story.cover_image ?? null,
       genre: story.genre,
@@ -244,6 +245,7 @@ export async function verifyPhase3Migration(
     mismatch(issues, actual.slug === expected.id, `Story slug mismatch ${expected.id}`);
     mismatch(issues, actual.title === expected.title && actual.description === expected.description, `Story text mismatch ${expected.id}`);
     mismatch(issues, actual.authorId === ownerId, `Story owner mismatch ${expected.id}`);
+    mismatch(issues, actual.authorDisplayName === expected.author, `Story author display mismatch ${expected.id}`);
     mismatch(issues, actual.status === storyStatus[expected.status], `Story status mismatch ${expected.id}`);
     mismatch(issues, actual.coverUrl === (expected.cover_image ?? null), `Story cover mismatch ${expected.id}`);
     mismatch(issues, actual.viewCount === expected.view_count && isDeepStrictEqual(actual.genre, expected.genre), `Story fields mismatch ${expected.id}`);
