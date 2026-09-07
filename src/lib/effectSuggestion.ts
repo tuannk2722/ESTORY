@@ -9,13 +9,13 @@ export interface EffectSuggestion {
   confidence: number;
 }
 
-interface KeywordEffectMapping {
+export interface KeywordEffectMapping {
   effect_type: EffectType;
   keywords: string[];
   baseConfidence: number;
 }
 
-const KEYWORD_EFFECT_DICTIONARY: KeywordEffectMapping[] = [
+export const KEYWORD_EFFECT_DICTIONARY: KeywordEffectMapping[] = [
   {
     effect_type: "lightning_flash",
     keywords: [
@@ -291,4 +291,3 @@ export function suggestEffectsForText(text: string): EffectSuggestion[] {
 }
 
 export const detectEffectKeywords = suggestEffectsForText;
-

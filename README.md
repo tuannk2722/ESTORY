@@ -139,3 +139,41 @@ Tích hợp theo [Prisma adapter](https://authjs.dev/getting-started/adapters/pr
 [database RBAC](https://authjs.dev/guides/role-based-access-control) và
 [deployment](https://authjs.dev/getting-started/deployment) của Auth.js; giữ stack
 NextAuth v5 đã chốt trong docs. Bằng chứng/gate: [P3-03](docs/verification/p3-03.md).
+
+## Migration JSON → Prisma (P3-04)
+
+Migration là CLI server-only và không đổi nguồn đọc/ghi runtime của app. Đặt
+`LEGACY_OWNER_USER_ID` trong `.env.local` bằng exact `User.id` đã tồn tại; script không
+suy owner từ chuỗi tên tác giả trong JSON. Trước apply, bảo đảm mọi media root-relative
+được JSON tham chiếu đều có trong `public/`.
+
+Chạy từng mode riêng và dừng ngay khi một mode lỗi:
+
+```sh
+pnpm migrate:phase3 -- --mode=dry-run
+pnpm migrate:phase3 -- --mode=apply
+pnpm migrate:phase3 -- --mode=apply
+pnpm migrate:phase3 -- --mode=verify
+```
+
+`dry-run` parse toàn bộ seed, resolve Scene/curated preset thành snapshot v1, kiểm tra
+Story–Chapter–Block membership, range/overlap, manifest/keyword và media checksum; DB
+chỉ được đọc để xác minh owner, ID collision và technical effect lạ. `apply` upsert stable
+legacy ID/slug trong một transaction, seed overlay/dictionary và không xóa row ngoài seed.
+Lần apply thứ hai phải không tăng count. `verify` đối chiếu count, ID/slug, order/text,
+effect config, public status, Scene/catalog snapshot, checksum preset, 25 overlay IDs và
+global/personal isolation. Report không in credential hoặc `LEGACY_OWNER_USER_ID`.
+
+Chỉ chạy trên database đã deploy migration P3-02. Dev/preview/production phải dùng owner
+và connection riêng của đúng môi trường. App vẫn để bốn `PHASE3_*` flag ở JSON/false;
+Prisma read/write cutover thuộc stage sau. DB integration có rollback:
+
+```sh
+pnpm test:migration:db
+```
+
+Trước apply ở môi trường dùng chung, tạo Neon restore point/branch và ghi application
+revision. Nếu apply thất bại, transaction không ghi một phần; sửa source/config rồi chạy
+dry-run lại. Vì runtime vẫn dùng JSON ở P3-04, có thể rollback application revision và để
+dữ liệu additive trong DB. Nếu cần hoàn tác dữ liệu đã apply, restore branch/restore point
+đã ghi; không dùng `migrate reset`, không xóa thủ công các row có thể đã được tham chiếu.

@@ -1,47 +1,43 @@
 # Current Task
 
 ## Goal
-Implement P3-03 Auth.js and admin bootstrap after the user's confirmed green P3-02 baseline.
+Implement P3-04 JSON-to-Prisma migration with dry-run, apply and verify modes after the user's confirmed green P3-03 baseline.
 
 ## Source of Truth
 - AGENTS.md; docs/00-INDEX.md; docs/01-tech-stack.md sections 1.2–1.3.
-- docs/02-data-schema.md section 2.5; docs/07-user-stories-phase3.md US-3.3/3.5.
-- docs/11-phase3-technical-roadmap.md section 9.5; docs/12-auth-and-author-management.md sections 12.1–12.3.
+- docs/02-data-schema.md relevant models, especially 2.1/2.6/2.9.
+- docs/07-user-stories-phase3.md US-3.1/3.2; docs/08-effects-and-scenes.md sections 8.3/8.6.
+- docs/11-phase3-technical-roadmap.md sections 9.3–9.4c.
 - docs/03-file-structure.md; docs/09-non-functional-requirements.md; docs/10-out-of-scope.md.
-- Workspace runbook ../phase3-execution-plan.md P3-03.
+- Workspace runbook ../phase3-execution-plan.md P3-04.
 
 ## Verified Starting State
-- HEAD 3065d8f; clean working tree. P3-02 evidence in docs/verification/p3-02.md.
-- Prisma 7.10.0 has all Auth.js models; no Auth.js dependencies or guards yet.
-- Only exposed content mutation is legacy editor PUT; editor page/API full reads are unguarded.
-- JSON has no trustworthy owner. Restrict legacy editor to admin until P3-06 ownership integration.
-- Installed Next.js proxy/authentication guides and official Auth.js docs inspected.
-- DATABASE_URL/DIRECT_URL set in ignored .env.local. Never print credentials.
+- HEAD 173d594; P3-02/P3-03 verification exists and user reports the P3-03 baseline green.
+- JSON baseline: 3 stories, 10 chapters, 64 blocks, 69 block effects, 17 scenes, 41 backgrounds, 20 palettes, 39 presets.
+- Story/chapter/block/effect/scene legacy IDs are globally unique in current fixtures; Scene ingredient and preset references resolve.
+- DATABASE_URL/DIRECT_URL and the exact legacy owner selector are present only in ignored `.env.local`; never print credentials or owner selectors.
 
 ## In Progress
-- None. P3-03 code and local/Neon dev gates passed, including a real admin.
+- P3-04 is complete on the configured Neon dev database. No P3-05 work has started.
 
 ## Completed
-- Auth.js 5.0.0-beta.32 + Prisma adapter 2.11.3; database sessions and safe stable ID/role projection.
-- Verified provider email, same-origin redirects, no automatic account linking, safe auth logging.
-- Session/rank guards, author/admin proxy/layout guards, admin-only legacy editor page/API and mutation Origin check.
-- Transactional promote-only CLI bootstrap with email/ID allowlist; no user creation or admin demotion.
-- Unit, DB and HTTP integration suites; CI jobs, README/env example and docs/verification/p3-03.md.
-- Frozen offline install, lint/typecheck/unit/build/client-bundle/credential audit/diff checks passed.
-- Neon Auth DB integration passed with rollback; HTTP suite passed, disposable users/sessions deleted.
-- User confirmed real GitHub login. Verified 1 GitHub account and active session in Neon dev.
-- Full allowlist has 2 emails; second has no OAuth user, so full-list bootstrap failed without changes.
-- Scoped the existing CLI to the one signed-in, allowlisted GitHub user using process-only exact ID env; .env.local unchanged.
-- Bootstrap run 1: matched=1, promoted=1, admins=1. Run 2: matched=1, promoted=0, admins=1.
-- User/Account/Session counts unchanged at 1/1/1; existing session projection retains user ID and returns role admin.
+- P3-03 implementation and verification are recorded in docs/verification/p3-03.md.
+- P3-04 requirements, schema, current adapters/mappers, fixtures and database foundation were inspected.
+- P3-04 CLI, source/media validation, reusable manifest/keyword sync, transactional apply, exact verify, tests, CI step and operations docs are implemented.
+- User-supplied covers now use paths matching their formats: WebP for an-khe-tra-vang, PNG for demo-story and JPEG for son-tinh-thuy-tinh. All referenced media pass existence and checksum validation.
+- Typecheck, lint, unit tests, Prisma validate, build and client bundle scan pass.
+- Neon migration integration passes apply twice + verify inside a rollback transaction; unknown manifest ID and overlay preservation are tested.
+- The real Neon dev sequence passed: dry-run, apply, second idempotent apply with unchanged counts, then exact verify.
+- Final migrated counts are 3 stories, 10 chapters, 64 blocks, 69 block effects, 17 scenes, 41 backgrounds, 20 palettes, 39 presets, 25 effect definitions and 144 normalized keywords.
 
 ## Remaining
-- Google real OAuth smoke, remote CI/Vercel and preview/prod checks unverified; no push/deploy requested.
-- Second configured allowlist email has not signed in/been bootstrapped. Full-list CLI intentionally requires every selector to match.
-- Stop before P3-04 unless explicitly requested. Verification: docs/verification/p3-03.md.
+- Remote GitHub Actions and Vercel Preview/Production are separate environment gates.
+- Before applying outside Neon dev, the operator must create the environment-specific restore point and rerun dry-run → apply twice → verify using that environment's exact owner ID.
+- Start P3-05 only when requested.
 
 ## Constraints
-- No schema changes, Story/Scene cutover, owner/membership services, Auth UI/onboarding or later stages.
-- Bootstrap only promotes existing allowlisted OAuth users; no public endpoint or admin demotion.
-- Keep Story/Scene persistence on JSON; no secrets or session/OAuth tokens in logs.
+- No schema change, Prisma repository/read cutover, DB write cutover, Admin UI or later-stage command services.
+- Keep runtime Story/Scene reads and writes on JSON; migration is an explicit server-side CLI only.
+- Preserve stable legacy IDs/slugs and public Story/Chapter status; no destructive cleanup of unrelated DB rows or media.
+- Apply must be transactional, idempotent and fail closed on invalid source, owner, manifest IDs, ranges or media.
 - Use workspace .tools/node-v24.20.0-win-x64 and pnpm 10.33.0.

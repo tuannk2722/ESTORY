@@ -147,3 +147,17 @@ objects as part of this schema migration or catalog record deletion.
 Official references: [Prisma requirements](https://docs.prisma.io/docs/orm/reference/system-requirements),
 [PostgreSQL adapters/connections](https://docs.prisma.io/docs/orm/core-concepts/supported-databases/postgresql),
 [Prisma config and offline generation](https://docs.prisma.io/docs/orm/reference/prisma-config-reference).
+
+## P3-04 legacy content migration
+
+After the foundation migration and Auth admin bootstrap are verified, configure an exact
+existing `LEGACY_OWNER_USER_ID` and run the P3-04 command sequence documented in the
+[project README](../README.md#migration-json--prisma-p3-04). Dry-run and verify read the
+database; apply writes all seed rows in one transaction. The importer preserves stable
+legacy IDs/slugs, does not delete unrelated rows, and fails on ownership/ID collisions or
+unknown EffectDefinition IDs.
+
+The second apply is an idempotency gate, not a retry after an unexplained failure. Record
+the first failure, inspect the safe error, and rerun dry-run after resolving it. Keep the
+environment restore point until verify passes. Runtime repositories remain on JSON during
+P3-04, so do not enable Prisma read/write flags as part of this operation.
