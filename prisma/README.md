@@ -37,9 +37,12 @@ all application databases. Prisma may reset its contents. The env parser rejects
 the same database target as either configured application URL, including Neon
 pooled/direct aliases.
 
-The four `PHASE3_*` flags default to JSON/false. P3-05 permits Prisma Story/Scene
-reads and safe shadow reads only when `DATABASE_URL` exists; Prisma writes remain
-rejected at startup. Missing URLs are allowed for the default JSON app and offline
+The four `PHASE3_*` flags default to JSON/false. Prisma Story/Scene reads and
+shadow reads require `DATABASE_URL`. From P3-06, write `json` disables runtime
+content writes; write `prisma` requires both read sources to be `prisma`.
+P3-07 Reader/Editor integration and environment cutover gates are documented in
+[README](../README.md#reader--editor-và-controlled-cutover-p3-07).
+Missing URLs are allowed for the default JSON app and offline
 generation; importing the Prisma singleton requires a valid `DATABASE_URL`.
 
 ## Initial migration on an empty development database
@@ -126,9 +129,10 @@ objects as part of this schema migration or catalog record deletion.
 1. Before a shared-environment migration, record the application revision,
    migration name and the Neon branch/restore point. Confirm available restore
    retention in that environment and keep the previous deployment available.
-2. In P3-02 the app still reads/writes JSON: roll back the application revision
-   if needed and leave the additive database schema in place. No database drop
-   is needed to restore application behavior.
+2. Before real DB content writes, a compatible public-read rollback can use JSON
+   while leaving the additive schema in place. From P3-06, runtime JSON writes
+   remain blocked; P3-07 Editor full reads use authorized DB snapshots. Never
+   restore an older unguarded write path as part of rollback.
 3. The initial DDL transaction rolls back on failure. Inspect
    `pnpm db:migrate:status` and migration history privately. Confirm the DDL was
    rolled back and resolve the cause before marking a **failed** migration:

@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Layers } from "lucide-react";
-import { LegacyScene as Scene, LegacySceneLibraryData as SceneLibraryData, LegacyScenePreset as ScenePreset } from "@/types/scene-legacy";
+import { Scene, SceneLibraryData, ScenePreset } from "@/types/scene";
 import { StoryBlock } from "@/types/story";
 import {
-  SceneDraft,
+  createEmptySceneDraft,
+  draftToRenderConfig,
   draftMatchesPreset,
   draftToScene,
   presetToDraft,
@@ -28,21 +29,8 @@ export interface ScenePickerProps {
   initialScene?: Scene | null;
   chapterId: string;
   blocks?: StoryBlock[];
-  sceneLibrary?: SceneLibraryData;
+  sceneLibrary: SceneLibraryData;
 }
-
-const EMPTY_DRAFT: SceneDraft = {
-  backgroundId: "",
-  paletteId: "",
-  ambientAudio: null,
-  ambientEffects: [],
-};
-
-const EMPTY_LIBRARY: SceneLibraryData = {
-  backgrounds: [],
-  palettes: [],
-  scenePresets: [],
-};
 
 function getInitialMode(
   initialScene: Scene | null | undefined,
@@ -70,39 +58,27 @@ export function ScenePicker({
   blocks = [],
   sceneLibrary,
 }: ScenePickerProps) {
-  const [fetchedLibrary, setFetchedLibrary] = useState<SceneLibraryData | null>(null);
-  const [loading, setLoading] = useState(!sceneLibrary);
   const [mode, setMode] = useState<"preset" | "custom">(
     () => getInitialMode(initialScene, sceneLibrary)
   );
-  const [draft, setDraft] = useState<SceneDraft>(() =>
-    initialScene ? sceneToDraft(initialScene) : EMPTY_DRAFT
+  const [draft, setDraft] = useState(() =>
+    initialScene ? sceneToDraft(initialScene) : createEmptySceneDraft()
   );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  const library = sceneLibrary || fetchedLibrary || EMPTY_LIBRARY;
-  const { backgrounds, palettes, scenePresets: presets } = library;
-
-  useEffect(() => {
-    if (!isOpen || sceneLibrary) return;
-    const controller = new AbortController();
-
-    fetch("/api/scene-library", { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) throw new Error("Không thể tải thư viện Scene");
-        return response.json() as Promise<SceneLibraryData>;
-      })
-      .then((data) => setFetchedLibrary(data))
-      .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        console.error("Error fetching scene library:", error);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [isOpen, sceneLibrary]);
+  const { scenePresets: presets } = sceneLibrary;
+  const renderConfig = useMemo(() => draftToRenderConfig(draft), [draft]);
+  // The saved snapshot remains editable even when no catalog ingredient exists.
+  const savedBackgroundId = "snapshot:current-background";
+  const savedPaletteId = "snapshot:current-palette";
+  const backgrounds = useMemo(() => [
+    ...(draft.background && !draft.backgroundId ? [{ id: savedBackgroundId, label: "Nền hiện tại", mood_tags: [], render: draft.background }] : []),
+    ...sceneLibrary.backgrounds,
+  ], [draft.background, draft.backgroundId, sceneLibrary.backgrounds]);
+  const palettes = useMemo(() => [
+    ...(draft.palette && !draft.paletteId ? [{ id: savedPaletteId, label: "Bảng màu hiện tại", mood_tags: [], colors: draft.palette }] : []),
+    ...sceneLibrary.palettes,
+  ], [draft.palette, draft.paletteId, sceneLibrary.palettes]);
 
   const handleClose = useCallback(() => {
     setIsPreviewOpen(false);
@@ -146,12 +122,8 @@ export function ScenePicker({
   }, [blocks, endBlockId, startBlockId]);
 
   const activeBackground = useMemo(
-    () => backgrounds.find((background) => background.id === draft.backgroundId),
+    () => backgrounds.find((background) => background.id === (draft.backgroundId || savedBackgroundId)),
     [backgrounds, draft.backgroundId]
-  );
-  const activeColorPalette = useMemo(
-    () => palettes.find((palette) => palette.id === draft.paletteId),
-    [palettes, draft.paletteId]
   );
   const previewSceneLabel = useMemo(() => {
     if (draft.sourcePresetId) {
@@ -176,7 +148,7 @@ export function ScenePicker({
   }, [draft, presets]);
 
   const isSaveDisabled =
-    !draft.backgroundId || !draft.paletteId || normalizedRange === null;
+    renderConfig === null || normalizedRange === null;
 
   const handleSave = useCallback(() => {
     if (isSaveDisabled || !normalizedRange) return;
@@ -224,31 +196,23 @@ export function ScenePicker({
       >
         <ScenePickerModeTabs mode={mode} presetCount={presets.length} onChange={setMode} />
 
-        {loading ? (
-          <div className="py-20 text-center text-muted-foreground" aria-live="polite">
-            <div className="inline-block w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin motion-reduce:animate-none mb-3" />
-            <p className="text-sm">Đang nạp thư viện Scene…</p>
-          </div>
-        ) : mode === "preset" ? (
+        {mode === "preset" ? (
           <PresetTab
             presets={presets}
-            backgrounds={backgrounds}
-            palettes={palettes}
             selectedPresetId={selectedPresetId}
-            selectedBackgroundId={draft.backgroundId}
             initialPresetId={initialScene?.based_on_preset_id}
             onSelectPreset={handleSelectPreset}
             onQuickPreview={handleQuickPreviewPreset}
           />
         ) : (
           <CustomSceneTab
-            draft={draft}
+            draft={{ ...draft, backgroundId: draft.backgroundId || savedBackgroundId, paletteId: draft.paletteId || savedPaletteId }}
             onChangeDraft={setDraft}
             backgrounds={backgrounds}
             palettes={palettes}
-            initialBackgroundId={initialScene?.background_id}
-            initialPaletteId={initialScene?.palette_id}
-            initialAudioSrc={initialScene?.effects?.find(
+            initialBackgroundId={savedBackgroundId}
+            initialPaletteId={savedPaletteId}
+            initialAudioSrc={initialScene?.render_config.ambient_effects?.find(
               (effect) => effect.type === "audio" || effect.category === "audio"
             )?.audio_src}
             isLoop
@@ -261,10 +225,7 @@ export function ScenePicker({
         onClose={() => setIsPreviewOpen(false)}
         onSave={handleSave}
         isSaveDisabled={isSaveDisabled}
-        background={activeBackground}
-        palette={activeColorPalette}
-        ambientAudio={draft.ambientAudio}
-        effects={draft.ambientEffects}
+        renderConfig={renderConfig}
         selectedBlocks={selectedBlocks}
         previewSceneLabel={previewSceneLabel}
         rangeLabel={rangeLabel}

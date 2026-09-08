@@ -1,16 +1,9 @@
-// src/app/author/stories/[storyId]/[chapterId]/page.tsx
-// Phase 2: Author Content Editor Screen — Parallel Bootstrap Loading (US-2.1 -> US-2.9)
-
-import { notFound, redirect } from "next/navigation";
-import {
-  storyRepository,
-  sceneRepository,
-  sceneLibraryRepository,
-} from "@/lib/repositories";
+import { sceneLibraryRepository } from "@/lib/repositories";
 import EditorClient from "@/components/editor/EditorClient";
-import { createEditorRevision } from "@/services/editorService";
 import { requirePageStoryAccess } from "@/lib/auth/page-guards";
-
+import { StoryDataAccess } from "@/lib/services/story-dal";
+import { CommandError } from "@/lib/services/command-error";
+import { notFound } from "next/navigation";
 
 interface EditorPageProps {
   params: Promise<{ storyId: string; chapterId: string }>;
@@ -18,44 +11,26 @@ interface EditorPageProps {
 
 export default async function EditorPage({ params }: EditorPageProps) {
   const { storyId, chapterId } = await params;
-  await requirePageStoryAccess(storyId, chapterId, `/author/stories/${encodeURIComponent(storyId)}/${encodeURIComponent(chapterId)}`);
-
-  // 1. Tải Story trước để xác thực sự tồn tại và danh sách chapters
-  const story = await storyRepository.getById(storyId);
-  if (!story) {
-    notFound();
-  }
-
-  // 2. Tìm chapter hợp lệ trong story
-  const targetChapter = story.chapters.find((c) => c.id === chapterId);
-  if (!targetChapter) {
-    // Nếu chapterId trong URL không tồn tại (ví dụ gõ nhầm 'ch1' cho truyện Sơn Tinh Thủy Tinh có chapter 'ch-son-tinh'),
-    // tự động chuyển hướng về chapter đầu tiên hợp lệ của truyện thay vì nạp nhầm scenes của chapter khác
-    if (story.chapters.length > 0) {
-      redirect(`/author/stories/${storyId}/${story.chapters[0].id}`);
-    }
-    notFound();
-  }
-
-  // 3. Preload song song Scenes đúng của targetChapter và Thư viện mẫu Scene
-  const [scenes, backgrounds, palettes, scenePresets] = await Promise.all([
-    sceneRepository.getLegacyByChapter(storyId, targetChapter.id),
-    sceneLibraryRepository.getBackgrounds(),
-    sceneLibraryRepository.getPalettes(),
-    sceneLibraryRepository.getScenePresets(),
-  ]);
-
+  const session = await requirePageStoryAccess(storyId, chapterId, `/author/stories/${encodeURIComponent(storyId)}/${encodeURIComponent(chapterId)}`);
+  const dal = new StoryDataAccess();
+  const [story, editor, backgrounds, palettes, scenePresets] = await Promise.all([
+    dal.getStory(session.user.id, storyId),
+    dal.getEditor(session.user.id, storyId, chapterId),
+    sceneLibraryRepository.getActiveGlobalBackgrounds(),
+    sceneLibraryRepository.getActivePalettes(),
+    sceneLibraryRepository.getActiveScenePresets(),
+  ]).catch((error: unknown) => {
+    if (error instanceof CommandError && error.status === 404) notFound();
+    throw error;
+  });
+  // Chapter, scenes and revision come from the same authorized DB snapshot.
   return (
     <EditorClient
-      initialStory={story}
-      chapterId={targetChapter.id}
-      initialScenes={scenes || []}
-      initialRevision={createEditorRevision(targetChapter, scenes || [])}
-      sceneLibrary={{
-        backgrounds: backgrounds || [],
-        palettes: palettes || [],
-        scenePresets: scenePresets || [],
-      }}
+      initialStory={{ ...story.data, chapters: [editor.data.chapter] }}
+      chapterId={chapterId}
+      initialScenes={editor.data.scenes}
+      initialRevision={editor.meta.updatedAt}
+      sceneLibrary={{ backgrounds, palettes, scenePresets }}
     />
   );
 }

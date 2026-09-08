@@ -3,7 +3,7 @@
 
 import { EditorState } from "./editorReducer";
 import { StoryBlock, Chapter } from "@/types/story";
-import { LegacyScene as Scene } from "@/types/scene-legacy";
+import { Scene } from "@/types/scene";
 import { buildBlockIndexMap } from "@/lib/scenes/sceneRange";
 import { buildSceneByBlockId, findActiveScene, SceneBlockInfo } from "@/lib/scenes/sceneSelectors";
 

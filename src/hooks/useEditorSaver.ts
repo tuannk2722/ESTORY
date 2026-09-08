@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { EditorSaveError, saveEditorAggregate } from "@/lib/editor/editorTransport";
 import { toast } from "sonner";
-import type { LegacyScene as Scene } from "@/types/scene-legacy";
+import type { Scene } from "@/types/scene";
 import type { Chapter } from "@/types/story";
 
 export interface UseEditorSaverOptions {
   storyId: string;
-  chapterId: string;
   chapter: Chapter;
   scenes: Scene[];
   dirty: boolean;
@@ -19,15 +19,8 @@ export interface UseEditorSaverOptions {
   onSaveConflict?: () => void;
 }
 
-interface EditorSaveResponse {
-  error?: string;
-  errors?: string[];
-  revision?: string;
-}
-
 export function useEditorSaver({
   storyId,
-  chapterId,
   chapter,
   scenes,
   dirty,
@@ -39,6 +32,7 @@ export function useEditorSaver({
   onSaveConflict,
 }: UseEditorSaverOptions) {
   const [isSaving, setIsSaving] = useState(false);
+  const inFlight = useRef(false);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -52,66 +46,36 @@ export function useEditorSaver({
   }, [dirty]);
 
   const handleSave = useCallback(async () => {
-    if (isSaving || !dirty) return;
+    if (inFlight.current || !dirty) return;
+    inFlight.current = true;
 
     const savingVersion = changeVersion;
     setIsSaving(true);
     onSaveStart?.(savingVersion);
 
     try {
-      const response = await fetch(
-        `/api/stories/${storyId}/chapters/${chapterId}/editor`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chapter, scenes, revision }),
-        }
-      );
-      const data: EditorSaveResponse = await response
-        .json()
-        .catch(() => ({}));
-
-      if (response.status === 409) {
-        const conflictMessage =
-          data.errors?.join(", ") ||
-          "Nội dung đã thay đổi ở một phiên khác. Hãy tải lại trang để đối chiếu trước khi lưu.";
-        toast.error(conflictMessage, { duration: 6000 });
-        onSaveConflict?.();
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          data.errors?.join(", ") ||
-            data.error ||
-            "Không thể lưu chương truyện."
-        );
-      }
-
-      if (!data.revision) {
-        throw new Error("Server không trả về revision sau khi lưu.");
-      }
+      const result = await saveEditorAggregate(storyId, chapter, scenes, revision);
 
       toast.success("Đã lưu nội dung và bối cảnh thành công!", {
         duration: 6000,
       });
-      onSaveSuccess?.(savingVersion, data.revision);
+      onSaveSuccess?.(savingVersion, result.meta.updatedAt);
     } catch (error: unknown) {
       const message =
         error instanceof Error
           ? error.message
           : "Không thể lưu chương truyện.";
       toast.error(message, { duration: 6000 });
-      onSaveError?.(message);
+      if (error instanceof EditorSaveError && error.status === 409) onSaveConflict?.();
+      else onSaveError?.(message);
     } finally {
+      inFlight.current = false;
       setIsSaving(false);
     }
   }, [
     changeVersion,
     chapter,
-    chapterId,
     dirty,
-    isSaving,
     onSaveConflict,
     onSaveError,
     onSaveStart,

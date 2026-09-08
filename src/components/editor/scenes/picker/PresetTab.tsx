@@ -4,7 +4,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { LegacyScenePreset as ScenePreset, LegacyBackgroundAsset as BackgroundAsset, LegacyColorPalette as ColorPalette } from "@/types/scene-legacy";
+import type { ScenePreset } from "@/types/scene";
+import { renderConfigToPresentation } from "@/lib/scenes/scene-presentation";
 import {
   Sparkles,
   Eye,
@@ -19,10 +20,7 @@ import { getEffectIcon, EFFECT_METADATA } from "@/lib/effects/effectCatalog";
 
 export interface PresetTabProps {
   presets: ScenePreset[];
-  backgrounds: BackgroundAsset[];
-  palettes: ColorPalette[];
   selectedPresetId?: string | null;
-  selectedBackgroundId?: string;
   initialPresetId?: string | null;
   onSelectPreset: (preset: ScenePreset) => void;
   onQuickPreview: (e: React.MouseEvent, preset: ScenePreset) => void;
@@ -32,10 +30,7 @@ const INITIAL_PRESET_LIMIT = 10;
 
 export const PresetTab = React.memo(function PresetTab({
   presets,
-  backgrounds,
-  palettes,
   selectedPresetId,
-  selectedBackgroundId,
   initialPresetId,
   onSelectPreset,
   onQuickPreview,
@@ -43,18 +38,6 @@ export const PresetTab = React.memo(function PresetTab({
   const [search, setSearch] = useState<string>("");
   const [searchOpen, setSearchOpen] = useState<boolean>(false);
   const [visibleCount, setVisibleCount] = useState<number>(INITIAL_PRESET_LIMIT);
-
-  const backgroundMap = useMemo(() => {
-    const map = new Map<string, BackgroundAsset>();
-    backgrounds.forEach((bg) => map.set(bg.id, bg));
-    return map;
-  }, [backgrounds]);
-
-  const paletteMap = useMemo(() => {
-    const map = new Map<string, ColorPalette>();
-    palettes.forEach((pal) => map.set(pal.id, pal));
-    return map;
-  }, [palettes]);
 
   // Đưa preset đang dùng lên đầu danh sách khi đang Edit (có initialPresetId)
   const orderedPresets = useMemo(() => {
@@ -131,19 +114,16 @@ export const PresetTab = React.memo(function PresetTab({
       {/* Preset Grid (2 Cột) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {visiblePresets.map((preset) => {
-          const bg = backgroundMap.get(preset.background_id);
-          const pal = paletteMap.get(preset.palette_id);
-          const isSelected =
-            selectedPresetId === preset.id &&
-            (selectedBackgroundId ? selectedBackgroundId === preset.background_id : true);
+          const { background: bg, palette: pal } = renderConfigToPresentation(preset.render_config);
+          const isSelected = selectedPresetId === preset.id;
 
-          const audioEffect = preset.effects?.find(
+          const audioEffect = preset.render_config.ambient_effects?.find(
             (e) => e.type === "audio" || e.category === "audio"
           );
           const hasAudio = Boolean(audioEffect?.audio_src);
 
           const nonAudioEffects =
-            preset.effects?.filter(
+            preset.render_config.ambient_effects?.filter(
               (e) => e.type !== "audio" && e.category !== "audio"
             ) || [];
 

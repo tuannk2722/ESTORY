@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useMemo } from "react";
-import { LegacyScene as Scene, LegacySceneLibraryData as SceneLibraryData } from "@/types/scene-legacy";
+import { Scene, SceneLibraryData } from "@/types/scene";
 import { StoryBlock } from "@/types/story";
 import { ChevronLeft, ChevronRight, Layers, Plus } from "lucide-react";
 import { buildBlockIndexMap } from "@/lib/scenes/sceneRange";
@@ -52,15 +52,7 @@ function ScenePanelComponent({
   rangeEndId,
   sceneLibrary,
 }: ScenePanelProps) {
-  const { backgrounds, palettes, scenePresets } = sceneLibrary;
-  const backgroundMap = useMemo(
-    () => new Map(backgrounds.map((background) => [background.id, background])),
-    [backgrounds]
-  );
-  const paletteMap = useMemo(
-    () => new Map(palettes.map((palette) => [palette.id, palette])),
-    [palettes]
-  );
+  const { scenePresets } = sceneLibrary;
   const presetMap = useMemo(
     () => new Map(scenePresets.map((preset) => [preset.id, preset])),
     [scenePresets]
@@ -231,8 +223,6 @@ function ScenePanelComponent({
                 index={index}
                 rangeStatus={rangeStatus}
                 isActive={isActive}
-                backgroundMap={backgroundMap}
-                paletteMap={paletteMap}
                 presetMap={presetMap}
                 onScrollToStart={handleScrollToBlock}
                 onOpenScenePicker={onOpenScenePicker}

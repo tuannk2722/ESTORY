@@ -3,8 +3,9 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { sceneSchema } from "@/lib/scenes/scene-render-config";
 import { Story } from "@/types/story";
-import { LegacyScene as Scene, LegacySceneLibraryData as SceneLibraryData } from "@/types/scene-legacy";
+import { Scene } from "@/types/scene";
 import {
   buildBlockIndexMap,
   findSceneOverlap,
@@ -21,7 +22,6 @@ export type CompactEditorPanel = "scenes" | "timeline" | null;
 
 export function useEditorClientController(
   story: Story,
-  sceneLibrary: SceneLibraryData
 ) {
   const { state, commands } = useEditor();
   const confirm = useConfirm();
@@ -46,7 +46,6 @@ export function useEditorClientController(
 
   const { isSaving, handleSave } = useEditorSaver({
     storyId: story.id,
-    chapterId: currentChapter.id,
     chapter: currentChapter,
     scenes,
     dirty: state.dirty,
@@ -89,18 +88,12 @@ export function useEditorClientController(
       const indexMap = buildBlockIndexMap(currentChapter.blocks);
       const range = validateSceneRange(scene, indexMap, currentChapter.blocks.length);
       const overlap = findSceneOverlap(scene, scenes, indexMap, scene.id);
-      const hasBackground = sceneLibrary.backgrounds.some(
-        (background) => background.id === scene.background_id
-      );
-      const hasPalette = sceneLibrary.palettes.some(
-        (palette) => palette.id === scene.palette_id
-      );
+      const validSnapshot = sceneSchema.safeParse(scene).success;
       if (
         scene.chapter_id !== currentChapter.id ||
         !range.valid ||
         overlap ||
-        !hasBackground ||
-        !hasPalette
+        !validSnapshot
       ) {
         toast.error("Scene không hợp lệ. Vui lòng kiểm tra lại dải block và tài nguyên.");
         return;
@@ -108,7 +101,7 @@ export function useEditorClientController(
       commands.scenes.upsertScene(scene);
       closeScenePicker();
     },
-    [closeScenePicker, commands.scenes, currentChapter, sceneLibrary, scenes]
+    [closeScenePicker, commands.scenes, currentChapter, scenes]
   );
 
   const handleProceedSceneRange = useCallback(() => {

@@ -2,7 +2,7 @@
 // Pure domain algorithms for Scene Range normalization, validation, collision detection, and reconciliation
 
 import { StoryBlock } from "@/types/story";
-import { LegacyScene as Scene } from "@/types/scene-legacy";
+type SceneRange = { id: string; chapter_id: string; start_block_id: string; end_block_id: string };
 
 export type SceneRangeValidation =
   | {
@@ -20,7 +20,7 @@ export type SceneRangeValidation =
         | "EMPTY_RANGE";
     };
 
-export type BlockMoveValidationResult =
+export type BlockMoveValidationResult<Scene extends SceneRange> =
   | {
       type: "allowed";
       recomputedScenes: Scene[];
@@ -38,7 +38,7 @@ export type BlockMoveValidationResult =
       reason: string;
     };
 
-export type PendingSceneRangeResult =
+export type PendingSceneRangeResult<Scene extends SceneRange> =
   | {
       valid: true;
       startBlockId: string;
@@ -140,7 +140,7 @@ export function validateSceneRange(
  * Kiểm tra xem dải block có bị chồng lấn (overlap) với bất kỳ Scene nào khác không
  * Trả về Scene bị chồng lấn đầu tiên (hoặc null nếu không bị chồng lấn)
  */
-export function findSceneOverlap(
+export function findSceneOverlap<Scene extends SceneRange>(
   range: { start_block_id: string; end_block_id: string; id?: string },
   scenes: Scene[],
   blockIndexMap: Map<string, number>,
@@ -187,12 +187,12 @@ export function findSceneOverlap(
  * Chuẩn bị dải Scene mới từ state chọn dải. UI chỉ hiển thị kết quả,
  * toàn bộ normalize/overlap rule được giữ tại domain layer này.
  */
-export function preparePendingSceneRange(
+export function preparePendingSceneRange<Scene extends SceneRange>(
   startBlockId: string | null,
   endBlockId: string | null,
   blocks: StoryBlock[],
   scenes: Scene[]
-): PendingSceneRangeResult {
+): PendingSceneRangeResult<Scene> {
   if (!startBlockId) {
     return { valid: false, reason: "MISSING_START" };
   }
@@ -260,7 +260,7 @@ export function getBlocksInsideRange(
  * 3. Block bị xóa là end_block_id: dịch end sang block liền trước.
  * 4. Block bị xóa là block DUY NHẤT trong Scene: đánh dấu Scene cần xóa.
  */
-export function updateScenesAfterBlockDelete(
+export function updateScenesAfterBlockDelete<Scene extends SceneRange>(
   deletedBlockId: string,
   scenes: Scene[],
   currentBlocks: StoryBlock[]
@@ -355,12 +355,12 @@ export function updateScenesAfterBlockDelete(
 /**
  * Validate và điều hòa Scene khi di chuyển / đổi chỗ 1 Block
  */
-export function validateBlockMoveAgainstScenes(
+export function validateBlockMoveAgainstScenes<Scene extends SceneRange>(
   fromIndex: number,
   toIndex: number,
   blocks: StoryBlock[],
   scenes: Scene[]
-): BlockMoveValidationResult {
+): BlockMoveValidationResult<Scene> {
   if (
     fromIndex < 0 ||
     fromIndex >= blocks.length ||

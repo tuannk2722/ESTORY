@@ -4,12 +4,14 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { LegacyColorPalette as ColorPalette } from "@/types/scene-legacy";
+import type { ColorPalette } from "@/types/scene";
 import { Palette, Check } from "lucide-react";
 import SearchableCombobox, { ComboboxOption } from "@/components/ui/SearchableCombobox";
 
+export type PaletteOption = Pick<ColorPalette, "id" | "label" | "mood_tags" | "colors">;
+
 export interface PalettePickerProps {
-  palettes: ColorPalette[];
+  palettes: PaletteOption[];
   selectedPaletteId: string;
   onSelectPalette: (id: string) => void;
   initialPaletteId?: string;
@@ -46,7 +48,7 @@ export const PalettePicker = React.memo(function PalettePicker({
               <div style={{ backgroundColor: pal.colors.accent }} className="flex-1" />
               <div style={{ backgroundColor: pal.colors.secondary }} className="flex-1" />
               <div
-                style={{ backgroundColor: pal.colors.background_tint || pal.colors.primary }}
+                style={{ backgroundColor: pal.colors.background_tint.color }}
                 className="flex-1 opacity-70"
               />
             </div>
@@ -66,7 +68,7 @@ export const PalettePicker = React.memo(function PalettePicker({
             <div style={{ backgroundColor: pal.colors.accent }} className="flex-1" />
             <div style={{ backgroundColor: pal.colors.secondary }} className="flex-1" />
             <div
-              style={{ backgroundColor: pal.colors.background_tint || pal.colors.primary }}
+              style={{ backgroundColor: pal.colors.background_tint.color }}
               className="flex-1 opacity-70"
             />
           </div>

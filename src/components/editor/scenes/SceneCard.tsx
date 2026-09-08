@@ -1,12 +1,8 @@
 "use client";
 
 import React from "react";
-import {
-  LegacyBackgroundAsset as BackgroundAsset,
-  LegacyColorPalette as ColorPalette,
-  LegacyScene as Scene,
-  LegacyScenePreset as ScenePreset,
-} from "@/types/scene-legacy";
+import type { Scene, ScenePreset } from "@/types/scene";
+import { renderConfigToPresentation } from "@/lib/scenes/scene-presentation";
 import { SceneRangeStatus } from "@/lib/scenes/sceneSelectors";
 import {
   AlertTriangle,
@@ -24,8 +20,6 @@ export interface SceneCardProps {
   index: number;
   rangeStatus: SceneRangeStatus;
   isActive: boolean;
-  backgroundMap: Map<string, BackgroundAsset>;
-  paletteMap: Map<string, ColorPalette>;
   presetMap: Map<string, ScenePreset>;
   onScrollToStart: (blockId: string) => void;
   onOpenScenePicker: (
@@ -44,16 +38,13 @@ export const SceneCard = React.memo(function SceneCard({
   index,
   rangeStatus,
   isActive,
-  backgroundMap,
-  paletteMap,
   presetMap,
   onScrollToStart,
   onOpenScenePicker,
   onDeleteScene,
 }: SceneCardProps) {
   const confirm = useConfirm();
-  const background = backgroundMap.get(scene.background_id);
-  const palette = paletteMap.get(scene.palette_id);
+  const { background, palette } = renderConfigToPresentation(scene.render_config);
   const preset = scene.based_on_preset_id
     ? presetMap.get(scene.based_on_preset_id)
     : undefined;
@@ -64,11 +55,11 @@ export const SceneCard = React.memo(function SceneCard({
       : `#${rangeStatus.startIndex + 1} → #${rangeStatus.endIndex + 1}`
     : "Dải không hợp lệ";
   const sceneLabel = preset?.label || background?.label || `Scene #${index + 1}`;
-  const hasAudio = scene.effects?.some(
+  const hasAudio = scene.render_config.ambient_effects?.some(
     (effect) => effect.type === "audio" || effect.category === "audio"
   );
   const visualEffectsCount =
-    scene.effects?.filter(
+    scene.render_config.ambient_effects?.filter(
       (effect) => effect.type !== "audio" && effect.category !== "audio"
     ).length || 0;
 

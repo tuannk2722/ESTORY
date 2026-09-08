@@ -1,4 +1,4 @@
-import type { SceneRenderConfig } from "@/types/scene";
+import type { BackgroundRenderSnapshot, SceneRenderConfig } from "@/types/scene";
 import type { LegacyBackgroundAsset, LegacyColorPalette } from "@/types/scene-legacy";
 
 /** Temporary presentation adapter for the shared renderer; never resolves catalog IDs. */
@@ -8,6 +8,20 @@ export function renderConfigToPresentation(renderConfig: SceneRenderConfig): {
   tintOpacity: number;
 } {
   const { background, palette } = renderConfig;
+  return {
+    background: backgroundSnapshotToPresentation(background),
+    palette: {
+      id: `snapshot-palette:${palette.primary}:${palette.secondary}:${palette.accent}:${palette.background_tint.color}:${palette.background_tint.opacity}`,
+      label: "",
+      mood_tags: [],
+      colors: { ...palette, background_tint: palette.background_tint.color },
+    },
+    tintOpacity: palette.background_tint.opacity,
+  };
+}
+
+/** Presentation only; never convert this lossy CSS projection back into a snapshot. */
+export function backgroundSnapshotToPresentation(background: BackgroundRenderSnapshot): LegacyBackgroundAsset {
   const data = background.render_data;
   let value: string;
   switch (data.kind) {
@@ -20,19 +34,10 @@ export function renderConfigToPresentation(renderConfig: SceneRenderConfig): {
     case "particle_composition": value = data.composition_key; break;
   }
   return {
-    background: {
-      id: `snapshot-background:${background.motion}:${background.poster_frame ?? ""}:${value}`,
-      label: "",
-      mood_tags: [],
-      type: data.kind === "radial_gradient" ? "gradient" : data.kind,
-      value, motion: background.motion, poster_frame: background.poster_frame,
-    },
-    palette: {
-      id: `snapshot-palette:${palette.primary}:${palette.secondary}:${palette.accent}:${palette.background_tint.color}:${palette.background_tint.opacity}`,
-      label: "",
-      mood_tags: [],
-      colors: { ...palette, background_tint: palette.background_tint.color },
-    },
-    tintOpacity: palette.background_tint.opacity,
+    id: `snapshot-background:${background.motion}:${background.poster_frame ?? ""}:${value}`,
+    label: "",
+    mood_tags: [],
+    type: data.kind === "radial_gradient" ? "gradient" : data.kind,
+    value, motion: background.motion, poster_frame: background.poster_frame,
   };
 }

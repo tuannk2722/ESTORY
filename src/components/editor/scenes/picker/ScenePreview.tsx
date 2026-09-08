@@ -4,25 +4,21 @@
 
 import React, { useEffect, useId, useMemo, useRef } from "react";
 import { ArrowLeft, Check, Palette } from "lucide-react";
-import type { LegacyBackgroundAsset as BackgroundAsset, LegacyColorPalette as ColorPalette } from "@/types/scene-legacy";
-import type { EffectConfig, StoryBlock as StoryBlockType } from "@/types/story";
+import type { SceneRenderConfig } from "@/types/scene";
+import type { StoryBlock as StoryBlockType } from "@/types/story";
 import { STORY_FONT_OPTIONS } from "@/types/settings";
 import SceneLayer from "@/components/scenes/SceneLayer";
 import StoryBlock from "@/components/reader/StoryBlock";
 import ReaderPlaybackStatus from "@/components/reader/ReaderPlaybackStatus";
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
 import { useActiveReaderBlock } from "@/hooks/useActiveReaderBlock";
-import { resolveLegacyScene } from "@/lib/scenes/scene-mappers";
 
 export interface ScenePreviewProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
   isSaveDisabled: boolean;
-  background?: BackgroundAsset;
-  palette?: ColorPalette;
-  ambientAudio?: EffectConfig | null;
-  effects?: EffectConfig[];
+  renderConfig: SceneRenderConfig | null;
   selectedBlocks: StoryBlockType[];
   previewSceneLabel: string;
   rangeLabel: string;
@@ -42,10 +38,7 @@ function ScenePreviewDialog({
   onClose,
   onSave,
   isSaveDisabled,
-  background,
-  palette,
-  ambientAudio,
-  effects = [],
+  renderConfig,
   selectedBlocks,
   previewSceneLabel,
   rangeLabel,
@@ -78,20 +71,6 @@ function ScenePreviewDialog({
     previewBlockIds,
     previewBlockIds[0] ?? null
   );
-
-  const previewRenderConfig = useMemo(() => {
-    if (!background || !palette) return null;
-    const audio = ambientAudio?.audio_src ? [ambientAudio] : [];
-    return resolveLegacyScene({
-      id: "scene-picker-live-preview",
-      chapter_id: "scene-picker-preview",
-      start_block_id: previewBlocks[0]?.id ?? "preview-start",
-      end_block_id: previewBlocks.at(-1)?.id ?? "preview-end",
-      background_id: background.id,
-      palette_id: palette.id,
-      effects: [...audio, ...effects],
-    }, [background], [palette]).render_config;
-  }, [ambientAudio, background, effects, palette, previewBlocks]);
 
   const firstParagraphId = previewBlocks.find(
     (block) => block.type === "paragraph"
@@ -179,11 +158,11 @@ function ScenePreviewDialog({
             </div>
             <div className="mt-0.5 hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
               <span>{rangeLabel}</span>
-              {palette && (
+              {renderConfig && (
                 <span className="flex items-center gap-1.5">
                   <span aria-hidden="true">•</span>
                   <Palette className="h-3 w-3 text-accent" aria-hidden="true" />
-                  {palette.label}
+                  Bảng màu hiện tại
                 </span>
               )}
             </div>
@@ -207,7 +186,7 @@ function ScenePreviewDialog({
       </header>
 
       <SceneLayer
-        renderConfig={previewRenderConfig}
+        renderConfig={renderConfig}
         reducedMotion={reducedMotion}
       >
         <div id="effect-portal-root" className="pointer-events-none" />

@@ -1,9 +1,5 @@
 import { notFound } from "next/navigation";
-import {
-  sceneLibraryRepository,
-  sceneRepository,
-  storyRepository,
-} from "@/lib/repositories";
+import { storyRepository } from "@/lib/repositories";
 import ReaderPane from "@/components/reader/ReaderPane";
 import ReaderScreenHeader from "@/components/reader/ReaderScreenHeader";
 import ProgressBar from "@/components/reader/ProgressBar";
@@ -14,32 +10,13 @@ interface ReaderPageProps {
 
 export default async function ReaderPage({ params }: ReaderPageProps) {
   const { storyId, chapterId } = await params;
-  const story = await storyRepository.getPublicById(storyId);
+  const data = await storyRepository.getPublicChapter(storyId, chapterId);
 
-  if (!story) {
+  if (!data) {
     notFound();
   }
 
-  // Sắp xếp các chương theo thứ tự order
-  const sortedChapters = [...story.chapters].sort((a, b) => a.order - b.order);
-  const currentChapterIndex = sortedChapters.findIndex((ch) => ch.id === chapterId);
-
-  if (currentChapterIndex === -1) {
-    notFound();
-  }
-
-  const chapter = sortedChapters[currentChapterIndex];
-  const prevChapter = currentChapterIndex > 0 ? sortedChapters[currentChapterIndex - 1] : null;
-  const nextChapter =
-    currentChapterIndex < sortedChapters.length - 1
-      ? sortedChapters[currentChapterIndex + 1]
-      : null;
-  const isLastChapter = currentChapterIndex === sortedChapters.length - 1;
-  const [scenes, backgrounds, palettes] = await Promise.all([
-    sceneRepository.getLegacyByChapter(storyId, chapter.id),
-    sceneLibraryRepository.getBackgrounds(),
-    sceneLibraryRepository.getPalettes(),
-  ]);
+  const { story, chapter, scenes, previousChapterId, nextChapterId, isLastChapter } = data;
 
   return (
     <div className="reader-screen min-h-screen bg-[#05070F] text-[#F8FAFC] transition-colors duration-300">
@@ -58,11 +35,10 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
         <ReaderPane
           storyId={story.id}
           chapter={chapter}
-          prevChapterId={prevChapter?.id}
-          nextChapterId={nextChapter?.id}
+          prevChapterId={previousChapterId}
+          nextChapterId={nextChapterId}
           isLastChapter={isLastChapter}
           scenes={scenes}
-          sceneLibrary={{ backgrounds, palettes, scenePresets: [] }}
           isPreview={false}
         />
       </div>

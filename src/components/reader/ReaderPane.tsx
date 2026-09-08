@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Chapter } from "@/types/story";
-import { LegacyScene as Scene, LegacySceneLibraryData as SceneLibraryData } from "@/types/scene-legacy";
+import { Scene } from "@/types/scene";
 import { buildBlockIndexMap } from "@/lib/scenes/sceneRange";
 import { buildSceneByBlockId } from "@/lib/scenes/sceneSelectors";
 import { scrollToEditorBlock } from "@/lib/editor/scrollToBlock";
@@ -13,13 +13,7 @@ import { useResumeCommit } from "@/hooks/useResumeCommit";
 import { useActiveReaderBlock } from "@/hooks/useActiveReaderBlock";
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
 import { STORY_FONT_OPTIONS } from "@/types/settings";
-import { resolveLegacyScene } from "@/lib/scenes/scene-mappers";
-
-const EMPTY_LIBRARY: SceneLibraryData = {
-  backgrounds: [],
-  palettes: [],
-  scenePresets: [],
-};
+import { getScenePreloadSources } from "@/lib/reader/scenePreload";
 
 export interface ReaderPaneProps {
   storyId: string;
@@ -27,8 +21,7 @@ export interface ReaderPaneProps {
   prevChapterId?: string | null;
   nextChapterId?: string | null;
   isLastChapter?: boolean;
-  scenes?: Scene[];
-  sceneLibrary?: SceneLibraryData;
+  scenes: Scene[];
   isPreview: boolean;
 }
 
@@ -38,62 +31,20 @@ export default function ReaderPane({
   prevChapterId,
   nextChapterId,
   isLastChapter = false,
-  scenes: suppliedScenes,
-  sceneLibrary: suppliedLibrary,
+  scenes: chapterScenes,
   isPreview,
 }: ReaderPaneProps) {
-  const { settings } = useReaderSettings();
-  const reducedMotion = Boolean(settings.reduced_motion);
+  const { settings, isMounted } = useReaderSettings();
+  // SSR cannot know the OS preference. Keep the first frame static until the
+  // provider has loaded client preferences, so reduced-motion readers never
+  // download/mount looping media during hydration.
+  const reducedMotion = !isMounted || Boolean(settings.reduced_motion);
   const contentRef = useRef<HTMLElement>(null);
   const reducedMotionRef = useRef(reducedMotion);
-  const [fetchedScenes, setFetchedScenes] = useState<Scene[]>([]);
-  const [fetchedLibrary, setFetchedLibrary] =
-    useState<SceneLibraryData>(EMPTY_LIBRARY);
-
   useEffect(() => {
     reducedMotionRef.current = reducedMotion;
   }, [reducedMotion]);
 
-  useEffect(() => {
-    if (suppliedScenes !== undefined && suppliedLibrary !== undefined) return;
-    const controller = new AbortController();     // Hủy fetch an toàn nếu user chuyển chương nhanh hoặc thoát trang
-
-    const requests: Promise<void>[] = [];
-    if (suppliedLibrary === undefined) {
-      requests.push(
-        fetch("/api/scene-library", { signal: controller.signal })
-          .then((response) => {
-            if (!response.ok) throw new Error("Không thể tải thư viện Scene");
-            return response.json() as Promise<SceneLibraryData>;
-          })
-          .then(setFetchedLibrary)
-      );
-    }
-    if (suppliedScenes === undefined) {
-      requests.push(
-        fetch(
-          `/api/scenes?storyId=${encodeURIComponent(storyId)}&chapterId=${encodeURIComponent(chapter.id)}`,
-          {
-            signal: controller.signal,
-          }
-        )
-          .then((response) => {
-            if (!response.ok) throw new Error("Không thể tải Scene của chương");
-            return response.json() as Promise<Scene[]>;
-          })
-          .then(setFetchedScenes)
-      );
-    }
-
-    Promise.all(requests).catch((error: unknown) => {
-      if (error instanceof DOMException && error.name === "AbortError") return;
-      console.error("Failed to load scene data in ReaderPane:", error);
-    });
-    return () => controller.abort();
-  }, [chapter.id, storyId, suppliedLibrary, suppliedScenes]);
-
-  const chapterScenes = suppliedScenes ?? fetchedScenes;
-  const sceneLibrary = suppliedLibrary ?? fetchedLibrary;
   const blockIndexMap = useMemo(
     () => buildBlockIndexMap(chapter.blocks),
     [chapter.blocks]
@@ -101,17 +52,6 @@ export default function ReaderPane({
   const sceneByBlockId = useMemo(
     () => buildSceneByBlockId(chapter.blocks, chapterScenes, blockIndexMap),
     [blockIndexMap, chapter.blocks, chapterScenes]
-  );
-  const backgroundMap = useMemo(
-    () =>
-      new Map(
-        sceneLibrary.backgrounds.map((background) => [background.id, background])
-      ),
-    [sceneLibrary.backgrounds]
-  );
-  const paletteMap = useMemo(
-    () => new Map(sceneLibrary.palettes.map((palette) => [palette.id, palette])),
-    [sceneLibrary.palettes]
   );
   const blockIds = useMemo(
     () => chapter.blocks.map((block) => block.id),
@@ -149,18 +89,7 @@ export default function ReaderPane({
   const activeScene = activeBlockId
     ? sceneByBlockId.get(activeBlockId)?.scene || null
     : null;
-  const activeRenderConfig = useMemo(
-    () => {
-      if (!activeScene) return null;
-      const background = backgroundMap.get(activeScene.background_id);
-      const palette = paletteMap.get(activeScene.palette_id);
-      // Client-side legacy fetches complete independently. Wait until both
-      // ingredients are present before resolving the runtime snapshot.
-      if (!background || !palette) return null;
-      return resolveLegacyScene(activeScene, [background], [palette]).render_config;
-    },
-    [activeScene, backgroundMap, paletteMap]
-  );
+  const activeRenderConfig = activeScene?.render_config ?? null;
   const fontSizeClass = `font-size-${settings.font_size || "lg"}`;
   const fontFamilyClass =
     STORY_FONT_OPTIONS.find((font) => font.id === settings.font_family)?.className ||
@@ -177,26 +106,16 @@ export default function ReaderPane({
     if (!nextBlock) return;
     const nextScene = sceneByBlockId.get(nextBlock.id)?.scene;
     if (!nextScene || nextScene.id === activeScene?.id) return;
-    const nextBackground = backgroundMap.get(nextScene.background_id);
-    if (!nextBackground) return;
-
-    // Preload đúng một Scene trước boundary để giữ crossfade mượt mà mà không
-    // tải toàn bộ media của chapter cùng lúc.
-    const imageSource =
-      nextBackground.type === "video"
-        ? nextBackground.poster_frame
-        : nextBackground.type === "image"
-          ? nextBackground.value
-          : undefined;
+    const { imageSource, videoSource } = getScenePreloadSources(nextScene.render_config.background, reducedMotion);
     const preloadImage = imageSource ? new Image() : null;
     if (preloadImage && imageSource) preloadImage.src = imageSource;
 
     const preloadVideo =
-      nextBackground.type === "video" ? document.createElement("video") : null;
-    if (preloadVideo) {
+      videoSource ? document.createElement("video") : null;
+    if (preloadVideo && videoSource) {
       preloadVideo.preload = "metadata";
       preloadVideo.muted = true;
-      preloadVideo.src = nextBackground.value;
+      preloadVideo.src = videoSource;
       preloadVideo.load();
     }
 
@@ -209,7 +128,7 @@ export default function ReaderPane({
   }, [
     activeBlockId,
     activeScene?.id,
-    backgroundMap,
+    reducedMotion,
     blockIndexMap,
     chapter.blocks,
     sceneByBlockId,

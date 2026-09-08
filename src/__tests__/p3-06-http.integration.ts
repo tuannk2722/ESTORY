@@ -6,6 +6,10 @@ import { once } from "node:events";
 import { loadEnvConfig } from "@next/env";
 import { MAX_COMMAND_BODY_BYTES } from "@/lib/http/command-response";
 import { snapshotConfig } from "./fixtures/scene-fixtures";
+import { EditorSaveError, saveEditorAggregate } from "@/lib/editor/editorTransport";
+import { sceneToDraft, draftToScene } from "@/lib/scenes/sceneDraft";
+import { databaseJson } from "@/lib/db/json-fields";
+import { resolve } from "node:path";
 
 loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
 let stage = "initialize";
@@ -136,16 +140,58 @@ async function run() {
 
     stage = "editor snapshot save and conflict";
     const blocks = [{ id: `${prefix}-block`, type: "paragraph", text: "HTTP content", effects: [] }];
-    const scene = { id: `${prefix}-scene`, chapter_id: chapterId, start_block_id: blocks[0].id, end_block_id: blocks[0].id, render_config: snapshotConfig() };
+    const presetId = `${prefix}-preset`;
+    await prisma.scenePreset.create({ data: { id: presetId, label: "Snapshot source", moodTags: [], status: "ACTIVE", renderConfig: databaseJson.presetRenderConfig.write(snapshotConfig()), sourceChecksum: "fixture" } });
+    const scene = { id: `${prefix}-scene`, chapter_id: chapterId, start_block_id: blocks[0].id, end_block_id: blocks[0].id, based_on_preset_id: presetId, render_config: snapshotConfig() };
     const saved = await json(editor, "PUT", { ...revision(created), blocks, scenes: [scene] });
     assert.deepEqual(saved.data.scenes, [scene]);
     await json(editor, "PUT", { ...revision(created), blocks, scenes: [scene] }, 409);
     const textEdit = await json(chapter, "PUT", { ...revision(saved), blocks: [{ ...blocks[0], text: "New text" }] });
+    // P3-07: use the exact client serializer/parser against real commands.
+    await prisma.scenePreset.update({ where: { id: presetId }, data: { status: "ARCHIVED", renderConfig: databaseJson.presetRenderConfig.write({ ...snapshotConfig(), palette: { ...snapshotConfig().palette, accent: "#123456" } }) } });
     const reloaded = await (await request(editor, { headers: headers() })).json();
     assert.deepEqual(reloaded.data.scenes, [scene]);
     assert.equal(reloaded.meta.updatedAt, textEdit.meta.updatedAt);
-    await json(`${chapter}/scenes`, "PUT", { ...revision(textEdit), scenes: [scene, { ...scene, id: `${prefix}-overlap` }] }, 400);
-    created = await json(`${base}/submit-review`, "POST", revision(textEdit));
+    const roundTripped = draftToScene(sceneToDraft(reloaded.data.scenes[0]), {
+      id: scene.id, chapterId, startBlockId: scene.start_block_id, endBlockId: scene.end_block_id,
+    });
+    const browserRequest: typeof fetch = (url, init) => {
+      const requestHeaders = new Headers(init?.headers);
+      for (const [key, value] of Object.entries(headers())) requestHeaders.set(key, value);
+      return request(String(url), { ...init, headers: requestHeaders });
+    };
+    const clientSaved = await saveEditorAggregate(storyId, reloaded.data.chapter, [roundTripped], reloaded.meta.updatedAt, browserRequest);
+    assert.deepEqual(clientSaved.data.scenes, [scene]);
+    await assert.rejects(saveEditorAggregate(storyId, reloaded.data.chapter, [roundTripped], reloaded.meta.updatedAt, browserRequest), (error: unknown) => error instanceof EditorSaveError && error.status === 409);
+    const editorPage = `/author/stories/${storyId}/${chapterId}`;
+    const page = await request(editorPage, { headers: headers() });
+    assert.equal(page.status, 200);
+    const html = await page.text();
+    assert.ok(html.includes("New text") && html.includes(scene.id) && html.includes(clientSaved.meta.updatedAt));
+    assert.equal((await request(editorPage, { headers: headers(1) })).status, 404);
+    assert.equal((await request(`/stories/${storyId}/${chapterId}`)).status, 404, "Draft stays private");
+    // Simulate moderation fixture without adding a moderation command/UI.
+    await prisma.story.update({ where: { slug: storyId }, data: { status: "PUBLISHED" } });
+    await prisma.chapter.update({ where: { id: chapterId }, data: { status: "PUBLISHED" } });
+    const reader = await request(`/stories/${storyId}/${chapterId}`);
+    assert.equal(reader.status, 200);
+    const readerHtml = await reader.text();
+    assert.ok(readerHtml.includes("New text") && readerHtml.includes(scene.id));
+    assert.ok(!readerHtml.includes("sceneLibrary"), "Reader bootstrap excludes catalog payload");
+    assert.equal((await request(`/stories/${storyId}/${secondId}`)).status, 404, "Draft sibling stays private");
+    if (process.env.P3_07_PLAYWRIGHT_MODULE) {
+      const browserScript = resolve("scripts/p3-07-browser-smoke.cjs");
+      const { runP307BrowserSmoke } = await import(browserScript);
+      await runP307BrowserSmoke({ origin, storyId, chapterId, token: tokens[0], makeDraft: async () => {
+        await prisma.story.update({ where: { slug: storyId }, data: { status: "DRAFT" } });
+        await prisma.chapter.update({ where: { id: chapterId }, data: { status: "DRAFT" } });
+      } });
+    }
+    await prisma.story.update({ where: { slug: storyId }, data: { status: "DRAFT" } });
+    await prisma.chapter.update({ where: { id: chapterId }, data: { status: "DRAFT" } });
+    const afterSmoke = await (await request(editor, { headers: headers() })).json();
+    await json(`${chapter}/scenes`, "PUT", { ...revision(afterSmoke), scenes: [scene, { ...scene, id: `${prefix}-overlap` }] }, 400);
+    created = await json(`${base}/submit-review`, "POST", revision(afterSmoke));
     assert.equal(created.data.status, "pending_review");
     await json(editor, "PUT", { ...revision(created), blocks, scenes: [scene] }, 409);
     const adminEdit = await json(base, "PUT", { ...revision(created), metadata: { ...metadata, title: "Admin edit" } }, 200, 2);
@@ -176,6 +222,7 @@ async function run() {
     assert.equal(leakedSecret, false);
     assert.equal(failedServer, false);
     console.log("P3-06 HTTP integration passed: every mutation authenticated, owner/admin/origin/ID guards, envelopes, byline, editor snapshot/stale update, state/chapter routes, 413 and disabled-write rejection.");
+    console.log("P3-07 HTTP regression passed: client save/reload, archived provenance, owner draft page, public snapshot Reader and draft sibling boundary.");
   } finally {
     await stop();
     await prisma.$transaction(async (tx) => {
@@ -183,6 +230,7 @@ async function run() {
       await tx.storyBlock.deleteMany({ where: { chapter: { story: { authorId: { in: users } } } } });
       await tx.chapter.deleteMany({ where: { story: { authorId: { in: users } } } });
       await tx.story.deleteMany({ where: { authorId: { in: users } } });
+      await tx.scenePreset.deleteMany({ where: { id: `${prefix}-preset` } });
       await tx.user.deleteMany({ where: { id: { in: users } } });
     });
     await prisma.$disconnect();
@@ -191,6 +239,7 @@ async function run() {
 run().catch((error: unknown) => {
   console.error(`P3-06 HTTP integration failed at: ${stage}`);
   if (error instanceof Error) {
+    if (error instanceof EditorSaveError) console.error(`Client save status: ${error.status}; code: ${error.code}`);
     const line = error.stack?.split("\n").find((entry) => entry.includes("p3-06-http.integration.ts:"));
     if (line) console.error(line.trim());
   }

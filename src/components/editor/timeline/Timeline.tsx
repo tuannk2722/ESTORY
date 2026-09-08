@@ -5,7 +5,7 @@
 
 import React, { useMemo } from "react";
 import { StoryBlock } from "@/types/story";
-import { LegacyScene as Scene } from "@/types/scene-legacy";
+import { Scene } from "@/types/scene";
 import { ListOrdered, Zap } from "lucide-react";
 import { TimelineItem } from "./TimelineItem";
 import { buildBlockIndexMap } from "@/lib/scenes/sceneRange";

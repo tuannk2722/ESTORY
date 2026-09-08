@@ -216,7 +216,8 @@ P3-06 bổ sung commands Story/Chapter/Scene và editor aggregate transaction. R
 `StoryRepository.save()` và legacy Scene save bị chặn, kể cả khi nguồn đọc vẫn JSON.
 Mặc định `PHASE3_STORY_WRITE_SOURCE=json` **tắt ghi nội dung**. Command HTTP hợp lệ
 trả `503 WRITES_DISABLED`; payload editor legacy chưa chuyển contract bị `400`.
-Editor client/Reader conversion và production cutover thuộc P3-07.
+Reader/Editor đã chuyển sang snapshot trong implementation P3-07 bên dưới;
+production cutover vẫn cần các gate môi trường.
 
 Để kiểm thử riêng trên dev/preview đã migrate, cả `PHASE3_STORY_READ_SOURCE` và
 `PHASE3_SCENE_READ_SOURCE` phải là `prisma` trước khi đặt write source thành `prisma`.
@@ -274,3 +275,86 @@ khi ghi blocks và Scenes, cùng hai mutation đồng thời trên hai chương.
 khởi chạy production server local hai lần với write bật/tắt và kiểm mọi mutation
 guest bị chặn, payload/envelope, ownership, byline, snapshot, stale update và 413.
 Hồ sơ kết quả và gate môi trường: [P3-06 verification](docs/verification/p3-06.md).
+
+## Reader / Editor và controlled cutover (P3-07)
+
+Reader dùng `getPublicChapter()` cho chương, Scene snapshots và published navigation.
+`ReaderPane` không tải `/api/scenes` hoặc `/api/scene-library`; JSON adapter vẫn có thể
+resolve legacy data phía server trước khi trả cùng contract snapshot. Home/Story vẫn
+dùng public repository methods cũ. Renderer và Scene media không resolve ngược catalog.
+
+Editor bootstrap lấy full owner/admin data qua DAL; Chapter, Scenes và revision lấy
+từ cùng một DB transaction. Danh mục dùng cho lựa chọn mới đi qua active catalog
+methods. Scene đã lưu mở được dù preset nguồn archived hoặc không còn ingredient
+trong catalog: picker giữ snapshot hiện tại, chỉ copy ingredient mới khi tác giả chọn.
+Không chuyển CSS presentation ngược thành dữ liệu lưu. Save dùng
+`blocks/scenes/expectedUpdatedAt`, đọc `data/meta`, giữ dirty state khi lưu lỗi/409
+hoặc khi tác giả gõ tiếp trong lúc đang lưu. Không tự retry bằng revision mới.
+
+Kiểm tra trên Local + Neon dev (DB suites tạo fixture riêng và cleanup):
+
+```sh
+pnpm typecheck
+pnpm test
+pnpm lint
+pnpm build
+pnpm test:client-bundle
+pnpm test:commands:db
+pnpm test:commands:http
+pnpm test:auth:http
+pnpm test:reads:db
+pnpm baseline:counts
+```
+
+`test:commands:http` bao gồm P3-07 client serializer/picker round-trip và HTTP page
+checks. Browser smoke là gate local bổ sung, không thêm dependency vào app: cài
+Playwright vào thư mục công cụ riêng, đặt `P3_07_PLAYWRIGHT_MODULE` thành đường dẫn
+module đó rồi chạy lại `pnpm test:commands:http`. Script
+`scripts/p3-07-browser-smoke.cjs` dùng Edge headless mặc định; có thể đặt
+`P3_07_BROWSER_CHANNEL=chrome` khi máy có Chrome. Chỉ dùng session fixture do suite
+tạo, không dùng browser profile thật. Ảnh QA lưu tại
+`../.tools/p3-07-browser/artifacts/`. Cách dùng Playwright Library theo
+[tài liệu chính thức](https://playwright.dev/docs/library).
+
+### Thực hiện cutover trên từng môi trường
+
+Hiện chỉ có Local + Neon dev; **chưa hoàn tất toàn stage P3-07**. Các bước dưới đây
+là công việc còn phải thực hiện và ghi bằng chứng, không phải kết quả đã chạy.
+
+1. Tạo Vercel preview/staging và DB riêng theo [Prisma operations](prisma/README.md).
+   Cấu hình OAuth callback/`AUTH_URL` đúng deployment; pooled/direct URL cùng DB.
+   Deploy schema, bootstrap đúng owner và migrate seed theo phần P3-03/P3-04 ở trên
+   khi DB đó chưa có dữ liệu. Không chạy lại seed apply lên DB đã nhận nội dung mới.
+2. Trước traffic cutover, ghi commit/deployment, môi trường/DB target (không ghi URL
+   chứa secret), người phụ trách, thời gian quan sát và ngưỡng latency/error được
+   chấp nhận. Đối chiếu baseline cùng route/dataset; mọi mismatch chưa giải thích,
+   lỗi snapshot hoặc rò rỉ public/owner đều chặn tiến bước tiếp theo.
+3. Khi dữ liệu JSON/DB còn tương đương, bật shadow để kiểm parity rồi chuyển hai
+   read flags sang `prisma`, giữ write `json` (nghĩa là **tắt ghi**, không ghi JSON).
+   Smoke Home/Story/Reader/Editor; đo latency và kiểm logs `P3_SHADOW_*`/
+   `P3_PRISMA_*`. Đối chiếu owner draft, outsider 404, public Story/Chapter/membership.
+   Production canary cần phạm vi traffic/thời gian cụ thể của môi trường deploy;
+   các flags hiện tại là toàn deployment, không có cơ chế chia traffic theo phần trăm.
+4. Trên preview DB riêng, tắt shadow JSON trước khi tạo dữ liệu mới rồi bật write
+   `prisma`. Chứng minh editor read–edit–save–reload, snapshot/provenance bất biến
+   khi chỉ sửa text, stale 409 và aggregate rollback bằng suite cùng smoke UI.
+   Command chưa có UI được kiểm qua integration test, không mở rộng sang P3-10–14.
+5. Sau read canary đạt ngưỡng đã ghi, chuẩn bị production write: ghi backup/restore
+   point, retention thực tế và kết quả restore thử trên DB riêng. Xác minh restore
+   đọc được dữ liệu/Scene/revision trước khi bật production write. Freeze ngắn nếu
+   cần; bật write chỉ khi cả hai read flags là Prisma, smoke create/edit/Scene save,
+   đối chiếu counts/latest update rồi kết thúc freeze.
+
+### Freeze và rollback
+
+- Trước DB write thật: có thể đổi public read về JSON nếu dữ liệu/UI còn tương
+  thích. Editor tiếp tục dùng DB qua authorized DAL; không mở lại legacy save.
+- Sau DB write thật: JSON không còn là nguồn rollback. Giữ read Prisma; có thể
+  đặt write flag `json` để **chặn command writes** trong lúc xử lý sự cố. Khôi phục
+  DB bằng restore/PITR hoặc forward fix; verify dữ liệu rồi mới mở lại write Prisma.
+- Shadow so sánh toàn bộ với JSON sẽ mismatch có chủ đích sau DB writes; tắt
+  shadow này trước write, không dùng mismatch đó làm bằng chứng corruption.
+- Giữ JSON adapters/read-only legacy endpoints tới cleanup P3-17; không còn
+  Reader/Editor consumer ghi qua các API legacy.
+
+Bằng chứng và gate còn thiếu: [P3-07 verification](docs/verification/p3-07.md).

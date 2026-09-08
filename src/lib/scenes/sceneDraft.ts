@@ -1,160 +1,83 @@
-// src/lib/scenes/sceneDraft.ts
-// Canonical SceneDraft domain model and round-trip converters between Scene, ScenePreset, and SceneDraft
-
-import { LegacyScene as Scene, LegacyScenePreset as ScenePreset } from "@/types/scene-legacy";
-import { EffectConfig } from "@/types/story";
+import type { BackgroundRenderSnapshot, PaletteRenderSnapshot, Scene, ScenePreset, SceneRenderConfig } from "@/types/scene";
+import type { EffectConfig } from "@/types/story";
 import { createSceneId } from "@/lib/editor/ids";
 import { cloneEffectConfig } from "@/lib/effects/effectFactory";
+import { parseScene, sceneRenderConfigSchema } from "./scene-render-config";
 
+/** Catalog IDs are transient selection state. Saved scenes keep only copied render data. */
 export interface SceneDraft {
   sourcePresetId?: string;
   backgroundId: string;
   paletteId: string;
+  background: BackgroundRenderSnapshot | null;
+  palette: PaletteRenderSnapshot | null;
   ambientAudio: EffectConfig | null;
   ambientEffects: EffectConfig[];
+  effectOrder: string[];
 }
 
-function normalizeEffect(effect: EffectConfig) {
+export function createEmptySceneDraft(): SceneDraft {
+  return { backgroundId: "", paletteId: "", background: null, palette: null, ambientAudio: null, ambientEffects: [], effectOrder: [] };
+}
+
+function configToDraft(config: SceneRenderConfig, sourcePresetId?: string, newEffectIds = false): SceneDraft {
+  const copy = structuredClone(config);
+  const effects = copy.ambient_effects.map(effect => cloneEffectConfig(effect, newEffectIds));
   return {
-    type: effect.type,
-    category: effect.category,
-    intensity: effect.intensity,
-    duration_ms: effect.duration_ms,
-    delay_ms: effect.delay_ms ?? 0,
-    audio_src: effect.audio_src?.trim() || "",
-    audio_asset_id: effect.audio_asset_id ?? "",
-    loop: effect.loop ?? true,
+    sourcePresetId, backgroundId: "", paletteId: "",
+    background: copy.background, palette: copy.palette,
+    ambientAudio: effects.find(effect => effect.category === "audio") ?? null,
+    ambientEffects: effects.filter(effect => effect.category !== "audio"),
+    effectOrder: effects.map(effect => effect.id),
   };
 }
 
-function normalizeEffects(effects: EffectConfig[]) {
-  return effects
-    .map(normalizeEffect)
-    .sort((left, right) =>
-      JSON.stringify(left).localeCompare(JSON.stringify(right))
-    );
+export function sceneToDraft(scene: Scene): SceneDraft {
+  return configToDraft(scene.render_config, scene.based_on_preset_id);
 }
 
-/**
- * Provenance chỉ cho biết Scene bắt đầu từ preset nào. Hàm này kiểm tra riêng
- * xem draft hiện tại còn giống preset hay đã được tùy chỉnh, không phụ thuộc ID
- * mới được sinh ra khi copy effect.
- */
-export function draftMatchesPreset(
-  draft: SceneDraft,
-  preset: ScenePreset
-): boolean {
-  const draftEffects = [
-    ...(draft.ambientAudio ? [draft.ambientAudio] : []),
-    ...draft.ambientEffects,
-  ];
+export function presetToDraft(preset: ScenePreset): SceneDraft {
+  return configToDraft(preset.render_config, preset.id, true);
+}
 
-  return (
-    draft.backgroundId === preset.background_id &&
-    draft.paletteId === preset.palette_id &&
-    JSON.stringify(normalizeEffects(draftEffects)) ===
-      JSON.stringify(normalizeEffects(preset.effects ?? []))
-  );
+export function draftToRenderConfig(draft: SceneDraft): SceneRenderConfig | null {
+  const effects = [...draft.ambientEffects, ...(draft.ambientAudio ? [draft.ambientAudio] : [])];
+  const order = new Map(draft.effectOrder.map((id, index) => [id, index]));
+  effects.sort((a, b) => (order.get(a.id) ?? order.size) - (order.get(b.id) ?? order.size));
+  const parsed = sceneRenderConfigSchema.safeParse({
+    schema_version: 1, background: draft.background, palette: draft.palette, ambient_effects: effects,
+  });
+  return parsed.success ? parsed.data : null;
+}
+
+function comparable(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(comparable).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.entries(value).filter(([, entry]) => entry !== undefined).sort(([a], [b]) => a.localeCompare(b)).map(([key, entry]) => `${JSON.stringify(key)}:${comparable(entry)}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function comparableConfig(config: SceneRenderConfig) {
+  return comparable({ ...config, ambient_effects: config.ambient_effects.map(effect => ({
+    ...effect, id: undefined, delay_ms: effect.delay_ms ?? 0, loop: effect.loop ?? false,
+  })).sort((a, b) => a.type.localeCompare(b.type)) });
+}
+
+export function draftMatchesPreset(draft: SceneDraft, preset: ScenePreset): boolean {
+  const config = draftToRenderConfig(draft);
+  return config !== null && comparableConfig(config) === comparableConfig(preset.render_config);
 }
 
 export function sceneMatchesPreset(scene: Scene, preset: ScenePreset): boolean {
-  return draftMatchesPreset(sceneToDraft(scene), preset);
+  return comparableConfig(scene.render_config) === comparableConfig(preset.render_config);
 }
 
-/**
- * Chuyển đổi từ Scene thực tế sang SceneDraft để chỉnh sửa trong ScenePicker
- */
-export function sceneToDraft(scene: Scene): SceneDraft {
-  const audio = scene.effects?.find(
-    (e) => e.type === "audio" || e.category === "audio"
-  );
-  const visualAndMotionEffects =
-    scene.effects?.filter(
-      (e) => e.type !== "audio" && e.category !== "audio"
-    ) || [];
-
-  return {
-    sourcePresetId: scene.based_on_preset_id,
-    backgroundId: scene.background_id,
-    paletteId: scene.palette_id,
-    ambientAudio: audio ? cloneEffectConfig(audio) : null,
-    ambientEffects: visualAndMotionEffects.map((e) => cloneEffectConfig(e)),
-  };
-}
-
-/**
- * Chuyển đổi từ ScenePreset sang SceneDraft mới
- */
-export function presetToDraft(preset: ScenePreset): SceneDraft {
-  const audio = preset.effects?.find(
-    (e) => e.type === "audio" || e.category === "audio"
-  );
-  const visualAndMotionEffects =
-    preset.effects?.filter(
-      (e) => e.type !== "audio" && e.category !== "audio"
-    ) || [];
-
-  return {
-    sourcePresetId: preset.id,
-    backgroundId: preset.background_id,
-    paletteId: preset.palette_id,
-    ambientAudio: audio ? cloneEffectConfig(audio, true) : null,
-    ambientEffects: visualAndMotionEffects.map((e) =>
-      cloneEffectConfig(e, true)
-    ),
-  };
-}
-
-/**
- * Tạo một SceneDraft trống mặc định
- */
-export function createEmptySceneDraft(): SceneDraft {
-  return {
-    sourcePresetId: undefined,
-    backgroundId: "",
-    paletteId: "",
-    ambientAudio: null,
-    ambientEffects: [],
-  };
-}
-
-/**
- * Chuyển đổi từ SceneDraft đã chỉnh sửa thành Scene hoàn chỉnh để lưu trữ
- */
-export function draftToScene(
-  draft: SceneDraft,
-  params: {
-    id?: string;
-    chapterId: string;
-    startBlockId: string;
-    endBlockId: string;
-  }
-): Scene {
-  const allEffects: EffectConfig[] = [];
-
-  if (draft.ambientAudio && draft.ambientAudio.audio_src) {
-    allEffects.push({
-      ...draft.ambientAudio,
-      category: "audio",
-      loop: draft.ambientAudio.loop ?? true,
-    });
-  }
-
-  draft.ambientEffects.forEach((eff) => {
-    allEffects.push({
-      ...eff,
-      loop: eff.loop ?? true,
-    });
+export function draftToScene(draft: SceneDraft, params: { id?: string; chapterId: string; startBlockId: string; endBlockId: string }): Scene {
+  return parseScene({
+    id: params.id ?? createSceneId(), chapter_id: params.chapterId,
+    start_block_id: params.startBlockId, end_block_id: params.endBlockId,
+    ...(draft.sourcePresetId ? { based_on_preset_id: draft.sourcePresetId } : {}),
+    render_config: draftToRenderConfig(draft),
   });
-
-  return {
-    id: params.id || createSceneId(),
-    chapter_id: params.chapterId,
-    start_block_id: params.startBlockId,
-    end_block_id: params.endBlockId,
-    based_on_preset_id: draft.sourcePresetId,
-    background_id: draft.backgroundId,
-    palette_id: draft.paletteId,
-    effects: allEffects.length > 0 ? allEffects : undefined,
-  };
 }

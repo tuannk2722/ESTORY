@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { ArrowLeft, Layers, ListOrdered, Loader2, Save } from "lucide-react";
 import { Story } from "@/types/story";
-import { LegacyScene as Scene, LegacySceneLibraryData as SceneLibraryData } from "@/types/scene-legacy";
+import { Scene, SceneLibraryData } from "@/types/scene";
 import { EditorProvider } from "./EditorProvider";
 import { useEditorClientController } from "./useEditorClientController";
 import BlockEditor from "./blocks/BlockEditor";
@@ -48,7 +48,7 @@ function EditorClientInner({
   story: Story;
   sceneLibrary: SceneLibraryData;
 }) {
-  const controller = useEditorClientController(story, sceneLibrary);
+  const controller = useEditorClientController(story);
   const {
     state,
     commands,
@@ -194,7 +194,6 @@ function EditorClientInner({
               nextChapterId={null}
               isLastChapter
               scenes={scenes}
-              sceneLibrary={sceneLibrary}
               isPreview
             />
           </div>

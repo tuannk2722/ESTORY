@@ -4,12 +4,15 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { LegacyBackgroundAsset as BackgroundAsset } from "@/types/scene-legacy";
+import type { BackgroundAsset } from "@/types/scene";
+import { backgroundSnapshotToPresentation } from "@/lib/scenes/scene-presentation";
 import { Check, Film, Sparkles, Search, ChevronDown } from "lucide-react";
 import SearchInput, { matchesSearch } from "@/components/ui/SearchInput";
 
+export type BackgroundOption = Pick<BackgroundAsset, "id" | "label" | "mood_tags" | "render">;
+
 export interface BackgroundPickerProps {
-  backgrounds: BackgroundAsset[];
+  backgrounds: BackgroundOption[];
   selectedBackgroundId: string;
   onSelectBackground: (id: string) => void;
   initialBackgroundId?: string;
@@ -102,7 +105,8 @@ export const BackgroundPicker = React.memo(function BackgroundPicker({
       {/* Expanded scrollable background grid container (max-h-[320px]) */}
       <div className="max-h-[320px] overflow-y-auto custom-scrollbar rounded-2xl border border-border/60 bg-secondary/15 p-3.5">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3.5">
-          {visibleBackgrounds.map((bg) => {
+          {visibleBackgrounds.map((item) => {
+            const bg = { ...backgroundSnapshotToPresentation(item.render), ...item };
             const isSelected = selectedBackgroundId === bg.id;
 
             return (

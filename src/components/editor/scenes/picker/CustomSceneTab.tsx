@@ -5,7 +5,8 @@
 
 import React, { useCallback } from "react";
 import { SceneDraft } from "@/lib/scenes/sceneDraft";
-import { LegacyBackgroundAsset as BackgroundAsset, LegacyColorPalette as ColorPalette } from "@/types/scene-legacy";
+import type { BackgroundOption } from "./BackgroundPicker";
+import type { PaletteOption } from "./PalettePicker";
 import { EffectConfig } from "@/types/story";
 import { BackgroundPicker } from "./BackgroundPicker";
 import { PalettePicker } from "./PalettePicker";
@@ -15,8 +16,8 @@ import { SceneAudioEditor } from "./SceneAudioEditor";
 export interface CustomSceneTabProps {
   draft: SceneDraft;
   onChangeDraft: (updater: (prev: SceneDraft) => SceneDraft) => void;
-  backgrounds: BackgroundAsset[];
-  palettes: ColorPalette[];
+  backgrounds: BackgroundOption[];
+  palettes: PaletteOption[];
   initialBackgroundId?: string;
   initialPaletteId?: string;
   initialAudioSrc?: string;
@@ -37,20 +38,22 @@ export const CustomSceneTab = React.memo(function CustomSceneTab({
     (bgId: string) => {
       onChangeDraft((prev) => ({
         ...prev,
-        backgroundId: bgId,
+        backgroundId: bgId === "snapshot:current-background" ? "" : bgId,
+        background: structuredClone(backgrounds.find(item => item.id === bgId)?.render ?? prev.background),
       }));
     },
-    [onChangeDraft]
+    [backgrounds, onChangeDraft]
   );
 
   const handleSelectPalette = useCallback(
     (palId: string) => {
       onChangeDraft((prev) => ({
         ...prev,
-        paletteId: palId,
+        paletteId: palId === "snapshot:current-palette" ? "" : palId,
+        palette: structuredClone(palettes.find(item => item.id === palId)?.colors ?? prev.palette),
       }));
     },
-    [onChangeDraft]
+    [palettes, onChangeDraft]
   );
 
   const handleChangeEffects = useCallback(

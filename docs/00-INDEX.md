@@ -23,6 +23,7 @@ Khi docs mâu thuẫn, giữ thứ tự ưu tiên:
 Nếu vẫn chưa phân xử được, nêu mâu thuẫn trước khi code phần phụ thuộc; không tự đổi logic/thuật toán/contract đã chốt.
 
 - **Tiến độ đã xác minh:** [verification/](verification/), gồm [P3-00](verification/p3-00.md), [P3-01](verification/p3-01.md), [P3-02](verification/p3-02.md), [P3-03](verification/p3-03.md), [P3-04](verification/p3-04.md), [P3-05](verification/p3-05.md) và [P3-06](verification/p3-06.md) (local/Neon dev pass; kiểm tra bên ngoài ghi riêng); đối chiếu git/code khi tiếp tục. Checkbox trong user stories là tiêu chí, không phải bảng tiến độ tự cập nhật.
+- **P3-07:** implementation và bằng chứng local/các gate môi trường còn thiếu tại [P3-07 verification](verification/p3-07.md); chưa coi local pass là hoàn tất cutover.
 - **Trạng thái task tạm:** `.codex/TASK.md` nếu có, theo AGENTS. Runbook/task state chỉ điều phối công việc; không thay nguồn quyết định và không chép lại schema/rule.
 - **Stack/version đang cài:** `package.json`, `pnpm-lock.yaml`, `.nvmrc`. Lệnh local/CI/deploy: README.
 

@@ -50,7 +50,7 @@ export function legacyPresetToRenderConfig(
 
 /** Catalogs must already be scoped by the calling repository to the actor. */
 export function customDraftToRenderConfig(
-  draft: SceneDraft, catalogs: Pick<SceneLibraryData, "backgrounds" | "palettes">,
+  draft: Pick<SceneDraft, "backgroundId" | "paletteId" | "ambientAudio" | "ambientEffects">, catalogs: Pick<SceneLibraryData, "backgrounds" | "palettes">,
 ): SceneRenderConfig {
   const background = catalogs.backgrounds.find((item) => item.id === draft.backgroundId && item.status === "active");
   const palette = catalogs.palettes.find((item) => item.id === draft.paletteId && item.status === "active");
