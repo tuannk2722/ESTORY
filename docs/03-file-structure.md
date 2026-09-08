@@ -37,7 +37,7 @@
   /author (Phase 3)
     AuthorDashboard.tsx            → Danh sách StoryManageCard + tabs lọc StoryStatus — mục 12.4
     StoryManageCard.tsx            → Card 1 truyện: cover, badge status, số chương published/tổng, menu hành động — mục 12.4, 12.7.5
-    StoryForm.tsx                  → Form thông tin cơ bản (title/description/cover upload/genre) — dùng chung cho wizard (Bước 1) và trang quản lý truyện — mục 12.5, 12.6
+    StoryForm.tsx                  → Form thông tin cơ bản (title/description/cover upload/genre), thêm byline khi tạo theo mục 12.5 — dùng chung cho wizard (Bước 1) và trang quản lý truyện — mục 12.5, 12.6
     ChapterListManager.tsx         → Thêm/xóa/sắp xếp chương; ở trang quản lý truyện có thêm nút "Sửa nội dung" (→ `/author/stories/[storyId]/[chapterId]`) và toggle publish/unpublish từng chương — mục 12.5, 12.6, 12.7.3
     PublishStoryButton.tsx         → Nút "Gửi duyệt" (draft/rejected → pending_review), disable + tooltip lý do khi chưa đủ điều kiện — mục 12.7.2
     IntegrationsSection.tsx        → (Phase 3) Khối "Liên kết tài khoản" trong `ProfileModal` — trạng thái connect Freesound, nút Kết nối/Ngắt kết nối — `12-auth-and-author-management.md` mục 12.9
@@ -125,6 +125,7 @@
     effect-catalog-service.ts     → merge technical manifest + admin DB overlay cho Author/Admin projection
   /repositories
     prisma-story-repository.ts     → implement StoryRepository bằng Prisma
+    prisma-story-command-repository.ts → extension transaction-scoped của PrismaStoryRepository, persistence cho commands P3-06
     prisma-scene-repository.ts     → query Scene bằng cả storyId + chapterId; trả render_config snapshot
     effect-admin-repository.ts       → P3-05 read contract cho EffectDefinition overlay + keyword; P3-12 mở rộng mutation có guard
     prisma-effect-admin-repository.ts → Prisma implementation; không chứa renderer/defaults
@@ -148,6 +149,9 @@
     story-command-service.ts       → mutation hẹp + transaction/ownership/state machine; Route Handler không gọi generic save(story)
     chapter-command-service.ts     → create/rename/reorder/delete chapter với Story–Chapter membership + ownership guard
     scene-command-service.ts       → validate range + SceneRenderConfig rồi replace chapter scenes atomically
+    prisma-story-command-service.ts / prisma-chapter-command-service.ts / prisma-scene-command-service.ts → implementations P3-06
+    story-command-context.ts       → transaction + authorization + conditional revision update dùng chung
+    story-dal.ts                   → full Story/editor read có quyền và revision trong cùng snapshot DB
     admin-effect-service.ts        → role guard, overlay/keyword mutation, manifest sync/read projection
     admin-scene-catalog-service.ts → lifecycle/dependency/media rules cho Background/Palette/Preset
     scene-preset-import-service.ts → validate/upsert curated SceneRenderConfig; không overwrite metadata admin ngoài cờ explicit
@@ -155,6 +159,7 @@
     scene-render-config.ts         → schema/version/mappers; resolve custom/preset thành runtime snapshot
     particle-composition-registry.ts → key + Zod schema + renderer cho particle composition được phép
   /validation
+    story-command-schema.ts        → strict Zod DTO, command/result schemas và byline policy P3-06
     story-schema.ts                → Zod schema cho API input/output
     audio-asset-schema.ts          → Zod schema cho upload/import audio (định dạng, dung lượng — `08-effects-and-scenes.md` mục 8.9.4)
     background-asset-schema.ts     → Zod schema cho upload/generate background (định dạng, dung lượng, prompt — mục 8.10)
@@ -166,8 +171,16 @@
   /stories/route.ts                → GET (list, US-1.1) + POST qua createStoryWithChapters (tạo truyện mới từ wizard, nâng role reader→author trong transaction — 12-auth-and-author-management.md mục 12.2, 12.5)
   /stories/[storyId]/route.ts      → GET/PUT metadata qua StoryCommandService; chapter batch qua ChapterCommandService trong cùng application transaction (mục 12.6) / DELETE có state guard
   /stories/[storyId]/submit-review/route.ts  → POST, đổi status draft/rejected → pending_review, validate điều kiện mục 12.7.2
-  /stories/[storyId]/chapters/[chapterId]/route.ts       → PUT nội dung block/effect (dùng ở `/author/stories/[storyId]/[chapterId]`) / DELETE
+  /stories/[storyId]/manage/route.ts → GET full owner/admin Story + meta.updatedAt (P3-06)
+  /stories/[storyId]/cancel-review/route.ts → POST pending_review → draft (P3-06)
+  /stories/[storyId]/archive/route.ts → POST published → archived (P3-06)
+  /stories/[storyId]/restore/route.ts → POST archived → draft (P3-06)
+  /stories/[storyId]/chapters/route.ts → POST tạo Chapter draft (P3-06)
+  /stories/[storyId]/chapters/reorder/route.ts → PATCH danh sách chapterIds đầy đủ (P3-06)
+  /stories/[storyId]/chapters/[chapterId]/route.ts       → PUT nội dung block/effect / PATCH title / DELETE (P3-06)
   /stories/[storyId]/chapters/[chapterId]/publish/route.ts  → PATCH toggle Chapter.status draft/published, validate rule "giữ ≥1 chương published" — mục 12.7.3
+  /stories/[storyId]/chapters/[chapterId]/editor/route.ts → GET/PUT snapshot aggregate Chapter + Scenes; PUT nhận blocks/scenes/expectedUpdatedAt (P3-06)
+  /stories/[storyId]/chapters/[chapterId]/scenes/route.ts → PUT replace Scene snapshots có membership/range validation (P3-06)
   /effect-catalog/route.ts         → GET active merged catalog + dictionary cho Author; Reader không dùng
   /scene-library/route.ts          → GET active global Background/Palette/curated Preset cho Author; Reader không dùng
   /admin/effects/route.ts          → GET merged list/filter; PATCH overlay (admin only)

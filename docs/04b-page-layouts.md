@@ -326,10 +326,11 @@ Logic/rule đầy đủ ở `12-auth-and-author-management.md` mục 12.4 → 12
 │ BƯỚC 1 (StoryForm):                             max-w-2xl mx-auto       │
 │  [ Upload Cover Image ] (preview 16:9 sau khi chọn)                     │
 │  Tên truyện: [......................................]                  │
+│  Tên tác giả / Bút danh hiển thị: [..................]                  │
 │  Mô tả:      [textarea..............................]                  │
 │  Thể loại:   [Kinh dị x] [Lãng mạn x] [+ Thêm thể loại]                 │
 │                                              [ Tiếp tục → ]  (disable   │
-│                                               tới khi đủ 4 field)       │
+│                                               tới khi form hợp lệ)     │
 └────────────────────────────────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -343,8 +344,10 @@ Logic/rule đầy đủ ở `12-auth-and-author-management.md` mục 12.4 → 12
 │                                     [ ← Quay lại ]      [ 💾 Lưu ]      │
 └────────────────────────────────────────────────────────────────────────┘
 ```
+
+- Ô `byline` điền sẵn từ `User.name`, cho phép sửa tự do; fallback và lỗi bắt buộc nhập theo `12-auth-and-author-management.md` mục 12.5. Hiện lỗi ngay dưới ô và liên kết label/error với input.
 - `[::]` = tay cầm kéo-thả sắp xếp lại thứ tự chương (tái dùng pattern Drag & Drop của `BlockEditor.tsx`).
-- Nút "Lưu" disable tới khi có ≥ 1 dòng chương với `title` không rỗng.
+- Nút "Lưu" disable tới khi dữ liệu bước 1 hợp lệ (gồm byline sau fallback) và có ≥ 1 dòng chương với `title` không rỗng.
 - Sau khi Lưu thành công → redirect `/author/stories/[storyId]` (không quay về `/author`).
 
 ### 7.3. `/author/stories/[storyId]` — Quản lý truyện (thông tin + danh sách chương)

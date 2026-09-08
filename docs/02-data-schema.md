@@ -92,6 +92,9 @@ còn `Story.authorId` là quan hệ tới `User` chỉ dùng cho ownership/autho
 Repository không expose internal `Story.id`/`authorId` thay cho slug/byline và không suy
 ownership từ chuỗi tác giả. Migration legacy phải backfill chính xác
 `authorDisplayName` từ JSON; đổi tên profile sau này không tự hồi tố byline đã lưu.
+Story tạo mới nhận input `byline` (bút danh), resolve và validate theo
+`12-auth-and-author-management.md` mục 12.5 rồi lưu vào `authorDisplayName` hiện có;
+không thêm field `byline` vào domain `Story` hoặc Prisma schema.
 
 ## 2.2. Ví dụ file nội dung (`/content/stories/demo-story.json`)
 

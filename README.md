@@ -116,9 +116,9 @@ khác và chỉ log counts. Allowlist rỗng/sai/chưa login làm lệnh thất 
 một phần. Bỏ một user khỏi allowlist không thu hồi role đã cấp.
 
 `/author/**` và `/admin/**` redirect guest sớm qua proxy. Page/API tự kiểm DB session;
-cookie tồn tại không chứng minh đã đăng nhập. Editor legacy (page + GET/PUT API) tạm
-chỉ cho admin do JSON chưa có owner đã xác minh; P3-06 thay bằng owner/admin guards.
-Guest gọi editor API nhận `401`, reader/author nhận `403`. PUT cần header `Origin`
+cookie tồn tại không chứng minh đã đăng nhập. P3-06 kiểm editor theo owner/admin và
+Story–Chapter membership từ DB. Guest gọi editor API nhận `401`, reader nhận `403`,
+author khác owner nhận `404`. PUT cần header `Origin`
 khớp `AUTH_URL` (trình duyệt gửi tự động); public Reader vẫn truy cập không cần login.
 
 ```sh
@@ -209,3 +209,68 @@ Suite tạo/migrate fixture trong transaction và rollback toàn bộ; bao phủ
 parity, public/full boundary, Story–Chapter membership, published navigation, Scene và
 Effect/catalog reads, shadow mismatch bằng 0 và invalid snapshot. P3-05 chưa bật Prisma
 write, chưa chuyển editor mutation/Reader và chưa xóa JSON adapter.
+
+## DAL & content commands (P3-06)
+
+P3-06 bổ sung commands Story/Chapter/Scene và editor aggregate transaction. Runtime
+`StoryRepository.save()` và legacy Scene save bị chặn, kể cả khi nguồn đọc vẫn JSON.
+Mặc định `PHASE3_STORY_WRITE_SOURCE=json` **tắt ghi nội dung**. Command HTTP hợp lệ
+trả `503 WRITES_DISABLED`; payload editor legacy chưa chuyển contract bị `400`.
+Editor client/Reader conversion và production cutover thuộc P3-07.
+
+Để kiểm thử riêng trên dev/preview đã migrate, cả `PHASE3_STORY_READ_SOURCE` và
+`PHASE3_SCENE_READ_SOURCE` phải là `prisma` trước khi đặt write source thành `prisma`.
+Không bật production write ở P3-06. Không dùng JSON làm rollback sau DB write.
+Các suite HTTP bên dưới chỉ thay flags của server test con, không sửa file env.
+
+Mọi mutation lấy actor từ DB session và yêu cầu `Origin` khớp `AUTH_URL`.
+Story ID luôn là slug. Tạo truyện nhận `{ metadata, byline?, chapters: [{ title }] }`;
+byline được xử lý theo [quy tắc tạo truyện](docs/12-auth-and-author-management.md#125-luồng-tạo-truyện-mới--authorstoriesnew-wizard-2-bước).
+Tất cả mutation còn lại bắt buộc có `expectedUpdatedAt` lấy từ `meta.updatedAt` của
+full read hoặc command response trước. Đây là revision của **toàn Story aggregate**;
+hai tab sửa hai chương khác nhau cũng có thể nhận `409` và phải reload/đối chiếu.
+
+Các route dưới đây đã có implementation; lấy `B = /api/stories/[storyId]`,
+`C = B/chapters/[chapterId]`. Payload chỉ liệt kê field ngoài `expectedUpdatedAt`:
+
+| Method / route | Payload / kết quả |
+|---|---|
+| `POST /api/stories` | `metadata`, `byline?`, `chapters`; tạo draft + nâng reader→author cùng transaction |
+| `GET B/manage` | Full Story owner/admin + revision |
+| `PUT B` | `metadata`; cập nhật thông tin truyện |
+| `POST B/submit-review` | Gửi duyệt draft/rejected |
+| `POST B/cancel-review` | Rút pending_review về draft |
+| `POST B/archive` | Gỡ published về archived |
+| `POST B/restore` | Khôi phục archived về draft |
+| `POST B/chapters` | `title`; tạo chương draft |
+| `PATCH B/chapters/reorder` | `chapterIds`; phải gồm mọi chương đúng một lần |
+| `PATCH C` | `title`; đổi tên chương |
+| `PUT C` | `blocks`; giữ Scene và validate range theo blocks mới |
+| `DELETE C` | Xóa chương; giữ ≥1 chương và ≥1 chương public nếu Story public |
+| `PATCH C/publish` | `status: draft\|published` |
+| `GET C/editor` | `{ chapter, scenes }` snapshot owner/admin + revision |
+| `PUT C/editor` | `blocks`, `scenes`; atomic replace, không nhận full chapter/status từ client |
+| `PUT C/scenes` | `scenes`; replace canonical snapshots |
+
+Success có dạng `{ data, meta: { updatedAt } }` (create `201`, còn lại `200`, chapter
+delete `data: null`). Public `GET B` dùng `{ data }` và vẫn lọc trạng thái public.
+Failure dùng `{ error: { code, message, fieldErrors? } }`; thiếu login `401`, thiếu role
+`403`, khác owner/membership hoặc không tồn tại `404`, state/stale conflict `409`,
+JSON/DTO sai `400`, body quá 4,000,000 bytes `413`. Error boundary hỗ trợ `429` cho
+rate-limit được tích hợp sau; P3-06 chưa thêm distributed rate limiter.
+
+```sh
+pnpm test
+pnpm test:commands:db
+pnpm build
+pnpm test:auth:http
+pnpm test:commands:http
+pnpm test:client-bundle
+```
+
+Chạy DB/HTTP suites trên dev/CI: fixtures có user/ID riêng, mọi dữ liệu fixture được
+dọn trong `finally`. DB suite kiểm thêm transaction rollback bằng lỗi được chèn sau
+khi ghi blocks và Scenes, cùng hai mutation đồng thời trên hai chương. HTTP suite
+khởi chạy production server local hai lần với write bật/tắt và kiểm mọi mutation
+guest bị chặn, payload/envelope, ownership, byline, snapshot, stale update và 413.
+Hồ sơ kết quả và gate môi trường: [P3-06 verification](docs/verification/p3-06.md).

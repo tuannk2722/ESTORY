@@ -206,8 +206,9 @@ export interface SceneCommandService {
     actorId: string;
     storyId: string;
     chapterId: string;
+    expectedUpdatedAt: string; // revision của Story aggregate
     scenes: Scene[];
-  }): Promise<void>;
+  }): Promise<{ data: Scene[]; meta: { updatedAt: string } }>;
 }
 
 // Phase 3 only — quản lý asset CÁ NHÂN của author, tách biệt hoàn toàn khỏi SceneLibraryRepository (global).

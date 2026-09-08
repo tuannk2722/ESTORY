@@ -29,7 +29,9 @@ async function run() {
   let server: ChildProcess | undefined;
   const port = await availablePort();
   const origin = `http://localhost:${port}`;
-  const editor = `/api/stories/${story.id}/chapters/${story.chapters[0].id}/editor`;
+  const fixtureSlug = `auth-http-${suffix}`;
+  const fixtureChapter = `auth-http-chapter-${suffix}`;
+  const editor = `/api/stories/${fixtureSlug}/chapters/${fixtureChapter}/editor`;
   const page = `/author/stories/${story.id}/${story.chapters[0].id}`;
   const tokens = { reader: randomUUID(), author: randomUUID(), admin: randomUUID(), expired: randomUUID() };
   const cookie = (token: string) => `authjs.session-token=${token}`;
@@ -42,6 +44,10 @@ async function run() {
       await prisma.session.create({ data: { userId: user.id, sessionToken: tokens[role.toLowerCase() as "reader" | "author" | "admin"], expires: new Date(Date.now() + 300_000) } });
     }
     await prisma.session.create({ data: { userId: ids[0], sessionToken: tokens.expired, expires: new Date(Date.now() - 60_000) } });
+    await prisma.story.create({ data: {
+      slug: fixtureSlug, authorId: ids[2], authorDisplayName: "HTTP fixture", title: "HTTP fixture",
+      description: "Fixture", genre: [], chapters: { create: { id: fixtureChapter, title: "Fixture", order: 1 } },
+    } });
     stage = "production server startup";
     server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "--port", String(port)], {
       windowsHide: true, stdio: ["ignore", "pipe", "pipe"],
@@ -97,14 +103,15 @@ async function run() {
     for (const role of ["reader", "author"] as const) {
       for (const method of ["GET", "PUT"]) {
         const response = await request(editor, { method, headers: { cookie: cookie(tokens[role]) } });
-        assert.equal(response.status, 403);
-        assert.equal((await response.json()).error.code, "FORBIDDEN");
+        const inaccessible = role === "author" && method === "GET";
+        assert.equal(response.status, inaccessible ? 404 : 403);
+        assert.equal((await response.json()).error.code, inaccessible ? "NOT_FOUND" : "FORBIDDEN");
       }
-      assert.equal((await request(page, { headers: { cookie: cookie(tokens[role]) } })).status, 307);
+      assert.equal((await request(page, { headers: { cookie: cookie(tokens[role]) } })).status, role === "author" ? 404 : 307);
     }
     assert.equal((await request(page, { headers: { cookie: cookie("forged") } })).status, 307);
     assert.equal((await request(editor, { headers: { cookie: cookie(tokens.admin) } })).status, 200);
-    assert.equal((await request(page, { headers: { cookie: cookie(tokens.admin) } })).status, 200);
+    // P3-07 owns the editor client bootstrap round-trip; this test checks its DAL API.
     assert.equal((await request(editor, { method: "PUT", headers: { cookie: cookie(tokens.admin), origin: "https://untrusted.invalid" }, body: "{}" })).status, 403);
     assert.equal((await request(editor, { method: "PUT", headers: { cookie: cookie(tokens.admin), origin, "content-type": "application/json" }, body: "invalid-json" })).status, 400);
 
@@ -143,6 +150,8 @@ async function run() {
       server.kill();
       await stopped;
     }
+    await prisma.chapter.deleteMany({ where: { story: { slug: fixtureSlug, authorId: { in: ids } } } });
+    await prisma.story.deleteMany({ where: { slug: fixtureSlug, authorId: { in: ids } } });
     await prisma.user.deleteMany({ where: { id: { in: ids } } });
     await prisma.$disconnect();
   }

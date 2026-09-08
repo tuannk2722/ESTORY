@@ -168,3 +168,20 @@ authenticated owner relation. On a database that already completed P3-04, deploy
 migration and rerun P3-04 apply twice plus verify so the temporary non-null backfill is
 replaced by the exact JSON `author` value. New read parity checks run with
 `pnpm test:reads:db` and roll back their fixtures.
+
+## P3-06 content commands
+
+No schema migration is required. Commands use the existing `Story.updatedAt` as an
+aggregate revision, conditional updates and Serializable transactions. Each Chapter
+or Scene mutation advances the parent Story revision in that same transaction.
+See the [command contract and write gate](../docs/11-phase3-technical-roadmap.md#95-auth-settings-sync-phân-quyền).
+
+Runtime JSON writes are disabled from P3-06 onward. Keep production write flags at
+their defaults until P3-07; `json` on the write selector now disables content writes.
+Opt-in Prisma writes require both read selectors to be Prisma. The command test
+suites use isolated fixtures on dev/CI and clean up only their own records.
+
+Transaction behavior follows the installed Prisma 7 API and the
+[Prisma 7 transaction reference](https://docs.prisma.io/docs/orm/v7/prisma-client/queries/transactions).
+Serialization/deadlock conflicts (`P2034`) are returned as `409`; clients must reload
+before resolving a content conflict, not silently retry with a fresh revision.

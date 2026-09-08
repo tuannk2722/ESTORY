@@ -122,11 +122,12 @@ Nguồn: [12](12-auth-and-author-management.md) §12.4/12.7.5; UI: [04b](04b-pag
 
 Nguồn: [12](12-auth-and-author-management.md) §12.5–12.7 **đầy đủ**; UI: [04b](04b-page-layouts.md) §7.2–7.3; schema: [02](02-data-schema.md) §2.1/2.7.
 
-- [ ] Wizard hai bước: title/description/cover upload/genre ≥1 → thêm/reorder/xóa chương (chỉ title); Lưu khi đủ bốn field và ≥1 chương có title.
+- [ ] Wizard hai bước: title/description/cover upload/genre ≥1 + ô `byline` "Tên tác giả / Bút danh hiển thị" → thêm/reorder/xóa chương (chỉ title); Lưu khi đủ bốn field, byline hợp lệ theo §12.5 và ≥1 chương có title.
+- [ ] Byline điền sẵn từ `User.name`, cho phép bút danh khác; server ưu tiên input đã trim, fallback tên actor từ DB khi input trống, báo lỗi field `byline` nếu cả hai trống. Lưu snapshot vào `authorDisplayName`, không dùng email hoặc đổi ownership; validation lỗi không tạo dữ liệu/nâng role, đổi profile không hồi tố byline.
 - [ ] Tạo Story + Chapters draft một transaction, redirect `/author/stories/[storyId]`.
 - [ ] Trang quản lý chỉ owner/admin qua shared layout guard + API guards; banner status/rejection reason, reuse form/chapter components trong một trang, không wizard steps.
 - [ ] Mỗi chương có Sửa nội dung → `/author/stories/[storyId]/[chapterId]` và publication toggle. Không xóa chương cuối, không unpublish chương published cuối của Story published; disable kèm giải thích.
-- [ ] Gửi duyệt draft/rejected khi đủ bốn field, ≥1 chương, ≥1 chương có blocks; pending review khóa author mutation theo §12.7.2. Admin duyệt tự publish mọi chương; reader chỉ thấy khi cả Story và Chapter published.
+- [ ] Gửi duyệt draft/rejected khi đủ bốn field, byline đã lưu không rỗng, ≥1 chương, ≥1 chương có blocks; pending review khóa author mutation theo §12.7.2. Admin duyệt tự publish mọi chương; reader chỉ thấy khi cả Story và Chapter published.
 
 ## US-3.18 — Freesound & personal audio upload
 

@@ -49,11 +49,13 @@ const environmentSchema = z.object({
       ctx.addIssue({ code: "custom", path: ["SHADOW_DATABASE_URL"], message: "Shadow database must be separate from the application database" });
     }
   }
-  if (env.PHASE3_STORY_WRITE_SOURCE !== "json") {
+  if (env.PHASE3_STORY_WRITE_SOURCE === "prisma" && (
+    env.PHASE3_STORY_READ_SOURCE !== "prisma" || env.PHASE3_SCENE_READ_SOURCE !== "prisma"
+  )) {
     ctx.addIssue({
       code: "custom",
       path: ["PHASE3_STORY_WRITE_SOURCE"],
-      message: "Prisma writes are not available yet",
+      message: "Prisma writes require both Story and Scene Prisma reads",
     });
   }
   const prismaReadEnabled = env.PHASE3_STORY_READ_SOURCE === "prisma"

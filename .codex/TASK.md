@@ -1,41 +1,37 @@
-# Current Task
+﻿# Current Task
 
 ## Goal
-Implement P3-05 Prisma read repositories, public/full contract and safe shadow parity tests. Preserve legacy story attribution with the user-approved `Story.authorDisplayName` database field, and repair the Linux CI database preflight that blocked P3-04.
+Complete P3-06 DAL, authorization, Story/Chapter/Scene commands and HTTP boundaries, with integration evidence. User explicitly requested continuing implementation after readiness/byline discussion.
 
 ## Source of Truth
-- AGENTS.md; docs/00-INDEX.md; docs/01-tech-stack.md sections 1.2–1.3.
-- docs/02-data-schema.md sections 2.1/2.6/2.9; docs/08-effects-and-scenes.md section 8.7.
-- docs/09-non-functional-requirements.md public/snapshot/catalog boundaries.
-- docs/11-phase3-technical-roadmap.md sections 9.2–9.3 and relevant Prisma mappings.
-- Workspace runbook ../phase3-execution-plan.md P3-05.
+- AGENTS.md; docs/00-INDEX.md; ../phase3-execution-plan.md P3-06.
+- docs/02-data-schema.md sections 2.1/2.5/2.7/2.9; docs/07-user-stories-phase3.md US-3.5/3.7/3.15/3.17.
+- docs/08-effects-and-scenes.md sections 8.3/8.7; docs/09-non-functional-requirements.md.
+- docs/11-phase3-technical-roadmap.md sections 9.2/9.5; docs/12-auth-and-author-management.md sections 12.5-12.7.
 
-## Verified Starting State
-- HEAD 519f3ca; worktree was clean before P3-05 edits.
-- P3-04 passed dry-run/apply/apply/verify on Neon dev, but GitHub Actions failed before migrations because `check-empty-database.mjs` directly imported a TypeScript module whose extensionless nested import cannot be resolved by Node 24 ESM on Linux.
-- Local `pnpm typecheck` and `pnpm test` pass at the P3-04 baseline.
-- JSON story contract retains a public attribution string while Prisma only persisted the shared migrated owner ID. User approved adding `Story.authorDisplayName` everywhere affected.
-- DATABASE_URL/DIRECT_URL and the exact legacy owner selector are present only in ignored `.env.local`; never print credentials or owner selectors.
+## Starting State
+- HEAD 9ad3bc9, P3-05 baseline; user confirms green.
+- Existing working changes: byline create-command input and six docs; typecheck/diff check passed.
+- Session/role helpers and Prisma read repositories exist. Command implementations absent; editor PUT still writes legacy JSON under admin-only guard.
 
 ## In Progress
-- No local implementation work remains; awaiting external environment gates.
+- None. P3-06 implementation and local/Neon verification are complete.
 
 ## Completed
-- P3-04 implementation and Neon dev evidence are recorded in docs/verification/p3-04.md.
-- P3-05 requirements, docs, current repository consumers, feature flags, Prisma codecs, migration source and CI failure were inspected.
-- Added and deployed the additive `Story.authorDisplayName` migration; P3-04 apply/apply/verify passes with exact legacy bylines and unchanged counts.
-- Implemented Prisma Story/Scene/catalog/Effect reads, server-only selectors and safe shadow comparison without Prisma writes or consumer cutover.
-- Repaired `db:check-empty` by using the repository TypeScript runner; the migrated Neon dev now reaches the intended non-empty rejection instead of failing Node ESM resolution.
-- Local/static/build/client-bundle gates and Neon database/auth/migration/P3-05 read/HTTP integration gates pass. Migration status is current and schema drift is zero.
-- Added `docs/verification/p3-05.md` and updated affected schema, auth/author, NFR, roadmap, operations and index documentation.
-- Final diff/whitespace/credential review passed; no real credentials or owner selectors were added.
+- DAL/guards, transactional Story/Chapter/Scene commands and normalized routes; canonical editor aggregate save.
+- Shared Story.updatedAt concurrency marker, origin/body-size/input-output validation, and runtime legacy-write blocking.
+- Byline policy implemented; create and reader-to-author promotion are atomic.
+- Typecheck, unit tests, lint, production build, client bundle and source counts passed.
+- Neon dev command DB, command HTTP, auth HTTP and P3-05 read regression suites passed; fixtures cleaned up.
+- Authoritative contracts/operations updated; evidence in docs/verification/p3-06.md.
+- Final diff, whitespace, conflict-marker and credential-marker reviews passed; schema/lockfile/seed unchanged. Runbook P3-06 status updated.
 
 ## Remaining
-- GitHub Actions and Vercel Preview/Production remain external gates until new runs are confirmed.
+- External GitHub Actions/Vercel results require the changeset to be published/deployed; not verified here.
+- P3-07 client integration/cutover is a later stage and is not started by this task.
 
 ## Constraints
-- Prisma read flags remain JSON by default; Prisma write remains rejected.
-- No editor mutation conversion, DB write cutover, Reader transition, Admin UI or deletion of JSON adapters in P3-05.
-- Shadow reads return the primary result, compare only safe reads, and log only stable code/count metadata—never content, tokens, selectors or connection data.
-- Invalid database snapshots fail observably without catalog fallback.
-- Use workspace .tools/node-v24.20.0-win-x64 and pnpm 10.33.0.
+- Production writes remain off; do not change environment values. P3-07 owns client/Reader integration and cutover.
+- No Admin moderation/catalog/media UI or schema migration unless necessary and authorized.
+- HTTP/domain Story IDs are slugs. Byline policy: docs/12 section 12.5.
+- Node: workspace .tools/node-v24.20.0-win-x64; pnpm 10.33.0. Never print credentials, sessions or connection values.

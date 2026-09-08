@@ -29,6 +29,8 @@
     "migrate:phase3": "node --conditions=react-server scripts/run-typescript-tests.cjs scripts/migrate-phase3.ts",
     "test:migration:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/phase3-migration.integration.ts",
     "test:reads:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/p3-05-read.integration.ts",
+    "test:commands:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/p3-06-commands.integration.ts",
+    "test:commands:http": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/p3-06-http.integration.ts",
     "test:client-bundle": "node scripts/check-client-bundle.mjs"
   },
   "dependencies": {

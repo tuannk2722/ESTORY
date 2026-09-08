@@ -1,6 +1,6 @@
 // lib/repositories/index.ts
 import { serverEnv } from "@/lib/env";
-import type { Story } from "@/types/story";
+import { CommandError } from "@/lib/services/command-error";
 import { JsonStoryRepository } from "./json-story-repository";
 import type {
   PublicChapterReaderData,
@@ -48,7 +48,7 @@ const activeStoryRead = serverEnv.PHASE3_SHADOW_READ === "true"
   ? new ShadowStoryRepository(selectedStoryRead, otherStoryRead)
   : selectedStoryRead;
 
-// P3-05 swaps reads only. Legacy save remains JSON until command/write cutover.
+// Runtime writes must go through guarded transactional commands from P3-06 onward.
 export const storyRepository: StoryRepository = {
   getAll: () => activeStoryRead.getAll(),
   getAllPublic: () => activeStoryRead.getAllPublic(),
@@ -61,7 +61,7 @@ export const storyRepository: StoryRepository = {
     activeStoryRead.getPublicChapter(storyId, chapterId),
   getAllForAuthor: (authorId: string) =>
     activeStoryRead.getAllForAuthor(authorId),
-  save: (story: Story) => jsonStoryRepository.save(story),
+  save: async () => { throw new CommandError(503, "LEGACY_WRITES_DISABLED", "Use transactional content commands."); },
 };
 
 const selectedSceneRead: SceneRepository =
@@ -96,12 +96,7 @@ export const sceneRepository: SceneRepository & LegacySceneRepository = {
     activeSceneRead.getByChapter(storyId, chapterId),
   getLegacyByChapter: (storyId, chapterId) =>
     jsonSceneRepository.getLegacyByChapter(storyId, chapterId),
-  replaceLegacyChapterScenes: (storyId, chapterId, scenes) =>
-    jsonSceneRepository.replaceLegacyChapterScenes(
-      storyId,
-      chapterId,
-      scenes,
-    ),
+  replaceLegacyChapterScenes: async () => { throw new CommandError(503, "LEGACY_WRITES_DISABLED", "Use transactional content commands."); },
 };
 
 export const sceneLibraryRepository: SceneLibraryRepository &

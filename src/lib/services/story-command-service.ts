@@ -1,11 +1,17 @@
 import type { Chapter, ChapterStatus, Story } from "@/types/story";
 
 /** actorId is supplied by the authenticated server boundary, never trusted from HTTP input. */
-export interface StoryCommandContext { actorId: string; storyId: string }
+export interface CommandResult<T> { data: T; meta: { updatedAt: string } }
+export interface StoryCommandContext { actorId: string; storyId: string; expectedUpdatedAt: string }
 export interface ChapterCommandContext extends StoryCommandContext { chapterId: string }
 export type StoryMetadata = Pick<Story, "title" | "description" | "cover_image" | "genre">;
 export interface CreateStoryWithChaptersCommand {
   actorId: string;
+  /**
+   * Trim; fall back to the actor's DB User.name when blank/omitted. Reject if both are blank.
+   * Persist the resolved snapshot as Story.authorDisplayName; never fall back to email.
+   */
+  byline?: string;
   metadata: StoryMetadata;
   chapters: Array<Pick<Chapter, "title">>;
 }
@@ -14,11 +20,14 @@ export interface ReplaceChapterContentCommand extends ChapterCommandContext { bl
 export type SubmitStoryCommand = StoryCommandContext;
 export interface SetChapterPublicationCommand extends ChapterCommandContext { status: ChapterStatus }
 
-// Contracts only. P3-06 supplies authorization, validation and transactional implementations.
+// Each result carries the aggregate revision committed with this command.
 export interface StoryCommandService {
-  createStoryWithChapters(input: CreateStoryWithChaptersCommand): Promise<Story>;
-  updateStoryMetadata(input: UpdateStoryMetadataCommand): Promise<Story>;
-  replaceChapterContent(input: ReplaceChapterContentCommand): Promise<Chapter>;
-  submitForReview(input: SubmitStoryCommand): Promise<Story>;
-  setChapterPublication(input: SetChapterPublicationCommand): Promise<Chapter>;
+  createStoryWithChapters(input: CreateStoryWithChaptersCommand): Promise<CommandResult<Story>>;
+  updateStoryMetadata(input: UpdateStoryMetadataCommand): Promise<CommandResult<Story>>;
+  replaceChapterContent(input: ReplaceChapterContentCommand): Promise<CommandResult<Chapter>>;
+  submitForReview(input: SubmitStoryCommand): Promise<CommandResult<Story>>;
+  cancelReview(input: StoryCommandContext): Promise<CommandResult<Story>>;
+  archiveStory(input: StoryCommandContext): Promise<CommandResult<Story>>;
+  restoreStory(input: StoryCommandContext): Promise<CommandResult<Story>>;
+  setChapterPublication(input: SetChapterPublicationCommand): Promise<CommandResult<Chapter>>;
 }

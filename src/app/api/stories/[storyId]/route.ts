@@ -1,29 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
-import { storyRepository } from "@/lib/repositories";
+﻿import { storyRepository } from "@/lib/repositories";
+import { PrismaStoryCommandService } from "@/lib/services/prisma-story-command-service";
+import { notFound } from "@/lib/services/command-error";
+import { storyMutationRoute, type CommandRouteContext } from "@/lib/http/story-command-route";
+import { commandFailure, publicResponse } from "@/lib/http/command-response";
+import { idSchema, storySchema, updateStorySchema, validateCommand } from "@/lib/validation/story-command-schema";
 
-interface RouteParams {
-  params: Promise<{ storyId: string }>;
-}
-
-/** Public read endpoint. Draft stories are deliberately not exposed here. */
-export async function GET(_request: NextRequest, { params }: RouteParams) {
+/** Full owner/admin data and concurrency metadata use the separate /manage endpoint. */
+export async function GET(_request: Request, { params }: CommandRouteContext) {
   try {
-    const { storyId } = await params;
-    const story = await storyRepository.getPublicById(storyId);
-
-    if (!story) {
-      return NextResponse.json(
-        { error: "Story not found", storyId },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(story);
-  } catch (error) {
-    console.error("Failed to get story:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
+    const storyId = validateCommand(idSchema, (await params).storyId);
+    const story = await storyRepository.getPublicById(storyId) ?? notFound();
+    return publicResponse(storySchema, story);
+  } catch (error) { return commandFailure(error); }
 }
+export const PUT = storyMutationRoute({
+  scope: "story", body: updateStorySchema.omit({ actorId: true, storyId: true }), output: storySchema,
+  execute: (body, { actorId, storyId }) => new PrismaStoryCommandService().updateStoryMetadata({ ...body, actorId, storyId }),
+});

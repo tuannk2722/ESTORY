@@ -36,7 +36,7 @@ Khớp `AuthMenu.tsx` (`03-file-structure.md`), wireframe 2 trạng thái ở `0
 
 Luồng cụ thể:
 1. User (role `reader`) bấm "✍️ Viết truyện" trên navbar → vào wizard `/author/stories/new` (mục 12.5).
-2. User điền xong Bước 1 + Bước 2, bấm "Lưu" → Route Handler gọi `StoryCommandService.createStoryWithChapters()` để tạo `Story` (status `draft`, `authorId` = user hiện tại, `authorDisplayName` = byline không rỗng được chốt tại thời điểm tạo) + các `Chapter` liên quan. Không dùng email làm byline public; đổi tên profile không tự sửa hồi tố truyện đã có.
+2. User điền xong Bước 1 + Bước 2, bấm "Lưu" → Route Handler gọi `StoryCommandService.createStoryWithChapters()` để tạo `Story` (status `draft`, `authorId` = user hiện tại, `authorDisplayName` = byline được xác định theo mục 12.5) + các `Chapter` liên quan. Không dùng email làm byline public; đổi tên profile không tự sửa hồi tố truyện đã có.
 3. **Chỉ khi lưu THÀNH CÔNG** (record đã tồn tại trong DB), server-side đổi `User.role` từ `reader` → `author` trong cùng transaction. Nếu user rời trang giữa chừng mà chưa lưu → role giữ nguyên `reader`.
 4. Sau khi lưu, redirect tới `/author/stories/[storyId]` (không phải `/author` dashboard) để user tiếp tục thêm nội dung ngay — dashboard chỉ cần khi có ≥ 2 truyện trở lên.
 5. Từ lần sau, navbar tự hiển thị "📚 Truyện của tôi" vì `session.user.role === "author"`.
@@ -86,7 +86,15 @@ Field bắt buộc (không field nào được để trống khi bấm "Lưu" �
 - `cover_image` (server presign purpose/key → client upload trực tiếp R2/Supabase → complete endpoint verify, dùng chung service US-3.6; hiện local preview ngay sau khi chọn file)
 - `genre` (chọn ≥ 1 tag, multi-select)
 
-Bấm "Tiếp tục" chỉ enable khi đủ 4 field trên — validate client-side ngay, không cần đợi submit để báo lỗi.
+Form có thêm ô `byline`, nhãn **"Tên tác giả / Bút danh hiển thị"**:
+
+- Điền sẵn `User.name` khi khởi tạo form; tác giả được giữ nguyên hoặc nhập bút danh khác. Không tự ghi đè giá trị tác giả đang nhập khi session/profile cập nhật.
+- Khi tạo truyện, server trim `byline`; nếu không gửi, rỗng hoặc chỉ có khoảng trắng thì fallback sang `User.name` đã trim của actor lấy từ DB trong transaction tạo truyện. Không tin tên profile/owner do client gửi thay cho dữ liệu này.
+- Nếu cả hai đều trống, trả lỗi validation cho field `byline`: **"Vui lòng nhập tên tác giả / bút danh hiển thị."** Không tạo Story/Chapter và không nâng role khi validation thất bại.
+- Lưu tên đã xác định vào `Story.authorDisplayName`; public DTO tiếp tục dùng `Story.author`. `byline` là input của command tạo truyện, không phải cột DB mới và không xác định ownership.
+- Fallback profile chỉ áp dụng lúc tạo; sửa metadata hoặc gửi duyệt truyện đã tồn tại giữ tên tác giả đã lưu, không tính lại từ profile của owner/admin.
+
+Bấm "Tiếp tục" chỉ enable khi đủ 4 field trên và có tên tác giả hợp lệ sau fallback — validate client-side ngay, server kiểm tra lại khi Lưu ở bước 2.
 
 ### Bước 2 — Thêm chương
 - Danh sách chương dạng list, mỗi dòng: `order` (tự động theo vị trí), input `title`, nút xóa dòng.
@@ -97,7 +105,7 @@ Bấm "Tiếp tục" chỉ enable khi đủ 4 field trên — validate client-si
 - Yêu cầu tối thiểu **1 chương** để bấm "Lưu" (khớp yêu cầu người dùng: "mỗi bộ truyện đều bắt buộc phải có đầy đủ các field và tối thiểu 1 chương").
 
 ### Lưu (kết thúc wizard)
-- Nút "Lưu" ở cuối bước 2 gọi `POST /api/stories` (route mới, xem `03-file-structure.md`); route validate DTO rồi gọi `StoryCommandService.createStoryWithChapters()` để tạo `Story` (`status: "draft"`) + toàn bộ `Chapter` cùng lúc (transaction).
+- Nút "Lưu" ở cuối bước 2 gọi `POST /api/stories` (route mới, xem `03-file-structure.md`); DTO gồm `metadata`, `byline` và `chapters`. Route lấy actor từ session, validate DTO rồi gọi `StoryCommandService.createStoryWithChapters()` để xác định byline và tạo `Story` (`status: "draft"`) + toàn bộ `Chapter` cùng lúc (transaction).
 - Thành công → nâng role nếu cần (mục 12.2) → redirect `/author/stories/[storyId]` kèm toast xác nhận.
 - Thất bại (network/validate server-side) → giữ nguyên state wizard, không mất dữ liệu đã nhập, hiện toast lỗi.
 
@@ -113,6 +121,7 @@ Bấm "Tiếp tục" chỉ enable khi đủ 4 field trên — validate client-si
   - Vẫn giữ chức năng thêm/xóa/sắp xếp chương như wizard, xóa chương có nội dung phải qua `Popconfirm` (tái dùng pattern `Popconfirm` đã có ở `06-user-stories-phase2.md` US-2.1/US-2.6).
   - Không cho xóa nếu chỉ còn đúng 1 chương (đồng bộ rule "tối thiểu 1 chương" ở mục 12.5).
 - Lưu thông tin truyện gọi `PUT /api/stories/[storyId]` và đi qua `StoryCommandService.updateStoryMetadata()`. Thêm/đổi tên/sắp xếp/xóa chương đi qua các method hẹp của `ChapterCommandService`; nếu UI gửi một batch từ nút "Lưu", application service điều phối các command đó trong **một transaction**. Phase-3 Route Handler tuyệt đối không gọi generic `StoryRepository.save()`.
+- P3-06 cung cấp full read `GET /api/stories/[storyId]/manage` và editor aggregate GET, có `meta.updatedAt`; client gửi lại `expectedUpdatedAt` khi mutate và dùng revision mới trong response. `409` yêu cầu reload/đối chiếu, không tự gửi lại với revision mới để ghi đè. Chi tiết DAL/transaction tại `11` §9.5; tích hợp editor client thuộc P3-07, management UI thuộc P3-10.
 
 ---
 
@@ -128,7 +137,7 @@ published ──(author/admin gỡ)──▶ archived
 
 ### 12.7.2. Điều kiện bấm "Gửi duyệt" (`draft`/`rejected` → `pending_review`)
 Nút chỉ **enable** khi:
-- Đủ 4 field bắt buộc ở Bước 1 (đã đảm bảo từ lúc tạo, nhưng vẫn re-validate vì có thể bị sửa rỗng sau này).
+- Đủ 4 field bắt buộc ở Bước 1 và `authorDisplayName` đã lưu không rỗng (re-validate dữ liệu hiện tại; không fallback lại tên profile khi gửi duyệt).
 - Có ≥ 1 chương.
 - Có ≥ 1 chương chứa **nội dung thật** (`blocks.length > 0`) — tránh gửi duyệt 1 truyện toàn chương trống. Nếu chưa đủ, hiện tooltip giải thích lý do nút bị disable thay vì ẩn nút.
 - Trạng thái publish/unpublish của từng chương (mục 12.7.3) **không** là điều kiện chặn gửi duyệt — admin duyệt trên nội dung, không quan tâm chương nào author đang bật/tắt.

@@ -54,19 +54,24 @@ export class JsonStoryRepository implements StoryRepository { /* Phase 1–2; pu
 export class PrismaStoryRepository implements StoryRepository { /* triển khai đúng phần lọc status ở nhóm "public" như mô tả trên */ }
 
 // Phase 3 mutation boundary: method hẹp + actor/context, transaction ở service.
+export interface CommandResult<T> { data: T; meta: { updatedAt: string } }
+
 export interface StoryCommandService {
-  createStoryWithChapters(input: CreateStoryWithChaptersCommand): Promise<Story>;
-  updateStoryMetadata(input: UpdateStoryMetadataCommand): Promise<Story>;
-  replaceChapterContent(input: ReplaceChapterContentCommand): Promise<Chapter>;
-  submitForReview(input: SubmitStoryCommand): Promise<Story>;
-  setChapterPublication(input: SetChapterPublicationCommand): Promise<Chapter>;
+  createStoryWithChapters(input: CreateStoryWithChaptersCommand): Promise<CommandResult<Story>>;
+  updateStoryMetadata(input: UpdateStoryMetadataCommand): Promise<CommandResult<Story>>;
+  replaceChapterContent(input: ReplaceChapterContentCommand): Promise<CommandResult<Chapter>>;
+  submitForReview(input: SubmitStoryCommand): Promise<CommandResult<Story>>;
+  cancelReview(input: StoryCommandContext): Promise<CommandResult<Story>>;
+  archiveStory(input: StoryCommandContext): Promise<CommandResult<Story>>;
+  restoreStory(input: StoryCommandContext): Promise<CommandResult<Story>>;
+  setChapterPublication(input: SetChapterPublicationCommand): Promise<CommandResult<Chapter>>;
 }
 
 export interface ChapterCommandService {
-  createChapter(input: CreateChapterCommand): Promise<Chapter>;
-  updateChapterMetadata(input: UpdateChapterMetadataCommand): Promise<Chapter>;
-  reorderChapters(input: ReorderChaptersCommand): Promise<Chapter[]>;
-  deleteChapter(input: DeleteChapterCommand): Promise<void>;
+  createChapter(input: CreateChapterCommand): Promise<CommandResult<Chapter>>;
+  updateChapterMetadata(input: UpdateChapterMetadataCommand): Promise<CommandResult<Chapter>>;
+  reorderChapters(input: ReorderChaptersCommand): Promise<CommandResult<Chapter[]>>;
+  deleteChapter(input: DeleteChapterCommand): Promise<CommandResult<null>>;
 }
 ```
 
@@ -75,8 +80,10 @@ Trong HTTP/domain boundary, `storyId` luôn là slug công khai (`Story.id` tron
 Public byline cũng tách khỏi ownership: repository map Prisma
 `Story.authorDisplayName → Story.author`; `authorId` chỉ phục vụ
 `getAllForAuthor`/DAL/authz và không được dùng thay byline. Legacy migration backfill
-byline từ JSON thay vì suy từ `User.name`; Story tạo mới phải ghi một byline không rỗng
-có chủ đích và không dùng email làm fallback public.
+byline từ JSON thay vì suy từ `User.name`. Command tạo Story mới nhận `byline?: string`
+cạnh `metadata` và `chapters`; resolve theo `12-auth-and-author-management.md` mục 12.5
+với tên actor lấy từ DB trong transaction, ghi snapshot không rỗng vào `authorDisplayName`.
+Không dùng email làm fallback public; các command cập nhật không tính lại byline từ profile.
 
 ### 9.2.1. Lộ trình tách read-model cho trang đọc chương
 
@@ -486,6 +493,12 @@ Command lưu effect phải xác minh `AudioAsset.ownerId` thuộc đúng author/
 - **Auth.js:** cấu hình OAuth (Google/GitHub) sau Prisma foundation. Đọc truyện không bắt buộc đăng nhập.
 - **Authorization thực:** DAL/service/Route Handler gọi `requireSession`, role rank, owner/admin guard và `requireChapterInStory`. Proxy/middleware chỉ redirect sớm, không phải security boundary.
 - **Mutation:** Zod + command service method hẹp; kiểm state/concurrency trong transaction. Không gọi generic repository `save()` trực tiếp từ route.
+- **P3-06 DAL/commands:** `StoryDataAccess` kiểm role/owner/membership trước full read. `PrismaStoryCommandRepository` mở rộng `PrismaStoryRepository` trong transaction; các service dùng chung `StoryCommandTransactions` với isolation `Serializable`. Actor được đọc lại từ DB, không nhận role/owner từ HTTP body.
+- **Concurrency:** mọi command sửa aggregate nhận `expectedUpdatedAt` (ISO từ `meta.updatedAt` của full Story/editor read hoặc command trước). So sánh rồi conditional-update `Story.updatedAt` trong cùng transaction; mỗi mutation Chapter/Scene cũng tăng mốc Story, tối thiểu 1ms. Các thao tác trên hai chương cùng Story có thể conflict; client phải reload khi `409`. Không cần thêm version/timestamp vào Chapter. Kết quả `CommandResult<T>` chứa revision của chính transaction vừa commit, không đọc lại revision sau commit.
+- **Authorization errors:** chưa đăng nhập `401`; thiếu role tối thiểu `403`; Story không tồn tại/khác owner hoặc Chapter không thuộc Story đều `404` với cùng envelope. Admin được override ownership và khóa pending-review dành cho author, nhưng vẫn tuân thủ state machine, concurrency và rule chương cuối. Truyện archived cần restore về draft trước khi sửa.
+- **Editor aggregate:** `replaceEditor` nhận blocks + Scene snapshots và lưu cả hai trong một transaction. Lệnh chỉ thay blocks phải giữ Scene hiện có và kiểm range lại; nếu xóa boundary làm Scene không hợp lệ thì từ chối, không tự drop Scene. Các command giữ snapshot/provenance đã lưu dù nguồn archived; tham chiếu mới tới preset phải active, audio cá nhân phải đúng actor và URL đã lưu. Catalog lifecycle/media integration đầy đủ thuộc các stage tương ứng.
+- **HTTP boundary:** routes P3-06 dùng strict Zod input/output và `{ data, meta: { updatedAt } }` / `{ error: { code, message, fieldErrors? } }`; chapter DELETE trả `data: null`. Mutation cookie-auth yêu cầu Origin khớp `AUTH_URL`. JSON body tối đa 4,000,000 bytes (đếm bytes thực từ stream); quá giới hạn `413`. Error mapper hỗ trợ `400/401/403/404/409/413/429/503`; `429` dành cho nguồn rate-limit khi được tích hợp, không thêm bộ đếm in-memory giả làm distributed rate limiter.
+- **Write gate:** mặc định write flag `json` từ P3-06 nghĩa là chặn runtime content write (`503` cho command hợp lệ), không fallback ghi JSON. Cho phép `prisma` khi cả Story/Scene read flags là `prisma` và DB được cấu hình; chỉ bật trong môi trường kiểm thử đã kiểm soát trước P3-07. Production cutover, client editor snapshot/envelope và Reader transition vẫn thuộc P3-07.
 - **Settings/Progress:** guest giữ localStorage; logged-in dùng DB source + local cache. First-login chỉ import local nếu DB chưa có record; nếu DB đã có thì DB thắng.
 
 ## 9.6. Storage, Admin catalog, integrations, CI/CD
