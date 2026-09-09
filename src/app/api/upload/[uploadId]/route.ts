@@ -7,7 +7,11 @@ import { validateCommand } from "@/lib/validation/story-command-schema";
 
 export const runtime = "nodejs";
 
-export async function DELETE(request: Request, context: RouteContext<"/api/upload/[uploadId]">) {
+interface UploadRouteContext {
+  params: Promise<{ uploadId: string }>;
+}
+
+export async function DELETE(request: Request, context: UploadRouteContext) {
   try {
     const session = await requireSession();
     assertMutationOrigin(request);
