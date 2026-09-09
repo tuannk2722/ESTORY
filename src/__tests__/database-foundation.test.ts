@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { parseEnvironment, requireDatabaseUrl } from "@/lib/config/environment";
+import { parseEnvironment, requireDatabaseUrl, requireR2Environment } from "@/lib/config/environment";
 import { databaseJson } from "@/lib/db/json-fields";
 import { snapshotConfig } from "./fixtures/scene-fixtures";
 
@@ -16,6 +16,18 @@ assert.throws(() => parseEnvironment({ DATABASE_URL: url, SHADOW_DATABASE_URL: u
 assert.throws(() => parseEnvironment({ DIRECT_URL: "postgresql://user:secret@ep-test-pooler.region.aws.neon.tech/db" }), /DIRECT_URL/);
 assert.throws(() => parseEnvironment({ DATABASE_URL: "postgresql://user:secret@ep-test-pooler.region.aws.neon.tech/db", SHADOW_DATABASE_URL: "postgresql://another:secret@ep-test.region.aws.neon.tech:5432/db" }), /SHADOW_DATABASE_URL/);
 assert.doesNotThrow(() => parseEnvironment({ DIRECT_URL: url, SHADOW_DATABASE_URL: "postgresql://user:secret@localhost:5432/shadow" }));
+const r2 = {
+  R2_ACCOUNT_ID: "a".repeat(32), R2_ACCESS_KEY_ID: "access", R2_SECRET_ACCESS_KEY: "secret",
+  R2_BUCKET_NAME: "storytelling-media", R2_PUBLIC_BASE_URL: "https://media.example.test", R2_KEY_PREFIX: "preview",
+};
+assert.equal(requireR2Environment(parseEnvironment(r2)).R2_KEY_PREFIX, "preview");
+assert.throws(() => requireR2Environment(parseEnvironment({})), /R2_ACCOUNT_ID/);
+for (const invalid of [
+  { ...r2, R2_ACCOUNT_ID: "not-an-account" },
+  { ...r2, R2_BUCKET_NAME: "invalid.bucket" },
+  { ...r2, R2_PUBLIC_BASE_URL: "http://media.example.test" },
+  { ...r2, R2_KEY_PREFIX: "../production" },
+]) assert.throws(() => parseEnvironment(invalid), (error: unknown) => error instanceof Error && !error.message.includes("secret"));
 
 for (const key of ["DATABASE_URL", "DIRECT_URL", "SHADOW_DATABASE_URL"]) {
   for (const invalid of ["secret-value", "https://user:secret@host/db", "postgresql://user:secret@host/", "   "]) {

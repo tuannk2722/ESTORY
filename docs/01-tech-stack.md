@@ -32,7 +32,7 @@
 | ORM | **Prisma** | Schema map 1:1 với `types/story.ts` — xem `11-phase3-technical-roadmap.md` mục 9.4 |
 | Auth | **Auth.js (NextAuth v5)** | OAuth (Google/GitHub) ưu tiên hơn Credentials để đỡ tự quản lý password |
 | Validation | **Zod** | Validate toàn bộ input/output của API Route Handlers |
-| Media storage | **Cloudflare R2** hoặc **Supabase Storage** (S3-compatible) | Cover image, audio effect do tác giả upload |
+| Media storage | **Cloudflare R2 Standard** qua S3-compatible API | Provider mặc định cho cover, audio và background image/video; luôn đi qua `MediaStorageProvider` để giữ boundary test/portability |
 | AI Image Generation | **Cloudflare Workers AI** (text-to-image) | Chỉ dùng cho tính năng "Tạo bằng AI" ở Scene background cá nhân của author — xem `08-effects-and-scenes.md` mục 8.10, luôn qua interface trừu tượng `ImageGenerationProvider` (`03-file-structure.md`), không gọi thẳng SDK trong component |
 | 3rd-party audio | **Freesound APIv2** | Search/preview/import sound cá nhân của author — `08-effects-and-scenes.md` mục 8.9. Search/preview dùng app token chung; Import cần OAuth cá nhân (`12-auth-and-author-management.md` mục 12.9) |
 | API | **Next.js Route Handlers** (`/app/api/**`) | Không tách backend riêng (NestJS/Express) trừ khi có lý do cụ thể — xem `11-phase3-technical-roadmap.md` mục 9.1 |

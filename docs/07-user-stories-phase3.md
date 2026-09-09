@@ -43,8 +43,9 @@ Nguồn: [02](02-data-schema.md) §2.5; [09](09-non-functional-requirements.md);
 
 Nguồn: [01](01-tech-stack.md) §1.2; [09](09-non-functional-requirements.md); [08](08-effects-and-scenes.md) §8.9.4/8.10.1 cho personal upload.
 
-- [ ] Upload cover/audio/background theo quyền và loại asset đã chốt; server cấp key/purpose/limit, presigned PUT ngắn hạn tới R2/Supabase, complete endpoint verify object.
-- [ ] File lớn không proxy qua Vercel Function body 4.5MB; replace tạo immutable key mới, archive/delete DB không xóa object còn trong snapshot.
+- [ ] Upload cover/audio/background theo quyền và loại asset đã chốt; server cấp key/purpose/limit, presigned PUT ngắn hạn tới R2, complete endpoint verify object.
+- [ ] File lớn không proxy qua Vercel Function body 4.5MB; R2 PUT 10 phút ký `Content-Type` + `If-None-Match: *`; replace tạo immutable key mới, archive/delete DB không xóa object còn trong snapshot.
+- [ ] Shared limits: image/poster ≤5 MiB, audio ≤8 MiB/5 phút, background video `mp4`/`webm` ≤50 MiB cho cả Admin và Author. Author video bắt buộc poster và tối đa 10 upload complete/chưa cleanup; concurrent pending intent không được vượt quota.
 
 ## US-3.7 — API chuẩn hóa
 
@@ -138,16 +139,17 @@ Nguồn: [08](08-effects-and-scenes.md) §8.9 **đầy đủ**; [12](12-auth-and
 - [ ] Import: reserve quota → refresh token nếu hết hạn → download/normalize/browser-playable → storage → AudioAsset; lỗi bất kỳ bước nào refund + báo lỗi.
 - [ ] Asset xuất hiện ngay thư viện cá nhân, reuse mọi block/scene/chapter/story cùng owner, không leak author khác.
 - [ ] License khác cc0 có attribution ở “Nguồn âm thanh” cuối chapter, tính cả block/Scene ambient.
-- [ ] Upload mp3/wav/ogg ≤8MB, ≤5 phút; tạo AudioAsset không connect/không quota.
+- [ ] Upload mp3/wav/ogg ≤8 MiB, ≤5 phút; tạo AudioAsset không connect/không quota.
 
-## US-3.19 — Personal image upload & AI background
+## US-3.19 — Personal background upload & AI background
 
 Nguồn: [08](08-effects-and-scenes.md) §8.10 **đầy đủ**; [02](02-data-schema.md) §2.5/2.9; [11](11-phase3-technical-roadmap.md) §9.4c; [09](09-non-functional-requirements.md).
 
-- [ ] ScenePicker Custom bước 1 có upload jpg/png/webp ≤5MB → personal asset active đúng owner; AI panel prefill genre/mood, prompt editable.
+- [ ] ScenePicker Custom bước 1 có upload `jpg`/`png`/`webp` ≤5 MiB hoặc `mp4`/`webm` ≤50 MiB → personal asset active đúng owner. Client detect video và bắt buộc poster image ≤5 MiB; server validate lại cả cặp. AI panel prefill genre/mood, prompt editable.
+- [ ] Author có tối đa 10 personal video upload đã complete/chưa cleanup; pending reservation chặn race. Cancel/expired/rejected không giữ slot sau khi object đã cleanup; image và AI không dùng quota video này.
 - [ ] Generate reserve quota + session hai seed/expiry; client lấy variant 0/1 qua hai request, mỗi request một inference/preview dưới encoded-size cap. DB chỉ hash/status, preview không storage.
 - [ ] Đúng hai preview; lỗi không đủ cặp refund, bỏ dở xử lý policy chống abuse §8.10.2.
-- [ ] Chọn ảnh gửi index + bytes; verify owner/expiry/hash rồi lưu đúng một ảnh + personal static/image asset + prompt gốc. Ảnh kia không storage; commit không trừ quota lần hai.
+- [ ] Chọn ảnh AI gửi index + bytes; verify owner/expiry/hash rồi lưu đúng một ảnh + personal static/image asset + prompt gốc. Ảnh kia không storage; commit không trừ quota lần hai.
 - [ ] Preview/commit có request/response cap + test 413, không trả hai base64 trong một Vercel response 4.5MB. Hết quota disable Generate + reset time, không gọi provider.
 - [ ] Personal background không trong Admin catalog hoặc curated preset dùng chung.
 

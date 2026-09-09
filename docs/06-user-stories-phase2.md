@@ -63,7 +63,7 @@
 **US-2.8 — Tự phối bối cảnh riêng (Custom Scene Composition)**
 > Là tác giả, tôi muốn tự do chọn từng thành phần nền, bảng màu, hiệu ứng không gian và nhạc nền.
 - [ ] Tab 2 "Tùy Chỉnh Phối Riêng" trong `ScenePicker.tsx` hỗ trợ quy trình 4 bước:
-  - 1. Chọn bối cảnh nền (`BackgroundAsset` dạng Image, Gradient, Video loop, Particle) — Phase 2 chỉ chọn từ thư viện seed JSON (`scope: "global"`). **(Mở rộng ở Phase 3, không thuộc scope Phase 2 này)**: thêm "Tải ảnh lên" / "Tạo bằng AI" cho background cá nhân — `08-effects-and-scenes.md` mục 8.10, `07-user-stories-phase3.md` US-3.19.
+  - 1. Chọn bối cảnh nền (`BackgroundAsset` dạng Image, Gradient, Video loop, Particle) — Phase 2 chỉ chọn từ thư viện seed JSON (`scope: "global"`). **(Mở rộng ở Phase 3, không thuộc scope Phase 2 này)**: thêm "Tải lên" (ảnh hoặc video + poster bắt buộc) / "Tạo bằng AI" cho background cá nhân — `08-effects-and-scenes.md` mục 8.10, `07-user-stories-phase3.md` US-3.19.
   - 2. Chọn bảng màu ánh sáng (`ColorPalette` qua `SearchableCombobox` hiển thị dải 4 vệt màu).
   - 3. Thêm & tinh chỉnh hiệu ứng không gian đa tầng (chỉ liệt kê effect phù hợp phạm vi Scene; Dropdown thêm + Badges + **Popover chống tràn dùng chung `EffectConfigForm` chuẩn với EffectPicker block**, không duy trì form tham số riêng).
   - 4. Cấu hình nhạc nền môi trường (Chọn preset hoặc nhập URL thủ công, thanh trượt âm lượng, checkbox `loop`) — cùng ghi chú mở rộng nguồn âm thanh cá nhân như US-2.2 ở trên (`08-effects-and-scenes.md` mục 8.9).

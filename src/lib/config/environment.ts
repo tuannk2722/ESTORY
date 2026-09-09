@@ -25,6 +25,17 @@ const optionalPostgresUrl = z.preprocess(
   postgresUrlSchema.optional(),
 );
 
+const optionalText = (schema: z.ZodString = z.string().trim().min(1)) =>
+  z.preprocess((value) => value === "" ? undefined : value, schema.optional());
+
+const httpsOriginSchema = z.string().url().refine((value) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && !url.username && !url.password
+      && !url.search && !url.hash && url.pathname === "/";
+  } catch { return false; }
+}, "Expected an HTTPS origin");
+
 const environmentSchema = z.object({
   ...authEnvironmentShape,
   DATABASE_URL: optionalPostgresUrl,
@@ -34,6 +45,12 @@ const environmentSchema = z.object({
   PHASE3_STORY_WRITE_SOURCE: z.enum(["json", "prisma"]).default("json"),
   PHASE3_SCENE_READ_SOURCE: z.enum(["json", "prisma"]).default("json"),
   PHASE3_SHADOW_READ: z.enum(["false", "true"]).default("false"),
+  R2_ACCOUNT_ID: optionalText(z.string().trim().regex(/^[a-f0-9]{32}$/i)),
+  R2_ACCESS_KEY_ID: optionalText(),
+  R2_SECRET_ACCESS_KEY: optionalText(),
+  R2_BUCKET_NAME: optionalText(z.string().trim().min(3).max(63).regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$/)),
+  R2_PUBLIC_BASE_URL: optionalText(httpsOriginSchema),
+  R2_KEY_PREFIX: optionalText(z.string().trim().min(1).max(32).regex(/^[a-z0-9][a-z0-9-]*$/)),
 }).superRefine((env, ctx) => {
   const direct = postgresUrl(env.DIRECT_URL);
   if (direct?.hostname.endsWith(".neon.tech") && direct.hostname.includes("-pooler.")) {
@@ -82,4 +99,15 @@ export function parseEnvironment(source: Record<string, string | undefined>) {
 export function requireDatabaseUrl(env: ReturnType<typeof parseEnvironment>): string {
   if (!env.DATABASE_URL) throw new Error("DATABASE_URL is required to initialize Prisma");
   return env.DATABASE_URL;
+}
+
+const r2Keys = [
+  "R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY",
+  "R2_BUCKET_NAME", "R2_PUBLIC_BASE_URL", "R2_KEY_PREFIX",
+] as const;
+
+export function requireR2Environment(env: ReturnType<typeof parseEnvironment>) {
+  const missing = r2Keys.filter((key) => !env[key]);
+  if (missing.length) throw new Error(`Missing server environment: ${missing.join(", ")}`);
+  return env as typeof env & Record<typeof r2Keys[number], string>;
 }

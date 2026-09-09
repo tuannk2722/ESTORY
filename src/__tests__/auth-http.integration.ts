@@ -54,7 +54,9 @@ async function run() {
       env: { ...process.env, NODE_ENV: "production", AUTH_URL: origin,
         AUTH_SECRET: randomBytes(32).toString("base64"),
         AUTH_GOOGLE_ID: "http-test-fixture", AUTH_GOOGLE_SECRET: "http-test-fixture",
-        AUTH_GITHUB_ID: "http-test-fixture", AUTH_GITHUB_SECRET: "http-test-fixture" },
+        AUTH_GITHUB_ID: "http-test-fixture", AUTH_GITHUB_SECRET: "http-test-fixture",
+        R2_ACCOUNT_ID: "", R2_ACCESS_KEY_ID: "", R2_SECRET_ACCESS_KEY: "",
+        R2_BUCKET_NAME: "", R2_PUBLIC_BASE_URL: "", R2_KEY_PREFIX: "" },
     });
     // Inspect log markers without ever printing raw server/adapter output.
     let leakedCredential = false;
@@ -114,6 +116,17 @@ async function run() {
     // P3-07 owns the editor client bootstrap round-trip; this test checks its DAL API.
     assert.equal((await request(editor, { method: "PUT", headers: { cookie: cookie(tokens.admin), origin: "https://untrusted.invalid" }, body: "{}" })).status, 403);
     assert.equal((await request(editor, { method: "PUT", headers: { cookie: cookie(tokens.admin), origin, "content-type": "application/json" }, body: "invalid-json" })).status, 400);
+
+    stage = "media upload route guards";
+    const uploadBody = JSON.stringify({ purpose: "story_cover", file: { name: "cover.png", contentType: "image/png", size: 24 } });
+    let upload = await request("/api/upload/presign", { method: "POST", headers: { origin, "content-type": "application/json" }, body: uploadBody });
+    assert.equal(upload.status, 401);
+    assert.equal((await upload.json()).error.code, "UNAUTHENTICATED");
+    upload = await request("/api/upload/presign", { method: "POST", headers: { cookie: cookie(tokens.reader), origin: "https://untrusted.invalid", "content-type": "application/json" }, body: uploadBody });
+    assert.equal(upload.status, 403);
+    upload = await request("/api/upload/presign", { method: "POST", headers: { cookie: cookie(tokens.reader), origin, "content-type": "application/json" }, body: uploadBody });
+    assert.equal(upload.status, 503);
+    assert.equal((await upload.json()).error.code, "MEDIA_STORAGE_UNAVAILABLE");
 
     stage = "session freshness and projection";
     const readSession = async () => (await request("/api/auth/session", { headers: { cookie: cookie(tokens.reader) } })).json();

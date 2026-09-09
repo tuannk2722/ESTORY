@@ -83,7 +83,7 @@ Wireframe ở `04b-page-layouts.md` mục 7. Component chính: `StoryForm.tsx` (
 Field bắt buộc (không field nào được để trống khi bấm "Lưu" ở bước 2):
 - `title` (text)
 - `description` (textarea)
-- `cover_image` (server presign purpose/key → client upload trực tiếp R2/Supabase → complete endpoint verify, dùng chung service US-3.6; hiện local preview ngay sau khi chọn file)
+- `cover_image` (server presign purpose/key → client upload trực tiếp R2 → complete endpoint verify, dùng chung service US-3.6; hiện local preview ngay sau khi chọn file)
 - `genre` (chọn ≥ 1 tag, multi-select)
 
 Form có thêm ô `byline`, nhãn **"Tên tác giả / Bút danh hiển thị"**:
@@ -190,7 +190,7 @@ Khớp `IntegrationsSection.tsx` (`03-file-structure.md`), hiện trong `Profile
 
 - **Vì sao cần luồng riêng:** Search/Preview sound trong Editor dùng app token chung của hệ thống, không cần danh tính Freesound của author (`08-effects-and-scenes.md` mục 8.9.1). Chỉ khi author muốn **Import** (tải sound thật về thư viện cá nhân) mới cần token cá nhân để tuân thủ rate-limit/quota phía Freesound theo đúng user thật.
 - **Kết nối:** Author bấm "Kết nối" trong `IntegrationsSection` (hoặc CTA tương tự bật lên trực tiếp từ `FreesoundSearchPanel` khi bấm "Dùng sound này" mà chưa connect) → `GET /api/integrations/freesound/connect` → redirect qua trang authorize của Freesound → callback `GET /api/integrations/freesound/callback` lưu token dạng ciphertext + `expires_at` trong credential record **server-only** → redirect về lại vị trí đang thao tác trong Editor (không mất context đang soạn). Session/API chỉ nhận `AppUser.freesound_connection: { connected, freesound_username? }`, không nhận token.
-- **Ngắt kết nối:** Author bấm "Ngắt kết nối" → `POST /api/integrations/freesound/disconnect` → xoá toàn bộ credential ciphertext/expiry phía server; projection tiếp theo trả `connected: false`. Các `AudioAsset` **đã import trước đó vẫn giữ nguyên** (đã copy file về R2/Supabase, không phụ thuộc kết nối còn hiệu lực hay không) — chỉ chặn Import sound mới cho tới khi connect lại.
+- **Ngắt kết nối:** Author bấm "Ngắt kết nối" → `POST /api/integrations/freesound/disconnect` → xoá toàn bộ credential ciphertext/expiry phía server; projection tiếp theo trả `connected: false`. Các `AudioAsset` **đã import trước đó vẫn giữ nguyên** (đã copy file về R2, không phụ thuộc kết nối còn hiệu lực hay không) — chỉ chặn Import sound mới cho tới khi connect lại.
 - **Tự refresh token:** Server tự gọi refresh flow (`lib/integrations/freesound/oauth.ts`) ngay trước mỗi lượt Import nếu `expires_at` đã qua — author không cần thao tác gì, không bị văng ra ngoài luồng đang soạn.
 - **Không có bước "xin phê duyệt" nào khác:** không giống luồng "trở thành author" (mục 12.2, tự nâng role), connect Freesound là hành động app-level đơn thuần, không ảnh hưởng `Role`.
 

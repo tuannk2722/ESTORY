@@ -270,7 +270,7 @@ Component: `SoundSourcePicker.tsx` (sub-panel dùng chung ở cả 2 nơi trên)
 3. Server, trong 1 request:
    - `quota-service.reserve(userId, "freesound_import")` — tăng `used` ngay; nếu đã chạm `limit` → trả lỗi kèm `reset_at` để client hiện thông báo, **không** gọi Freesound.
    - Server đọc `FreesoundCredentialRecord.expires_at` — nếu hết hạn, tự refresh và thay thế ciphertext qua `oauth.ts` trước khi tiếp tục (không yêu cầu author đăng nhập lại Freesound). Credential này không đi qua client.
-   - `audio-import-service.ts`: download file gốc từ Freesound (dùng access token cá nhân của author, đây là bước duy nhất cần token cá nhân) → chuẩn hoá thành định dạng phát được trên mọi trình duyệt (mp3/ogg, bitrate vừa phải) → upload lên R2/Supabase Storage → insert `AudioAsset` (`source: "freesound"`, `owner_id`, `freesound_id`, `license`, `attribution` nếu license khác `cc0`).
+   - `audio-import-service.ts`: download file gốc từ Freesound (dùng access token cá nhân của author, đây là bước duy nhất cần token cá nhân) → chuẩn hoá thành định dạng phát được trên mọi trình duyệt (mp3/ogg, bitrate vừa phải) → upload lên R2 → insert `AudioAsset` (`source: "freesound"`, `owner_id`, `freesound_id`, `license`, `attribution` nếu license khác `cc0`).
    - Bất kỳ bước nào lỗi (download/transcode/upload thất bại) → **refund quota ngay trong catch block** trước khi trả lỗi cho client.
 4. Thành công → `AudioAsset` mới xuất hiện ngay trong tab "Thư viện của tôi", dùng được ngay cho block/scene hiện tại và mọi chapter/story khác của cùng author — **không** tự động lên thư viện dùng chung cho author khác (xem ranh giới ở mục 2.11 và `10-out-of-scope.md`).
 
@@ -281,22 +281,30 @@ Component: `SoundSourcePicker.tsx` (sub-panel dùng chung ở cả 2 nơi trên)
 
 ### 8.9.4. Upload từ thiết bị
 - Cùng 1 tab "Tải lên" bên cạnh "Thư viện của tôi"/"Tìm trên Freesound". Upload dùng `/api/upload/presign` → direct storage PUT → `/api/upload/complete`, tạo `AudioAsset` (`source: "upload"`, không có `license`/`attribution`).
-- **Định mức chấp nhận** (áp dụng thống nhất cho mọi nơi upload audio trong dự án): định dạng `mp3`/`wav`/`ogg`, dung lượng tối đa **8MB**, thời lượng tối đa **5 phút** — đủ cho SFX chấm phá và nhạc nền loop ngắn, tránh phình storage free-tier cho 1 personal project (khớp tinh thần Performance NFR ở `09-non-functional-requirements.md`). Validate cả client (chặn sớm) lẫn server (nguồn tin cậy).
+- **Định mức chấp nhận** (áp dụng thống nhất cho mọi nơi upload audio trong dự án): định dạng `mp3`/`wav`/`ogg`, dung lượng tối đa **8 MiB**, thời lượng tối đa **5 phút** — đủ cho SFX chấm phá và nhạc nền loop ngắn, tránh phình storage free-tier cho 1 personal project (khớp tinh thần Performance NFR ở `09-non-functional-requirements.md`). Validate cả client (chặn sớm) lẫn server (nguồn tin cậy).
 - Upload **không** tốn `freesound_import_quota` (quota đó chỉ áp dụng cho luồng Import từ Freesound) và **không** yêu cầu connect Freesound.
 
 ---
 
-## 8.10. Nguồn bối cảnh cá nhân của Author — Upload ảnh & AI Generate Background (hiệu lực từ Phase 3)
+## 8.10. Nguồn bối cảnh cá nhân của Author — Upload ảnh/video & AI Generate Background (hiệu lực từ Phase 3)
 
-Bổ sung nguồn cho **bước 1 "Chọn bối cảnh nền"** trong `ScenePicker.tsx` Tab 2 (US-2.8) — hiện tại chỉ chọn được `BackgroundAsset` do admin quản lý (`scope: "global"`). Từ Phase 3, bước 1 có thêm 2 tab con bên cạnh "Thư viện Preset": **"Tải ảnh lên"** và **"Tạo bằng AI"**. Component: `BackgroundSourcePicker.tsx` / `AIBackgroundGeneratePanel.tsx` — vị trí file `03-file-structure.md`.
+Bổ sung nguồn cho **bước 1 "Chọn bối cảnh nền"** trong `ScenePicker.tsx` Tab 2 (US-2.8) — hiện tại chỉ chọn được `BackgroundAsset` do admin quản lý (`scope: "global"`). Từ Phase 3, bước 1 có thêm 2 tab con bên cạnh "Thư viện Preset": **"Tải lên"** (ảnh hoặc video) và **"Tạo bằng AI"**. Component: `BackgroundSourcePicker.tsx` / `AIBackgroundGeneratePanel.tsx` — vị trí file `03-file-structure.md`.
 
-> Cả 2 nguồn mới này chỉ tạo `BackgroundAsset.render` với `render_data.kind: "image"` và `motion: "static"` — **không** hỗ trợ author tự upload/AI-generate video loop. Vì vậy không áp dụng rule poster bắt buộc dành cho looping.
+> Upload từ thiết bị tạo static image hoặc looping video; video bắt buộc poster. AI Generate vẫn chỉ tạo `BackgroundAsset.render` với `render_data.kind: "image"` và `motion: "static"`, không AI-generate video.
 > Personal asset chuyển `active` ngay sau upload/AI commit thành công, không cần admin duyệt; mọi query vẫn filter đúng `owner_id`.
 
-### 8.10.1. Tải ảnh lên
-- Upload dùng presign/direct PUT/complete của US-3.6 → tạo personal `BackgroundAsset` với owner hiện tại; client không được tự chọn object key/owner.
-- **Định mức chấp nhận**: định dạng `jpg`/`png`/`webp`, dung lượng tối đa **5MB**, khuyến nghị tối thiểu **1280×720** để đủ nét khi phủ full-viewport ở breakpoint desktop (`04-ui-ux-design.md` checklist responsive 1440px) — ảnh nhỏ hơn vẫn nhận nhưng hiện cảnh báo mờ trước khi author xác nhận lưu. Validate cả client lẫn server.
-- Không tốn `ai_background_quota`, không giới hạn số lượt/ngày (chỉ giới hạn bởi dung lượng file).
+### 8.10.1. Tải ảnh hoặc video lên
+
+1. Author chọn file chính. Client phân loại theo MIME/extension chỉ để phản hồi sớm; server vẫn là nguồn tin cậy, đối chiếu MIME với extension filename khai báo, tự sinh extension object rồi kiểm magic bytes và metadata khi complete.
+2. Nếu là ảnh: nhận `jpg`/`png`/`webp` tối đa **5 MiB**, tạo `kind: "image"`, `motion: "static"`.
+3. Nếu là video: nhận `mp4`/`webm` tối đa **50 MiB**. UI lập tức hiện field poster bắt buộc; poster nhận `jpg`/`png`/`webp` tối đa **5 MiB**. Chỉ cho upload khi đủ hai file; complete atomic theo bundle và tạo `kind: "video"`, `motion: "looping"`, `poster_frame` là URL poster. Playback luôn muted; không tin audio track của file.
+4. Ảnh/poster khuyến nghị tối thiểu **1280×720** để đủ nét khi phủ full viewport ở desktop; nhỏ hơn vẫn nhận nhưng cảnh báo mờ trước khi xác nhận. UI giữ vùng preview/error ổn định, hiển thị progress cho từng part, Cancel/Retry và error gắn đúng field.
+5. Upload dùng presign/direct PUT/complete của US-3.6 → tạo personal `BackgroundAsset` với owner hiện tại; client không được tự chọn object key/owner. Video và poster dùng hai immutable key trong cùng server upload intent; thiếu/hỏng một part thì không tạo asset.
+6. Giới hạn **10 personal video upload đã complete và chưa physical-cleanup cho mỗi author**. Pending intent chưa hết hạn cũng reserve slot để hai request đồng thời không vượt 10. Cancel/expired/rejected chỉ release sau best-effort delete; archive/ẩn record không tự release vì Scene snapshot có thể còn giữ URL. Admin dùng cùng giới hạn 50 MiB/video nhưng không có count limit.
+
+Upload image/video không tốn `ai_background_quota`. Image không có count/day quota; quota 10 ở trên chỉ bảo vệ dung lượng video R2.
+
+**Lý do chốt limit (2026-09-09):** R2 Standard có free tier 10 GB-month và Cloudflare khuyến nghị single PUT cho file nhỏ/trung bình dưới khoảng 100 MB. 50 MiB × 10 giữ trần video danh nghĩa khoảng 500 MiB/author, vẫn dùng direct single PUT, không đi qua body Vercel. Nguồn: [R2 pricing](https://developers.cloudflare.com/r2/pricing/), [upload objects](https://developers.cloudflare.com/r2/objects/upload-objects/), [presigned URLs](https://developers.cloudflare.com/r2/api/s3/presigned-urls/).
 
 ### 8.10.2. Tạo bằng AI (Cloudflare Workers AI)
 Nguyên tắc: **preview trước, lưu sau** — ảnh preview chưa từng chạm storage cho tới khi author chủ động chọn.

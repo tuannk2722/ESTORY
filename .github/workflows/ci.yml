@@ -87,6 +87,7 @@ jobs:
       - run: pnpm test:reads:db
       - run: pnpm test:commands:db
       - run: pnpm test:sync:db
+      - run: pnpm test:media:db
       - run: pnpm build
       - run: pnpm test:auth:http
       - run: pnpm test:commands:http

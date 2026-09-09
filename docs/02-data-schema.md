@@ -441,6 +441,7 @@ Quy tắc bất biến:
 - Media URL trong snapshot dùng object key bất biến. Replace upload tạo key mới; archive/xóa record catalog không được xóa object còn được snapshot sử dụng.
 - Author picker chỉ thấy catalog `active`; Reader vẫn render snapshot của Scene cũ dù nguồn đã archived.
 - Personal Background chuyển thẳng `active` sau khi upload/AI commit thành công (không qua admin draft/review), chỉ owner nhìn thấy; admin global catalog không quản lý lifecycle của nó.
+- Personal Background do author upload có thể là static image hoặc looping video. Video bắt buộc có `poster_frame`, dùng cùng giới hạn file với Admin và bị giới hạn tối đa 10 video đã upload/chưa cleanup cho mỗi owner; AI vẫn chỉ tạo static image.
 - `ScenePreset` mới chỉ được developer seed/import bằng script. Admin được Preview, sửa metadata/thumbnail/status và remove khỏi catalog; admin **không** có preset builder.
 - Background global và Palette có vòng đời `draft → active → archived`. “Remove” là archive mặc định; hard-delete record chỉ khi `activated_at = null`. Storage cleanup vẫn phải reference-audit riêng.
 - Background theo kind phải validate bằng discriminated schema. Không nhận raw CSS hoặc particle JSON tùy ý; particle dùng `composition_key` đã đăng ký trong code.
@@ -480,7 +481,7 @@ export interface AudioAsset {
   owner_id: string;             // authorId sở hữu — asset CÁ NHÂN, không phải thư viện global
   source: AudioAssetSource;
   title: string;
-  url: string;                  // luôn trỏ về file đã lưu ở R2/Supabase Storage — KHÔNG bao giờ trỏ thẳng domain Freesound
+  url: string;                  // luôn trỏ về file đã lưu ở R2 — KHÔNG bao giờ trỏ thẳng domain Freesound
   duration_ms: number;
   freesound_id?: string;        // chỉ có khi source === "freesound", dùng để tránh import trùng 1 sound 2 lần
   license?: string;              // VD "cc0" | "cc-by" | "cc-by-nc" — chỉ có khi source === "freesound"

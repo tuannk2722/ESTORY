@@ -67,7 +67,7 @@
     ConfirmModal.tsx               → Hộp thoại xác nhận nguy hiểm z-[100]
     SoundSourcePicker.tsx          → (Phase 3) Sub-panel chọn nguồn âm thanh, dùng chung ở `EffectPicker` (tab Âm Thanh) & `ScenePicker` (bước 4): 3 tab con "Thư viện của tôi" / "Tải lên" / "Tìm trên Freesound" — `08-effects-and-scenes.md` mục 8.9
     FreesoundSearchPanel.tsx       → (Phase 3) Ô tìm kiếm debounce + danh sách kết quả + preview phát trực tiếp + nút "Dùng sound này" (disable kèm CTA connect nếu chưa liên kết Freesound) — mục 8.9.1, 8.9.2
-    BackgroundSourcePicker.tsx     → (Phase 3) Sub-panel chọn nguồn bối cảnh ở bước 1 `ScenePicker` Tab 2: 3 tab con "Thư viện Preset" (global) / "Tải ảnh lên" / "Tạo bằng AI" — mục 8.10
+    BackgroundSourcePicker.tsx     → (Phase 3) Sub-panel chọn nguồn bối cảnh ở bước 1 `ScenePicker` Tab 2: 3 tab con "Thư viện Preset" (global) / "Tải lên" (ảnh hoặc video + poster bắt buộc) / "Tạo bằng AI" — mục 8.10
     AIBackgroundGeneratePanel.tsx  → (Phase 3) Ô prompt prefill sẵn theo genre/mood (editable), nút "Tạo ảnh", hiển thị đúng 2 ảnh preview kèm nút "Dùng ảnh này" từng ảnh, hiển thị số lượt còn lại/ngày — mục 8.10.2
   /scenes                          → Render tầng bối cảnh (Phase 2)
     SceneLayer.tsx                 → Wrapper bối cảnh, 3-tier color grading, Howler audio ambient (z-0)
@@ -142,7 +142,7 @@
     prompt-enricher.ts             → ghép prompt gốc của author + hậu tố chất lượng/an toàn cố định + gợi ý style theo genre (bảng map tĩnh riêng) — chạy phía server, author không thấy
   /services
     auth.ts                        → cấu hình Auth.js
-    upload.ts                      → xử lý upload lên R2/Supabase Storage (cover, audio, background image)
+    upload.ts                      → upload intent + validation/complete/cancel cho cover, audio, background image/video + poster
     audio-import-service.ts        → orchestrator Freesound download → chuẩn hoá định dạng phát được trên browser → upload R2 → tạo AudioAsset — mục 8.9.2
     ai-background-service.ts       → orchestrator enrich prompt → gọi provider → trả preview tạm (chưa ghi storage) → commit() ghi thật khi author xác nhận — mục 8.10.2
     quota-service.ts               → generic reserve()/commit()/refund() cho quota theo ngày, dùng chung cho `freesound_import_quota` & `ai_background_quota` (`02-data-schema.md` mục 2.5)
@@ -155,6 +155,10 @@
     admin-effect-service.ts        → role guard, overlay/keyword mutation, manifest sync/read projection
     admin-scene-catalog-service.ts → lifecycle/dependency/media rules cho Background/Palette/Preset
     scene-preset-import-service.ts → validate/upsert curated SceneRenderConfig; không overwrite metadata admin ngoài cờ explicit
+  /storage
+    media-storage-provider.ts      → interface server-only cho presign/head/range/delete; không để Route/UI gọi SDK R2 trực tiếp
+    r2-media-storage-provider.ts   → R2 S3 implementation; conditional presigned PUT, public custom-domain URL
+    runtime-media-storage.ts       → ghép R2 provider + Prisma upload-intent store; thiếu cấu hình trả lỗi 503 an toàn
   /scenes
     scene-render-config.ts         → schema/version/mappers; resolve custom/preset thành runtime snapshot
     particle-composition-registry.ts → key + Zod schema + renderer cho particle composition được phép
@@ -202,9 +206,10 @@
     /sessions/[generationId]/variants/[index]/route.ts → POST, generate 1 preview, cap payload, lưu hash
     /sessions/[generationId]/commit/route.ts → POST, verify owner/expiry/hash rồi lưu đúng ảnh chọn vào R2
   /audio-assets/route.ts           → GET, thư viện AudioAsset cá nhân của author hiện tại; POST upload từ thiết bị — mục 8.9.4
-  /background-assets/route.ts      → GET, thư viện BackgroundAsset cá nhân (scope personal) của author hiện tại; POST upload từ thiết bị — mục 8.10.1
-  /upload/presign/route.ts         → POST, server cấp purpose-scoped immutable key + short-lived signed PUT
-  /upload/complete/route.ts        → POST, verify object metadata/MIME/size/owner trước khi ghi DB URL
+  /background-assets/route.ts      → GET, thư viện BackgroundAsset cá nhân (scope personal) của author hiện tại; POST claim upload image hoặc video+poster đã complete — mục 8.10.1
+  /upload/presign/route.ts         → POST, server cấp purpose-scoped immutable key + conditional signed PUT 10 phút; video trả thêm poster part
+  /upload/complete/route.ts        → POST, verify toàn bộ intent/bundle metadata, magic bytes, size/dimension/duration trước khi cho domain claim URL
+  /upload/[uploadId]/route.ts      → DELETE cancel pending intent đúng owner; best-effort xóa object/bundle
   /auth/[...nextauth]/route.ts
 
 /app/admin (Phase 3)

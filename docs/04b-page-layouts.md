@@ -236,7 +236,7 @@ Desktop (≥1024px):
 ### 5.5. Hộp Thoại Bối Cảnh (`ScenePicker.tsx`) — Modal Lớn `z-[80]`
 - **Tab 1: Scene Preset Có Sẵn (`mode === "preset"`)**: Lưới preset có thumbnail, swatch màu, nút nghe thử Howler và nút `Xem trước` 1-Click.
 - **Tab 2: Tùy Chỉnh Phối Riêng (`mode === "custom"`)**: 4 bước (Backgrounds, Palettes, Scene Effects với popover `clamp()` chống tràn, Ambient Audio).
-  - **(Phase 3) Bước 1 "Backgrounds" nhúng `BackgroundSourcePicker.tsx`** — 3 tab con `Thư viện Preset` (global, như hiện tại) / `Tải ảnh lên` / `Tạo bằng AI` (`AIBackgroundGeneratePanel.tsx`: ô prompt prefill sẵn theo genre/mood — editable, nút "Tạo ảnh", grid đúng **2 ảnh** preview cạnh nhau kèm nút "Dùng ảnh này" riêng từng ảnh, dòng nhỏ hiện số lượt tạo còn lại/ngày). Xem `08-effects-and-scenes.md` mục 8.10.
+  - **(Phase 3) Bước 1 "Backgrounds" nhúng `BackgroundSourcePicker.tsx`** — 3 tab con `Thư viện Preset` (global, như hiện tại) / `Tải lên` / `Tạo bằng AI`. Trong `Tải lên`: Author chọn file → client detect image/video → nếu là video thì hiện field poster bắt buộc, quota `đã dùng/10`, và chỉ bật Upload khi đủ cặp hợp lệ; server vẫn detect/validate lại. `AIBackgroundGeneratePanel.tsx`: prompt prefill theo genre/mood — editable, nút "Tạo ảnh", grid đúng **2 ảnh** preview cạnh nhau kèm nút "Dùng ảnh này" riêng từng ảnh, dòng nhỏ hiện số lượt tạo còn lại/ngày. Xem `08-effects-and-scenes.md` mục 8.10.
   - **(Phase 3) Bước 4 "Ambient Audio" nhúng lại `SoundSourcePicker.tsx`** — cùng component với tab Âm Thanh ở `EffectPicker` (mục 5.4), tái sử dụng không viết lại logic.
 - **Full Interactive Live Preview Overlay (`z-[90]`)**: Xem trước toàn màn hình với 5 lớp kết xuất thực tế. Header riêng hiển thị trạng thái Reader Settings đang ảnh hưởng đến preview.
 
@@ -458,8 +458,8 @@ Tab dùng semantic tabs (`role=tablist/tab/tabpanel`), hỗ trợ ArrowLeft/Arro
 - Card: thumbnail/poster ratio cố định, label, type, motion/status badge, tối đa ba mood tag + “+N”, Preview, Edit, More.
 - Chỉ query `scope: "global"`; personal background tuyệt đối không xuất hiện.
 - Form add/edit thay đổi theo `type`:
-  - Image: upload image, luôn static.
-  - Video: upload video câm + poster frame, luôn looping.
+  - Image: upload `jpg`/`png`/`webp` tối đa 5 MiB, luôn static.
+  - Video: upload `mp4`/`webm` tối đa 50 MiB + poster `jpg`/`png`/`webp` tối đa 5 MiB, playback luôn muted + looping. Đây là cùng giới hạn file với Author; Admin không có count limit.
   - Gradient: angle + danh sách color stop typed; không có textarea raw CSS.
   - Particle composition: combobox `composition_key` đã đăng ký + field config theo schema; không có textarea raw JSON.
 - Upload có progress, Cancel/Retry và trạng thái processing. Save disabled trong lúc upload/validate.
@@ -505,7 +505,7 @@ Tab dùng semantic tabs (`role=tablist/tab/tabpanel`), hỗ trợ ArrowLeft/Arro
 - `ScenePicker` Tab 1 chỉ đọc curated `ScenePreset.status = active`.
 - `ScenePicker` Tab 2 Custom Scene chỉ đọc Background/Palette active cộng personal background đúng owner.
 - Hai đường đều deep-copy cùng `SceneRenderConfig` vào Scene; Reader không biết Scene đến từ preset hay custom.
-- AI Background ở Author ScenePicker (US-3.19) chỉ tạo personal background image, không sinh full ScenePreset.
+- Author upload ở ScenePicker có thể tạo personal image hoặc video+poster; AI Background vẫn chỉ tạo personal static image, không sinh full ScenePreset.
 
 ### 8.4. Responsive & Accessibility gate riêng cho Admin
 

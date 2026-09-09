@@ -33,10 +33,14 @@
     "test:commands:http": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/p3-06-http.integration.ts",
     "test:sync:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/reader-sync.integration.ts",
     "test:sync:http": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/reader-sync-http.integration.ts",
+    "test:media:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/media-upload.integration.ts",
+    "test:media:r2": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/media-upload-r2.integration.ts",
     "test:client-bundle": "node scripts/check-client-bundle.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.11.3",
+    "@aws-sdk/client-s3": "3.1127.0",
+    "@aws-sdk/s3-request-presigner": "3.1127.0",
     "@next/env": "16.3.1",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
@@ -71,6 +75,10 @@
     "typescript": "^5"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "prisma"]
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma"
+    ]
   }
 }

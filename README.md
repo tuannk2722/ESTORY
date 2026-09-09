@@ -392,3 +392,41 @@ pnpm test:sync:http
 
 Browser dùng Edge headless với context mới và session fixture. Xem scope, kết quả,
 rollback và các gate CI/deployment còn lại tại [P3-08 verification](docs/verification/p3-08.md).
+
+## Cloudflare R2 media storage (P3-09)
+
+Storage endpoints require the six `R2_*` values in [.env.example](.env.example).
+Use R2 Standard and a different bucket or `R2_KEY_PREFIX` for each environment.
+`R2_PUBLIC_BASE_URL` is the HTTPS custom domain used in immutable media URLs;
+Cloudflare's `r2.dev` URL is suitable only for local/development traffic.
+
+Browser direct PUT requires this bucket CORS shape, with exact application origins
+for the current environment (never use `*` for production):
+
+```json
+[
+  {
+    "AllowedOrigins": ["http://localhost:3000"],
+    "AllowedMethods": ["PUT"],
+    "AllowedHeaders": ["Content-Type", "Cache-Control", "If-None-Match"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+The client sends every header returned by `/api/upload/presign`; in particular,
+`If-None-Match: *` prevents a presigned URL from overwriting an immutable key.
+Presigned URLs expire after 10 minutes. Upload bytes go directly to R2; the app's
+`/api/upload/complete` endpoint only verifies metadata/content and returns the
+validated durable reference. See [P3-09 verification](docs/verification/p3-09.md)
+for commands and the live-R2 gate.
+
+```sh
+pnpm test:media:db
+pnpm test:media:r2
+```
+
+`test:media:r2` cần cả Neon dev và sáu biến R2, tạo object/row fixture dung lượng
+nhỏ rồi dọn trong `finally`; không chạy mặc định trong CI nếu môi trường chưa có
+Cloudflare secrets. Test không in credential, presigned URL, object key hoặc row.

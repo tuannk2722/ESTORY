@@ -179,6 +179,7 @@ model User {
   settings        UserSettings?
   audioAssets     AudioAsset[]
   backgroundAssets BackgroundAsset[] @relation("PersonalBackgroundAssets")
+  mediaUploads    MediaUpload[]
   aiGenerationSessions AiBackgroundGenerationSession[]
 }
 
@@ -433,24 +434,60 @@ Validation/service rules:
 
 - `BackgroundAsset.render`/`ScenePreset.renderConfig`/`Scene.renderConfig` là JSON nhưng không phải free-form: parse bằng discriminated Zod schema và `schema_version` trước khi write/read.
 - `SceneCommandService` xác minh Story–Chapter–Block membership, ownership và non-overlap trong transaction.
-- `render.poster_frame` bắt buộc khi `render.motion = looping`; personal asset chỉ image/static; global admin query không bao giờ trả personal asset.
+- `render.poster_frame` bắt buộc khi `render.motion = looping`; personal upload nhận image/static hoặc video/looping + poster, còn AI chỉ tạo image/static; global admin query không bao giờ trả personal asset.
 - Personal upload/AI commit service tạo `status = ACTIVE` ngay sau khi storage verify thành công; `DRAFT` mặc định chủ yếu dành cho global Admin catalog/import.
 - `activatedAt` được set lần đầu khi chuyển Active và không xóa lại. “Remove” chuyển Archived; hard delete record yêu cầu `activatedAt = null`. Object storage cleanup vẫn cần reference audit riêng.
 - Media key bất biến; DB delete và object cleanup là hai operation tách biệt.
 - Migration legacy resolve `background_id`/`palette_id`/`effects` thành snapshot. Missing ID/media/checksum làm verify fail, không âm thầm fallback.
 
-## 9.4c. Prisma schema mở rộng — Personal Media Assets (Freesound Audio & AI Background, xem `08-effects-and-scenes.md` mục 8.9 → 8.10)
+## 9.4c. Prisma schema mở rộng — Media upload intents & Personal Media Assets (xem `08-effects-and-scenes.md` mục 8.9 → 8.10)
 
-> Map từ `types/audio-asset.ts` (`02-data-schema.md` mục 2.11) và phần mở rộng `scope`/`ownerId`/`source`/`generationPrompt` trên `BackgroundAsset` ở mục 9.4b. Toàn bộ asset ở đây là **cá nhân** (`ownerId` bắt buộc), tách biệt hoàn toàn khỏi 4 bảng thư viện global ở mục 9.4/9.4b.
+> Map từ `types/audio-asset.ts` (`02-data-schema.md` mục 2.11), phần mở rộng `scope`/`ownerId`/`source`/`generationPrompt` trên `BackgroundAsset` ở mục 9.4b và upload intent bền vững của P3-09. Personal asset có `ownerId` bắt buộc; upload intent cũng có owner kể cả global Admin upload để complete/cancel không thể bị user khác chiếm.
 
 ```prisma
+enum MediaUploadStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CLAIMED
+  CANCELLED
+  EXPIRED
+  REJECTED
+}
+
+model MediaUpload {
+  id                 String            @id @default(cuid())
+  ownerId            String
+  owner              User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  purpose            String            // story_cover | personal_audio | personal_background | global_background
+  mediaKind          String            // image | audio | video
+  videoSlot          Int?              // 1..10 chỉ cho personal background video; giữ tới physical cleanup
+  objectKey          String            @unique
+  contentType        String
+  expectedSize       Int
+  posterObjectKey    String?           @unique
+  posterContentType  String?
+  posterExpectedSize Int?
+  status             MediaUploadStatus @default(PENDING)
+  result             Json?             // validated URL/size/dimension/duration projection; parse bằng Zod
+  expiresAt          DateTime
+  completedAt        DateTime?
+  claimedAt          DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([ownerId, status, expiresAt])
+  @@index([ownerId, purpose, mediaKind, status])
+  @@unique([ownerId, videoSlot])
+}
+
 model AudioAsset {
   id            String   @id @default(cuid())
   ownerId       String
   owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   source        String   // "freesound" | "upload"
   title         String
-  url           String   // luôn trỏ về file đã lưu ở R2/Supabase — KHÔNG bao giờ trỏ thẳng domain Freesound
+  url           String   // luôn trỏ về file đã lưu ở R2 — KHÔNG bao giờ trỏ thẳng domain Freesound
   durationMs    Int
   freesoundId   String?  // chỉ có khi source = "freesound", tránh import trùng
   license       String?  // "cc0" | "cc-by" | "cc-by-nc" ...
@@ -488,6 +525,10 @@ Command lưu effect phải xác minh `AudioAsset.ownerId` thuộc đúng author/
 
 `AiBackgroundGenerationSession` chỉ lưu metadata/hash, không lưu preview bytes. Mỗi variant được generate/trả ở request riêng để giữ request/response dưới giới hạn 4.5 MB của Vercel; server cap encoded body và chống generate lặp cùng index. Commit chỉ chấp nhận bytes có hash khớp session/owner/expiry.
 
+`MediaUpload` là intent nội bộ, không phải public asset/catalog record. Presign tạo row `PENDING` trước khi trả bearer URL 10 phút; key server-generated theo `{env}/{purpose}/{owner-or-global}/{uuid}.{ext}`. PUT ký `Content-Type` và `If-None-Match: *` để URL reuse không overwrite key. `complete` conditional-transition `PENDING → PROCESSING` trước khi đọc object để không race với cancel; lỗi tạm thời/incomplete trả về `PENDING`, còn validation pass mới thành `COMPLETED`. Video bundle phải có cả primary và poster hợp lệ. Domain service P3-10/13/15/16 claim `COMPLETED → CLAIMED` cùng transaction tạo/cập nhật Story/AudioAsset/BackgroundAsset; không nhận URL tùy ý từ client.
+
+Quota video Author cấp một `videoSlot` 1..10 trong transaction/serializable boundary; unique `(ownerId, videoSlot)` chặn race giữa các request `PENDING`. Slot được giữ qua `COMPLETED`/`CLAIMED` và chỉ set null sau best-effort physical delete hoặc cleanup audit cho `CANCELLED`/`EXPIRED`/`REJECTED`. Không dùng daily quota fields cho limit storage này.
+
 ## 9.5. Auth, Settings sync, Phân quyền
 
 - **Auth.js:** cấu hình OAuth (Google/GitHub) sau Prisma foundation. Đọc truyện không bắt buộc đăng nhập.
@@ -505,7 +546,7 @@ Command lưu effect phải xác minh `AudioAsset.ownerId` thuộc đúng author/
 
 ## 9.6. Storage, Admin catalog, integrations, CI/CD
 
-- **Storage:** cover/audio/background upload qua provider service. File lớn dùng presigned PUT; server quyết định owner/purpose/key/MIME/limit. Object key immutable.
+- **Storage:** cover/audio/background upload qua `MediaStorageProvider`, R2 Standard là implementation mặc định. File lớn dùng conditional presigned PUT 10 phút; server quyết định owner/purpose/key/MIME/limit. Object key immutable; public read dùng custom domain. Image/poster 5 MiB, audio 8 MiB/5 phút, background video 50 MiB dùng chung Admin/Author; Author video có poster và trần 10 intent complete/chưa cleanup.
 - **Effect admin:** manifest sync + DB overlay/keywords; active chỉ ảnh hưởng lựa chọn mới.
 - **Scene admin:** typed Background/Palette catalog + curated Preset metadata. Preset mới đi qua developer import; không có admin builder.
 - **Integrations:** Freesound và AI chạy sau Auth/authorization/storage/quota. AI dùng generation session/từng variant hoặc phương án khác chỉ sau payload spike chứng minh an toàn.

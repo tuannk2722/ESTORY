@@ -79,6 +79,7 @@ model User {
   settings             UserSettings?
   audioAssets          AudioAsset[]
   backgroundAssets     BackgroundAsset[]               @relation("PersonalBackgroundAssets")
+  mediaUploads         MediaUpload[]
   aiGenerationSessions AiBackgroundGenerationSession[]
 }
 
@@ -348,6 +349,42 @@ model AudioAsset {
 
   @@unique([ownerId, freesoundId])
   @@index([ownerId, createdAt])
+}
+
+enum MediaUploadStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CLAIMED
+  CANCELLED
+  EXPIRED
+  REJECTED
+}
+
+model MediaUpload {
+  id                 String            @id @default(cuid())
+  ownerId            String
+  owner              User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  purpose            String
+  mediaKind          String
+  videoSlot          Int?
+  objectKey          String            @unique
+  contentType        String
+  expectedSize       Int
+  posterObjectKey    String?           @unique
+  posterContentType  String?
+  posterExpectedSize Int?
+  status             MediaUploadStatus @default(PENDING)
+  result             Json?
+  expiresAt          DateTime
+  completedAt        DateTime?
+  claimedAt          DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@unique([ownerId, videoSlot])
+  @@index([ownerId, status, expiresAt])
+  @@index([ownerId, purpose, mediaKind, status])
 }
 
 model AiBackgroundGenerationSession {
