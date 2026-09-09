@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { settingsStore } from "@/lib/settingsStore";
 import { calculateScrollProgress } from "@/lib/reader/readerMetrics";
 import { RESUME_COMMIT_THRESHOLDS, type ReadingStatus } from "@/types/settings";
+import { useSettingsSync } from "./useSettingsSync";
 
 interface UseResumeCommitProps {
   storyId: string;
@@ -15,6 +16,7 @@ interface UseResumeCommitProps {
 }
 
 interface LatestReadingState extends UseResumeCommitProps {
+  scope: number;
   isLastChapter: boolean;
   isLastBlock: boolean;
   isPaused: boolean;
@@ -34,33 +36,37 @@ export function useResumeCommit({
   isLastBlock = false,
   isPaused = false,
 }: UseResumeCommitProps) {
+  const sync = useSettingsSync();
+  const paused = isPaused || !sync.canWrite;
   const committedRef = useRef(false);
   const startTimeRef = useRef(0);
   const saveTimerRef = useRef<number | null>(null);
   const intervalRef = useRef<number | null>(null);
   const latestRef = useRef<LatestReadingState>({
+    scope: sync.scope,
     storyId,
     chapterId,
     activeBlockId,
     isLastChapter,
     isLastBlock,
-    isPaused,
+    isPaused: paused,
   });
 
   useEffect(() => {
     latestRef.current = {
+      scope: sync.scope,
       storyId,
       chapterId,
       activeBlockId,
       isLastChapter,
       isLastBlock,
-      isPaused,
+      isPaused: paused,
     };
-  }, [activeBlockId, chapterId, isLastBlock, isLastChapter, isPaused, storyId]);
+  }, [activeBlockId, chapterId, isLastBlock, isLastChapter, paused, storyId, sync.scope]);
 
   const persistLatest = useCallback(() => {
     const latest = latestRef.current;
-    if (!committedRef.current || latest.isPaused || !latest.activeBlockId) return;
+    if (!committedRef.current || latest.isPaused || !latest.activeBlockId || latest.scope !== settingsStore.getStatus().scope) return;
 
     const scrollProgress = calculateScrollProgress(
       window.scrollY,
@@ -123,14 +129,14 @@ export function useResumeCommit({
       window.clearTimeout(saveTimerRef.current);
       saveTimerRef.current = null;
     }
-  }, [chapterId, storyId]);
+  }, [chapterId, storyId, sync.scope, paused]);
 
   useEffect(() => {
     if (committedRef.current) scheduleSave();
   }, [activeBlockId, isLastBlock, isLastChapter, scheduleSave]);
 
   useEffect(() => {
-    if (isPaused) return;
+    if (paused) return;
     window.addEventListener("scroll", commitIfReady, { passive: true });
     intervalRef.current = window.setInterval(commitIfReady, 2_000);
     return () => {
@@ -140,7 +146,7 @@ export function useResumeCommit({
         intervalRef.current = null;
       }
     };
-  }, [commitIfReady, isPaused]);
+  }, [commitIfReady, paused, sync.scope, storyId, chapterId]);
 
   useEffect(() => {
     const flushPendingSave = () => {

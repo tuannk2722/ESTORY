@@ -181,6 +181,7 @@ export interface ReadingProgress {
 }
 ```
 > Phase 1–2: 2 type này lưu localStorage qua `lib/settingsStore.ts`. Phase 3: cùng shape, chỉ đổi nơi lưu (DB, gắn `userId`) — xem `11-phase3-technical-roadmap.md` mục 9.5. `lib/settingsStore.ts` phải viết theo interface trừu tượng ngay từ Phase 1.
+> P3-08: import guest chỉ một lần khi khởi tạo đồng bộ tài khoản; bản ghi `UserSettings` được tạo cùng transaction import và đánh dấu đã khởi tạo. Sau đó DB luôn thắng, kể cả progress/bookmark rỗng. Không tự tạo settings bằng server default trước bootstrap client. Cache tách theo tài khoản, không trở thành guest data khi logout. Chi tiết revision/first-login tại `11` §9.5.
 >
 > **Trang "Đang đọc"** = danh sách `Story` có `ReadingProgress.status === "reading"`, sắp xếp `updated_at` giảm dần — suy ra trực tiếp từ `ReadingProgress`, không cần bảng riêng. (Trang "Đã đọc" bổ sung sau bằng cách lọc `status === "completed"`, schema đã sẵn sàng.)
 

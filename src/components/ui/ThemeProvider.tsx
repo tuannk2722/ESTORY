@@ -1,134 +1,88 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useReducer } from "react";
-import { ReaderSettings } from "@/types/settings";
+import React, { createContext, useContext, useEffect, useLayoutEffect } from "react";
+import { SessionProvider, useSession } from "next-auth/react";
+import { toast } from "sonner";
+import type { ReaderSettings } from "@/types/settings";
 import { DEFAULT_READER_SETTINGS, settingsStore } from "@/lib/settingsStore";
+import { GUEST_KEYS } from "@/lib/reader-state/local-store";
+import { accountCacheKey } from "@/lib/reader-state/sync-store";
+import { useSettingsSync } from "@/hooks/useSettingsSync";
 
-// State & Action types
-interface SettingsState {
-  settings: ReaderSettings;
-  isMounted: boolean;
-}
-
-type SettingsAction =
-  | { type: "INIT"; payload: ReaderSettings }
-  | { type: "SET_SETTINGS"; payload: ReaderSettings }
-  | { type: "SYNC_REDUCED_MOTION"; payload: boolean };
-
-// Reducer
-function settingsReducer(state: SettingsState, action: SettingsAction): SettingsState {
-  switch (action.type) {
-    case "INIT":
-      return { settings: action.payload, isMounted: true };
-
-    case "SET_SETTINGS":
-      return { ...state, settings: action.payload };
-
-    case "SYNC_REDUCED_MOTION":
-      return {
-        ...state,
-        settings: { ...state.settings, reduced_motion: action.payload },
-      };
-
-    default:
-      return state;
-  }
-}
-
-// Context
 interface ReaderSettingsContextType {
   settings: ReaderSettings;
-  updateSettings: (newSettings: Partial<ReaderSettings>) => void;
+  updateSettings: (settings: Partial<ReaderSettings>) => void;
   setTheme: (theme: "dark" | "light" | "sepia") => void;
   isMounted: boolean;
 }
-
 const ReaderSettingsContext = createContext<ReaderSettingsContextType>({
-  settings: DEFAULT_READER_SETTINGS,
-  updateSettings: () => { },
-  setTheme: () => { },
-  isMounted: false,
+  settings: DEFAULT_READER_SETTINGS, updateSettings: () => {}, setTheme: () => {}, isMounted: false,
 });
 
-// Provider
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(settingsReducer, {
-    settings: DEFAULT_READER_SETTINGS,
-    isMounted: false,
-  });
+function SettingsSession({ children }: { children: React.ReactNode }) {
+  const session = useSession();
+  const identity = session.data?.user.id ?? (session.status === "loading" ? undefined : null);
+  const sync = useSettingsSync();
+  // Reset account data before paint, including subscriptions outside this context.
+  useLayoutEffect(() => { void settingsStore.connect(identity); }, [identity]);
+  const isMounted = sync.userId === identity && sync.ready;
+  const settings = isMounted ? settingsStore.getSettings() : DEFAULT_READER_SETTINGS;
 
   useEffect(() => {
-    // 1. Đọc settings từ localStorage
-    const saved = settingsStore.getSettings();
+    document.documentElement.setAttribute("data-theme", settings.theme);
+    document.documentElement.setAttribute("data-story-font", settings.font_family);
+  }, [isMounted, settings.theme, settings.font_family]);
 
-    // 2. Tự động đồng bộ reduced_motion với prefers-reduced-motion nếu chưa có user override
-    const reducedMotionOverride = settingsStore.getReducedMotionOverride();
-    const initialReducedMotion =
-      reducedMotionOverride ??
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const initialSettings: ReaderSettings = {
-      ...saved,
-      reduced_motion: initialReducedMotion ?? false,
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onMedia = () => settingsStore.notifyGuest();
+    const onStorage = (event: StorageEvent) => {
+      const userId = settingsStore.getStatus().userId;
+      if (userId && (event.key === null || event.key === accountCacheKey(userId))) void settingsStore.refresh();
+      else if (userId === null && (event.key === null || Object.values(GUEST_KEYS).some((key) => key === event.key))) settingsStore.notifyGuest();
     };
-
-    // 3. Gán data-theme lên <html>
-    if (typeof document !== "undefined") {
-      document.documentElement.setAttribute("data-theme", initialSettings.theme || "dark");
-      document.documentElement.setAttribute("data-story-font", initialSettings.font_family || "cormorant");
-    }
-
-    dispatch({ type: "INIT", payload: initialSettings });
+    const refresh = () => { void settingsStore.refresh(); };
+    media.addEventListener("change", onMedia);
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("focus", refresh);
+    window.addEventListener("online", refresh);
+    const poll = window.setInterval(() => { if (document.visibilityState === "visible") refresh(); }, 60_000);
+    return () => {
+      media.removeEventListener("change", onMedia);
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("online", refresh);
+      window.clearInterval(poll);
+    };
   }, []);
 
+  const { update } = session;
   useEffect(() => {
-    if (!state.isMounted || settingsStore.getReducedMotionOverride() !== null) {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const handleChange = (event: MediaQueryListEvent) => {
-      dispatch({ type: "SYNC_REDUCED_MOTION", payload: event.matches });
-    };
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [state.isMounted]);
-
-  // Cập nhật data-theme trên <html> mỗi khi theme thay đổi
+    const refreshSession = () => { void update().then((value) => {
+      // Auth.js update() retains the old context when the server returns null.
+      // Reload an expired/revoked session to establish guest state safely.
+      if (value === null) window.location.reload();
+    }); };
+    window.addEventListener("reader-session-changed", refreshSession);
+    return () => window.removeEventListener("reader-session-changed", refreshSession);
+  }, [update]);
   useEffect(() => {
-    if (state.isMounted && typeof document !== "undefined") {
-      document.documentElement.setAttribute("data-theme", state.settings.theme || "dark");
-    }
-  }, [state.settings.theme, state.isMounted]);
-
-  useEffect(() => {
-    if (state.isMounted && typeof document !== "undefined") {
-      document.documentElement.setAttribute(
-        "data-story-font",
-        state.settings.font_family || "cormorant"
-      );
-    }
-  }, [state.settings.font_family, state.isMounted]);
-
-  const updateSettings = (newSettings: Partial<ReaderSettings>) => {
-    const updated = settingsStore.saveSettings(newSettings);
-    dispatch({ type: "SET_SETTINGS", payload: updated });
-  };
-
-  const setTheme = (theme: "dark" | "light" | "sepia") => {
-    const updated = settingsStore.saveSettings({ theme });
-    dispatch({ type: "SET_SETTINGS", payload: updated });
-  };
+    if (!sync.error) return;
+    toast.error(sync.error, { id: "reader-sync", duration: 10_000, action: {
+      label: "Thử lại", onClick: () => { void update().then(() => settingsStore.refresh()); },
+    } });
+  }, [sync.error, update]);
 
   return (
-    <ReaderSettingsContext.Provider
-      value={{ settings: state.settings, updateSettings, setTheme, isMounted: state.isMounted }}
-    >
+    <ReaderSettingsContext.Provider value={{ settings, isMounted,
+      updateSettings: (patch) => { settingsStore.saveSettings(patch); },
+      setTheme: (theme) => { settingsStore.saveSettings({ theme }); },
+    }}>
       {children}
     </ReaderSettingsContext.Provider>
   );
 }
-
-export function useReaderSettings() {
-  return useContext(ReaderSettingsContext);
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  return <SessionProvider refetchOnWindowFocus refetchInterval={60}><SettingsSession>{children}</SettingsSession></SessionProvider>;
 }
+export function useReaderSettings() { return useContext(ReaderSettingsContext); }

@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import Link from "next/link";
 import { Story } from "@/types/story";
 import { settingsStore } from "@/lib/settingsStore";
 import { ReadingProgress } from "@/types/settings";
 import { ArrowRight, BookOpen, Clock, Sparkles } from "lucide-react";
-import { useHydrated } from "@/hooks/useHydrated";
+import { useSettingsSync } from "@/hooks/useSettingsSync";
 import { resolvePublicReadingTarget } from "@/lib/reader/publicReadingTarget";
 
 export interface ReadingListClientProps {
@@ -14,9 +14,9 @@ export interface ReadingListClientProps {
 }
 
 export default function ReadingListClient({ stories }: ReadingListClientProps) {
-  const isHydrated = useHydrated();
-  const progressList = useMemo<ReadingProgress[]>(
-    () =>
+  const sync = useSettingsSync();
+  const isHydrated = sync.ready;
+  const progressList: ReadingProgress[] =
       isHydrated
         ? settingsStore
             .getAllProgress()
@@ -38,14 +38,13 @@ export default function ReadingListClient({ stories }: ReadingListClientProps) {
                 new Date(b.updated_at).getTime() -
                 new Date(a.updated_at).getTime()
             )
-        : [],
-    [isHydrated, stories]
-  );
+        : [];
 
   if (!isHydrated) {
     return (
       <div className="glass-card p-12 text-center text-[var(--color-muted-foreground)]">
-        Đang tải tiến trình đọc...
+        <p>{sync.error ?? "Đang tải tiến trình đọc..."}</p>
+        {sync.error && <button type="button" className="mt-2 underline" onClick={() => { void settingsStore.refresh(); }}>Thử lại</button>}
       </div>
     );
   }

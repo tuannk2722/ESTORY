@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { Play, Bookmark, ArrowRight } from "lucide-react";
 import { Story, Chapter } from "@/types/story";
 import { settingsStore } from "@/lib/settingsStore";
-import { useHydrated } from "@/hooks/useHydrated";
+import { useSettingsSync } from "@/hooks/useSettingsSync";
 import { resolvePublicReadingTarget } from "@/lib/reader/publicReadingTarget";
 
 export interface StoryDetailActionsProps {
@@ -17,9 +17,9 @@ export default function StoryDetailActions({
   story,
   firstChapter,
 }: StoryDetailActionsProps) {
-  const isHydrated = useHydrated();
-  const [bookmarkOverride, setBookmarkOverride] = useState<boolean | null>(null);
-  const readingTarget = useMemo(() => {
+  const sync = useSettingsSync();
+  const isHydrated = sync.ready;
+  const readingTarget = (() => {
     if (!isHydrated) return null;
     const resume = settingsStore.getResumeReading(story.id);
     const progress = settingsStore.getProgress(story.id);
@@ -32,13 +32,11 @@ export default function StoryDetailActions({
         blockId: progress.block_id,
       }
     );
-  }, [isHydrated, story.chapters, story.id]);
-  const isBookmarked =
-    bookmarkOverride ?? (isHydrated && settingsStore.isBookmarked(story.id));
+  })();
+  const isBookmarked = isHydrated && settingsStore.isBookmarked(story.id);
 
   const handleToggleBookmark = () => {
-    const next = settingsStore.toggleBookmark(story.id);
-    setBookmarkOverride(next);
+    settingsStore.toggleBookmark(story.id);
   };
 
   const continueUrl = readingTarget
@@ -55,6 +53,8 @@ export default function StoryDetailActions({
       {continueUrl && (
         <Link
           href={continueUrl}
+          aria-disabled={!sync.ready && !sync.error}
+          onClick={(event) => { if (!sync.ready && !sync.error) event.preventDefault(); }}
           className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-foreground)] font-ui font-semibold transition-all duration-200 shadow-lg hover:shadow-blue-500/25 min-h-[44px]"
         >
           {readingTarget ? (
@@ -65,7 +65,7 @@ export default function StoryDetailActions({
           ) : (
             <>
               <Play className="w-5 h-5 fill-white" />
-              <span>Bắt Đầu Đọc</span>
+              <span>{!sync.ready && !sync.error ? "Đang tải vị trí đọc..." : "Bắt Đầu Đọc"}</span>
             </>
           )}
         </Link>
@@ -73,13 +73,14 @@ export default function StoryDetailActions({
 
       {/* Bookmark Toggle */}
       <button
+        disabled={!sync.canWrite}
         onClick={handleToggleBookmark}
         className={`flex items-center gap-2 px-4 py-3 rounded-lg border font-ui font-medium text-sm transition-all duration-200 cursor-pointer min-h-[44px] ${
           isBookmarked
             ? "border-[var(--color-accent)] bg-[var(--color-accent)]/15 text-[var(--color-accent)]"
             : "border-[var(--color-border)] bg-[var(--color-card)] hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
         }`}
-        aria-label="Đánh dấu truyện"
+        aria-pressed={isBookmarked}
       >
         <Bookmark className="w-4 h-4" fill={isBookmarked ? "currentColor" : "none"} />
         <span>{isBookmarked ? "Đã Lưu Truyện" : "Lưu Đọc Sau"}</span>

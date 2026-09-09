@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, BookOpen, Bookmark, Calendar, User } from "lucide-react";
-import { useHydrated } from "@/hooks/useHydrated";
+import { useSettingsSync } from "@/hooks/useSettingsSync";
 import { settingsStore } from "@/lib/settingsStore";
 import type { Story } from "@/types/story";
 
@@ -14,11 +13,12 @@ export interface BookmarksListClientProps {
 export default function BookmarksListClient({
   stories,
 }: BookmarksListClientProps) {
-  const isHydrated = useHydrated();
-  const [, setRevision] = useState(0);
+  const sync = useSettingsSync();
+  const isHydrated = sync.ready;
   const bookmarks = isHydrated
     ? settingsStore
         .getBookmarks()
+        .filter((bookmark) => stories.some((story) => story.id === bookmark.story_id))
         .slice()
         .sort(
           (a, b) =>
@@ -29,13 +29,13 @@ export default function BookmarksListClient({
 
   const handleRemoveBookmark = (storyId: string) => {
     settingsStore.toggleBookmark(storyId);
-    setRevision((current) => current + 1);
   };
 
   if (!isHydrated) {
     return (
       <div className="glass-card p-12 text-center text-[var(--color-muted-foreground)]">
-        Đang tải danh sách...
+        <p>{sync.error ?? "Đang tải danh sách..."}</p>
+        {sync.error && <button type="button" className="mt-2 underline" onClick={() => { void settingsStore.refresh(); }}>Thử lại</button>}
       </div>
     );
   }
@@ -111,6 +111,7 @@ export default function BookmarksListClient({
               </div>
 
               <button
+                disabled={!sync.canWrite}
                 type="button"
                 onClick={() => handleRemoveBookmark(bookmark.story_id)}
                 className="self-end sm:self-center flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-500 transition-colors"

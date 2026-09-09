@@ -17,6 +17,8 @@ import {
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
 import { EffectCategory } from "@/types/story";
 import { STORY_FONT_OPTIONS } from "@/types/settings";
+import { useSettingsSync } from "@/hooks/useSettingsSync";
+import { settingsStore } from "@/lib/settingsStore";
 
 export interface SettingsPanelProps {
   isOpen: boolean;
@@ -25,6 +27,7 @@ export interface SettingsPanelProps {
 
 export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const { settings, updateSettings, setTheme } = useReaderSettings();
+  const sync = useSettingsSync();
   const [isFontOpen, setIsFontOpen] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -46,7 +49,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
       const focusable = Array.from(
         panelRef.current.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+          'button:not(:disabled), input:not(:disabled), [href], [tabindex]:not([tabindex="-1"])'
         )
       );
       if (focusable.length === 0) {
@@ -129,6 +132,8 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           </div>
 
           {/* 1. Theme Selection */}
+          <fieldset disabled={!sync.canWrite} className="min-w-0 space-y-6 border-0 p-0 m-0">
+          <legend className="sr-only">Tùy chỉnh trải nghiệm đọc</legend>
           <div className="space-y-3">
             <label className="font-editor text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
               Giao Diện
@@ -387,11 +392,13 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               className="w-5 h-5 accent-[var(--color-primary)] cursor-pointer"
             />
           </label>
+          </fieldset>
         </div>
 
         {/* Footer */}
         <div className="pt-6 border-t border-[var(--color-border)] text-center text-xs font-editor text-[var(--color-muted-foreground)]">
-          Tùy chỉnh được lưu tự động trên trình duyệt.
+          <p role="status">{sync.error ?? (!sync.ready ? "Đang tải cài đặt..." : sync.userId ? (sync.syncing ? "Đang đồng bộ..." : "Cài đặt được đồng bộ với tài khoản.") : "Tùy chỉnh được lưu tự động trên trình duyệt.")}</p>
+          {sync.error && <button type="button" className="mt-2 underline" onClick={() => { void settingsStore.refresh(); }}>Thử đồng bộ lại</button>}
         </div>
       </aside>
     </div>

@@ -30,7 +30,7 @@ Nguồn: [11](11-phase3-technical-roadmap.md) §9.5; [12](12-auth-and-author-man
 Nguồn: [02](02-data-schema.md) §2.3–2.5; [11](11-phase3-technical-roadmap.md) §9.5.
 
 - [ ] Guest giữ localStorage; logged-in đọc/ghi DB + local cache.
-- [ ] First-login chỉ import local khi DB chưa có record; đã có thì DB thắng.
+- [ ] Chỉ import guest một lần khi khởi tạo đồng bộ tài khoản; các lần sau DB luôn thắng, kể cả danh sách rỗng. Không tái import dữ liệu cũ từ thiết bị khác (`11` §9.5, quyết định 2026-09-09).
 
 ## US-3.5 — Phân quyền
 

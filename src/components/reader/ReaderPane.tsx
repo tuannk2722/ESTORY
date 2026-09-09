@@ -14,6 +14,8 @@ import { useActiveReaderBlock } from "@/hooks/useActiveReaderBlock";
 import { useReaderSettings } from "@/components/ui/ThemeProvider";
 import { STORY_FONT_OPTIONS } from "@/types/settings";
 import { getScenePreloadSources } from "@/lib/reader/scenePreload";
+import { useSettingsSync } from "@/hooks/useSettingsSync";
+import { settingsStore } from "@/lib/settingsStore";
 
 export interface ReaderPaneProps {
   storyId: string;
@@ -35,12 +37,14 @@ export default function ReaderPane({
   isPreview,
 }: ReaderPaneProps) {
   const { settings, isMounted } = useReaderSettings();
+  const sync = useSettingsSync();
   // SSR cannot know the OS preference. Keep the first frame static until the
   // provider has loaded client preferences, so reduced-motion readers never
   // download/mount looping media during hydration.
   const reducedMotion = !isMounted || Boolean(settings.reduced_motion);
   const contentRef = useRef<HTMLElement>(null);
   const reducedMotionRef = useRef(reducedMotion);
+  const restoredScopeRef = useRef<number | undefined>(undefined);
   useEffect(() => {
     reducedMotionRef.current = reducedMotion;
   }, [reducedMotion]);
@@ -74,17 +78,26 @@ export default function ReaderPane({
   });
 
   useEffect(() => {
-    if (!window.location.hash) return;
-    const blockId = decodeURIComponent(window.location.hash.slice(1));
+    if (!sync.ready || isPreview) return;
+    const accountChanged = restoredScopeRef.current !== undefined && restoredScopeRef.current !== sync.scope;
+    restoredScopeRef.current = sync.scope;
+    let blockId: string | undefined;
+    try { blockId = window.location.hash ? decodeURIComponent(window.location.hash.slice(1)) : undefined; } catch { return; }
+    if (!blockId) {
+      const progress = settingsStore.getProgress(storyId);
+      blockId = progress?.chapter_id === chapter.id ? progress.block_id : accountChanged ? chapter.blocks[0]?.id : undefined;
+    }
+    if (!blockId || !chapter.blocks.some((block) => block.id === blockId)) return;
+    const targetBlockId = blockId;
     const timer = window.setTimeout(
       () =>
-        scrollToEditorBlock(blockId, {
+        scrollToEditorBlock(targetBlockId, {
           reducedMotion: reducedMotionRef.current,
         }),
       300
     );
     return () => window.clearTimeout(timer);
-  }, [chapter.id]);
+  }, [chapter.id, chapter.blocks, storyId, sync.ready, sync.scope, isPreview]);
 
   const activeScene = activeBlockId
     ? sceneByBlockId.get(activeBlockId)?.scene || null

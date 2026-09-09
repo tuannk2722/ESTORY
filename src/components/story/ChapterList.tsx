@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen, ChevronRight, Sparkles } from "lucide-react";
 import ResumeReadingModal from "@/components/reader/ResumeReadingModal";
-import { useHydrated } from "@/hooks/useHydrated";
+import { useSettingsSync } from "@/hooks/useSettingsSync";
 import { settingsStore } from "@/lib/settingsStore";
 import { resolvePublicReadingTarget } from "@/lib/reader/publicReadingTarget";
 import type { Chapter } from "@/types/story";
@@ -16,12 +16,14 @@ export interface ChapterListProps {
 
 export default function ChapterList({ storyId, chapters }: ChapterListProps) {
   const router = useRouter();
-  const isHydrated = useHydrated();
-  const [dismissedOverride, setDismissedOverride] = useState(false);
+  const sync = useSettingsSync();
+  const isHydrated = sync.ready;
+  const [dismissedScope, setDismissedScope] = useState<number | null>(null);
   const [targetChapter, setTargetChapter] = useState<Chapter | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalScope, setModalScope] = useState<number | null>(null);
 
-  const resumeReading = useMemo(() => {
+  const resumeReading = (() => {
     if (!isHydrated) return null;
     const resume = settingsStore.getResumeReading(storyId);
     const oldProgress = settingsStore.getProgress(storyId);
@@ -34,12 +36,10 @@ export default function ChapterList({ storyId, chapters }: ChapterListProps) {
         blockId: oldProgress.block_id,
       }
     );
-  }, [chapters, isHydrated, storyId]);
+  })();
 
   const isDismissed =
-    dismissedOverride ||
-    (isHydrated &&
-      sessionStorage.getItem(`resume_dismissed_${storyId}`) === "true");
+    dismissedScope === sync.scope || (sync.ready && settingsStore.isResumeDismissed(storyId));
 
   const handleChapterClick = (chapter: Chapter) => {
     if (
@@ -52,6 +52,7 @@ export default function ChapterList({ storyId, chapters }: ChapterListProps) {
     }
 
     setTargetChapter(chapter);
+    setModalScope(sync.scope);
     setIsModalOpen(true);
   };
 
@@ -66,8 +67,8 @@ export default function ChapterList({ storyId, chapters }: ChapterListProps) {
 
   const handleDismissAndNavigate = () => {
     if (!targetChapter) return;
-    sessionStorage.setItem(`resume_dismissed_${storyId}`, "true");
-    setDismissedOverride(true);
+    setDismissedScope(sync.scope);
+    settingsStore.dismissResume(storyId);
     setIsModalOpen(false);
     router.push(`/stories/${storyId}/${targetChapter.id}`);
   };
@@ -103,6 +104,7 @@ export default function ChapterList({ storyId, chapters }: ChapterListProps) {
           return (
             <button
               type="button"
+              disabled={!sync.ready && !sync.error}
               key={chapter.id}
               onClick={() => handleChapterClick(chapter)}
               className={`w-full min-h-11 text-left glass-card group flex items-center justify-between p-4 md:p-5 rounded-xl border transition-colors cursor-pointer motion-safe:hover:translate-x-1 ${
@@ -144,7 +146,7 @@ export default function ChapterList({ storyId, chapters }: ChapterListProps) {
       </div>
 
       <ResumeReadingModal
-        isOpen={isModalOpen}
+        isOpen={isModalOpen && modalScope === sync.scope}
         targetChapterTitle={targetChapterTitle}
         onResume={handleResume}
         onDismiss={handleDismissAndNavigate}

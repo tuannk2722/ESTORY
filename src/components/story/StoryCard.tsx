@@ -1,32 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { Bookmark, Sparkles, User } from "lucide-react";
 import { Story } from "@/types/story";
 import { settingsStore } from "@/lib/settingsStore";
-import { useHydrated } from "@/hooks/useHydrated";
+import { useSettingsSync } from "@/hooks/useSettingsSync";
 
 export interface StoryCardProps {
   story: Story;
 }
 
 export default function StoryCard({ story }: StoryCardProps) {
-  const isHydrated = useHydrated();
-  const [bookmarkOverride, setBookmarkOverride] = useState<{
-    storyId: string;
-    value: boolean;
-  } | null>(null);
-  const isBookmarked =
-    bookmarkOverride?.storyId === story.id
-      ? bookmarkOverride.value
-      : isHydrated && settingsStore.isBookmarked(story.id);
+  const sync = useSettingsSync();
+  const isBookmarked = sync.ready && settingsStore.isBookmarked(story.id);
 
   const handleToggleBookmark = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const nextState = settingsStore.toggleBookmark(story.id);
-    setBookmarkOverride({ storyId: story.id, value: nextState });
+    settingsStore.toggleBookmark(story.id);
   };
 
   return (
@@ -47,6 +39,7 @@ export default function StoryCard({ story }: StoryCardProps) {
 
         {/* Bookmark Button */}
         <button
+          disabled={!sync.canWrite}
           onClick={handleToggleBookmark}
           className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md border transition-all z-20 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center ${
             isBookmarked

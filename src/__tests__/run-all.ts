@@ -10,8 +10,9 @@ import { runPhase3MigrationTests } from "./phase3-migration.test";
 import { runShadowReadTests } from "./shadow-read.test";
 import { runStoryCommandTests } from "./story-command.test";
 import { runP307ClientTests } from "./p3-07-client.test";
+import { runReaderSyncTests } from "./reader-sync.test";
 
-Promise.all([runSceneRepositoryTests(), runAuthTests(), runPhase3MigrationTests(), runShadowReadTests(), runStoryCommandTests(), runP307ClientTests()]).then(() => {
+Promise.all([runSceneRepositoryTests(), runAuthTests(), runPhase3MigrationTests(), runShadowReadTests(), runStoryCommandTests(), runP307ClientTests(), runReaderSyncTests()]).then(() => {
   console.log("All Reader, Effect, Scene and repository tests completed successfully");
 }).catch((error: unknown) => {
   console.error(error);

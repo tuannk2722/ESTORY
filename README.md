@@ -318,7 +318,8 @@ tạo, không dùng browser profile thật. Ảnh QA lưu tại
 
 ### Thực hiện cutover trên từng môi trường
 
-Hiện chỉ có Local + Neon dev; **chưa hoàn tất toàn stage P3-07**. Các bước dưới đây
+User xác nhận CI P3-07 xanh và đã tạo Neon preview-db khi giao P3-08; Vercel chưa
+deploy và được hoãn. **Các gate production cutover P3-07 vẫn chưa hoàn tất.** Các bước dưới đây
 là công việc còn phải thực hiện và ghi bằng chứng, không phải kết quả đã chạy.
 
 1. Tạo Vercel preview/staging và DB riêng theo [Prisma operations](prisma/README.md).
@@ -358,3 +359,36 @@ là công việc còn phải thực hiện và ghi bằng chứng, không phải
   Reader/Editor consumer ghi qua các API legacy.
 
 Bằng chứng và gate còn thiếu: [P3-07 verification](docs/verification/p3-07.md).
+
+## Settings, progress và bookmark sync (P3-08)
+
+Guest tiếp tục lưu local. Sau login, `/api/reader-state` bootstrap dữ liệu cá nhân
+qua `settingsStore`. Import guest chỉ một lần khi tài khoản khởi tạo đồng bộ;
+`UserSettings` là marker được tạo cùng transaction. Sau đó DB thắng, kể cả danh
+sách rỗng. Không xóa marker hoặc tự tạo settings bằng DB defaults trước bootstrap.
+Contract/giải quyết conflict: [roadmap §9.5](docs/11-phase3-technical-roadmap.md#95-auth-settings-sync-phân-quyền).
+
+Không thêm env flag hoặc migration. API dùng DB/Auth đã cấu hình từ P3-02/03;
+content write flag không chặn settings/progress/bookmark cá nhân.
+
+```powershell
+pnpm test
+pnpm typecheck
+pnpm lint
+pnpm build
+pnpm test:client-bundle
+pnpm test:sync:db
+pnpm test:sync:http
+```
+
+Hai suite sync được thêm vào CI PostgreSQL job. DB/HTTP suite chỉ tạo fixture riêng
+và cleanup trong `finally`. Optional browser gate chạy trong HTTP suite khi đặt
+`P3_08_PLAYWRIGHT_MODULE` trỏ tới Playwright đã cài ngoài app, ví dụ local hiện tại:
+
+```powershell
+$env:P3_08_PLAYWRIGHT_MODULE = 'C:\Users\OS\story-telling\.tools\p3-07-browser\node_modules\playwright'
+pnpm test:sync:http
+```
+
+Browser dùng Edge headless với context mới và session fixture. Xem scope, kết quả,
+rollback và các gate CI/deployment còn lại tại [P3-08 verification](docs/verification/p3-08.md).
