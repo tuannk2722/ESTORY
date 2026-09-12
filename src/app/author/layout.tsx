@@ -1,7 +1,4 @@
-import { requirePageRole } from "@/lib/auth/page-guards";
-
-export default async function AuthorLayout({ children }: { children: React.ReactNode }) {
-  // Readers must be able to reach the first-story wizard in P3-10.
-  await requirePageRole("reader", "/author");
+export default function AuthorLayout({ children }: { children: React.ReactNode }) {
+  // Route pages own auth so each sign-in redirect keeps its exact destination.
   return children;
 }

@@ -65,12 +65,19 @@ export interface Chapter {
 
 export type StoryStatus = "draft" | "pending_review" | "published" | "rejected" | "archived";
 
+/** Percentage-based focal position used by every 16:9 cover viewport. */
+export interface CoverPosition {
+  x: number;
+  y: number;
+}
+
 export interface Story {
   id: string;                 // slug, dùng làm route param
   title: string;
   author: string;             // byline public; Prisma map từ authorDisplayName, tách khỏi authorId ownership
   description: string;
   cover_image?: string;
+  cover_position?: CoverPosition;
   genre: string[];
   status: StoryStatus;         // Phase 1–2: luôn để "published" (chưa có kiểm duyệt). Phase 3: có hiệu lực đầy đủ
   view_count: number;          // Phase 1–2: có thể để cố định 0

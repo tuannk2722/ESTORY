@@ -160,6 +160,8 @@ export async function applyPhase3MigrationTransaction(
       authorDisplayName: story.author,
       description: story.description,
       coverUrl: story.cover_image ?? null,
+      coverPositionX: story.cover_position?.x ?? 50,
+      coverPositionY: story.cover_position?.y ?? 50,
       genre: story.genre,
       viewCount: story.view_count,
       status: storyStatus[story.status],
@@ -248,6 +250,12 @@ export async function verifyPhase3Migration(
     mismatch(issues, actual.authorDisplayName === expected.author, `Story author display mismatch ${expected.id}`);
     mismatch(issues, actual.status === storyStatus[expected.status], `Story status mismatch ${expected.id}`);
     mismatch(issues, actual.coverUrl === (expected.cover_image ?? null), `Story cover mismatch ${expected.id}`);
+    mismatch(
+      issues,
+      actual.coverPositionX === (expected.cover_position?.x ?? 50)
+        && actual.coverPositionY === (expected.cover_position?.y ?? 50),
+      `Story cover position mismatch ${expected.id}`,
+    );
     mismatch(issues, actual.viewCount === expected.view_count && isDeepStrictEqual(actual.genre, expected.genre), `Story fields mismatch ${expected.id}`);
     const chapterRows = new Map(actual.chapters.map((chapter) => [chapter.id, chapter] as const));
     mismatch(issues, actual.chapters.length === expected.chapters.length, `Chapter count mismatch ${expected.id}`);

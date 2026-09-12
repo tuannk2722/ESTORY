@@ -16,8 +16,12 @@ export async function requirePageRole(minRole: Role, callbackUrl: string) {
   }
 }
 
-export async function requirePageStoryAccess(storyId: string, chapterId: string, callbackUrl: string) {
-  const session = await requirePageRole("author", callbackUrl);
+export function requirePageStoryAccess(storyId: string, callbackUrl: string): ReturnType<typeof requirePageRole>;
+export function requirePageStoryAccess(storyId: string, chapterId: string, callbackUrl: string): ReturnType<typeof requirePageRole>;
+export async function requirePageStoryAccess(storyId: string, chapterIdOrCallbackUrl: string, callbackUrl?: string) {
+  const chapterId = callbackUrl === undefined ? undefined : chapterIdOrCallbackUrl;
+  const resolvedCallbackUrl = callbackUrl ?? chapterIdOrCallbackUrl;
+  const session = await requirePageRole("author", resolvedCallbackUrl);
   try {
     await new StoryDataAccess().authorize(session.user.id, storyId, chapterId);
   } catch (error) {

@@ -189,3 +189,24 @@ Transaction behavior follows the installed Prisma 7 API and the
 [Prisma 7 transaction reference](https://docs.prisma.io/docs/orm/v7/prisma-client/queries/transactions).
 Serialization/deadlock conflicts (`P2034`) are returned as `409`; clients must reload
 before resolving a content conflict, not silently retry with a fresh revision.
+
+## P3-10 story cover focal position
+
+The additive migration `20260910000000_story_cover_position` adds non-null
+`Story.coverPositionX` and `Story.coverPositionY` columns. Both are percentages with a
+default of `50`; SQL `CHECK` constraints keep each value in `0..100`. Existing stories
+therefore remain centered without rewriting media URLs or legacy JSON. The migration does
+not crop, recompress, copy or delete an R2 object.
+
+Deploy this migration before deploying application code that selects the two columns. On
+development/CI, run the normal deploy/status/schema-diff sequence and the Story read/command
+integration suites. Production still uses `pnpm db:migrate:deploy` as a separate controlled
+release step; a local schema/build pass is not evidence that Preview or Production has been
+migrated.
+
+The public/domain field is optional `cover_position: { x, y }`; omission means centered.
+Create defaults omitted positions to `{50,50}`. Metadata updates preserve an omitted position,
+except replacing the cover with a new `coverUploadId` resets an omitted position to center.
+Because this migration is additive and older application revisions ignore the columns, an app
+rollback should normally leave the columns in place. Reverse schema changes require a reviewed
+forward migration or database restore; never edit applied migration history.

@@ -29,12 +29,17 @@ const chapterSchema = z.strictObject({
   view_count: z.number().int().min(0).optional(),
   blocks: z.array(storyBlockSchema),
 });
+const coverPositionSchema = z.strictObject({
+  x: z.number().finite().min(0).max(100),
+  y: z.number().finite().min(0).max(100),
+});
 const storySchema = z.strictObject({
   id: nonEmpty,
   title: z.string(),
   author: nonEmpty,
   description: z.string(),
   cover_image: z.string().optional(),
+  cover_position: coverPositionSchema.optional(),
   genre: z.array(z.string()),
   status: z.enum(["draft", "pending_review", "published", "rejected", "archived"]),
   view_count: z.number().int().min(0),

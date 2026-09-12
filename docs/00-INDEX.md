@@ -26,6 +26,7 @@ Nếu vẫn chưa phân xử được, nêu mâu thuẫn trước khi code phầ
 - **P3-07:** implementation và bằng chứng local/các gate môi trường còn thiếu tại [P3-07 verification](verification/p3-07.md); chưa coi local pass là hoàn tất cutover.
 - **P3-08:** quyết định import guest một lần và bằng chứng sync tại [P3-08 verification](verification/p3-08.md); gate CI/deployment ghi riêng.
 - **P3-09:** R2 upload intent/provider, video+poster/quota và bằng chứng Local + Neon dev + live R2 tại [P3-09 verification](verification/p3-09.md); domain claim/UI và deployment thuộc các stage sau.
+- **P3-10:** Auth/Profile UI, wizard cover claim, Author dashboard/management và protected admin landing tại [P3-10 verification](verification/p3-10.md); local/Neon/browser pass, CI và Vercel preview của changeset mới cần xác nhận sau push.
 - **Trạng thái task tạm:** `.codex/TASK.md` nếu có, theo AGENTS. Runbook/task state chỉ điều phối công việc; không thay nguồn quyết định và không chép lại schema/rule.
 - **Stack/version đang cài:** `package.json`, `pnpm-lock.yaml`, `.nvmrc`. Lệnh local/CI/deploy: README.
 

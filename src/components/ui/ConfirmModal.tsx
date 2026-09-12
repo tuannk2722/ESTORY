@@ -122,18 +122,49 @@ export function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
   const cancelBtnRef = useRef<HTMLButtonElement>(null);
+  const confirmLoadingRef = useRef(confirmLoading);
   const config = VARIANT_CONFIG[variant] || VARIANT_CONFIG.danger;
   const Icon = CustomIcon || config.icon;
 
-  // Focus trap & Escape key
+  useEffect(() => {
+    confirmLoadingRef.current = confirmLoading;
+  }, [confirmLoading]);
+
+  // Keep destructive confirmations keyboard-contained and return focus to the
+  // control that opened them after either outcome.
   useEffect(() => {
     if (!isOpen) return;
+    const previouslyFocused = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        onCancel();
+        if (!confirmLoadingRef.current) onCancel();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ));
+      if (focusable.length === 0) {
+        e.preventDefault();
+        dialog.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
       }
     };
 
@@ -143,6 +174,7 @@ export function ConfirmModal({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       clearTimeout(focusTimer);
+      if (previouslyFocused?.isConnected) previouslyFocused.focus();
     };
   }, [isOpen, onCancel]);
 
@@ -153,11 +185,13 @@ export function ConfirmModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
-      aria-describedby="confirm-dialog-desc"
+      aria-describedby={description ? "confirm-dialog-desc" : undefined}
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in text-foreground font-editor"
-      onClick={onCancel}
+      onClick={() => { if (!confirmLoading) onCancel(); }}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className="relative w-full max-w-md bg-card/95 border border-border/80 rounded-3xl shadow-2xl overflow-hidden p-6 md:p-7 transition-all scale-100 flex flex-col gap-5"
         style={{
           boxShadow: `0 20px 40px -15px ${config.glowColor}, 0 0 0 1px rgba(255, 255, 255, 0.08)`,
@@ -169,7 +203,7 @@ export function ConfirmModal({
           <div
             className={`p-3.5 rounded-2xl ${config.badgeBg} ${config.badgeText} border ${config.badgeBorder} shrink-0 shadow-xs`}
           >
-            <Icon className="w-6 h-6 stroke-[2.2]" />
+            <Icon aria-hidden="true" className="w-6 h-6 stroke-[2.2]" />
           </div>
 
           <div className="flex-1 min-w-0 pr-6">
@@ -192,10 +226,11 @@ export function ConfirmModal({
           <button
             type="button"
             onClick={onCancel}
-            className="absolute top-5 right-5 p-1.5 text-muted-foreground hover:text-foreground rounded-xl hover:bg-secondary/70 transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+            disabled={confirmLoading}
+            className="absolute top-3 right-3 p-1.5 text-muted-foreground hover:text-foreground rounded-xl hover:bg-secondary/70 transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Đóng hộp thoại"
           >
-            <X className="w-4 h-4" />
+            <X aria-hidden="true" className="w-4 h-4" />
           </button>
         </div>
 
@@ -205,6 +240,7 @@ export function ConfirmModal({
             ref={cancelBtnRef}
             type="button"
             onClick={onCancel}
+            disabled={confirmLoading}
             className="px-4 py-2.5 rounded-xl font-editor text-sm font-medium bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border transition-all cursor-pointer min-h-[44px] flex items-center justify-center"
           >
             {cancelText}
@@ -240,6 +276,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
   const resolverRef = useRef<((value: boolean) => void) | null>(null);
 
   const confirm = useCallback((options: ConfirmOptions): Promise<boolean> => {
+    if (resolverRef.current) return Promise.resolve(false);
     return new Promise<boolean>((resolve) => {
       resolverRef.current = resolve;
       setModalState({

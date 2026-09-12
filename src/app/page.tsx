@@ -49,7 +49,7 @@ export default async function HomePage() {
               <p>Chưa có tác phẩm nào trong thư viện.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {stories.map((story) => (
                 <StoryCard key={story.id} story={story} />
               ))}

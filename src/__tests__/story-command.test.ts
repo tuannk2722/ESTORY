@@ -3,7 +3,20 @@ import { z } from "zod";
 import { requireStoryOwnerOrAdmin, requireChapterInStory, requireStoryMutable } from "@/lib/auth/story-policy";
 import { AuthAccessError } from "@/lib/auth/policy";
 import { CommandError, mapCommandDatabaseError } from "@/lib/services/command-error";
-import { createStorySchema, resolveStoryByline, validateCommand, replaceEditorSchema } from "@/lib/validation/story-command-schema";
+import {
+  authorStoryListSchema,
+  createChapterSchema,
+  createStorySchema,
+  deleteStorySchema,
+  chapterOrderSchema,
+  managedChapterSchema,
+  managedStoryDataSchema,
+  managedStorySchema,
+  replaceEditorSchema,
+  resolveStoryByline,
+  updateStorySchema,
+  validateCommand,
+} from "@/lib/validation/story-command-schema";
 import { commandFailure, commandResponse, MAX_COMMAND_BODY_BYTES, readCommandJson } from "@/lib/http/command-response";
 import { parseEnvironment } from "@/lib/config/environment";
 
@@ -32,11 +45,61 @@ export async function runStoryCommandTests() {
     assert.ok(error.body.error.fieldErrors?.byline);
     return error.status === 400;
   });
-  const create = { actorId: "owner", metadata: { title: "Title", description: "Description", cover_image: "/cover.svg", genre: ["Fantasy"] }, chapters: [{ title: "Chapter" }] };
+  const create = { actorId: "owner", coverUploadId: "cover-upload", metadata: { title: "Title", description: "Description", genre: ["Fantasy"] }, chapters: [{ title: "Chapter" }] };
   validateCommand(createStorySchema, create);
-  for (const invalid of [{ ...create, role: "admin" }, { ...create, byline: 123 }, { ...create, chapters: [] }, { ...create, metadata: { ...create.metadata, title: " " } }]) {
+  assert.deepEqual(validateCommand(createStorySchema, {
+    ...create,
+    metadata: { ...create.metadata, cover_position: { x: 0, y: 100 } },
+  }).metadata.cover_position, { x: 0, y: 100 });
+  for (const invalid of [
+    { ...create, role: "admin" },
+    { ...create, byline: 123 },
+    { ...create, coverUploadId: " " },
+    { ...create, chapters: [] },
+    { ...create, metadata: { ...create.metadata, title: " " } },
+    { ...create, metadata: { ...create.metadata, cover_image: "https://untrusted.invalid/cover.png" } },
+    { ...create, metadata: { ...create.metadata, cover_position: { x: -1, y: 50 } } },
+    { ...create, metadata: { ...create.metadata, cover_position: { x: 50, y: 101 } } },
+  ]) {
     assert.throws(() => validateCommand(createStorySchema, invalid), errorStatus(400));
   }
+  const context = { actorId: "owner", storyId: "story", expectedUpdatedAt: new Date().toISOString() };
+  assert.equal(validateCommand(createChapterSchema, {
+    ...context,
+    title: "Inserted chapter",
+    afterChapterId: "chapter-one",
+  }).afterChapterId, "chapter-one");
+  assert.equal(validateCommand(createChapterSchema, { ...context, title: "Appended chapter" }).afterChapterId, undefined);
+  assert.throws(() => validateCommand(createChapterSchema, {
+    ...context,
+    title: "Invalid anchor",
+    afterChapterId: " ",
+  }), errorStatus(400));
+  assert.deepEqual(validateCommand(updateStorySchema, { ...context, metadata: create.metadata }), { ...context, metadata: create.metadata });
+  assert.equal(validateCommand(updateStorySchema, { ...context, coverUploadId: "new-cover", metadata: create.metadata }).coverUploadId, "new-cover");
+  assert.throws(() => validateCommand(updateStorySchema, { ...context, metadata: { ...create.metadata, cover_image: "/cover.svg" } }), errorStatus(400));
+  assert.deepEqual(validateCommand(deleteStorySchema, context), context);
+  const storyData = {
+    id: "story", title: "Title", author: "Author", description: "Description",
+    cover_image: "https://media.invalid/cover.png", genre: ["Fantasy"], status: "rejected" as const,
+    view_count: 0, chapters: [],
+  };
+  const managedChapter = {
+    id: "chapter", title: "Chapter", order: 1, status: "draft" as const,
+    blockCount: 2, effectCount: 3,
+  };
+  const managedStory = {
+    id: storyData.id, title: storyData.title, author: storyData.author,
+    description: storyData.description, cover_image: storyData.cover_image,
+    genre: storyData.genre, status: storyData.status, chapters: [managedChapter],
+  };
+  assert.deepEqual(managedChapterSchema.parse(managedChapter), managedChapter);
+  assert.deepEqual(chapterOrderSchema.parse({ id: managedChapter.id, order: 2 }), { id: "chapter", order: 2 });
+  assert.deepEqual(managedStorySchema.parse(managedStory), managedStory);
+  assert.deepEqual(managedStoryDataSchema.parse({ story: managedStory, rejectionReason: "Needs revision" }).rejectionReason, "Needs revision");
+  assert.equal(authorStoryListSchema.parse([{ story: managedStory, rejectionReason: null, updatedAt: context.expectedUpdatedAt }]).length, 1);
+  assert.throws(() => managedChapterSchema.parse({ ...managedChapter, blocks: [] }));
+  assert.throws(() => managedStorySchema.parse({ ...managedStory, view_count: 0 }));
   assert.throws(() => validateCommand(replaceEditorSchema, { actorId: "owner", storyId: "story", chapterId: "chapter", chapter: {}, scenes: [], revision: "legacy" }), errorStatus(400));
   const prismaFlags = { DATABASE_URL: "postgresql://fixture:fixture@localhost/test", PHASE3_STORY_WRITE_SOURCE: "prisma", PHASE3_STORY_READ_SOURCE: "prisma", PHASE3_SCENE_READ_SOURCE: "prisma" };
   assert.doesNotThrow(() => parseEnvironment(prismaFlags));

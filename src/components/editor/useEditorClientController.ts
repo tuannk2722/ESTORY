@@ -68,7 +68,7 @@ export function useEditorClientController(
       });
       if (!approved) return;
     }
-    router.push(`/stories/${story.id}`);
+    router.push(`/author/stories/${encodeURIComponent(story.id)}`);
   }, [confirm, router, state.dirty, story.id]);
 
   const openScenePicker = useCallback(

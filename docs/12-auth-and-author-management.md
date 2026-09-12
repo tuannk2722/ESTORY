@@ -23,7 +23,7 @@ Khớp `AuthMenu.tsx` (`03-file-structure.md`), wireframe 2 trạng thái ở `0
 | **Guest** (chưa đăng nhập) | ... [🌗 Theme]  [ Đăng nhập ] (mở OAuth Google/GitHub qua Auth.js) |
 | **Logged-in, role = `reader`** | ... [🌗 Theme]  [ ✍️ Viết truyện ]  (Avatar) → mở `ProfileModal`. Nút **"✍️ Viết truyện"** (dẫn thẳng `/author/stories/new`) |
 | **Logged-in, role = `author`/`admin`** | ... [🌗 Theme]  [ 📚 Truyện của tôi ]  (Avatar) → mở `ProfileModal`. Việc kết nối Freesound chỉ nằm trong `IntegrationsSection` của modal hoặc CTA theo ngữ cảnh trong picker; không thêm nút Freesound riêng trên navbar. |
-| **Logged-in, role = `admin`** | Thêm mục "Quản trị" trong `ProfileModal` dẫn `/admin` (redirect `/admin/stories`); Admin shell có Stories, Effects, Scene Library theo `04b-page-layouts.md` mục 8 |
+| **Logged-in, role = `admin`** | Thêm mục "Quản trị" trong `ProfileModal` dẫn `/admin`. P3-10 cung cấp landing được bảo vệ để link không 404; P3-11 thay landing bằng shell/moderation và redirect `/admin/stories`. |
 
 - Đọc truyện **không** yêu cầu đăng nhập (giữ nguyên US-3.3). Nút "Viết truyện"/"Truyện của tôi" chỉ hiện khi đã login.
 - Nút navbar là **context-aware theo role**, không tồn tại song song 2 nút — tránh rối UI. Trang `/author` (dashboard) sẽ có nút riêng "+ Tạo truyện mới" để tạo thêm truyện tiếp theo, navbar chỉ giữ 1 điểm vào duy nhất phù hợp với trạng thái hiện tại.
@@ -51,7 +51,7 @@ Nội dung modal (top-down):
 1. Avatar + tên + email.
 2. Badge vai trò: chỉ hiện khi `role !== "reader"` (VD: "Tác giả", "Quản trị viên") — reader thường không cần thấy badge "Reader" gây rối mắt.
 3. Theme Switcher (Dark/Light/Sepia) — giữ nguyên hành vi cũ.
-4. `IntegrationsSection.tsx` — khối "Liên kết tài khoản": chỉ hiện khi `role >= author`. Hiện trạng thái Freesound (đã kết nối/chưa) + nút tương ứng — chi tiết luồng ở mục 12.9.
+4. `IntegrationsSection.tsx` là boundary dành sẵn cho khối "Liên kết tài khoản", nhưng P3-10 **không render Freesound row/action** vì OAuth, connection projection và Import thuộc P3-15. Khi P3-15 triển khai, khối chỉ hiện với `role >= author` và tuân theo mục 12.9.
 5. Menu liên kết theo role:
    - `role >= author`: "📚 Truyện của tôi" → `/author`.
    - `role === admin`: "🛠️ Trang quản trị" → `/admin`.
@@ -66,11 +66,12 @@ Wireframe ở `04b-page-layouts.md` mục 7.1. Chỉ truy cập được khi `ro
 - Header trang: "Truyện của tôi" + nút chính "+ Tạo truyện mới" (→ `/author/stories/new`).
 - Tabs lọc theo `StoryStatus`: Tất cả / Nháp (`draft`) / Chờ duyệt (`pending_review`) / Đã xuất bản (`published`) / Bị từ chối (`rejected`) / Lưu trữ (`archived`).
 - Mỗi truyện hiển thị qua `StoryManageCard`:
-  - Cover, title, badge `StoryStatus` (màu theo trạng thái: `draft` = xám, `pending_review` = vàng cảnh báo, `published` = xanh thành công, `rejected` = đỏ, `archived` = xám mờ).
+  - Cover `16:9` áp dụng `cover_position`, title, badge `StoryStatus` (màu theo trạng thái: `draft` = xám, `pending_review` = vàng cảnh báo, `published` = xanh thành công, `rejected` = đỏ, `archived` = xám mờ). Badge trên ảnh có surface đủ tương phản với cả cover sáng lẫn tối.
   - Số chương: "`X`/`Y` chương đã publish" (X = chương `status: "published"`, Y = tổng số chương).
   - Nếu có dữ liệu thống kê (mục 12.8): lượt xem, số bookmark — hiện dạng số nhỏ kèm icon, ẩn nếu Phase 3 chưa build phần này.
   - Nếu `status === "rejected"`: hiện dòng lý do từ chối rút gọn (`line-clamp-1`), click card để xem đầy đủ.
   - Actions: "Sửa" (→ `/author/stories/[storyId]`), menu `⋮` chứa hành động phụ theo trạng thái (mục 12.7).
+- DAL/repository trả `ManagedStory` cho dashboard: chapter chỉ gồm `id/title/order/status` và hai số tổng hợp `blockCount`/`effectCount`. Không load hoặc serialize text block, Effect config hay Scene xuống `AuthorDashboard` để đếm trạng thái/chương.
 - Empty state (chưa có truyện nào): icon + "Bạn chưa có truyện nào" + CTA "+ Tạo truyện đầu tiên".
 
 ---
@@ -83,8 +84,25 @@ Wireframe ở `04b-page-layouts.md` mục 7. Component chính: `StoryForm.tsx` (
 Field bắt buộc (không field nào được để trống khi bấm "Lưu" ở bước 2):
 - `title` (text)
 - `description` (textarea)
-- `cover_image` (server presign purpose/key → client upload trực tiếp R2 → complete endpoint verify, dùng chung service US-3.6; hiện local preview ngay sau khi chọn file)
+- `cover_image` (UI chọn file ảnh và hiện local preview ngay; khi Lưu, client xin presign `story_cover` → upload trực tiếp R2 → complete verify rồi gửi opaque `coverUploadId`, không gửi URL làm nguồn tin cậy)
 - `genre` (chọn ≥ 1 tag, multi-select)
+
+Cover preview dùng tỷ lệ `16:9` giống public `StoryCard` và `StoryManageCard`. Author kéo
+ảnh để chọn vùng hiển thị; state lưu `cover_position: { x, y }` theo phần trăm `0..100`
+(`0/100` là trái/phải hoặc trên/dưới, mặc định `{50,50}`). Khi có preview và form không
+bị khóa, vùng ảnh luôn nhận chạm/click để chọn vùng, drag và phím mũi tên, kể cả cover đã
+lưu ở màn edit. File local,
+preview URL và focal point phải sống ở state cấp wizard để không mất/vỡ khi Bước 1 unmount
+lúc sang Bước 2 rồi quay lại. Đây là focal metadata không phá hủy, không tạo bản crop mới
+hoặc sửa object R2.
+
+Ở Bước 1, `LiveStoryCardPreview` dẫn xuất trực tiếp title/byline/description/genre,
+`coverPreviewUrl` và `cover_position` từ controlled state của wizard rồi render qua cùng
+visual surface với public `StoryCard`. Không tạo `Story.id` giả, không subscribe
+`settingsStore`, không có link hay mutation bookmark và không tạo/revoke blob URL. Desktop
+`xl` đặt preview sticky trong cột khoảng `22rem`; viewport nhỏ hơn xếp preview sau form.
+Bước 2 không render preview nhưng state cấp wizard vẫn giữ nguyên dữ liệu để khi quay lại
+hiển thị đúng tức thì.
 
 Form có thêm ô `byline`, nhãn **"Tên tác giả / Bút danh hiển thị"**:
 
@@ -99,13 +117,15 @@ Bấm "Tiếp tục" chỉ enable khi đủ 4 field trên và có tên tác gi�
 ### Bước 2 — Thêm chương
 - Danh sách chương dạng list, mỗi dòng: `order` (tự động theo vị trí), input `title`, nút xóa dòng.
 - Nút "+ Thêm chương" thêm 1 dòng trống.
+- Divider giữa hai chương cũng có `InsertGapButton`: hit-area vẫn tồn tại nhưng visual ẩn ở trạng thái nghỉ, hiện khi pointer hover, keyboard `focus-visible` hoặc nhấn trên touch rồi ẩn lại; disabled không nhận action. Khi drag bắt đầu, placeholder cùng chiều cao giữ geometry/drop zone không co giãn. Focus chuyển thẳng vào title mới sau khi thêm. Drag handle và nút lên/xuống dùng chung reorder engine với Block Editor, nhưng row UI vẫn riêng theo nghiệp vụ chapter.
 - Sắp xếp lại thứ tự bằng kéo-thả (tái dùng pattern HTML5 Drag & Drop đã có ở `BlockEditor.tsx`, không cần logic mới) hoặc nút mũi tên lên/xuống cho thao tác đơn giản trên mobile.
 - **Ở bước này chỉ nhập `title` chương** — nội dung block/effect/scene được viết sau, trong `/author/stories/[storyId]/[chapterId]` đã có sẵn (US-2.1 → US-2.9), **không** nhồi form soạn nội dung vào wizard này.
 - Chapter mới tạo mặc định `status: "draft"` (`02-data-schema.md` mục 2.1 cập nhật, xem mục 12.7 dưới).
 - Yêu cầu tối thiểu **1 chương** để bấm "Lưu" (khớp yêu cầu người dùng: "mỗi bộ truyện đều bắt buộc phải có đầy đủ các field và tối thiểu 1 chương").
 
 ### Lưu (kết thúc wizard)
-- Nút "Lưu" ở cuối bước 2 gọi `POST /api/stories` (route mới, xem `03-file-structure.md`); DTO gồm `metadata`, `byline` và `chapters`. Route lấy actor từ session, validate DTO rồi gọi `StoryCommandService.createStoryWithChapters()` để xác định byline và tạo `Story` (`status: "draft"`) + toàn bộ `Chapter` cùng lúc (transaction).
+- Nút "Lưu" ở cuối bước 2 hoàn tất upload cover trước rồi gọi `POST /api/stories` (route mới, xem `03-file-structure.md`); DTO gồm `metadata` (`title`, `description`, `genre`, optional `cover_position`), `byline`, `coverUploadId` và `chapters`. Route lấy actor từ session, validate DTO rồi gọi `StoryCommandService.createStoryWithChapters()`.
+- Trong cùng transaction tạo Story, server tìm intent `story_cover` đúng `coverUploadId` + owner + purpose, yêu cầu trạng thái `COMPLETED` và media ảnh hợp lệ, lấy durable URL từ result rồi conditional claim `COMPLETED → CLAIMED`. Story (`status: "draft"`), focal point (thiếu thì `{50,50}`), Chapters, cover claim và nâng role `reader → author` cùng commit hoặc cùng rollback; client URL không bao giờ được dùng thay intent.
 - Thành công → nâng role nếu cần (mục 12.2) → redirect `/author/stories/[storyId]` kèm toast xác nhận.
 - Thất bại (network/validate server-side) → giữ nguyên state wizard, không mất dữ liệu đã nhập, hiện toast lỗi.
 
@@ -113,15 +133,20 @@ Bấm "Tiếp tục" chỉ enable khi đủ 4 field trên và có tên tác gi�
 
 ## 12.6. Quản lý truyện — `/author/stories/[storyId]`
 
-- Dùng lại 2 component `StoryForm.tsx` + `ChapterListManager.tsx` của wizard, nhưng **không chia bước** — hiển thị cùng lúc trên 1 trang dài (section "Thông tin truyện" phía trên, section "Danh sách chương" phía dưới), dữ liệu prefill từ `StoryRepository.getById()` (method "full", trả cả chương `draft` — không dùng `getPublicById()` ở đây, xem `11-phase3-technical-roadmap.md` mục 9.2).
+- Dùng lại 2 component `StoryForm.tsx` + `ChapterListManager.tsx` của wizard, nhưng **không chia bước** — hiển thị cùng lúc trên 1 trang dài (section "Thông tin truyện" phía trên, section "Danh sách chương" phía dưới). Dữ liệu prefill đến từ owner/admin-only `ManagedStory` projection của `GET /api/stories/[storyId]/manage`, vẫn có mọi chapter bất kể draft/published nhưng không mang theo text block, Effect config hay Scene; Editor route riêng mới đọc aggregate đầy đủ (xem `11-phase3-technical-roadmap.md` mục 9.2).
+- Section "Thông tin truyện" đặt form cạnh live `StoryCard` ở `xl` và xếp dọc ở viewport nhỏ hơn. Preview dùng `form.coverPreviewUrl ?? story.cover_image`, luôn dùng `form.coverPosition`, lấy byline snapshot đã lưu từ `form.byline` dù field này không cho sửa, và dừng trước section chương. Đây chỉ là projection client-side; không thêm API/schema/persistence contract.
 - Chỉ chủ sở hữu (`authorId === session.user.id`) hoặc `admin` mới vào được trang này — kiểm tra qua `layout.tsx` tại `/author/stories/[storyId]/` (`03-file-structure.md`, dùng chung cho cả trang này lẫn trang editor nội dung ở mục 12.9), cộng middleware chung ở tầng API theo US-3.5.
 - Banner trạng thái đầu trang hiển thị `StoryStatus` hiện tại + hành động phù hợp (mục 12.7). Nếu `rejected`, hiện đầy đủ `rejection_reason`.
 - Trong `ChapterListManager.tsx` ở trang này (khác wizard):
   - Mỗi chương có thêm: nút "Sửa nội dung" (→ `/author/stories/[storyId]/[chapterId]`), badge số block/effect đã có, và **toggle publish/unpublish riêng chương đó** (mục 12.7).
-  - Vẫn giữ chức năng thêm/xóa/sắp xếp chương như wizard, xóa chương có nội dung phải qua `Popconfirm` (tái dùng pattern `Popconfirm` đã có ở `06-user-stories-phase2.md` US-2.1/US-2.6).
+  - Badge dùng trực tiếp `blockCount`/`effectCount` của `ManagedChapter`; client không nhận nội dung block/effect để tự đếm.
+  - Vẫn giữ chức năng thêm/xóa/sắp xếp chương như wizard, xóa chương có nội dung phải qua `Popconfirm` (tái dùng pattern `Popconfirm` đã có ở `06-user-stories-phase2.md` US-2.1/US-2.6). Sau khi xóa, focus chuyển theo stable ID sang chapter kế tiếp hoặc chapter trước nếu vừa xóa hàng cuối; cancel/lỗi API giữ focus và danh sách hiện tại. Title local phải nhận lại giá trị chuẩn hóa từ response server sau rename. Async feedback dùng một live owner (global toast), không lặp thêm `aria-live` trong list/trang.
+  - Cuối danh sách chỉ hiện nút "+ Thêm chương" ở trạng thái nghỉ, không mở sẵn input. Nút này và `InsertGapButton` giữa hai chapter cùng dùng một draft row cục bộ `Chương N · Chưa lưu`; `Escape`/Hủy trả focus về trigger. Draft chỉ gọi create sau khi title hợp lệ, thành công mới đổi thành row persisted và focus title mới; vì vậy mở hoặc hủy draft không sinh chapter rỗng.
+  - Thêm tại divider gửi optional `afterChapterId`; service xác minh anchor thuộc Story rồi tạo + đặt đúng thứ tự nguyên tử. Không nối `POST` append với `PATCH reorder` thành hai mutation rời.
+  - Reorder gửi toàn bộ chapter ID đúng một lần. Service kiểm tập ID/ownership rồi repository ghi order bằng một batch statement trong transaction; response chỉ trả `{ id, order }[]` để client merge vào row hiện hữu, không trả lại aggregate chapter đầy đủ.
   - Không cho xóa nếu chỉ còn đúng 1 chương (đồng bộ rule "tối thiểu 1 chương" ở mục 12.5).
-- Lưu thông tin truyện gọi `PUT /api/stories/[storyId]` và đi qua `StoryCommandService.updateStoryMetadata()`. Thêm/đổi tên/sắp xếp/xóa chương đi qua các method hẹp của `ChapterCommandService`; nếu UI gửi một batch từ nút "Lưu", application service điều phối các command đó trong **một transaction**. Phase-3 Route Handler tuyệt đối không gọi generic `StoryRepository.save()`.
-- P3-06 cung cấp full read `GET /api/stories/[storyId]/manage` và editor aggregate GET, có `meta.updatedAt`; client gửi lại `expectedUpdatedAt` khi mutate và dùng revision mới trong response. `409` yêu cầu reload/đối chiếu, không tự gửi lại với revision mới để ghi đè. Chi tiết DAL/transaction tại `11` §9.5; tích hợp editor client thuộc P3-07, management UI thuộc P3-10.
+- Lưu thông tin truyện gọi `PUT /api/stories/[storyId]` và đi qua `StoryCommandService.updateStoryMetadata()`. Request gửi `metadata` (`title`, `description`, `genre`, optional `cover_position`) và chỉ gửi `coverUploadId` khi thay cover; thiếu `coverUploadId` phải giữ URL hiện tại. Có thể đổi focal point của cover hiện tại mà không upload lại. Nếu cả `coverUploadId` và `cover_position` đều thiếu thì giữ nguyên cả URL/vị trí; nếu thay cover nhưng client không gửi vị trí thì reset `{50,50}`. Cover mới được resolve/claim và lưu cùng focal point nguyên tử như luồng create, không nhận URL tùy ý. Thêm/đổi tên/sắp xếp/xóa chương đi qua các method hẹp của `ChapterCommandService`; nếu UI gửi một batch từ nút "Lưu", application service điều phối các command đó trong **một transaction**. Phase-3 Route Handler tuyệt đối không gọi generic `StoryRepository.save()`.
+- P3-06/P3-10 cung cấp management summary `GET /api/stories/[storyId]/manage` và editor aggregate GET riêng, đều có `meta.updatedAt`; client gửi lại `expectedUpdatedAt` khi mutate và dùng revision mới trong response. `409` yêu cầu reload/đối chiếu, không tự gửi lại với revision mới để ghi đè. Chi tiết DAL/transaction tại `11` §9.5; tích hợp editor client thuộc P3-07, management UI thuộc P3-10.
 
 ---
 
@@ -187,6 +212,8 @@ Theo đúng nguyên tắc "dự trữ schema, chưa build UI" đã áp dụng ch
 ## 12.9. Liên kết tài khoản Freesound (dùng cho luồng Import — mục 8.9)
 
 Khớp `IntegrationsSection.tsx` (`03-file-structure.md`), hiện trong `ProfileModal` (mục 12.3). Đây là luồng **liên kết tài khoản bên thứ 3**, khác với luồng đăng nhập chính của app (Auth.js, mục 12.1) — 1 user có thể đã login app (Google/GitHub) nhưng chưa từng connect Freesound.
+
+> **Stage boundary:** mục này được triển khai ở P3-15. P3-10 chỉ tạo component boundary và không hiển thị trạng thái/nút giả khi session/API connection chưa tồn tại.
 
 - **Vì sao cần luồng riêng:** Search/Preview sound trong Editor dùng app token chung của hệ thống, không cần danh tính Freesound của author (`08-effects-and-scenes.md` mục 8.9.1). Chỉ khi author muốn **Import** (tải sound thật về thư viện cá nhân) mới cần token cá nhân để tuân thủ rate-limit/quota phía Freesound theo đúng user thật.
 - **Kết nối:** Author bấm "Kết nối" trong `IntegrationsSection` (hoặc CTA tương tự bật lên trực tiếp từ `FreesoundSearchPanel` khi bấm "Dùng sound này" mà chưa connect) → `GET /api/integrations/freesound/connect` → redirect qua trang authorize của Freesound → callback `GET /api/integrations/freesound/callback` lưu token dạng ciphertext + `expires_at` trong credential record **server-only** → redirect về lại vị trí đang thao tác trong Editor (không mất context đang soạn). Session/API chỉ nhận `AppUser.freesound_connection: { connected, freesound_username? }`, không nhận token.

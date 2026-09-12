@@ -10,6 +10,7 @@ import { Plus } from "lucide-react";
 import { BlockCard } from "./BlockCard";
 import { useBlockReorder } from "./useBlockReorder";
 import { toast } from "sonner";
+import InsertGapButton from "@/components/ui/InsertGapButton";
 
 const EffectPicker = dynamic(() => import("../effects/EffectPicker"), {
   ssr: false,
@@ -26,6 +27,19 @@ export interface BlockEditorProps {
   onMoveBlock: (fromIndex: number, toIndex: number) => void;
   onUpsertEffect: (blockId: string, effect: EffectConfig) => void;
   onDeleteEffect: (blockId: string, effectId: string) => void;
+}
+
+function DropIndicator({ active }: { active: boolean }) {
+  return (
+    <div aria-hidden="true" className="relative h-0">
+      <span
+        className={`pointer-events-none absolute inset-x-2 top-0 z-10 h-1 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_10px_rgba(0,0,0,0.15)] shadow-primary/50 transition-[opacity,transform] duration-150 ease-out motion-reduce:scale-x-100 motion-reduce:transition-none ${active
+          ? "scale-x-100 opacity-100"
+          : "scale-x-95 opacity-0"
+          }`}
+      />
+    </div>
+  );
 }
 
 export function BlockEditor({
@@ -53,6 +67,7 @@ export function BlockEditor({
     setDragHandleActive,
     handleDragStart,
     handleDragOver,
+    handleDragOverAt,
     handleDrop,
     handleDragEnd,
     moveUp,
@@ -119,13 +134,7 @@ export function BlockEditor({
         return (
           <React.Fragment key={block.id}>
             {/* Đường chỉ báo vị trí thả - phía trên block */}
-            <div
-              aria-hidden
-              className={`mx-2 rounded-full bg-primary shadow-[0_0_10px_rgba(0,0,0,0.15)] shadow-primary/50 transition-all duration-150 ease-out ${showIndicatorBefore
-                ? "h-1 my-1 opacity-100 scale-x-100"
-                : "h-0 my-0 opacity-0 scale-x-95"
-                }`}
-            />
+            <DropIndicator active={showIndicatorBefore} />
 
             {/* Block Card */}
             <BlockCard
@@ -151,31 +160,23 @@ export function BlockEditor({
             />
 
             {/* Đường chỉ báo vị trí thả - phía dưới block */}
-            <div
-              aria-hidden
-              className={`mx-2 rounded-full bg-primary shadow-[0_0_10px_rgba(0,0,0,0.15)] shadow-primary/50 transition-all duration-150 ease-out ${showIndicatorAfter
-                ? "h-1 my-1 opacity-100 scale-x-100"
-                : "h-0 my-0 opacity-0 scale-x-95"
-                }`}
-            />
+            <DropIndicator active={showIndicatorAfter} />
 
             {/* Hover Divider Gap Between Blocks (Item 5) */}
-            {index < blocks.length - 1 && !showIndicatorAfter && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onInsertBlock(index);
-                }}
-                className="group relative my-1 flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
-                title="Chèn đoạn mới vào giữa"
-                aria-label={`Chèn block sau block ${index + 1}`}
+            {index < blocks.length - 1 && (
+              <div
+                data-reorder-gap
+                className="flow-root"
+                onDragOver={(event) => handleDragOverAt(event, index, "after")}
               >
-                <div className="w-full h-px bg-transparent group-hover:bg-primary/40 transition-colors" />
-                <div className="opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-200 absolute px-3 py-1 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-md flex items-center gap-1.5 text-xs font-editor font-medium z-10 min-h-[28px]">
-                  <Plus className="w-3.5 h-3.5" />
-                </div>
-              </button>
+                {draggedIndex === null ? (
+                  <InsertGapButton
+                    label="Thêm đoạn"
+                    ariaLabel={`Chèn block sau block ${index + 1}`}
+                    onClick={() => onInsertBlock(index)}
+                  />
+                ) : <div aria-hidden="true" className="my-1 min-h-11" />}
+              </div>
             )}
           </React.Fragment>
         );

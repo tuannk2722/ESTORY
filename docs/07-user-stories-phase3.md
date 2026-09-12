@@ -102,7 +102,7 @@ Nguồn: [02](02-data-schema.md) §2.9; [08](08-effects-and-scenes.md) §8.3–8
 Nguồn: [12](12-auth-and-author-management.md) §12.1–12.3; UI: [04b](04b-page-layouts.md) §6.
 
 - [ ] Guest có Login; reader đã login có “Viết truyện” → `/author/stories/new`; author/admin có “Truyện của tôi” → `/author`.
-- [ ] Avatar mở ProfileModal: avatar/name/email, badge ẩn với reader, Theme Switcher, role links (author→Dashboard, admin→Admin), logout; integrations theo §12.3/12.9.
+- [ ] Avatar mở ProfileModal: avatar/name/email, badge ẩn với reader, Theme Switcher, role links (author→Dashboard, admin→protected landing `/admin`), logout. P3-10 chỉ chuẩn bị integrations boundary; Freesound projection/action được nghiệm thu ở P3-15 theo §12.3/12.9.
 
 ## US-3.15 — Nâng role khi tạo truyện đầu tiên
 
@@ -116,16 +116,18 @@ Nguồn: [12](12-auth-and-author-management.md) §12.2.
 Nguồn: [12](12-auth-and-author-management.md) §12.4/12.7.5; UI: [04b](04b-page-layouts.md) §7.1.
 
 - [ ] `/author` yêu cầu role ≥ author, chặn reader; `getAllForAuthor(session.user.id)` chỉ trả truyện sở hữu, tabs đủ StoryStatus.
-- [ ] StoryManageCard có cover/status badge đúng màu/số chương published trên tổng/actions theo trạng thái.
+- [ ] StoryManageCard có cover 16:9 áp dụng đúng `cover_position`, status badge luôn đủ tương phản trên mọi ảnh, số chương published trên tổng và actions theo trạng thái. Public StoryCard dùng cùng tỷ lệ/focal point; cover thiếu thì fallback an toàn.
 - [ ] CTA tạo truyện → `/author/stories/new`; empty state có CTA tạo truyện đầu tiên.
 
 ## US-3.17 — Tạo/sửa truyện & publish chương
 
 Nguồn: [12](12-auth-and-author-management.md) §12.5–12.7 **đầy đủ**; UI: [04b](04b-page-layouts.md) §7.2–7.3; schema: [02](02-data-schema.md) §2.1/2.7.
 
-- [ ] Wizard hai bước: title/description/cover upload/genre ≥1 + ô `byline` "Tên tác giả / Bút danh hiển thị" → thêm/reorder/xóa chương (chỉ title); Lưu khi đủ bốn field, byline hợp lệ theo §12.5 và ≥1 chương có title.
+- [ ] Wizard hai bước: title/description/cover upload/genre ≥1 + ô `byline` "Tên tác giả / Bút danh hiển thị" → thêm/reorder/xóa chương (chỉ title); Lưu khi đủ bốn field, byline hợp lệ theo §12.5 và ≥1 chương có title. Cover gửi bằng `coverUploadId`; `metadata.cover_position` là `{ x, y }` theo phần trăm `0..100`, mặc định giữa. Server claim completed intent đúng owner/purpose và lưu focal point trong transaction tạo/cập nhật Story, không tin URL client.
+- [ ] Cover preview không vỡ khi chuyển qua lại hai bước; vùng preview có ảnh luôn hỗ trợ chạm/click để chọn vùng, drag và phím mũi tên khi form không bị khóa, gồm cả cover đã lưu ở màn edit. Tạo mới thiếu `cover_position` dùng `{50,50}`; update thiếu cả `coverUploadId` lẫn `cover_position` giữ nguyên cover/vị trí, còn replace cover mà thiếu vị trí thì reset về giữa. Create Bước 1 và section metadata edit có live preview toàn `StoryCard`, dẫn xuất trực tiếp từ form, inert và responsive; preview, dashboard và trang chủ cùng `aspect-video/object-position`.
 - [ ] Byline điền sẵn từ `User.name`, cho phép bút danh khác; server ưu tiên input đã trim, fallback tên actor từ DB khi input trống, báo lỗi field `byline` nếu cả hai trống. Lưu snapshot vào `authorDisplayName`, không dùng email hoặc đổi ownership; validation lỗi không tạo dữ liệu/nâng role, đổi profile không hồi tố byline.
 - [ ] Tạo Story + Chapters draft một transaction, redirect `/author/stories/[storyId]`.
+- [ ] Block Editor và chapter list dùng chung lõi reorder, không dùng chung row UI. Chapter có nút lên/xuống ngoài drag và divider `+ Thêm chương` dùng được bằng touch/keyboard; management `POST chapters` nhận optional `afterChapterId` để create + placement nguyên tử.
 - [ ] Trang quản lý chỉ owner/admin qua shared layout guard + API guards; banner status/rejection reason, reuse form/chapter components trong một trang, không wizard steps.
 - [ ] Mỗi chương có Sửa nội dung → `/author/stories/[storyId]/[chapterId]` và publication toggle. Không xóa chương cuối, không unpublish chương published cuối của Story published; disable kèm giải thích.
 - [ ] Gửi duyệt draft/rejected khi đủ bốn field, byline đã lưu không rỗng, ≥1 chương, ≥1 chương có blocks; pending review khóa author mutation theo §12.7.2. Admin duyệt tự publish mọi chương; reader chỉ thấy khi cả Story và Chapter published.

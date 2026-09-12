@@ -73,12 +73,18 @@ export interface Chapter {
 
 export type StoryStatus = "draft" | "pending_review" | "published" | "rejected" | "archived";
 
+export interface CoverPosition {
+  x: number;                    // phần trăm 0..100: trái → phải
+  y: number;                    // phần trăm 0..100: trên → dưới
+}
+
 export interface Story {
   id: string;                 // slug, dùng làm route param
   title: string;
   author: string;             // byline public; Prisma map từ Story.authorDisplayName, KHÔNG phải owner ID
   description: string;
   cover_image?: string;
+  cover_position?: CoverPosition; // focal point cho mọi viewport ảnh bìa 16:9
   genre: string[];
   status: StoryStatus;         // Phase 1–2: luôn để "published" (chưa có kiểm duyệt). Phase 3: có hiệu lực đầy đủ, xem mục 2.7
   view_count: number;          // Phase 1–2: có thể để cố định 0, chưa cần tracking thật
@@ -95,6 +101,15 @@ ownership từ chuỗi tác giả. Migration legacy phải backfill chính xác
 Story tạo mới nhận input `byline` (bút danh), resolve và validate theo
 `12-auth-and-author-management.md` mục 12.5 rồi lưu vào `authorDisplayName` hiện có;
 không thêm field `byline` vào domain `Story` hoặc Prisma schema.
+
+`cover_position` là tọa độ focal point theo phần trăm, không phải crop pixels và không
+thay đổi object ảnh gốc. `x = 0/100` tương ứng mép trái/phải; `y = 0/100` tương ứng
+mép trên/dưới. Giá trị mặc định là `{ x: 50, y: 50 }`. Field được để optional ở domain
+để dữ liệu JSON legacy không phải rewrite; repository/UI bắt buộc normalize trường hợp
+thiếu về chính giữa. Prisma map thành hai cột non-null `coverPositionX` /
+`coverPositionY`, có default `50` và constraint `0..100`. Preview của author,
+`StoryManageCard` và public `StoryCard` đều dùng viewport `16:9`, `object-fit: cover`
+và cùng `object-position: "x% y%"` để vùng tác giả chọn không bị lệch giữa các trang.
 
 ## 2.2. Ví dụ file nội dung (`/content/stories/demo-story.json`)
 

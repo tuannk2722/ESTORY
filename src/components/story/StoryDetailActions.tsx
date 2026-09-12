@@ -11,11 +11,13 @@ import { resolvePublicReadingTarget } from "@/lib/reader/publicReadingTarget";
 export interface StoryDetailActionsProps {
   story: Story;
   firstChapter?: Chapter;
+  variant?: "default" | "media";
 }
 
 export default function StoryDetailActions({
   story,
   firstChapter,
+  variant = "default",
 }: StoryDetailActionsProps) {
   const sync = useSettingsSync();
   const isHydrated = sync.ready;
@@ -46,25 +48,26 @@ export default function StoryDetailActions({
     : firstChapter
     ? `/stories/${story.id}/${firstChapter.id}`
     : null;
+  const onMedia = variant === "media";
 
   return (
-    <div className="flex flex-wrap items-center gap-3 pt-4">
+    <div className={`flex flex-wrap items-center gap-3 ${onMedia ? "border-t border-white/20 pt-5" : "pt-4"}`}>
       {/* Nút Đọc tiếp hoặc Bắt đầu đọc */}
       {continueUrl && (
         <Link
           href={continueUrl}
           aria-disabled={!sync.ready && !sync.error}
           onClick={(event) => { if (!sync.ready && !sync.error) event.preventDefault(); }}
-          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-foreground)] font-ui font-semibold transition-all duration-200 shadow-lg hover:shadow-blue-500/25 min-h-[44px]"
+          className="flex min-h-[48px] items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 font-ui font-semibold text-[var(--color-primary-foreground)] shadow-lg transition-[background-color,box-shadow] duration-200 hover:bg-[var(--color-primary-hover)] hover:shadow-xl motion-reduce:transition-none"
         >
           {readingTarget ? (
             <>
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight aria-hidden="true" className="h-5 w-5" />
               <span>Đọc Tiếp</span>
             </>
           ) : (
             <>
-              <Play className="w-5 h-5 fill-white" />
+              <Play aria-hidden="true" className="h-5 w-5 fill-current" />
               <span>{!sync.ready && !sync.error ? "Đang tải vị trí đọc..." : "Bắt Đầu Đọc"}</span>
             </>
           )}
@@ -75,14 +78,18 @@ export default function StoryDetailActions({
       <button
         disabled={!sync.canWrite}
         onClick={handleToggleBookmark}
-        className={`flex items-center gap-2 px-4 py-3 rounded-lg border font-ui font-medium text-sm transition-all duration-200 cursor-pointer min-h-[44px] ${
+        className={`flex min-h-[48px] cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 font-ui text-sm font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none ${
           isBookmarked
-            ? "border-[var(--color-accent)] bg-[var(--color-accent)]/15 text-[var(--color-accent)]"
-            : "border-[var(--color-border)] bg-[var(--color-card)] hover:bg-[var(--color-muted)] text-[var(--color-foreground)]"
+            ? onMedia
+              ? "border-white/30 bg-[var(--color-accent)] text-[var(--color-accent-foreground)]"
+              : "border-[var(--color-accent)] bg-[var(--color-accent)]/15 text-[var(--color-accent)]"
+            : onMedia
+              ? "border-white/25 bg-black/35 text-white hover:bg-white/15"
+              : "border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)] hover:bg-[var(--color-muted)]"
         }`}
         aria-pressed={isBookmarked}
       >
-        <Bookmark className="w-4 h-4" fill={isBookmarked ? "currentColor" : "none"} />
+        <Bookmark aria-hidden="true" className="h-4 w-4" fill={isBookmarked ? "currentColor" : "none"} />
         <span>{isBookmarked ? "Đã Lưu Truyện" : "Lưu Đọc Sau"}</span>
       </button>
     </div>

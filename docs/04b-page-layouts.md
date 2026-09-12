@@ -34,7 +34,7 @@
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │ AppHeader (sticky, z-40, glass-card blur)                              │
-│  ✨ StoryVerse      [📖 Khám phá] [🕒 Đang đọc] [🔖 Đã lưu]   [User/Theme]│
+│  ✨ StoryVerse                     [🕒 Đang đọc] [🔖 Đã lưu]   [User/Theme]│
 ├────────────────────────────────────────────────────────────────────────┤
 │ Hero Section (căn giữa):                                               │
 │  [✨ Trải nghiệm Đọc Truyện Đa Giác Quan] (pill badge)                 │
@@ -44,7 +44,7 @@
 │ Section "Truyện Nổi Bật" (BookOpen icon + X truyện có sẵn):            │
 │  Grid: 1 cột (mobile) / 2 cột (sm: 640px) / 3 cột (lg: 1024px)         │
 │  ┌────────────────────────┐  ┌────────────────────────┐  ...           │
-│  │ [Banner h-44 Gradient] │  │ [Banner h-44 Gradient] │                │
+│  │ [Cover 16:9 / fallback]│  │ [Cover 16:9 / fallback]│                │
 │  │ ✨ Icon + Tiêu đề + [🔖]│  │ ✨ Icon + Tiêu đề + [🔖]│                │
 │  │ ---------------------- │  │ ---------------------- │                │
 │  │ 👤 Tác giả: ...        │  │ 👤 Tác giả: ...        │                │
@@ -57,12 +57,13 @@
 
 - **AppHeader (`sticky top-0 z-40`)**:
   - Logo `Sparkles` + "StoryVerse" dẫn về `/`.
-  - Menu điều hướng: `Khám phá` (`BookOpen`), `Đang đọc` (`Clock`), `Đã lưu` (`Bookmark`).
+  - Menu điều hướng: `Đang đọc` (`Clock`), `Đã lưu` (`Bookmark`).
   - Menu người dùng `UserMenu` tích hợp Theme Switcher (`Dark`, `Light`, `Sepia`).
 - **Hero Section**: Giới thiệu phong cách scrollytelling và định hướng sản phẩm.
 - **StoryCard (`bg-card border border-border rounded-xl`)**:
-  - Banner trên (`h-44`): Nền chuyển sắc gradient Indigo/Slate + quầng sáng glow + icon `Sparkles`. Nút bookmark `Bookmark` tròn góc trên phải (`min-h-[44px] min-w-[44px]`).
-  - Thân card: Tác giả (`User` icon), mô tả truyện (`line-clamp-3`), danh sách thể loại `genre` pills, và nút bấm chính "Đọc Truyện →" dẫn tới `/stories/[storyId]`.
+  - Banner trên dùng `aspect-video`: render `cover_image` bằng `object-cover` và `object-position` từ `cover_position`; khi không có cover mới dùng nền chuyển sắc semantic làm fallback. Lớp scrim giữ bookmark và genre đủ tương phản trên mọi ảnh. Nút bookmark `Bookmark` tròn góc trên phải (`min-h-[44px] min-w-[44px]`).
+  - Public card, `StoryManageCard` và live preview cạnh `StoryForm` phải giữ cùng tỷ lệ `16:9` và cùng focal point; không dùng chiều cao cố định làm thay đổi crop theo breakpoint.
+  - Thân card: title (`line-clamp-2`), tác giả (`User` icon), mô tả (`line-clamp-2`) và hàng CTA trực quan "Đọc truyện"; toàn card là link tới `/stories/[storyId]`. Genre pills nằm trên cover, tối đa 3 tag rồi rút gọn thành `+N`.
 
 ---
 
@@ -72,11 +73,10 @@
 ┌────────────────────────────────────────────────────────────────────────┐
 │ Breadcrumb: Khám phá / Tên Truyện                                      │
 ├────────────────────────────────────────────────────────────────────────┤
-│ Story Info Banner (glass-card p-6 md:p-8 rounded-2xl):                 │
+│ Story Info Banner (cover 16:9, full-bleed ở md+, rounded-3xl):         │
+│  [Cover + scrim bảo đảm contrast]                                      │
 │  [Thể loại 1] [Thể loại 2]                                             │
-│  Tên Tác Phẩm (font-display text-3xl md:text-5xl font-bold)            │
-│  👤 Tác giả: Tên Tác Giả                                               │
-│  Mô tả chi tiết tác phẩm (font-story text-base md:text-lg)             │
+│  Tên Tác Phẩm · mô tả · 👤 tác giả · 📖 số chương                     │
 │  -------------------------------------------------------------         │
 │  [ ▶ Bắt Đầu Đọc / Đọc Tiếp ]    [ 🔖 Lưu Đọc Sau / Đã Lưu ]           │
 ├────────────────────────────────────────────────────────────────────────┤
@@ -91,7 +91,8 @@
 
 - **Breadcrumb**: Điều hướng nhanh quay lại trang chủ.
 - **Khung thông tin truyện (`Story Info Banner`)**:
-  - Hiển thị tags thể loại, tiêu đề lớn, tác giả và đoạn mô tả chi tiết.
+  - Dùng `cover_image` làm visual chính ở viewport `16:9`, `object-cover` và `object-position` từ `cover_position`, cùng quy ước crop với wizard/dashboard/Home. Scrim trung tính nhiều lớp giữ chữ trắng đạt tương phản trên mọi ảnh; CTA vẫn dùng token Primary/Accent của Dark, Light và Sepia.
+  - Desktop đặt tags, tiêu đề, mô tả, tác giả và số chương trực tiếp trên cover. Mobile giữ cover `16:9` riêng rồi đặt nội dung trên media-surface tối liền kề, tránh đổi tỷ lệ crop hoặc nhồi chữ lên ảnh thấp.
   - **Nút hành động (`StoryDetailActions`)**:
   - Nút đọc: "Bắt Đầu Đọc" (nếu chưa có tiến trình) hoặc "Đọc Tiếp" (nếu đang đọc dở, tự gắn `#block_id`).
     - Trước khi tạo link, đối chiếu vị trí lưu với danh sách chapter public hiện tại. Chapter đã unpublish/xóa → coi như chưa có tiến trình; block đã xóa trong chapter còn public → mở đầu chapter, không gắn hash cũ.
@@ -219,7 +220,7 @@ Desktop (≥1024px):
   - Textarea tự động co giãn (`scrollHeight`) theo nội dung, không có thanh cuộn riêng.
   - Nút xóa thông minh (`Popconfirm`): Xóa ngay nếu rỗng; popup xác nhận nếu có chữ/effect; chặn xóa nếu chỉ còn 1 block.
 - **Gợi ý hiệu ứng thông minh (`onBlur` Activated)**: Quét từ khóa tiếng Việt khi rời textarea, hiển thị tối đa 3 chip gợi ý có icon `Sparkles`.
-- **Thao tác chèn nhanh**: `Hover Divider Gap` giữa 2 block và nút `+ Thêm Đoạn Văn Mới` cuối trang.
+- **Thao tác chèn nhanh**: `Hover Divider Gap` giữa 2 block giữ hit-area cao tối thiểu 44 px nhưng đường kẻ/pill `+ Thêm đoạn` ẩn ở trạng thái nghỉ và chỉ lộ khi pointer hover. Keyboard `focus-visible` và trạng thái nhấn trên touch được phản hồi tương đương mà không làm CTA hiện thường trực; disabled không nhận action và giảm nhấn mạnh. Trong lúc reorder, gap được thay bằng placeholder cùng kích thước và drop indicator nằm absolute trong slot cao 0, nên hover CTA/drop feedback không làm các Block Card dịch chuyển. Nút `+ Thêm Đoạn Văn Mới` cuối trang vẫn luôn hiện.
 
 ### 5.3. Cột 3: Timeline — Điều Hướng Toàn Cảnh Chương (Sticky top-20)
 - Tự động co giãn bề ngang (`w-64 ↔ w-80`).
@@ -259,7 +260,7 @@ Guest:            ... [🌗 Theme]  [ Đăng nhập ]
 Reader đã login:  ... [🌗 Theme]  [ ✍️ Viết truyện ]  (Avatar) 
 Author/Admin:     ... [🌗 Theme]  [ 📚 Truyện của tôi ]  (Avatar)
 ```
-- Vùng menu điều hướng (`Khám phá`/`Đang đọc`/`Đã lưu`) giữ nguyên như mục 1, không đổi theo trạng thái login.
+- Vùng menu điều hướng (`Đang đọc`/`Đã lưu`) giữ nguyên như mục 1, không đổi theo trạng thái login.
 - Nút "Đăng nhập" mở popup OAuth (Google/GitHub) qua Auth.js — không mở trang riêng.
 - Click Avatar (không phải nút chính) → mở `ProfileModal` (`z-[80]`, cùng tầng modal với `EffectPicker`/`ScenePicker`).
 
@@ -274,8 +275,8 @@ Author/Admin:     ... [🌗 Theme]  [ 📚 Truyện của tôi ]  (Avatar)
 ├───────────────────────────────┤
 │  🌗 Giao diện: [Dark|Light|Sepia] │
 ├───────────────────────────────┤
-│  🔗 Liên kết tài khoản          │  ← chỉ hiện nếu role >= author (`IntegrationsSection.tsx`)
-│    Freesound: [Đã kết nối ✓ | Kết nối] │  ← mục 12.9
+│  🔗 Liên kết tài khoản          │  ← bắt đầu render khi P3-15 có connection projection
+│    Freesound: [Đã kết nối ✓ | Kết nối] │  ← P3-15, mục 12.9
 ├───────────────────────────────┤
 │  📚 Truyện của tôi          →  │  ← chỉ hiện nếu role >= author
 │  🛠️ Trang quản trị          →  │  ← chỉ hiện nếu role === admin
@@ -284,7 +285,7 @@ Author/Admin:     ... [🌗 Theme]  [ 📚 Truyện của tôi ]  (Avatar)
 └───────────────────────────────┘
 ```
 - Dùng `glass-card` + `rounded-xl` như các card khác, không cần backdrop tối toàn màn hình (khác `EffectPicker`) vì đây là menu ngữ cảnh nhỏ, đóng khi click ra ngoài.
-- Khối "Liên kết tài khoản" (Phase 3, `IntegrationsSection.tsx`) chỉ hiện với `role >= author` vì Search/Preview Freesound đã dùng được ngay trong Editor không cần connect — mục này chỉ cần khi author muốn **Import** thật (`08-effects-and-scenes.md` mục 8.9.2). Đã kết nối → hiện tên tài khoản Freesound + nút "Ngắt kết nối"; chưa kết nối → nút "Kết nối" mở OAuth. Chi tiết luồng ở `12-auth-and-author-management.md` mục 12.9.
+- P3-10 chỉ tạo boundary `IntegrationsSection.tsx`, không render row/action giả. Từ P3-15, khối "Liên kết tài khoản" chỉ hiện với `role >= author`: đã kết nối → tên Freesound + "Ngắt kết nối"; chưa kết nối → "Kết nối" mở OAuth. Chi tiết ở `12-auth-and-author-management.md` mục 12.9.
 
 ---
 
@@ -312,6 +313,8 @@ Logic/rule đầy đủ ở `12-auth-and-author-management.md` mục 12.4 → 12
 └────────────────────────────────────────────────────────────────────────┘
 ```
 - Badge status màu theo `StoryStatus` (mục 12.7.5 của file 12): Nháp = xám (`bg-muted`), Chờ duyệt = vàng (`bg-warning/20 text-warning`), Đã xuất bản = xanh (`bg-success/20 text-success`), Bị từ chối = đỏ (`bg-destructive/20 text-destructive`), Lưu trữ = xám mờ.
+- Cover của `StoryManageCard` dùng `aspect-video` + `object-cover` + `cover_position` giống hệt preview và public `StoryCard`. Badge đặt trên ảnh phải có surface/scrim đủ tương phản, không phụ thuộc màu hoặc độ sáng của cover.
+- Dashboard nhận `ManagedStory` gọn: mỗi chapter chỉ có metadata quản lý cùng `blockCount`/`effectCount`; không tải hoặc serialize text block, Effect config hay Scene qua Server → Client chỉ để tính số chương/status trên card.
 - Hàng `👁 / 🔖` (lượt xem/bookmark) chỉ render khi có dữ liệu `StoryStats` (mục 12.8 file 12) — nếu chưa build, ẩn cả hàng, không hiện số `0` gây hiểu lầm.
 - Empty state: `glass-card p-12 text-center`, icon `BookOpen` + "Bạn chưa có truyện nào" + nút CTA lớn "+ Tạo truyện đầu tiên".
 
@@ -323,14 +326,15 @@ Logic/rule đầy đủ ở `12-auth-and-author-management.md` mục 12.4 → 12
 ├────────────────────────────────────────────────────────────────────────┤
 │  ① Thông tin truyện  ───────  ② Danh sách chương   (step indicator)     │
 ├────────────────────────────────────────────────────────────────────────┤
-│ BƯỚC 1 (StoryForm):                             max-w-2xl mx-auto       │
-│  [ Upload Cover Image ] (preview 16:9 sau khi chọn)                     │
-│  Tên truyện: [......................................]                  │
-│  Tên tác giả / Bút danh hiển thị: [..................]                  │
-│  Mô tả:      [textarea..............................]                  │
-│  Thể loại:   [Kinh dị x] [Lãng mạn x] [+ Thêm thể loại]                 │
-│                                              [ Tiếp tục → ]  (disable   │
-│                                               tới khi form hợp lệ)     │
+│ BƯỚC 1 — xl: StoryForm + preview 22rem; dưới xl xếp dọc                 │
+│  ┌──────────────────────────────────────┐  ┌────────────────────────┐  │
+│  │ [ Upload Cover 16:9 + focal point ] │  │ Xem trước trang chủ    │  │
+│  │ Tên truyện: [.....................] │  │ [StoryCard visual]     │  │
+│  │ Bút danh:   [.....................] │  │ inert, cùng cover crop │  │
+│  │ Mô tả:      [textarea............] │  └────────────────────────┘  │
+│  │ Thể loại: [Kỳ ảo x] [+ Thêm]       │                              │
+│  │                         [Tiếp tục →]│                              │
+│  └──────────────────────────────────────┘                              │
 └────────────────────────────────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -346,7 +350,10 @@ Logic/rule đầy đủ ở `12-auth-and-author-management.md` mục 12.4 → 12
 ```
 
 - Ô `byline` điền sẵn từ `User.name`, cho phép sửa tự do; fallback và lỗi bắt buộc nhập theo `12-auth-and-author-management.md` mục 12.5. Hiện lỗi ngay dưới ô và liên kết label/error với input.
+- Preview cover dùng đúng viewport `16:9` của card. Khi có preview và form không bị khóa, author luôn có thể chạm/click vào vùng muốn ưu tiên, kéo ảnh hoặc focus vùng preview rồi dùng phím mũi tên để đổi focal point `x/y` trong `0..100`. Chuyển Bước 1 → Bước 2 → quay lại phải giữ nguyên file, preview URL và vị trí đã chọn.
+- Bước 1 có live preview của toàn public `StoryCard`: ở `xl` form và preview rộng khoảng `22rem` nằm thành hai cột, preview sticky dưới header; dưới `xl` preview xếp sau form và không tạo cuộn ngang. Preview dẫn xuất trực tiếp từ state form, dùng cùng visual surface/cover focal point nhưng hoàn toàn inert — không link, không mutation bookmark, không control giả và không `aria-live`. Bước 2 giữ `max-w-3xl` căn giữa và không render preview.
 - `[::]` = tay cầm kéo-thả sắp xếp lại thứ tự chương (tái dùng pattern Drag & Drop của `BlockEditor.tsx`).
+- Khoảng giữa hai chapter dùng cùng `InsertGapButton`: hit-area/gap geometry luôn được giữ, còn đường kẻ/pill `+ Thêm chương` ẩn khi nghỉ và hiện khi pointer hover, keyboard `focus-visible` hoặc đang nhấn trên touch. Trong lúc drag, placeholder cùng chiều cao giữ drop zone ổn định. Sau khi thêm, focus chuyển vào ô title mới; nút lên/xuống vẫn là phương án thay thế cho drag trên mobile và bàn phím.
 - Nút "Lưu" disable tới khi dữ liệu bước 1 hợp lệ (gồm byline sau fallback) và có ≥ 1 dòng chương với `title` không rỗng.
 - Sau khi Lưu thành công → redirect `/author/stories/[storyId]` (không quay về `/author`).
 
@@ -361,7 +368,7 @@ Trang này chỉ chủ sở hữu/admin vào được, xem `12-auth-and-author-m
 │ [← Về Truyện của tôi]                                                   │
 │ Status Banner: 🟡 Đang chờ admin duyệt   /   🔴 Bị từ chối: "lý do..."  │
 ├────────────────────────────────────────────────────────────────────────┤
-│ Thông tin truyện (StoryForm, prefill sẵn)                               │
+│ Thông tin truyện: [StoryForm prefill] + [live StoryCard] ở xl           │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Danh sách chương (ChapterListManager, bản mở rộng):                     │
 │  ┌──────────────────────────────────────────────────────────────────┐  │
@@ -376,6 +383,17 @@ Trang này chỉ chủ sở hữu/admin vào được, xem `12-auth-and-author-m
 │                          [ 💾 Lưu thay đổi ]   [ 📤 Gửi duyệt ]         │
 └────────────────────────────────────────────────────────────────────────┘
 ```
+
+Trang quản lý gửi `afterChapterId` khi thêm ở divider; server tạo và đặt chapter vào đúng
+vị trí trong cùng transaction Story/revision. Không ghép một request append với một request
+reorder riêng vì có thể thành công một nửa.
+- Ở trạng thái nghỉ, cuối danh sách chỉ hiện nút `[ + Thêm chương ]`, đồng nhất với wizard;
+  form không mở sẵn. Nút ở cuối và `InsertGapButton` giữa hai row cùng mở một draft row cục bộ
+  có nhãn `Chương N · Chưa lưu`, input title, `Thêm` và `Hủy`. Chưa tạo chapter trong database
+  cho tới khi title hợp lệ được submit. `Escape`/Hủy đóng draft và trả focus về đúng trigger;
+  submit thành công thay draft bằng row thật rồi focus title của row mới.
+- Payload quản lý là `ManagedStory`, không phải aggregate Editor đầy đủ: mỗi row chapter chỉ nhận `id/title/order/status/blockCount/effectCount`. Text block, Effect config và Scene không đi qua RSC/client props của trang này. Reorder thành công chỉ trả danh sách `{ id, order }`; client áp order vào state đang có thay vì nhận lại hoặc serialize toàn bộ chapter content.
+- Chỉ section "Thông tin truyện" dùng bố cục form + live `StoryCard` hai cột ở `xl`; preview lấy cover local nếu đang thay ảnh, nếu không lấy cover persisted, và sticky chỉ trong section này để dừng trước danh sách chương. Dưới `xl` preview xếp sau form. Banner trạng thái, chapter list và vùng nguy hiểm vẫn full-width.
 - Toggle `⇄` publish/unpublish riêng chương — disable + tooltip nếu đó là chương `published` cuối cùng của 1 truyện đang `published` (rule mục 12.7.3 file 12).
 - Nút "✏ Sửa nội dung" dẫn `/author/stories/[storyId]/[chapterId]` (trang đã có ở mục 5).
 - Nút "📤 Gửi duyệt" chỉ hiện khi `Story.status` là `draft`/`rejected`; disable + tooltip nếu chưa đủ điều kiện (mục 12.7.2 file 12).

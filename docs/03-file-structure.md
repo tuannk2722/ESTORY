@@ -32,15 +32,18 @@
   /ui                              → AppHeader, Popconfirm, Modal, Button dùng chung
     AuthMenu.tsx                   → (Phase 3) Nút "Đăng nhập" (guest) hoặc nút context-aware "Viết truyện"/"Truyện của tôi" (logged-in) — 12-auth-and-author-management.md mục 12.1
     ProfileModal.tsx               → (Phase 3) avatar/tên/email, badge role, Theme Switcher, menu điều hướng theo role, Đăng xuất — mục 12.3
-  /story                           → StoryCard, StoryDetailActions, ChapterList
+    IntegrationsSection.tsx        → boundary trong `ProfileModal`; P3-10 chưa render action, P3-15 nối trạng thái Freesound + Kết nối/Ngắt kết nối — `12-auth-and-author-management.md` mục 12.9
+  /story                           → StoryCard, StoryCardVisual (surface dùng chung cho public card/live preview), StoryCoverImage, StoryDetailActions, ChapterList
   /library                         → ReadingListClient, BookmarksListClient
   /author (Phase 3)
     AuthorDashboard.tsx            → Danh sách StoryManageCard + tabs lọc StoryStatus — mục 12.4
     StoryManageCard.tsx            → Card 1 truyện: cover, badge status, số chương published/tổng, menu hành động — mục 12.4, 12.7.5
     StoryForm.tsx                  → Form thông tin cơ bản (title/description/cover upload/genre), thêm byline khi tạo theo mục 12.5 — dùng chung cho wizard (Bước 1) và trang quản lý truyện — mục 12.5, 12.6
+    LiveStoryCardPreview.tsx       → projection trực quan, không tương tác, của StoryForm lên surface StoryCard dùng chung; create Bước 1 và section metadata edit — mục 12.5, 12.6
+    storyPreview.ts                → mapper thuần từ StoryFormValue sang dữ liệu hiển thị StoryCard, gồm placeholder và cover persisted/local
     ChapterListManager.tsx         → Thêm/xóa/sắp xếp chương; ở trang quản lý truyện có thêm nút "Sửa nội dung" (→ `/author/stories/[storyId]/[chapterId]`) và toggle publish/unpublish từng chương — mục 12.5, 12.6, 12.7.3
     PublishStoryButton.tsx         → Nút "Gửi duyệt" (draft/rejected → pending_review), disable + tooltip lý do khi chưa đủ điều kiện — mục 12.7.2
-    IntegrationsSection.tsx        → (Phase 3) Khối "Liên kết tài khoản" trong `ProfileModal` — trạng thái connect Freesound, nút Kết nối/Ngắt kết nối — `12-auth-and-author-management.md` mục 12.9
+    types.ts                       → state/props chỉ dùng trong Author UI; DTO quản lý dùng trực tiếp từ `/types/story-management.ts`, không re-export qua feature
   /reader
     ReaderPane.tsx                 → Container chính, quản lý Intersection Observer & Scrollytelling
     ReaderScreenHeader.tsx         → Header mini sticky trên màn hình đọc
@@ -94,6 +97,7 @@
 
 /types
   story.ts
+  story-management.ts              → DTO gọn cho dashboard/quản lý Story + Chapter, dùng chung giữa server và Author UI
   settings.ts
   user.ts                          → định nghĩa trước, dùng thật từ Phase 3
   scene.ts                         → (Phase 2) BackgroundAsset, ColorPalette, ScenePreset, Scene — xem `08-effects-and-scenes.md` mục 8.3
@@ -172,8 +176,8 @@
     scene-render-config-schema.ts  → `schema_version: 1`, ambient scope/unique/audio constraints
 
 /app/api
-  /stories/route.ts                → GET (list, US-1.1) + POST qua createStoryWithChapters (tạo truyện mới từ wizard, nâng role reader→author trong transaction — 12-auth-and-author-management.md mục 12.2, 12.5)
-  /stories/[storyId]/route.ts      → GET/PUT metadata qua StoryCommandService; chapter batch qua ChapterCommandService trong cùng application transaction (mục 12.6) / DELETE có state guard
+  /stories/route.ts                → GET (list, US-1.1) + POST qua createStoryWithChapters; POST nhận `coverUploadId`, claim cover + tạo Story/Chapters + nâng reader→author cùng transaction — mục 12.2, 12.5
+  /stories/[storyId]/route.ts      → GET/PUT metadata qua StoryCommandService; PUT nhận optional `coverUploadId` khi replace và giữ cover cũ nếu thiếu; chapter batch qua ChapterCommandService trong cùng application transaction (mục 12.6) / DELETE draft hoặc archived có state guard
   /stories/[storyId]/submit-review/route.ts  → POST, đổi status draft/rejected → pending_review, validate điều kiện mục 12.7.2
   /stories/[storyId]/manage/route.ts → GET full owner/admin Story + meta.updatedAt (P3-06)
   /stories/[storyId]/cancel-review/route.ts → POST pending_review → draft (P3-06)

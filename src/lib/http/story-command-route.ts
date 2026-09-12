@@ -38,15 +38,17 @@ export function storyMutationRoute<S extends z.ZodType>(options: {
   };
 }
 
-export function storyReadRoute(output: z.ZodType, editor = false) {
+export function storyReadRoute(output: z.ZodType, mode: "story" | "managed" | "editor" = "story") {
   return async (_request: Request, context: CommandRouteContext) => {
     try {
       const session = await requireRole("author");
       const params = await context.params;
       const storyId = validateCommand(idSchema, params.storyId);
-      const result = editor
+      const result = mode === "editor"
         ? await dal.getEditor(session.user.id, storyId, validateCommand(idSchema, params.chapterId))
-        : await dal.getStory(session.user.id, storyId);
+        : mode === "managed"
+          ? await dal.getManagedStory(session.user.id, storyId)
+          : await dal.getStory(session.user.id, storyId);
       return commandResponse(output, result);
     } catch (error) { return commandFailure(error); }
   };

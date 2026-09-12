@@ -1,15 +1,120 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import type { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import type { Chapter, EffectConfig, StoryBlock } from "@/types/story";
+import type { ManagedChapter, ManagedStory } from "@/types/story-management";
 import type { Scene } from "@/types/scene";
 import type { StoryActor, StoryAccessRecord } from "@/lib/auth/story-policy";
 import { AuthAccessError } from "@/lib/auth/policy";
 import { conflict, notFound } from "@/lib/services/command-error";
 import type { StoryMetadata } from "@/lib/services/story-command-service";
 import { databaseJson } from "@/lib/db/json-fields";
+import { completedMediaUploadSchema } from "@/lib/validation/media-upload-schema";
+import { normalizeCoverPosition } from "@/lib/story-cover";
+import { consoleRepositoryReadObserver, failRepositoryRead } from "./read-observability";
 import { PrismaStoryRepository } from "./prisma-story-repository";
 import { PrismaSceneRepository } from "./prisma-scene-repository";
+
+const managedChapterSelect = {
+  id: true,
+  title: true,
+  order: true,
+  status: true,
+  blocks: {
+    select: { _count: { select: { effects: true } } },
+  },
+} satisfies Prisma.ChapterSelect;
+
+const managedStorySelect = {
+  slug: true,
+  title: true,
+  authorDisplayName: true,
+  description: true,
+  coverUrl: true,
+  coverPositionX: true,
+  coverPositionY: true,
+  genre: true,
+  status: true,
+  rejectionReason: true,
+  updatedAt: true,
+  chapters: {
+    orderBy: [{ order: "asc" as const }, { id: "asc" as const }],
+    select: managedChapterSelect,
+  },
+} satisfies Prisma.StorySelect;
+
+type ManagedChapterRow = Prisma.ChapterGetPayload<{ select: typeof managedChapterSelect }>;
+type ManagedStoryRow = Prisma.StoryGetPayload<{ select: typeof managedStorySelect }>;
+
+const storyStatuses: Record<string, ManagedStory["status"]> = {
+  DRAFT: "draft",
+  PENDING_REVIEW: "pending_review",
+  PUBLISHED: "published",
+  REJECTED: "rejected",
+  ARCHIVED: "archived",
+};
+
+const chapterStatuses: Record<string, ManagedChapter["status"]> = {
+  DRAFT: "draft",
+  PUBLISHED: "published",
+};
+
+function invalidManagementRead(code: string): never {
+  return failRepositoryRead(consoleRepositoryReadObserver, code);
+}
+
+function mapManagedChapter(row: ManagedChapterRow): ManagedChapter {
+  const status = chapterStatuses[row.status]
+    ?? invalidManagementRead("P3_PRISMA_INVALID_MANAGED_CHAPTER_STATUS");
+  const effectCount = row.blocks.reduce((count, block) => count + block._count.effects, 0);
+  if (!row.id.trim() || !Number.isInteger(row.order) || row.order < 0 || effectCount < 0) {
+    return invalidManagementRead("P3_PRISMA_INVALID_MANAGED_CHAPTER");
+  }
+  return {
+    id: row.id,
+    title: row.title,
+    order: row.order,
+    status,
+    blockCount: row.blocks.length,
+    effectCount,
+  };
+}
+
+function mapManagedStoryRecord(row: ManagedStoryRow) {
+  const status = storyStatuses[row.status]
+    ?? invalidManagementRead("P3_PRISMA_INVALID_MANAGED_STORY_STATUS");
+  if (
+    !row.slug.trim()
+    || !row.authorDisplayName.trim()
+    || !Array.isArray(row.genre)
+    || !Number.isFinite(row.coverPositionX)
+    || !Number.isFinite(row.coverPositionY)
+    || row.coverPositionX < 0
+    || row.coverPositionX > 100
+    || row.coverPositionY < 0
+    || row.coverPositionY > 100
+  ) {
+    return invalidManagementRead("P3_PRISMA_INVALID_MANAGED_STORY");
+  }
+  const story: ManagedStory = {
+    id: row.slug,
+    title: row.title,
+    author: row.authorDisplayName,
+    description: row.description,
+    ...(row.coverUrl === null ? {} : { cover_image: row.coverUrl }),
+    ...(row.coverPositionX === 50 && row.coverPositionY === 50
+      ? {}
+      : { cover_position: { x: row.coverPositionX, y: row.coverPositionY } }),
+    genre: [...row.genre],
+    status,
+    chapters: row.chapters.map(mapManagedChapter),
+  };
+  return {
+    story,
+    rejectionReason: row.rejectionReason,
+    updatedAt: row.updatedAt,
+  };
+}
 
 /** Transaction-scoped extension of StoryRepository; all content persistence stays here. */
 export class PrismaStoryCommandRepository extends PrismaStoryRepository {
@@ -33,6 +138,28 @@ export class PrismaStoryCommandRepository extends PrismaStoryRepository {
   getScenes(slug: string, chapterId: string) {
     return new PrismaSceneRepository(this.tx).getByChapter(slug, chapterId);
   }
+  async getStoryManagementRecord(slug: string) {
+    if (!slug.trim()) return null;
+    const row = await this.tx.story.findUnique({ where: { slug }, select: managedStorySelect });
+    return row ? mapManagedStoryRecord(row) : null;
+  }
+  async getStoryManagementRecordsForAuthor(authorId: string) {
+    if (!authorId.trim()) return [];
+    const rows = await this.tx.story.findMany({
+      where: { authorId },
+      orderBy: { slug: "asc" },
+      select: managedStorySelect,
+    });
+    return rows.map(mapManagedStoryRecord);
+  }
+  async getChapterManagementSummary(storyId: string, chapterId: string) {
+    if (!storyId.trim() || !chapterId.trim()) return null;
+    const row = await this.tx.chapter.findFirst({
+      where: { id: chapterId, storyId },
+      select: managedChapterSelect,
+    });
+    return row ? mapManagedChapter(row) : null;
+  }
   async getChapter(slug: string, chapterId: string): Promise<Chapter> {
     const story = await this.getById(slug);
     return story?.chapters.find((chapter) => chapter.id === chapterId) ?? notFound();
@@ -44,20 +171,54 @@ export class PrismaStoryCommandRepository extends PrismaStoryRepository {
     if (result.count !== 1) conflict();
     return next;
   }
-  async createStory(actor: StoryActor, metadata: StoryMetadata, byline: string, chapters: Array<{ title: string }>) {
+  async claimStoryCover(actorId: string, uploadId: string, claimedAt: Date): Promise<string> {
+    const upload = await this.tx.mediaUpload.findFirst({
+      where: { id: uploadId, ownerId: actorId, purpose: "story_cover", mediaKind: "image" },
+      select: { id: true, status: true, result: true },
+    });
+    if (!upload) notFound();
+    if (upload.status !== "COMPLETED") {
+      conflict("UPLOAD_NOT_CLAIMABLE", "The story cover upload is not ready to be claimed.");
+    }
+    const parsed = completedMediaUploadSchema.safeParse(upload.result);
+    if (!parsed.success || parsed.data.kind !== "image" || !parsed.data.primary.contentType.startsWith("image/")) {
+      conflict("UPLOAD_INVALID", "The completed story cover is invalid.");
+    }
+    const claimed = await this.tx.mediaUpload.updateMany({
+      where: {
+        id: upload.id,
+        ownerId: actorId,
+        purpose: "story_cover",
+        mediaKind: "image",
+        status: "COMPLETED",
+      },
+      data: { status: "CLAIMED", claimedAt },
+    });
+    if (claimed.count !== 1) {
+      conflict("UPLOAD_NOT_CLAIMABLE", "The story cover upload is not ready to be claimed.");
+    }
+    return parsed.data.primary.url;
+  }
+  async createStory(actor: StoryActor, metadata: StoryMetadata, coverUrl: string, byline: string, chapters: Array<{ title: string }>) {
     const base = metadata.title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[đĐ]/g, "d")
       .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 100) || "story";
+    const coverPosition = normalizeCoverPosition(metadata.cover_position);
     const row = await this.tx.story.create({ data: {
       slug: `${base}-${randomUUID()}`, title: metadata.title, description: metadata.description,
-      coverUrl: metadata.cover_image, genre: metadata.genre, authorId: actor.id, authorDisplayName: byline,
+      coverUrl, genre: metadata.genre, authorId: actor.id, authorDisplayName: byline,
+      coverPositionX: coverPosition.x, coverPositionY: coverPosition.y,
       chapters: { create: chapters.map((chapter, index) => ({ title: chapter.title, order: index + 1 })) },
     }, select: { slug: true, updatedAt: true } });
     await this.tx.user.updateMany({ where: { id: actor.id, role: "READER" }, data: { role: "AUTHOR" } });
     return row;
   }
-  updateMetadata(id: string, metadata: StoryMetadata, updatedAt: Date) {
+  updateMetadata(id: string, metadata: StoryMetadata, coverUrl: string | undefined, updatedAt: Date) {
     return this.tx.story.update({ where: { id }, data: {
-      title: metadata.title, description: metadata.description, coverUrl: metadata.cover_image,
+      title: metadata.title, description: metadata.description, ...(coverUrl === undefined ? {} : { coverUrl }),
+      ...(metadata.cover_position === undefined ? {} : {
+        coverPositionX: metadata.cover_position.x,
+        coverPositionY: metadata.cover_position.y,
+      }),
       genre: metadata.genre, updatedAt,
     } });
   }
@@ -76,12 +237,30 @@ export class PrismaStoryCommandRepository extends PrismaStoryRepository {
     return this.tx.chapter.update({ where: { id }, data: { status: status === "published" ? "PUBLISHED" : "DRAFT" } });
   }
   async reorderChapters(ids: string[]) {
-    for (const [index, id] of ids.entries()) await this.tx.chapter.update({ where: { id }, data: { order: index + 1 } });
+    if (ids.length === 0) return;
+    const orderCases = ids.map((id, index) => Prisma.sql`WHEN ${id} THEN ${index + 1}`);
+    await this.tx.$executeRaw(Prisma.sql`
+      UPDATE "Chapter"
+      SET "order" = CASE "id"
+        ${Prisma.join(orderCases, " ")}
+        ELSE "order"
+      END
+      WHERE "id" IN (${Prisma.join(ids)})
+    `);
   }
   async deleteChapter(id: string) {
     await this.tx.effect.deleteMany({ where: { block: { chapterId: id } } });
     await this.tx.storyBlock.deleteMany({ where: { chapterId: id } });
     await this.tx.chapter.delete({ where: { id } }); // Scene FK cascades; stale progress is reconciled by public reads.
+  }
+  async deleteStory(id: string) {
+    await this.tx.effect.deleteMany({ where: { block: { chapter: { storyId: id } } } });
+    await this.tx.scene.deleteMany({ where: { chapter: { storyId: id } } });
+    await this.tx.storyBlock.deleteMany({ where: { chapter: { storyId: id } } });
+    await this.tx.bookmark.deleteMany({ where: { storyId: id } });
+    await this.tx.readingProgress.deleteMany({ where: { storyId: id } });
+    await this.tx.chapter.deleteMany({ where: { storyId: id } });
+    await this.tx.story.delete({ where: { id } });
   }
   async assertContentIds(chapterId: string, blocks: StoryBlock[], scenes: Scene[]) {
     const blockIds = blocks.map((block) => block.id);

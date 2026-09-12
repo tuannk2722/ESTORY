@@ -430,3 +430,24 @@ pnpm test:media:r2
 `test:media:r2` cần cả Neon dev và sáu biến R2, tạo object/row fixture dung lượng
 nhỏ rồi dọn trong `finally`; không chạy mặc định trong CI nếu môi trường chưa có
 Cloudflare secrets. Test không in credential, presigned URL, object key hoặc row.
+
+## Auth UI & Author management (P3-10)
+
+Navbar/profile dùng Auth.js session thật. Reader bắt đầu tại `/author/stories/new`; lần tạo
+Story đầu tiên claim `coverUploadId` của chính user và nâng role thành Author trong cùng
+transaction. Author quản lý truyện tại `/author`, metadata/chapter/state tại
+`/author/stories/[storyId]`, và tiếp tục dùng editor P3-07. `/admin` là landing admin-only;
+moderation bắt đầu ở P3-11. `IntegrationsSection` chưa hiển thị action Freesound trước P3-15.
+
+Gate local chính:
+
+```powershell
+pnpm test
+pnpm test:commands:db
+$env:P3_10_PLAYWRIGHT_MODULE = 'C:\Users\OS\story-telling\.tools\p3-07-browser\node_modules\playwright'
+pnpm test:commands:http
+pnpm build
+```
+
+Playwright là tooling optional ngoài dependency app. Chi tiết contract, accessibility,
+responsive, regression, cleanup và gate CI/Vercel còn lại: [P3-10 verification](docs/verification/p3-10.md).

@@ -6,10 +6,16 @@ import { CommandError } from "@/lib/services/command-error";
 
 export const idSchema = z.string().trim().min(1).max(200).regex(/^[^\s/\\\u0000-\u001f]+$/);
 const titleSchema = z.string().trim().min(1);
+export const coverPositionSchema = z.strictObject({
+  x: z.number().finite().min(0).max(100),
+  y: z.number().finite().min(0).max(100),
+});
 export const storyMetadataSchema = z.strictObject({
   title: titleSchema, description: z.string().trim().min(1),
-  cover_image: mediaUrlSchema, genre: z.array(z.string().trim().min(1)).min(1),
+  genre: z.array(z.string().trim().min(1)).min(1),
+  cover_position: coverPositionSchema.optional(),
 });
+export const storyReadyMetadataSchema = storyMetadataSchema.extend({ cover_image: mediaUrlSchema });
 const effectSchema = effectConfigSchema.superRefine((effect, ctx) => {
   for (const key of ["duration_ms", "delay_ms"] as const) {
     const value = effect[key];
@@ -27,22 +33,43 @@ export const chapterSchema = z.strictObject({
   status: z.enum(["draft", "published"]), view_count: z.number().int().nonnegative().optional(),
   blocks: z.array(blockSchema),
 });
+export const managedChapterSchema = z.strictObject({
+  id: idSchema, title: z.string(), order: z.number().int().nonnegative(),
+  status: z.enum(["draft", "published"]),
+  blockCount: z.number().int().nonnegative(), effectCount: z.number().int().nonnegative(),
+});
+export const chapterOrderSchema = managedChapterSchema.pick({ id: true, order: true });
 export const storySchema = z.strictObject({
   id: idSchema, title: z.string(), author: z.string().trim().min(1), description: z.string(),
-  cover_image: mediaUrlSchema.optional(), genre: z.array(z.string()),
+  cover_image: mediaUrlSchema.optional(), cover_position: coverPositionSchema.optional(), genre: z.array(z.string()),
   status: z.enum(["draft", "pending_review", "published", "rejected", "archived"]),
   view_count: z.number().int().nonnegative(), chapters: z.array(chapterSchema),
 });
+export const managedStorySchema = z.strictObject({
+  id: idSchema, title: z.string(), author: z.string().trim().min(1), description: z.string(),
+  cover_image: mediaUrlSchema.optional(), cover_position: coverPositionSchema.optional(), genre: z.array(z.string()),
+  status: z.enum(["draft", "pending_review", "published", "rejected", "archived"]),
+  chapters: z.array(managedChapterSchema),
+});
+export const managedStoryDataSchema = z.strictObject({
+  story: managedStorySchema,
+  rejectionReason: z.string().nullable(),
+});
+export const authorStoryListItemSchema = managedStoryDataSchema.extend({
+  updatedAt: z.iso.datetime(),
+});
+export const authorStoryListSchema = z.array(authorStoryListItemSchema);
 
 export const actorContextSchema = z.strictObject({ actorId: idSchema });
 export const storyContextSchema = actorContextSchema.extend({ storyId: idSchema, expectedUpdatedAt: z.iso.datetime() });
 export const chapterContextSchema = storyContextSchema.extend({ chapterId: idSchema });
 export const createStorySchema = actorContextSchema.extend({
-  byline: z.string().optional(), metadata: storyMetadataSchema,
+  byline: z.string().optional(), coverUploadId: idSchema, metadata: storyMetadataSchema,
   chapters: z.array(z.strictObject({ title: titleSchema })).min(1),
 });
-export const updateStorySchema = storyContextSchema.extend({ metadata: storyMetadataSchema });
-export const createChapterSchema = storyContextSchema.extend({ title: titleSchema });
+export const updateStorySchema = storyContextSchema.extend({ coverUploadId: idSchema.optional(), metadata: storyMetadataSchema });
+export const deleteStorySchema = storyContextSchema;
+export const createChapterSchema = storyContextSchema.extend({ title: titleSchema, afterChapterId: idSchema.optional() });
 export const updateChapterSchema = chapterContextSchema.extend({ title: titleSchema });
 export const reorderChaptersSchema = storyContextSchema.extend({ chapterIds: z.array(idSchema).min(1) });
 export const publishChapterSchema = chapterContextSchema.extend({ status: z.enum(["draft", "published"]) });

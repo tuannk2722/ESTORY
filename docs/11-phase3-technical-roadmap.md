@@ -36,12 +36,13 @@ export interface StoryRepository {
     chapterId: string
   ): Promise<PublicChapterReaderData | null>;
 
-  // ─── Nhóm "full" — dùng ở trang quản lý của author/admin: /author/stories/[storyId], [chapterId] editor, /admin/stories ───
+  // ─── Nhóm "full" — dùng cho editor, moderation và rule cần đọc nội dung đầy đủ ───
   getById(storyId: string): Promise<Story | null>;
   // LUÔN trả đầy đủ, KHÔNG lọc theo status dưới bất kỳ hình thức nào — author bắt buộc phải thấy được
   //   chương đang "draft" của chính mình để sửa, admin phải thấy truyện "pending_review" để duyệt.
   getAllForAuthor(authorId: string): Promise<Story[]>;
-  // Phase 3 only (chưa có `authorId` thật ở Phase 1–2) — toàn bộ truyện của 1 author bất kể status, dùng cho `/author` dashboard (mục 12.4)
+  // Phase 3 only (chưa có `authorId` thật ở Phase 1–2) — full aggregate cho consumer nội bộ
+  // thật sự cần content; `/author` dashboard dùng management projection riêng (mục 12.4).
 
   // Legacy Phase 1–2 adapter only. Phase-3 Route Handler không được gọi generic save(story).
   save(story: Story): Promise<void>;
@@ -58,19 +59,20 @@ export interface CommandResult<T> { data: T; meta: { updatedAt: string } }
 
 export interface StoryCommandService {
   createStoryWithChapters(input: CreateStoryWithChaptersCommand): Promise<CommandResult<Story>>;
-  updateStoryMetadata(input: UpdateStoryMetadataCommand): Promise<CommandResult<Story>>;
+  updateStoryMetadata(input: UpdateStoryMetadataCommand): Promise<CommandResult<ManagedStory>>;
   replaceChapterContent(input: ReplaceChapterContentCommand): Promise<CommandResult<Chapter>>;
-  submitForReview(input: SubmitStoryCommand): Promise<CommandResult<Story>>;
-  cancelReview(input: StoryCommandContext): Promise<CommandResult<Story>>;
-  archiveStory(input: StoryCommandContext): Promise<CommandResult<Story>>;
-  restoreStory(input: StoryCommandContext): Promise<CommandResult<Story>>;
-  setChapterPublication(input: SetChapterPublicationCommand): Promise<CommandResult<Chapter>>;
+  submitForReview(input: SubmitStoryCommand): Promise<CommandResult<ManagedStory>>;
+  cancelReview(input: StoryCommandContext): Promise<CommandResult<ManagedStory>>;
+  archiveStory(input: StoryCommandContext): Promise<CommandResult<ManagedStory>>;
+  restoreStory(input: StoryCommandContext): Promise<CommandResult<ManagedStory>>;
+  deleteStory(input: StoryCommandContext): Promise<CommandResult<null>>;
+  setChapterPublication(input: SetChapterPublicationCommand): Promise<CommandResult<ManagedChapter>>;
 }
 
 export interface ChapterCommandService {
-  createChapter(input: CreateChapterCommand): Promise<CommandResult<Chapter>>;
-  updateChapterMetadata(input: UpdateChapterMetadataCommand): Promise<CommandResult<Chapter>>;
-  reorderChapters(input: ReorderChaptersCommand): Promise<CommandResult<Chapter[]>>;
+  createChapter(input: CreateChapterCommand): Promise<CommandResult<ManagedChapter>>;
+  updateChapterMetadata(input: UpdateChapterMetadataCommand): Promise<CommandResult<ManagedChapter>>;
+  reorderChapters(input: ReorderChaptersCommand): Promise<CommandResult<ChapterOrder[]>>;
   deleteChapter(input: DeleteChapterCommand): Promise<CommandResult<null>>;
 }
 ```
@@ -84,6 +86,13 @@ byline từ JSON thay vì suy từ `User.name`. Command tạo Story mới nhận
 cạnh `metadata` và `chapters`; resolve theo `12-auth-and-author-management.md` mục 12.5
 với tên actor lấy từ DB trong transaction, ghi snapshot không rỗng vào `authorDisplayName`.
 Không dùng email làm fallback public; các command cập nhật không tính lại byline từ profile.
+
+P3-10 tách read model owner/admin khỏi aggregate Editor: `ManagedStory` chỉ chứa metadata
+Story và `ManagedChapter[]`; mỗi `ManagedChapter` chỉ có `id/title/order/status` cùng
+`blockCount`/`effectCount`. Prisma `select` lấy count cần thiết nhưng không lấy text block,
+Effect config hoặc Scene; `/author` và `GET /api/stories/[storyId]/manage` chỉ serialize
+projection này xuống client. Full `Story/Chapter` vẫn dành cho Editor aggregate và các
+nghiệp vụ thật sự cần nội dung.
 
 ### 9.2.1. Lộ trình tách read-model cho trang đọc chương
 
@@ -197,6 +206,8 @@ model Story {
   authorDisplayName String      // public byline snapshot; tách khỏi authorId ownership
   description     String
   coverUrl        String?
+  coverPositionX  Float        @default(50) // phần trăm 0..100; DB migration có CHECK range
+  coverPositionY  Float        @default(50) // legacy/default = chính giữa
   genre           String[]
   viewCount       Int          @default(0)
   status          StoryStatus  @default(DRAFT)
@@ -527,6 +538,14 @@ Command lưu effect phải xác minh `AudioAsset.ownerId` thuộc đúng author/
 
 `MediaUpload` là intent nội bộ, không phải public asset/catalog record. Presign tạo row `PENDING` trước khi trả bearer URL 10 phút; key server-generated theo `{env}/{purpose}/{owner-or-global}/{uuid}.{ext}`. PUT ký `Content-Type` và `If-None-Match: *` để URL reuse không overwrite key. `complete` conditional-transition `PENDING → PROCESSING` trước khi đọc object để không race với cancel; lỗi tạm thời/incomplete trả về `PENDING`, còn validation pass mới thành `COMPLETED`. Video bundle phải có cả primary và poster hợp lệ. Domain service P3-10/13/15/16 claim `COMPLETED → CLAIMED` cùng transaction tạo/cập nhật Story/AudioAsset/BackgroundAsset; không nhận URL tùy ý từ client.
 
+Focal point ảnh bìa thuộc aggregate `Story`, không thuộc `MediaUpload.result`: domain/API dùng
+`cover_position: { x, y }` theo phần trăm `0..100`, Prisma dùng hai cột
+`coverPositionX/coverPositionY` non-null, mặc định `50` và có DB CHECK range. JSON legacy
+thiếu field được đọc như `{50,50}`; Prisma projection có thể omit đúng giá trị mặc định để
+giữ compatibility. Đây là metadata trình bày không phá hủy: không crop/recompress object R2.
+Mọi consumer cover phải render `aspect-ratio: 16/9`, `object-fit: cover` và cùng
+`object-position`, nếu không không thể bảo đảm vùng author chọn giống nhau.
+
 Quota video Author cấp một `videoSlot` 1..10 trong transaction/serializable boundary; unique `(ownerId, videoSlot)` chặn race giữa các request `PENDING`. Slot được giữ qua `COMPLETED`/`CLAIMED` và chỉ set null sau best-effort physical delete hoặc cleanup audit cho `CANCELLED`/`EXPIRED`/`REJECTED`. Không dùng daily quota fields cho limit storage này.
 
 ## 9.5. Auth, Settings sync, Phân quyền
@@ -534,7 +553,10 @@ Quota video Author cấp một `videoSlot` 1..10 trong transaction/serializable 
 - **Auth.js:** cấu hình OAuth (Google/GitHub) sau Prisma foundation. Đọc truyện không bắt buộc đăng nhập.
 - **Authorization thực:** DAL/service/Route Handler gọi `requireSession`, role rank, owner/admin guard và `requireChapterInStory`. Proxy/middleware chỉ redirect sớm, không phải security boundary.
 - **Mutation:** Zod + command service method hẹp; kiểm state/concurrency trong transaction. Không gọi generic repository `save()` trực tiếp từ route.
-- **P3-06 DAL/commands:** `StoryDataAccess` kiểm role/owner/membership trước full read. `PrismaStoryCommandRepository` mở rộng `PrismaStoryRepository` trong transaction; các service dùng chung `StoryCommandTransactions` với isolation `Serializable`. Actor được đọc lại từ DB, không nhận role/owner từ HTTP body.
+- **P3-06 DAL/commands:** `StoryDataAccess` kiểm role/owner/membership trước read; Editor dùng full aggregate, còn dashboard/manage P3-10 dùng `ManagedStory` count projection nêu ở §9.2. `PrismaStoryCommandRepository` mở rộng `PrismaStoryRepository` trong transaction; các service dùng chung `StoryCommandTransactions` với isolation `Serializable`. Actor được đọc lại từ DB, không nhận role/owner từ HTTP body.
+- **P3-10 cover metadata:** create/update nhận optional `metadata.cover_position` đã strict-validate `0..100`. Create thiếu vị trí dùng `{50,50}`. Update không gửi vị trí thì giữ vị trí cũ; ngoại lệ khi có `coverUploadId` mới mà thiếu vị trí là reset về giữa để không mang crop của ảnh cũ sang ảnh mới. Chỉ đổi vị trí không cần upload/claim lại; đổi URL + vị trí vẫn commit/rollback cùng transaction và aggregate revision.
+- **P3-10 chapter insertion:** `POST /api/stories/[storyId]/chapters` nhận optional `afterChapterId`. Command kiểm anchor thuộc chính Story rồi create + normalize order trong cùng transaction/revision; anchor ngoài Story trả `404`. Client không append rồi gọi reorder bằng request thứ hai.
+- **P3-10 chapter reorder:** command bắt buộc nhận đúng một lần toàn bộ chapter ID hiện tại của Story, kiểm duplicate/membership bằng `Set`, rồi ghi order bằng một batch statement có tham số trong cùng transaction/revision thay vì tuần tự N lệnh `update`. Create-at-gap, delete và reorder trực tiếp dùng chung primitive normalize này. Response strict chỉ là `ChapterOrder[]` (`{ id, order }`), không đọc/serialize lại block/effect payload; client merge order vào `ManagedChapter` đang có.
 - **Concurrency:** mọi command sửa aggregate nhận `expectedUpdatedAt` (ISO từ `meta.updatedAt` của full Story/editor read hoặc command trước). So sánh rồi conditional-update `Story.updatedAt` trong cùng transaction; mỗi mutation Chapter/Scene cũng tăng mốc Story, tối thiểu 1ms. Các thao tác trên hai chương cùng Story có thể conflict; client phải reload khi `409`. Không cần thêm version/timestamp vào Chapter. Kết quả `CommandResult<T>` chứa revision của chính transaction vừa commit, không đọc lại revision sau commit.
 - **Authorization errors:** chưa đăng nhập `401`; thiếu role tối thiểu `403`; Story không tồn tại/khác owner hoặc Chapter không thuộc Story đều `404` với cùng envelope. Admin được override ownership và khóa pending-review dành cho author, nhưng vẫn tuân thủ state machine, concurrency và rule chương cuối. Truyện archived cần restore về draft trước khi sửa.
 - **Editor aggregate:** `replaceEditor` nhận blocks + Scene snapshots và lưu cả hai trong một transaction. Lệnh chỉ thay blocks phải giữ Scene hiện có và kiểm range lại; nếu xóa boundary làm Scene không hợp lệ thì từ chối, không tự drop Scene. Các command giữ snapshot/provenance đã lưu dù nguồn archived; tham chiếu mới tới preset phải active, audio cá nhân phải đúng actor và URL đã lưu. Catalog lifecycle/media integration đầy đủ thuộc các stage tương ứng.

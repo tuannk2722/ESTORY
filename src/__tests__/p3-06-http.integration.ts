@@ -10,6 +10,7 @@ import { EditorSaveError, saveEditorAggregate } from "@/lib/editor/editorTranspo
 import { sceneToDraft, draftToScene } from "@/lib/scenes/sceneDraft";
 import { databaseJson } from "@/lib/db/json-fields";
 import { resolve } from "node:path";
+import { storyCoverUploadFixture } from "./fixtures/media-upload-fixtures";
 
 loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
 let stage = "initialize";
@@ -81,6 +82,16 @@ async function run() {
     }
     return result;
   }
+  let coverSequence = 0;
+  const createCover = async (
+    ownerId: string,
+    options: Partial<Parameters<typeof storyCoverUploadFixture>[0]> = {},
+  ) => {
+    const id = `${prefix}-cover-${coverSequence++}`;
+    const fixture = storyCoverUploadFixture({ id, ownerId, ...options });
+    await prisma.mediaUpload.create({ data: fixture });
+    return { id, url: fixture.result?.primary.url };
+  };
   try {
     stage = "fixtures";
     for (const [index, id] of users.entries()) {
@@ -92,14 +103,19 @@ async function run() {
     }
     await start(true);
     stage = "create validation and role promotion";
-    const metadata = { title: "HTTP story", description: "Fixture description", cover_image: "/cover.svg", genre: ["Fantasy"] };
-    const create = { metadata, byline: " Hàn Mặc Tử ", chapters: [{ title: "One" }, { title: "Two" }] };
+    const metadata = { title: "HTTP story", description: "Fixture description", genre: ["Fantasy"] };
+    const ownerCover = await createCover(users[0]);
+    const outsiderCover = await createCover(users[1]);
+    const blankCover = await createCover(users[3]);
+    const create = { metadata, coverUploadId: ownerCover.id, byline: " Hàn Mặc Tử ", chapters: [{ title: "One" }, { title: "Two" }] };
     await json("/api/stories", "POST", { ...create, actorId: users[2] }, 400);
-    await json("/api/stories", "POST", { ...create, byline: " " }, 400, 3);
+    await json("/api/stories", "POST", { ...create, coverUploadId: blankCover.id, byline: " " }, 400, 3);
     assert.equal((await prisma.user.findUniqueOrThrow({ where: { id: users[3] } })).role, "READER");
     assert.equal(await prisma.story.count({ where: { authorId: users[3] } }), 0);
+    assert.equal((await prisma.mediaUpload.findUniqueOrThrow({ where: { id: blankCover.id } })).status, "COMPLETED");
     let created = await json("/api/stories", "POST", create, 201);
     assert.equal(created.data.author, "Hàn Mặc Tử");
+    assert.equal(created.data.cover_image, ownerCover.url);
     const storyId: string = created.data.id;
     const chapterId: string = created.data.chapters[0].id;
     const secondId: string = created.data.chapters[1].id;
@@ -109,11 +125,24 @@ async function run() {
     const revision = (value: { meta: { updatedAt: string } }) => ({ expectedUpdatedAt: value.meta.updatedAt });
     assert.equal((await prisma.user.findUniqueOrThrow({ where: { id: users[0] } })).role, "AUTHOR");
     assert.equal((await request(base)).status, 404, "A draft must not be publicly readable");
-    assert.equal((await request(`${base}/manage`, { headers: headers() })).status, 200);
+    const initialManage = await (await request(`${base}/manage`, { headers: headers() })).json();
+    assert.equal(initialManage.data.story.id, storyId);
+    assert.equal(initialManage.data.rejectionReason, null);
+    assert.equal(initialManage.meta.updatedAt, created.meta.updatedAt);
+    assert.equal(initialManage.data.story.chapters[0].blockCount, 0);
+    assert.equal(initialManage.data.story.chapters[0].effectCount, 0);
+    assert.ok(!("blocks" in initialManage.data.story.chapters[0]));
+    assert.ok(!("view_count" in initialManage.data.story));
+    const ownerDashboard = await (await request("/api/stories", { headers: headers() })).json();
+    assert.deepEqual(ownerDashboard.data.map((item: { story: { id: string } }) => item.story.id), [storyId]);
+    assert.equal(ownerDashboard.data[0].updatedAt, created.meta.updatedAt);
+    assert.equal(ownerDashboard.data[0].rejectionReason, null);
+    assert.ok(!("blocks" in ownerDashboard.data[0].story.chapters[0]));
+    assert.equal((await request("/api/stories", { headers: headers(3) })).status, 403);
 
     stage = "all mutations reject unauthenticated callers";
     const mutations = [
-      ["/api/stories", "POST"], [base, "PUT"],
+      ["/api/stories", "POST"], [base, "PUT"], [base, "DELETE"],
       ...["submit-review", "cancel-review", "archive", "restore"].map((action) => [`${base}/${action}`, "POST"]),
       [`${base}/chapters`, "POST"], [`${base}/chapters/reorder`, "PATCH"],
       [chapter, "PUT"], [chapter, "PATCH"], [chapter, "DELETE"],
@@ -125,7 +154,7 @@ async function run() {
       assert.equal((await response.json()).error.code, "UNAUTHENTICATED");
     }
     stage = "ownership origin and malformed requests";
-    const foreign = await json("/api/stories", "POST", create, 201, 1);
+    const foreign = await json("/api/stories", "POST", { ...create, coverUploadId: outsiderCover.id }, 201, 1);
     assert.equal((await request(`${base}/manage`, { headers: headers(1) })).status, 404);
     await json(base, "PUT", { ...revision(created), metadata }, 404, 1);
     await json(`${base}/chapters/${foreign.data.chapters[0].id}`, "PATCH", { ...revision(created), title: "Swap" }, 404);
@@ -134,9 +163,58 @@ async function run() {
     await json(editor, "PUT", { chapter: {}, scenes: [], revision: "legacy" }, 400);
     await json(editor, "PUT", { ...revision(created), blocks: [], scenes: [] }, 400);
     await json(editor, "PUT", { ...revision(created), blocks: [], scenes: [], actorId: users[2] }, 400);
+    await json(base, "PUT", { ...revision(created), metadata: { ...metadata, cover_image: "https://untrusted.invalid/cover.png" } }, 400);
     const oversized = await request(editor, { method: "PUT", headers: headers(), body: '"' + "a".repeat(MAX_COMMAND_BODY_BYTES) + '"' });
     assert.equal(oversized.status, 413);
     assert.equal((await oversized.json()).error.code, "PAYLOAD_TOO_LARGE");
+
+    stage = "cover claim HTTP boundaries and management list";
+    const crossOwnerCover = await createCover(users[1]);
+    const wrongPurposeCover = await createCover(users[0], { purpose: "personal_background" });
+    const pendingCover = await createCover(users[0], { status: "pending" });
+    await json(base, "PUT", { ...revision(created), coverUploadId: crossOwnerCover.id, metadata }, 404);
+    await json(base, "PUT", { ...revision(created), coverUploadId: wrongPurposeCover.id, metadata }, 404);
+    await json(base, "PUT", { ...revision(created), coverUploadId: pendingCover.id, metadata }, 409);
+    await json(base, "PUT", { ...revision(created), coverUploadId: ownerCover.id, metadata }, 409);
+    const unchangedManage = await (await request(`${base}/manage`, { headers: headers() })).json();
+    assert.equal(unchangedManage.meta.updatedAt, created.meta.updatedAt);
+    const replacementCover = await createCover(users[0]);
+    created = await json(base, "PUT", { ...revision(created), coverUploadId: replacementCover.id, metadata });
+    assert.equal(created.data.cover_image, replacementCover.url);
+    assert.ok(!("view_count" in created.data));
+    assert.ok(!("blocks" in created.data.chapters[0]));
+    created = await json(base, "PUT", {
+      ...revision(created),
+      metadata: { ...metadata, cover_position: { x: 25, y: 75 } },
+    });
+    assert.deepEqual(created.data.cover_position, { x: 25, y: 75 });
+    created = await json(base, "PUT", { ...revision(created), metadata: { ...metadata, title: "Cover and focal point preserved" } });
+    assert.equal(created.data.cover_image, replacementCover.url);
+    assert.deepEqual(created.data.cover_position, { x: 25, y: 75 });
+    const centeredReplacement = await createCover(users[0]);
+    created = await json(base, "PUT", {
+      ...revision(created),
+      coverUploadId: centeredReplacement.id,
+      metadata: { ...metadata, title: "Replacement resets omitted focal point" },
+    });
+    assert.equal(created.data.cover_image, centeredReplacement.url);
+    assert.equal(created.data.cover_position, undefined);
+
+    const rejectedAt = new Date(Date.now() + 1_000);
+    await prisma.story.update({
+      where: { slug: foreign.data.id },
+      data: { status: "REJECTED", rejectionReason: "Cần sửa phần kết", updatedAt: rejectedAt },
+    });
+    const outsiderDashboard = await (await request("/api/stories", { headers: headers(1) })).json();
+    assert.deepEqual(outsiderDashboard.data.map((item: { story: { id: string } }) => item.story.id), [foreign.data.id]);
+    assert.equal(outsiderDashboard.data[0].rejectionReason, "Cần sửa phần kết");
+    assert.equal(outsiderDashboard.data[0].updatedAt, rejectedAt.toISOString());
+    const adminDashboard = await (await request("/api/stories", { headers: headers(2) })).json();
+    assert.deepEqual(adminDashboard.data, [], "Admin dashboard must not list other authors' stories");
+    const rejectedManage = await (await request(`/api/stories/${foreign.data.id}/manage`, { headers: headers(1) })).json();
+    assert.equal(rejectedManage.data.rejectionReason, "Cần sửa phần kết");
+    const adminManage = await (await request(`/api/stories/${foreign.data.id}/manage`, { headers: headers(2) })).json();
+    assert.equal(adminManage.data.story.id, foreign.data.id);
 
     stage = "editor snapshot save and conflict";
     const blocks = [{ id: `${prefix}-block`, type: "paragraph", text: "HTTP content", effects: [] }];
@@ -179,6 +257,10 @@ async function run() {
     assert.ok(readerHtml.includes("New text") && readerHtml.includes(scene.id));
     assert.ok(!readerHtml.includes("sceneLibrary"), "Reader bootstrap excludes catalog payload");
     assert.equal((await request(`/stories/${storyId}/${secondId}`)).status, 404, "Draft sibling stays private");
+    await prisma.story.update({
+      where: { slug: storyId },
+      data: { coverPositionX: 25, coverPositionY: 75 },
+    });
     if (process.env.P3_07_PLAYWRIGHT_MODULE) {
       const browserScript = resolve("scripts/p3-07-browser-smoke.cjs");
       const { runP307BrowserSmoke } = await import(browserScript);
@@ -186,6 +268,20 @@ async function run() {
         await prisma.story.update({ where: { slug: storyId }, data: { status: "DRAFT" } });
         await prisma.chapter.update({ where: { id: chapterId }, data: { status: "DRAFT" } });
       } });
+    }
+    if (process.env.P3_10_PLAYWRIGHT_MODULE) {
+      const browserScript = resolve("scripts/p3-10-browser-smoke.cjs");
+      const { runP310BrowserSmoke } = await import(browserScript);
+      await runP310BrowserSmoke({
+        origin,
+        readerToken: tokens[3],
+        readerCoverUploadId: blankCover.id,
+        outsiderStoryId: foreign.data.id,
+        adminToken: tokens[2],
+        publicStoryId: storyId,
+        publicCoverPosition: { x: 25, y: 75 },
+      });
+      assert.equal((await prisma.user.findUniqueOrThrow({ where: { id: users[3] } })).role, "AUTHOR");
     }
     await prisma.story.update({ where: { slug: storyId }, data: { status: "DRAFT" } });
     await prisma.chapter.update({ where: { id: chapterId }, data: { status: "DRAFT" } });
@@ -199,14 +295,87 @@ async function run() {
     created = await json(`${base}/cancel-review`, "POST", revision(adminEdit));
 
     stage = "chapter endpoints";
-    const newChapter = await json(`${base}/chapters`, "POST", { ...revision(created), title: "Three" }, 201);
-    const reordered = await json(`${base}/chapters/reorder`, "PATCH", { ...revision(newChapter), chapterIds: [secondId, chapterId, newChapter.data.id] });
+    const insertedChapter = await json(`${base}/chapters`, "POST", {
+      ...revision(created),
+      title: "Inserted after first",
+      afterChapterId: chapterId,
+    }, 201);
+    assert.equal(insertedChapter.data.order, 2);
+    assert.deepEqual(
+      { blockCount: insertedChapter.data.blockCount, effectCount: insertedChapter.data.effectCount },
+      { blockCount: 0, effectCount: 0 },
+    );
+    assert.ok(!("blocks" in insertedChapter.data));
+    const afterInsertion = await (await request(`${base}/manage`, { headers: headers() })).json();
+    assert.deepEqual(afterInsertion.data.story.chapters.map((item: { id: string }) => item.id), [
+      chapterId,
+      insertedChapter.data.id,
+      secondId,
+    ]);
+    await json(`${base}/chapters`, "POST", {
+      ...revision(insertedChapter),
+      title: "Foreign anchor",
+      afterChapterId: foreign.data.chapters[0].id,
+    }, 404);
+    const newChapter = await json(`${base}/chapters`, "POST", { ...revision(insertedChapter), title: "Three" }, 201);
+    const reordered = await json(`${base}/chapters/reorder`, "PATCH", { ...revision(newChapter), chapterIds: [secondId, chapterId, insertedChapter.data.id, newChapter.data.id] });
+    assert.ok(reordered.data.every((item: Record<string, unknown>) => Object.keys(item).sort().join(",") === "id,order"));
     const renamed = await json(chapter, "PATCH", { ...revision(reordered), title: "Renamed" });
+    assert.ok(!("blocks" in renamed.data));
     const published = await json(`${chapter}/publish`, "PATCH", { ...revision(renamed), status: "published" });
+    assert.ok(!("blocks" in published.data));
     const removed = await json(`${base}/chapters/${newChapter.data.id}`, "DELETE", revision(published));
     assert.equal(removed.data, null);
     const sceneRemoved = await json(`${chapter}/scenes`, "PUT", { ...revision(removed), scenes: [] });
     assert.deepEqual(sceneRemoved.data, []);
+
+    stage = "story DELETE HTTP state, authorization and cleanup";
+    const deleteCover = await createCover(users[1]);
+    const disposable = await json("/api/stories", "POST", {
+      ...create,
+      coverUploadId: deleteCover.id,
+      metadata: { ...metadata, title: "HTTP disposable" },
+      chapters: [{ title: "Disposable" }],
+    }, 201, 1);
+    const disposableChapterId: string = disposable.data.chapters[0].id;
+    const disposableRow = await prisma.story.findUniqueOrThrow({ where: { slug: disposable.data.id } });
+    const disposableBlockId = `${prefix}-disposable-block`;
+    await prisma.storyBlock.create({ data: {
+      id: disposableBlockId, chapterId: disposableChapterId, type: "paragraph", text: "Disposable", order: 0,
+      effects: { create: { id: `${prefix}-disposable-effect`, type: "particle_rain", category: "visual", intensity: 0.5, durationMs: 1000 } },
+    } });
+    await prisma.scene.create({ data: {
+      id: `${prefix}-disposable-scene`, chapterId: disposableChapterId,
+      startBlockId: disposableBlockId, endBlockId: disposableBlockId,
+      renderConfig: databaseJson.sceneRenderConfig.write(snapshotConfig()),
+    } });
+    await prisma.bookmark.create({ data: { userId: users[0], storyId: disposableRow.id } });
+    await prisma.readingProgress.create({ data: {
+      userId: users[0], storyId: disposableRow.id, chapterId: disposableChapterId, blockId: disposableBlockId,
+    } });
+    await prisma.story.update({
+      where: { id: disposableRow.id },
+      data: { status: "PUBLISHED", updatedAt: new Date(Date.now() + 2_000) },
+    });
+    const publishedDisposable = await (await request(`/api/stories/${disposable.data.id}/manage`, { headers: headers(1) })).json();
+    await json(`/api/stories/${disposable.data.id}`, "DELETE", revision(publishedDisposable), 409, 1);
+    await prisma.story.update({
+      where: { id: disposableRow.id },
+      data: { status: "ARCHIVED", updatedAt: new Date(Date.now() + 3_000) },
+    });
+    const archivedDisposable = await (await request(`/api/stories/${disposable.data.id}/manage`, { headers: headers(1) })).json();
+    await json(`/api/stories/${disposable.data.id}`, "DELETE", revision(archivedDisposable), 404);
+    await json(`/api/stories/${disposable.data.id}`, "DELETE", revision(publishedDisposable), 409, 2);
+    const deleted = await json(`/api/stories/${disposable.data.id}`, "DELETE", revision(archivedDisposable), 200, 2);
+    assert.equal(deleted.data, null);
+    assert.equal(await prisma.story.count({ where: { id: disposableRow.id } }), 0);
+    assert.equal(await prisma.chapter.count({ where: { storyId: disposableRow.id } }), 0);
+    assert.equal(await prisma.storyBlock.count({ where: { id: disposableBlockId } }), 0);
+    assert.equal(await prisma.effect.count({ where: { id: `${prefix}-disposable-effect` } }), 0);
+    assert.equal(await prisma.scene.count({ where: { id: `${prefix}-disposable-scene` } }), 0);
+    assert.equal(await prisma.bookmark.count({ where: { storyId: disposableRow.id } }), 0);
+    assert.equal(await prisma.readingProgress.count({ where: { storyId: disposableRow.id } }), 0);
+    assert.equal((await prisma.mediaUpload.findUniqueOrThrow({ where: { id: deleteCover.id } })).status, "CLAIMED");
 
     stage = "write-off flag rejects both new and former editor writes";
     await stop();
@@ -221,13 +390,15 @@ async function run() {
     assert.equal(await prisma.story.count({ where: { authorId: { in: users } } }), beforeCount);
     assert.equal(leakedSecret, false);
     assert.equal(failedServer, false);
-    console.log("P3-06 HTTP integration passed: every mutation authenticated, owner/admin/origin/ID guards, envelopes, byline, editor snapshot/stale update, state/chapter routes, 413 and disabled-write rejection.");
+    console.log("P3-06/P3-10 HTTP integration passed: authenticated owner/admin guards, upload-backed cover contracts, management projections, Story DELETE cleanup, envelopes, editor/state/chapter routes, 413 and disabled-write rejection.");
     console.log("P3-07 HTTP regression passed: client save/reload, archived provenance, owner draft page, public snapshot Reader and draft sibling boundary.");
   } finally {
     await stop();
     await prisma.$transaction(async (tx) => {
       await tx.effect.deleteMany({ where: { block: { chapter: { story: { authorId: { in: users } } } } } });
       await tx.storyBlock.deleteMany({ where: { chapter: { story: { authorId: { in: users } } } } });
+      await tx.bookmark.deleteMany({ where: { OR: [{ userId: { in: users } }, { story: { authorId: { in: users } } }] } });
+      await tx.readingProgress.deleteMany({ where: { OR: [{ userId: { in: users } }, { story: { authorId: { in: users } } }] } });
       await tx.chapter.deleteMany({ where: { story: { authorId: { in: users } } } });
       await tx.story.deleteMany({ where: { authorId: { in: users } } });
       await tx.scenePreset.deleteMany({ where: { id: `${prefix}-preset` } });

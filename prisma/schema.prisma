@@ -97,6 +97,8 @@ model Story {
   authorDisplayName String
   description       String
   coverUrl          String?
+  coverPositionX    Float       @default(50)
+  coverPositionY    Float       @default(50)
   genre             String[]
   viewCount         Int         @default(0)
   status            StoryStatus @default(DRAFT)

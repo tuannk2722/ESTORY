@@ -61,6 +61,8 @@ interface StoryRow {
   authorDisplayName: string;
   description: string;
   coverUrl: string | null;
+  coverPositionX: number;
+  coverPositionY: number;
   genre: string[];
   status: string;
   viewCount: number;
@@ -197,7 +199,16 @@ function mapStory(
   row: StoryRow,
   observer: RepositoryReadObserver,
 ): Story {
-  if (row.viewCount < 0 || !Array.isArray(row.genre)) {
+  if (
+    row.viewCount < 0
+    || !Array.isArray(row.genre)
+    || !Number.isFinite(row.coverPositionX)
+    || !Number.isFinite(row.coverPositionY)
+    || row.coverPositionX < 0
+    || row.coverPositionX > 100
+    || row.coverPositionY < 0
+    || row.coverPositionY > 100
+  ) {
     return failRepositoryRead(observer, "P3_PRISMA_INVALID_STORY");
   }
   return {
@@ -210,6 +221,9 @@ function mapStory(
     ),
     description: row.description,
     ...(row.coverUrl === null ? {} : { cover_image: row.coverUrl }),
+    ...(row.coverPositionX === 50 && row.coverPositionY === 50
+      ? {}
+      : { cover_position: { x: row.coverPositionX, y: row.coverPositionY } }),
     genre: [...row.genre],
     status: mapStoryStatus(row.status, observer),
     view_count: row.viewCount,
@@ -240,6 +254,8 @@ export class PrismaStoryRepository implements StoryRepository {
         authorDisplayName: true,
         description: true,
         coverUrl: true,
+        coverPositionX: true,
+        coverPositionY: true,
         genre: true,
         status: true,
         viewCount: true,
@@ -279,6 +295,8 @@ export class PrismaStoryRepository implements StoryRepository {
         authorDisplayName: true,
         description: true,
         coverUrl: true,
+        coverPositionX: true,
+        coverPositionY: true,
         genre: true,
         status: true,
         viewCount: true,
