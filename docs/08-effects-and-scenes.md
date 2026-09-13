@@ -234,6 +234,13 @@ export interface AudioAssetRepository {
 Editor aggregate xác minh full Story + ownership/role rồi mới gọi `getByChapter(storyId, chapterId)`. Mọi mutation qua command service; không expose generic `save(scene)` cho Route Handler.
 Component/page chỉ gọi qua các interface trên, không đọc JSON/Prisma trực tiếp — kể cả ở Phase 2. Vị trí file: `03-file-structure.md`.
 
+**Search trong picker:** Effect/Background/Palette/Preset/AudioAsset đã thuộc catalog
+được tải theo aggregate/owner một lần, nên lọc tức thì ở client bằng matcher thuần tại
+`lib/search/text-search.ts`. Query state chỉ sống trong picker; không URL, debounce hoặc
+request theo từng phím. Gọi matcher một lần với toàn bộ field/tags searchable để nhiều
+token có thể match xuyên field. Việc cắt `visibleCount`/“Xem thêm” là batching render,
+không phải server pagination. Freesound search là upstream proxy riêng theo §8.9.1.
+
 ---
 
 ## 8.8. Ví dụ minh họa — "Sơn Tinh Thủy Tinh"

@@ -91,6 +91,17 @@ Push changeset rồi xác nhận GitHub Actions và Vercel preview P3-10 xanh. P
 upload smoke chỉ chạy với R2 preview bucket/prefix/CORS tách biệt. Không deploy/push trong
 task local này.
 
+## Pre-P3-11 spec refresh
+Đã bổ sung Admin shell + moderation UI vào nguồn canonical ở `docs/04b` §8.0–8.1;
+contract liên quan nằm ở `02`/`03`/`07`/`09`/`10`/`11`/`12` và runbook P3-11.
+Đã chốt tiếp search boundary ở `11` §9.2.2: `SearchInput` chỉ trình bày, picker
+lọc local catalog đã tải, còn Home/Admin Story list query server-side qua URL + read-model
+gọn. P3-11 chia P3-11A discovery/Home rồi P3-11B moderation; không renumber stage sau.
+Home P3-11A tiếp tục dùng `q + genre` server-side/facet public động theo `11` §9.2.2 và
+ba Hero artwork Dark/Light/Sepia + paint-hint/load-decode-crossfade theo `11` §9.2.3;
+layout/AC/gate đã nối ở `04b` §1, `07` US-3.20, `09` và runbook P3-11.
+Không tạo spec riêng và chưa bắt đầu implementation P3-11.
+
 ## Constraints
 Node 24 qua `../.tools/node-v24.20.0-win-x64`; pnpm 10.33.0. Không secrets trong
 log/test/docs, không deploy/push hay đổi persistent environment nếu chưa được giao.

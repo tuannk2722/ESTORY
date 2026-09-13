@@ -6,8 +6,9 @@
 
 **US-1.1 — Xem danh sách truyện**
 > Là người đọc, tôi muốn thấy danh sách truyện có sẵn để chọn đọc.
-- [ ] Trang `/` hiển thị grid/list các truyện, lấy dữ liệu qua `StoryRepository.getAllPublic()` (không đọc file JSON trực tiếp trong component — xem `11-phase3-technical-roadmap.md` mục 9.2)
+- [ ] Trang `/` hiển thị grid/list qua `StoryRepository`, không đọc JSON/Prisma trực tiếp trong component. Phase 1–2 dùng `getAllPublic()`; Phase 3 chuyển Home sang public card projection `listPublicStories()` để search/paginate server-side theo `07` US-3.20 và `11` §9.2.2 (library chưa bắt buộc đổi cùng stage)
 - [ ] Mỗi item hiện: cover (hoặc placeholder), title, description, genre tags
+- [ ] Phase 3 chỉ nâng phần Hero bằng artwork theo theme + search/genre quick-filter theo `04b` §1; Story grid/card và đường dẫn đọc của US này giữ nguyên
 - [ ] Click vào → điều hướng tới `/stories/[storyId]`
 
 **US-1.2 — Xem mục lục truyện**

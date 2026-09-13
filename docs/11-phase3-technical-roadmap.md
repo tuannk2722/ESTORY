@@ -21,14 +21,42 @@ export interface PublicChapterReaderData {
   isLastChapter: boolean;
 }
 
+export type PublicStoryListItem = Pick<
+  Story,
+  "id" | "title" | "author" | "description" | "cover_image" | "cover_position" | "genre"
+>;
+
+export interface PublicStoryListQuery {
+  q: string;                 // raw query đã trim/collapse, "" = catalog mặc định
+  genre: string | null;      // single-select exact facet; AND với q, không nhập search document
+  cursor: string | null;     // opaque, chỉ hợp lệ với đúng q/genre/sort hiện tại
+  limit: number;
+}
+
+export interface PublicGenreFacet {
+  genre: string;             // label đã trim lấy từ Story public, đồng thời là URL value
+  storyCount: number;        // đếm DISTINCT Story public; UI có thể chỉ dùng để xếp hạng
+}
+
+export interface CursorPage<T> {
+  items: T[];
+  total: number;
+  nextCursor: string | null;
+}
+
 export interface StoryRepository {
   // ─── Nhóm "public" — dùng ở trang công khai: Trang chủ (US-1.1), /stories/[storyId], Reader ───
-  getAllPublic(): Promise<Story[]>;
+  // Read-model đích cho Home: luôn filter public ở DB, select card fields, search/paginate server-side.
+  listPublicStories(input: PublicStoryListQuery): Promise<CursorPage<PublicStoryListItem>>;
+  // Quick filters của Home; projection/aggregate genre-only, không tải Story aggregate.
+  listPublicGenreFacets(limit: number): Promise<PublicGenreFacet[]>;
+  // Compatibility cho library/consumer aggregate cũ; Home Phase 3 không dùng method này.
   // Phase 1–2: trả toàn bộ (mọi Story đều status "published" theo mục 2.7). Phase 3: CHỈ trả Story.status === "published".
-  getPublicById(storyId: string): Promise<Story | null>;
+  getAllPublic(): Promise<Story[]>;
   // Phase 1–2: hành vi như getById (chưa có gì để lọc).
   // Phase 3: trả null nếu Story.status !== "published"; nếu có, `chapters` trả về đã được lọc chỉ còn Chapter.status === "published"
   //   — đúng công thức "12-auth-and-author-management.md" mục 12.7.4. KHÔNG được để page tự lọc lại lần nữa.
+  getPublicById(storyId: string): Promise<Story | null>;
 
   // Phase 3: read-model chuyên biệt cho /stories/[storyId]/[chapterId].
   getPublicChapter(
@@ -97,12 +125,81 @@ nghiệp vụ thật sự cần nội dung.
 ### 9.2.1. Lộ trình tách read-model cho trang đọc chương
 
 - **Phase 1–2:** `/stories/[storyId]/[chapterId]/page.tsx` tiếp tục dùng `getPublicById(storyId)`. JSON đang lưu nguyên Story trong một file nên tách method sớm không giảm disk I/O/JSON parse đáng kể.
-- **Phase 3, ngay khi có `PrismaStoryRepository`:** đổi **riêng** Reader route trên sang `getPublicChapter(storyId, chapterId)`. Trang chi tiết `/stories/[storyId]` vẫn dùng `getPublicById()`; trang home/library vẫn dùng `getAllPublic()`.
+- **Phase 3, ngay khi có `PrismaStoryRepository`:** đổi Reader route trên sang `getPublicChapter(storyId, chapterId)`. Trang chi tiết `/stories/[storyId]` vẫn dùng `getPublicById()`; library tạm giữ `getAllPublic()`, còn Home chuyển sang `listPublicStories()` theo §9.2.2.
 - `getPublicChapter()` phải fail-closed và trả `null` nếu Story không `published`, Chapter không `published`, Chapter không thuộc Story trong URL, hoặc bất kỳ status bắt buộc nào bị thiếu/không hợp lệ.
 - `previousChapterId`/`nextChapterId` chỉ tính trên các Chapter `published`, sắp theo `order`; vì vậy navigation không bao giờ đi qua chapter draft.
 - Prisma implementation phải dùng `where/select` hạn chế payload: chỉ metadata Story cần cho header, Chapter hiện tại, Scene snapshot của chapter và metadata điều hướng. Không load blocks/effects/Scene của chapter khác như `getPublicById()`.
 - **Editor không bao giờ dùng method này.** `/author/stories/[storyId]/[chapterId]`, editor aggregate API và `editorService` tiếp tục dùng `getById()` + kiểm tra ownership/role, nếu không author sẽ mất khả năng mở chapter draft.
 - Thực hiện theo strangler pattern: khi bắt đầu Bước 4 Phase 3, thêm method vào interface, implement cho cả JSON bridge lẫn Prisma + test trước, chuyển Reader route sau, giữ `getPublicById()` cho các consumer cũ. Không đổi return type của `getPublicById()`.
+
+### 9.2.2. Ranh giới search/list — picker local và Story server-side
+
+**Không có một search engine dùng chung cho mọi bề mặt.** Chỉ dùng chung các primitive đúng tầng:
+
+| Tầng | Sở hữu | Không được sở hữu |
+|---|---|---|
+| `SearchInput` | field/clear/focus/label/accessibility | normalize, debounce, URL, fetch, repository, lọc mảng |
+| `lib/search/text-search.ts` | normalize/tokenize/build document và matcher thuần, chạy được cả client/server | React, router, DB, auth |
+| Picker Effect/Scene/combobox | state tạm + lọc ngay catalog đầy đủ đã tải | URL, cursor, request theo từng phím |
+| Home/Admin Story list | URL query/filter → Server Component/DAL/repository → projection phân trang | tải `Story[]` aggregate rồi `.filter()` ở client |
+
+`SearchInput` phải nhận/passthrough tối thiểu `id`, `name`, label/`aria-labelledby`,
+`disabled`, controlled `value/onChange` hoặc `defaultValue` cho GET form và clear callback.
+Controller từng page sở hữu Enter, pending, IME composition và commit URL; input không có
+prop `mode="local|server"`.
+
+`normalizeSearchText()` là contract deterministic: NFD → bỏ combining marks → `đ/Đ`
+thành `d` → lowercase → ký tự không phải Unicode letter/number thành một space →
+trim/collapse. `buildSearchDocument(title, authorDisplayName)` ghép bản normalized có
+space và alias bỏ space; vì vậy `dem giong` và `demgiong` đều match `Đêm Giông`.
+Matcher hiện tại là **accent/case-insensitive AND-token substring**, không phải fuzzy,
+không sửa typo, autocomplete hoặc relevance ranking. Mỗi picker gọi matcher một lần với
+toàn bộ label/description/tags cần tìm để token có thể match xuyên field.
+
+Story search dùng cùng normalization nhưng khác execution boundary:
+
+- URL giữ raw `q` dễ đọc sau trim/collapse, tối đa **100 Unicode code point**; normalized text chỉ dùng nội bộ. `q` rỗng bị bỏ khỏi URL và nghĩa là catalog mặc định. Repeated/invalid param được Zod parser canonicalize hoặc từ chối nhất quán.
+- Baseline chỉ tìm trong `title + authorDisplayName`; không tìm email, description, genre, chapter/block content. Mọi token phải xuất hiện trong `Story.searchTextNormalized`. Sort của từng bề mặt giữ nguyên và luôn có tie-breaker ổn định; search chỉ là filter, không tự thêm relevance.
+- Home có thêm đúng một `genre` URL filter, lấy từ facet public và match **exact label đã trim** trong `Story.genre`; đây là filter độc lập, không ghép genre vào `q`/`searchTextNormalized`. `q + genre` kết hợp AND. “Tất cả thể loại” bỏ `genre`; clear ô tìm kiếm chỉ bỏ `q`; cả hai giữ param còn lại và xóa cursor.
+- `listPublicGenreFacets(6)` chỉ aggregate `Story.status = published`, đếm DISTINCT Story cho mỗi label, bỏ label rỗng rồi sort `storyCount DESC → normalizeSearchText(genre) ASC → genre ASC`. Prisma aggregate/`unnest` ngay trong DB (raw query phải tagged/parameterized nếu Prisma không biểu diễn được); JSON bridge chỉ scan seed public, rồi dùng chung sort để contract parity. UI không bắt buộc hiện count. Đây là quick-filter động, không thêm bảng taxonomy, không suy facet từ page kết quả hiện tại và không tải full Story aggregate.
+- Thay `q`, `genre`, status/filter hoặc sort phải xóa cursor. Cursor opaque và gắn với đúng query/filter/sort; không nhận lại cursor của state khác. `limit` có default theo page và cap server-side.
+- Home `page.tsx` nhận `searchParams: Promise<...>`, parse `q/genre/cursor` rồi gọi `listPublicStories()` và `listPublicGenreFacets()` trực tiếp trong Server Component; không self-fetch Route Handler nội bộ. Repository áp `Story.status = published` trong chính query và chỉ trả `PublicStoryListItem` + count/cursor hoặc facet projection, không chapter/block/effect/Scene.
+- Admin page gọi `StoryDataAccess` admin-only; `/api/admin/stories` nếu dùng cho client cũng gọi cùng DAL. Public và moderation có DTO, auth, status/sort/cursor riêng; tuyệt đối không nhận một cờ `scope/includeDrafts` từ client để đổi visibility.
+- Home dùng GET form/Enter hoặc nút “Tìm kiếm” (không request từng phím); genre chip là link GET giữ `q`, đổi `genre` và xóa cursor. Admin toolbar live-search debounce khoảng `300ms`; Enter/Clear commit ngay, không navigate khi IME đang composition, dùng URL replace không scroll để history không chứa từng keystroke. Kết quả có loading boundary riêng.
+
+`Story.searchTextNormalized` là cột hạ tầng, không thêm vào domain `Story` hoặc DTO.
+Create/update/import/backfill đều phải gọi đúng một `buildStorySearchText()`; JSON bridge
+tính khi đọc. Migration theo expand → backfill → verify không còn blank/mismatch →
+`NOT NULL`, rồi mới dùng query mới. Prisma dùng predicate có tham số; không fetch toàn bộ
+row để giả lập bỏ dấu.
+
+Không dùng PostgreSQL full-text Preview hoặc `unaccent()` raw expression làm baseline vì
+chúng đổi/couple semantics đang có. Trước khi thêm `pg_trgm` + GIN, ghi lại dataset,
+`EXPLAIN (ANALYZE, BUFFERS)` và p95; chỉ thêm bằng customized migration khi phép đo cho
+thấy substring scan là bottleneck. `pg_trgm` vẫn là đường nâng cấp lexical tương thích,
+không phải điều kiện để triển khai đúng contract ban đầu.
+
+**Seam tương lai:** chưa tạo AI provider, embedding/vector schema, job index hoặc score
+trong DTO. Nếu sau này có lexical/semantic/hybrid engine, nó chỉ trả candidate ID/order ở
+server; repository vẫn hydrate và áp lại public visibility hoặc admin authorization trước
+khi trả kết quả. Local picker không tự chuyển sang AI/server search.
+
+Tham chiếu implementation: [Next.js URL search/pagination](https://nextjs.org/learn/dashboard-app/adding-search-and-pagination), [`<Form>` GET navigation](https://nextjs.org/docs/app/api-reference/components/form), [Page `searchParams`](https://nextjs.org/docs/app/api-reference/file-conventions/page), [direct Server Component data access](https://nextjs.org/docs/app/guides/backend-for-frontend), [Prisma case sensitivity](https://www.prisma.io/docs/orm/v7/prisma-client/queries/case-sensitivity), [PostgreSQL `pg_trgm`](https://www.postgresql.org/docs/17/pgtrgm.html), [WAI form labels](https://www.w3.org/WAI/tutorials/forms/labels/) và [ARIA status](https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA22).
+
+### 9.2.3. Home hero media và theme trước first paint
+
+Home dùng **ba art-directed asset riêng**, không dùng một ảnh rồi `filter`/`hue-rotate`:
+`home-hero-dark.png` (đêm/trăng), `home-hero-light.png` (ngày/mặt trời) và
+`home-hero-sepia.png` (giấy ấm). Ba ảnh cùng `2172×724` nhưng khác ánh sáng/nội dung;
+trước khi nối UI phải chuẩn hóa đúng ba tên trên theo **nội dung ảnh**, không suy từ tên tạm.
+
+- `HomeHeroArtwork` là client leaf nằm tuyệt đối trong Hero; nội dung Hero/search/genre vẫn ở DOM phía trên. Render bằng `next/image` local, `fill`, `object-cover`, `object-position: center top`, `alt=""`; khung cha có nền semantic, kích thước content-driven + `min-height` dành sẵn, scrim trung tâm và fade đáy về `--color-background`. Không dùng raw PNG làm CSS background, không đưa ảnh vào accessibility tree và không để media nhận pointer event.
+- Initial HTML có ba theme layer nhưng CSS `[data-theme]` chỉ `display` đúng layer hiện hành. Giữ native lazy loading và `fetchPriority="high"`; không gắn `preload`, `loading="eager"` hoặc legacy `priority` cho cả ba vì sẽ tranh băng thông/tải nhiều variant. Public PNG nguồn gần 5.9 MiB phải đi qua optimizer; chỉ active variant được phép nằm trên critical path.
+- Khi theme đổi, layer cũ vẫn hiện; mount/hiện target ở opacity `0`, chờ `load` + `HTMLImageElement.decode()`, rồi crossfade opacity ngắn **150–220 ms**. Không animate `background-image`. Variant đã tải được giữ cache; chỉ warm variant còn lại sau active image/LCP ở idle hoặc khi mở theme control, tuần tự và bỏ qua khi Save-Data. `prefers-reduced-motion` bỏ crossfade nhưng vẫn chờ decode rồi mới swap, nên không có frame trắng/trong suốt.
+- Theme SSR hiện mặc định Dark nhưng setting được resolve sau hydration. Thêm allowlist `dark|light|sepia` + presentation hint local `story_theme_hint_v1`: script nhỏ trong `<head>` đọc hint trước first paint, fallback đọc `story_reader_settings.theme` của guest cũ rồi Dark, và set `data-theme`. Hint chỉ chống FOUC, không sync DB/import và **không** là settings store thứ hai; khi sync chưa ready, `ThemeProvider` không được reset DOM về default. Khi ready, Provider dùng layout effect để áp setting authoritative; `setTheme` gọi `settingsStore` trước rồi áp DOM/hint ngay từ giá trị store chấp nhận. `settingsStore` vẫn là authority duy nhất; không đưa `next-themes` vào luồng này.
+- Ảnh rộng 3:1 được coi là atmosphere: mobile được phép crop sách/núi hai cạnh để giữ safe zone giữa cho chữ; không kéo méo hoặc cố nhồi hai motif. Nếu sau này bắt buộc giữ cả hai motif ở portrait thì cần asset art-direction riêng. `sizes` phải được tính theo **chiều rộng bitmap thực sau `object-cover` và chiều cao Hero**, không mặc định `100vw` ở mobile; kiểm request `_next/image`, độ nét 375/768/1024/1440/ultrawide và không upscale vô ích quá nguồn.
+
+Tham chiếu implementation: [Next.js Image/theme detection](https://nextjs.org/docs/app/api-reference/components/image), [`HTMLImageElement.decode()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/decode), [CSS background là transition rời rạc](https://developer.mozilla.org/en-US/docs/Web/CSS/background-image) và [WAI contrast trên ảnh nền](https://www.w3.org/WAI/WCAG22/Techniques/general/G18.html).
 
 ## 9.3. DB/Auth/Migration/Cutover — thứ tự an toàn
 
@@ -204,6 +301,7 @@ model Story {
   slug            String       @unique
   title           String
   authorDisplayName String      // public byline snapshot; tách khỏi authorId ownership
+  searchTextNormalized String   // hạ tầng search title+byline; không map vào domain/public DTO — §9.2.2
   description     String
   coverUrl        String?
   coverPositionX  Float        @default(50) // phần trăm 0..100; DB migration có CHECK range
@@ -559,10 +657,14 @@ Quota video Author cấp một `videoSlot` 1..10 trong transaction/serializable 
 - **P3-10 chapter reorder:** command bắt buộc nhận đúng một lần toàn bộ chapter ID hiện tại của Story, kiểm duplicate/membership bằng `Set`, rồi ghi order bằng một batch statement có tham số trong cùng transaction/revision thay vì tuần tự N lệnh `update`. Create-at-gap, delete và reorder trực tiếp dùng chung primitive normalize này. Response strict chỉ là `ChapterOrder[]` (`{ id, order }`), không đọc/serialize lại block/effect payload; client merge order vào `ManagedChapter` đang có.
 - **Concurrency:** mọi command sửa aggregate nhận `expectedUpdatedAt` (ISO từ `meta.updatedAt` của full Story/editor read hoặc command trước). So sánh rồi conditional-update `Story.updatedAt` trong cùng transaction; mỗi mutation Chapter/Scene cũng tăng mốc Story, tối thiểu 1ms. Các thao tác trên hai chương cùng Story có thể conflict; client phải reload khi `409`. Không cần thêm version/timestamp vào Chapter. Kết quả `CommandResult<T>` chứa revision của chính transaction vừa commit, không đọc lại revision sau commit.
 - **Authorization errors:** chưa đăng nhập `401`; thiếu role tối thiểu `403`; Story không tồn tại/khác owner hoặc Chapter không thuộc Story đều `404` với cùng envelope. Admin được override ownership và khóa pending-review dành cho author, nhưng vẫn tuân thủ state machine, concurrency và rule chương cuối. Truyện archived cần restore về draft trước khi sửa.
+- **P3-11A public discovery:** thêm `listPublicStories()` + `PublicStoryListItem`, `listPublicGenreFacets()`, normalized search field/backfill và Home URL `q/genre` theo §9.2.2; thêm Hero media/theme paint boundary theo §9.2.3. Home không còn tải aggregate bằng `getAllPublic()`; library chưa đổi trong stage này.
+- **P3-11B moderation reads:** `StoryDataAccess` thêm admin-only projections: queue summary/counts (`q/status/cursor`) dùng text contract §9.2.2 nhưng auth/status/sort riêng, detail có author email + chapter/effect counts, và full single-chapter preview. List/detail không serialize block/effect/Scene payload; preview mới đọc full aggregate và reuse Reader renderer nhưng tuyệt đối không gọi/nới public repository. Mọi response dùng envelope chuẩn; detail/preview xác minh Story–Chapter membership và trả `meta.updatedAt`.
+- **P3-11 moderation commands:** `POST /api/admin/stories/[storyId]/approve|reject` gọi `StoryModerationService`, đọc lại actor role và kiểm `pending_review` + `expectedUpdatedAt` trong transaction Serializable. Approve ghi review metadata, clear reason và publish Story + mọi Chapter; reject trim/validate reason `5..2000` rồi ghi review metadata + status/reason. `409` buộc client reload, không auto-retry; không nhận status/reviewer/timestamp/chapter IDs từ client.
 - **Editor aggregate:** `replaceEditor` nhận blocks + Scene snapshots và lưu cả hai trong một transaction. Lệnh chỉ thay blocks phải giữ Scene hiện có và kiểm range lại; nếu xóa boundary làm Scene không hợp lệ thì từ chối, không tự drop Scene. Các command giữ snapshot/provenance đã lưu dù nguồn archived; tham chiếu mới tới preset phải active, audio cá nhân phải đúng actor và URL đã lưu. Catalog lifecycle/media integration đầy đủ thuộc các stage tương ứng.
 - **HTTP boundary:** routes P3-06 dùng strict Zod input/output và `{ data, meta: { updatedAt } }` / `{ error: { code, message, fieldErrors? } }`; chapter DELETE trả `data: null`. Mutation cookie-auth yêu cầu Origin khớp `AUTH_URL`. JSON body tối đa 4,000,000 bytes (đếm bytes thực từ stream); quá giới hạn `413`. Error mapper hỗ trợ `400/401/403/404/409/413/429/503`; `429` dành cho nguồn rate-limit khi được tích hợp, không thêm bộ đếm in-memory giả làm distributed rate limiter.
 - **Write gate:** mặc định write flag `json` từ P3-06 nghĩa là chặn runtime content write (`503` cho command hợp lệ), không fallback ghi JSON. Cho phép `prisma` khi cả Story/Scene read flags là `prisma` và DB được cấu hình; chỉ bật trong môi trường kiểm thử đã kiểm soát trước P3-07. Production cutover, client editor snapshot/envelope và Reader transition vẫn thuộc P3-07.
 - **Settings/Progress/Bookmark (P3-08, quyết định 2026-09-09):** guest giữ localStorage; logged-in dùng DB source + cache riêng theo user. Chỉ import guest một lần khi khởi tạo đồng bộ tài khoản. `UserSettings` là dấu mốc bền vững: tạo settings và import trong cùng transaction; các record DB có sẵn luôn thắng. Những lần sau DB thắng toàn bộ, kể cả danh sách rỗng; không bổ sung lại từ thiết bị khác. Không tự tạo `UserSettings` bằng server defaults trước bootstrap: client gửi settings đã tính `prefers-reduced-motion` nếu chưa có override; DB settings hiện hữu giữ nguyên.
+- **Theme paint hint:** `story_theme_hint_v1` chỉ cache enum theme cuối trên browser để root bootstrap áp `data-theme` trước first paint (§9.2.3). Nó không tham gia guest import, account cache, conflict resolution hay API/DB; `settingsStore` vẫn là authority. Khi identity sync chưa ready, Provider giữ paint hint thay vì ghi đè bằng default Dark; sau khi ready, setting guest/DB thắng và cập nhật lại hint. Account switch có thể tạm dùng hint gần nhất rồi được sync sửa, không đổi root request thành session/DB theme lookup chỉ để triệt edge case này.
 - **Sync isolation/concurrency:** cache tài khoản không trở thành guest data khi logout/switch. Sau bootstrap thành công, client tiêu thụ guest snapshot đã gửi (chỉ xóa giá trị chưa thay đổi), không tái import snapshot đó vào tài khoản kế tiếp. API lấy actor từ session; `expectedUserId` chỉ kiểm session chưa đổi. `UserSettings.updatedAt` là revision chung cho settings/progress/bookmark; transaction Serializable và conditional-update trả `409` khi stale. Client tải lại DB, không tự phát lại stale mutation. Bookmark ghi trạng thái mong muốn (lưu/bỏ lưu), không toggle phía server. Cache chỉ lưu kết quả DB đã xác nhận; lỗi mạng không được thông báo là đã đồng bộ.
 - **Resume compatibility:** tài khoản dùng `ReadingProgress` DB làm nguồn vị trí; `ResumeReading` chỉ là projection/cache tương thích, không có bảng riêng và không được ưu tiên hơn DB. Trước khi trả sync snapshot, đối chiếu Story/Chapter public qua `StoryRepository`: xóa target đã mất public, block đã mất fallback đầu chapter; bookmark không tạo link tới Story không public. Không dùng content write flag để chặn dữ liệu đọc cá nhân.
 

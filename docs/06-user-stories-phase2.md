@@ -16,7 +16,7 @@
 **US-2.2 — Gắn & Tinh chỉnh hiệu ứng block (`EffectPicker`)**
 > Là tác giả, tôi muốn gắn một hoặc nhiều hiệu ứng chấm phá vào block và tinh chỉnh thông số trực quan.
 - [ ] Nút `+ Gắn Hiệu Ứng` mở `EffectPicker.tsx` dạng modal `z-[80]` căn giữa với 4 tab danh mục: `Hình Ảnh (Visual)`, `Chuyển Động (Motion)`, `Âm Thanh (Audio)`, `Chuyển Cảnh (Transition)`.
-- [ ] Ô tìm kiếm thời gian thực lọc nhanh theo tên/mô tả; tự động ưu tiên đưa hiệu ứng đang sửa lên đầu danh sách.
+- [ ] Ô tìm kiếm thời gian thực lọc client-side catalog đã tải theo tên/mô tả bằng AND-token substring bỏ dấu/case; không URL, debounce, request server hay gọi sai là fuzzy search. Tự động ưu tiên đưa hiệu ứng đang sửa lên đầu danh sách.
 - [ ] Bộ 4 thanh trượt thông số: `Intensity` (0.1 - 1.0), `Duration` (200ms - 10000ms), `Delay` (0ms - 3000ms cho chuỗi choreography), và công tắc `Loop`.
 - [ ] Nút con mắt `Eye` kích hoạt **Live Preview Portal tức thì (`z-[90]`)** qua `createPortal` render hạt/chớp sáng toàn màn hình trong 5 giây mà không làm đóng modal.
 - [ ] Quick Effect Preview luôn phát đúng cấu hình effect đang chỉnh, không áp dụng `effects_enabled`, category toggles, `intensity_multiplier` hay `reduced_motion` của Reader; thay đổi thông số khi preview đang mở phải cập nhật preview. Đây là công cụ kiểm thử effect, không phải mô phỏng trải nghiệm Reader.
@@ -57,7 +57,7 @@
   - Chế độ thu gọn: Dãy nút tròn Mini Scene (1, 2, 3...) tự phóng to và sáng viền khi focus vào block thuộc Scene; click cuộn tới block đầu.
   - Chế độ mở rộng: Khung chọn dải block 2 bước có chỉ dẫn rõ ràng.
 - [ ] **Thuật toán chống va chạm chồng lấn (Overlap Collision Check)**: $\max(start_A, start_B) \le \min(end_A, end_B)$ — chặn ngay lập tức nếu dải chọn giao thoa với Scene khác trong chương.
-- [ ] Hộp thoại `ScenePicker.tsx` (`z-[80]`, `max-w-4xl`) Tab 1 "Preset Có Sẵn": Lưới 2 cột các mẫu bối cảnh kèm tìm kiếm/phân trang, swatch 3 màu, nút `Xem trước` 1-Click.
+- [ ] Hộp thoại `ScenePicker.tsx` (`z-[80]`, `max-w-4xl`) Tab 1 "Preset Có Sẵn": Lưới 2 cột các mẫu bối cảnh kèm search client-side trên catalog đã tải và visible batching “Xem thêm” (không phải server pagination/cursor), swatch 3 màu, nút `Xem trước` 1-Click.
 - [ ] Implementation Phase 2 legacy resolve preset qua `background_id`/`palette_id`; khi vào Phase 3 bắt buộc migrate thành deep snapshot `SceneRenderConfig` và ghi qua `SceneCommandService`, không giữ ID catalog làm runtime source. Timeline/ScenePanel vẫn cập nhật Optimistic UI.
 
 **US-2.8 — Tự phối bối cảnh riêng (Custom Scene Composition)**

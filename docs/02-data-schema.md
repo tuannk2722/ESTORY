@@ -111,6 +111,13 @@ thiếu về chính giữa. Prisma map thành hai cột non-null `coverPositionX
 `StoryManageCard` và public `StoryCard` đều dùng viewport `16:9`, `object-fit: cover`
 và cùng `object-position: "x% y%"` để vùng tác giả chọn không bị lệch giữa các trang.
 
+Từ P3-11, Prisma `Story` có thêm cột hạ tầng `searchTextNormalized` để Home và
+Admin lọc title + `authorDisplayName` ở DB với cùng semantics bỏ dấu/case. Cột này
+được tạo bởi `buildStorySearchText()` theo `11-phase3-technical-roadmap.md` §9.2.2,
+backfill trước khi đặt `NOT NULL`, và cập nhật cùng transaction khi title/byline đổi.
+Nó **không** thuộc domain `Story`, không xuất hiện trong public/admin DTO và không chứa
+description, email hay nội dung chapter.
+
 ## 2.2. Ví dụ file nội dung (`/content/stories/demo-story.json`)
 
 Dùng ở Phase 1–2, và làm dữ liệu seed/migrate ở Phase 3. `status` (cả `Story` lẫn từng `Chapter`) và `view_count` là field **bắt buộc** trong interface (mục 2.1) — ở Phase 1–2 luôn để `"published"`/`0` như dưới đây, xem lý do ở mục 2.7 và `12-auth-and-author-management.md` mục 12.7:
@@ -320,6 +327,13 @@ published ──(admin/tác giả gỡ)──▶ archived
 ```
 
 Field bổ sung ở tầng DB (Phase 3, Prisma `11-phase3-technical-roadmap.md` mục 9.4): `submitted_at`, `reviewed_at`, `reviewed_by` (userId admin), `rejection_reason`.
+
+Invariants kiểm duyệt:
+
+- `submitted_at` là thời điểm gửi/gửi lại gần nhất. Approve/reject chỉ hợp lệ từ `pending_review`, phải kiểm role + `expectedUpdatedAt` trong cùng transaction; stale revision trả `409`, không tự retry.
+- Approve ghi `published`, `reviewed_at`, `reviewed_by`, xóa `rejection_reason` và chuyển **toàn bộ** Chapter sang `published` nguyên tử.
+- Reject trim reason rồi yêu cầu độ dài `5..2000` ký tự; rỗng/toàn whitespace/ngoài range không hợp lệ. Transaction ghi `rejected`, `reviewed_at`, `reviewed_by` và reason đã trim.
+- Không tạo moderation-history model trong scope hiện tại; các field review chỉ phản ánh quyết định gần nhất.
 
 > Phase 1–2: **không có bước duyệt** — mọi truyện coi như `status: "published"` ngay (chưa có admin/auth thật). Field `status` vẫn nên có mặt từ Phase 1 (mặc định `"published"`) để Phase 3 không phải thêm field mới vào dữ liệu cũ.
 >

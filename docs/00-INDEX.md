@@ -52,15 +52,17 @@ Bảng này bổ sung bước đọc chung phía trên. Số `02`, `08`… là f
 | Task | Mục cần đọc | Điểm vào code hiện có |
 |---|---|---|
 | Reader, thư viện, resume/settings | `02` §2.1/2.3–2.4; `05`; `04b` §1–4; Scene liên quan: `08` §8.4; public read: `11` §9.2.1, `12` §12.7.4 | `src/components/reader/`, `src/lib/reader/`, `src/lib/settingsStore.ts` |
+| Story discovery/Home + Admin search | `05` US-1.1; `07` US-3.11/3.20; `11` §9.2.2–9.2.3; `04` §4.4; `04b` §0/§1/§8.1; `09`; Admin auth: `12` §12.7.6 | `src/components/home/`, `src/components/ui/SearchInput.tsx`, `src/lib/search/`, `src/lib/repositories/story-repository.ts`, `public/home-background-image/`; Admin: `src/lib/services/story-dal.ts` |
 | Chapter editor, lưu/reorder block | `02` §2.1/2.9; `06`; `04b` §5; `08` §8.3/8.4/8.7; Phase-3 mutation: `11` §9.2/9.5 | `src/components/editor/`, `src/lib/editor/`, `src/services/editorService.ts` |
 | Effect renderer/suggestion | `02` §2.1/2.6; `08` §8.1/8.2/8.5.1; `06` US-2.2/2.3 | `src/lib/effects/`, `src/lib/effectSuggestion.ts`, `src/components/effects/` |
-| Scene runtime/picker | `02` §2.9; `08` §8.3–8.7; `06` US-2.7–2.9; `04b` §5.5/8.3 | `src/types/scene.ts`, `scene-legacy.ts`, `src/lib/scenes/`, `src/components/scenes/` |
+| Scene runtime/picker | `02` §2.9; `08` §8.3–8.7; `06` US-2.7–2.9; `04b` §5.5/8.4 | `src/types/scene.ts`, `scene-legacy.ts`, `src/lib/scenes/`, `src/components/scenes/` |
 | DB/schema/migration | `07` US-3.1/3.2; `11` §9.2–9.4c/9.7; `02` toàn bộ model được map; Scene: `08` §8.3/8.6 | `src/lib/repositories/`, `content/`; Prisma chưa có ở mốc P3-01 |
 | Repository/API/authz/cutover | `07` US-3.1/3.3/3.5/3.7; `11` §9.2/9.3/9.5; `12` §12.7; `09` | `src/lib/repositories/`, `src/lib/services/`, `src/types/api.ts`, `src/app/api/` |
-| Auth UI/Author/moderation | `02` §2.5/2.7; `07` US-3.11/3.14–3.17; `12` §12.1–12.7; `04b` §6–7 | `src/components/ui/`, `src/app/author/`; các trang quản lý là đích Phase 3 |
-| Settings/progress/bookmark sync | `02` §2.3–2.5; `07` US-3.4; `11` §9.5; `12` §12.7.4 | `src/lib/settingsStore.ts`, `src/components/ui/ThemeProvider.tsx` |
-| Effect Admin | `02` §2.6; `07` US-3.12; `08` §8.5.1; `11` §9.4; `04b` §8.0/8.1/8.4 | Manifest/projector ở `src/lib/effects/`; Admin UI là đích Phase 3 |
-| Scene catalog/Preset import | `02` §2.9; `07` US-3.13; `08` §8.3/8.5–8.7; `11` §9.4b; `04b` §8.0/8.2–8.4 | `src/lib/repositories/scene-repository.ts`, `src/lib/scenes/` |
+| Auth UI/Author | `02` §2.5/2.7; `07` US-3.14–3.17; `12` §12.1–12.7; `04b` §6–7 | `src/components/ui/`, `src/app/author/` |
+| Story moderation | `02` §2.7; `07` US-3.11; `11` §9.5; `12` §12.7.6; `04b` §8.0–8.1; `09`; `10` | `src/app/admin/`, `src/components/admin/`; protected landing hiện có, moderation là đích P3-11 |
+| Settings/progress/bookmark/theme | `02` §2.3–2.5; `07` US-3.4; Home paint hint: `11` §9.2.3/§9.5; `12` §12.7.4 | `src/lib/settingsStore.ts`, `src/components/ui/ThemeProvider.tsx`, `src/lib/theme/` |
+| Effect Admin | `02` §2.6; `07` US-3.12; `08` §8.5.1; `11` §9.4; `04b` §8.0/8.2/8.5 | Manifest/projector ở `src/lib/effects/`; Admin UI là đích Phase 3 |
+| Scene catalog/Preset import | `02` §2.9; `07` US-3.13; `08` §8.3/8.5–8.7; `11` §9.4b; `04b` §8.0/8.3–8.5 | `src/lib/repositories/scene-repository.ts`, `src/lib/scenes/` |
 | Storage/Freesound/AI background | `07` US-3.6/3.18/3.19; `02` §2.5/2.9/2.11; `08` §8.9 hoặc §8.10; `12` §12.9 nếu Freesound; `11` §9.4c/9.6; `09` | Chưa tích hợp ở mốc P3-01; vị trí đích trong `03` |
 | CI/testing/hardening | `07` US-3.8; `09`; `11` §9.6; README | `.github/workflows/ci.yml`, `scripts/`, `src/__tests__/` |
 

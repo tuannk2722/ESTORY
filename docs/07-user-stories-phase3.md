@@ -71,15 +71,17 @@ Nguồn: [09](09-non-functional-requirements.md); [10](10-out-of-scope.md) phầ
 
 ## US-3.11 — Admin kiểm duyệt truyện
 
-Nguồn: [02](02-data-schema.md) §2.7; [12](12-auth-and-author-management.md) §12.7.
+Nguồn: [02](02-data-schema.md) §2.7; [11](11-phase3-technical-roadmap.md) §9.2.2/9.5; [12](12-auth-and-author-management.md) §12.7.6; UI: [04b](04b-page-layouts.md) §8.0–8.1.
 
-- [ ] `/admin/stories` lọc status, pending review trước; admin xem chi tiết rồi approve/reject đúng state machine.
-- [ ] Approve → published + `reviewed_at/reviewed_by`, toàn bộ chương published; reject bắt buộc reason.
-- [ ] Author thấy status/rejection reason, sửa và gửi lại từ rejected.
+- [ ] `/admin/**` dùng shell riêng không có `AppHeader`: desktop sidebar gập/mở; mobile/tablet navigation sheet; có Stories/Effects/Scene Library, lối về Reader, Admin identity và shared ThemeSwitcher.
+- [ ] `/admin/stories` mặc định pending, có summary counts, URL-backed status/search, server pagination, desktop table/mobile cards và đủ loading/empty/error; list chỉ dùng moderation summary, không gửi chapter content xuống client.
+- [ ] Admin mở drawer để xem cover đúng focal point, author/email, metadata, description/genre và chapter/effect counts; preview chapter admin-only reuse Reader renderer nhưng không đi qua public read boundary.
+- [ ] Decision chỉ có trong detail của Story `pending_review`. Approve → published + review metadata + clear reason + mọi Chapter published; reject trim reason bắt buộc `5..2000`; cả hai atomic và nhận `expectedUpdatedAt`.
+- [ ] `409` không auto-retry, buộc reload detail. Drawer/dialog keyboard/focus/reduced-motion/375px/AA theo `04b` §8.5; Author thấy status/reason, sửa và gửi lại từ rejected.
 
 ## US-3.12 — Effect Admin
 
-Nguồn: [02](02-data-schema.md) §2.6; [08](08-effects-and-scenes.md) §8.5.1; UI: [04b](04b-page-layouts.md) §8.0/8.1/8.4.
+Nguồn: [02](02-data-schema.md) §2.6; [08](08-effects-and-scenes.md) §8.5.1; UI: [04b](04b-page-layouts.md) §8.0/8.2/8.5.
 
 - [ ] Code manifest giữ technical ID/category/icon/defaults/renderer/scope. Admin chỉ sửa overlay `label/description/is_active` và keyword; không Create EffectType, sửa technical/default hay per-picker visibility.
 - [ ] `/admin/effects`: search/category/status, desktop table/mobile cards, detail drawer; keyword CRUD inline, Preview renderer thật/reduced motion, dirty-close confirm theo layout.
@@ -89,13 +91,13 @@ Nguồn: [02](02-data-schema.md) §2.6; [08](08-effects-and-scenes.md) §8.5.1; 
 
 ## US-3.13 — Scene Admin & snapshot integration
 
-Nguồn: [02](02-data-schema.md) §2.9; [08](08-effects-and-scenes.md) §8.3–8.7; UI: [04b](04b-page-layouts.md) §8.2–8.4.
+Nguồn: [02](02-data-schema.md) §2.9; [08](08-effects-and-scenes.md) §8.3–8.7; UI: [04b](04b-page-layouts.md) §8.3–8.5.
 
 - [ ] `/admin/scene-library` có Backgrounds/Palettes/Scene Presets; Background chỉ global, typed kinds/registered particle, looping có poster, từ chối raw CSS/particle JSON. Palette đủ bốn kênh, tint color + opacity, sample Reader Preview.
 - [ ] Lifecycle draft/active/archived; Author chỉ active, Remove = archive, hard-delete chỉ `activated_at = null`. Preset chỉ developer seed/import; Admin Preview/sửa label/description/mood/thumbnail/status/remove, không builder/Create.
 - [ ] Custom/preset cùng deep-copy `SceneRenderConfig`; Reader không resolve background/palette ID hay fetch Scene library. Ambient chỉ scope scene, unique type, ≤1 audio loop.
 - [ ] Replace key mới; archive/delete không xóa media đang dùng. ConfirmModal nêu dependency/impact và Scene cũ giữ nguyên; preset có thể hiện provenance count; cleanup storage riêng.
-- [ ] Không personal background trong Admin response/UI, không global AudioAsset library. Nghiệm thu responsive 375px/keyboard/focus/error summary/AA/reduced motion và target size theo gate §8.4 của `04b`.
+- [ ] Không personal background trong Admin response/UI, không global AudioAsset library. Nghiệm thu responsive 375px/keyboard/focus/error summary/AA/reduced motion và target size theo gate §8.5 của `04b`.
 
 ## US-3.14 — Navbar & Profile Modal
 
@@ -155,12 +157,24 @@ Nguồn: [08](08-effects-and-scenes.md) §8.10 **đầy đủ**; [02](02-data-sc
 - [ ] Preview/commit có request/response cap + test 413, không trả hai base64 trong một Vercel response 4.5MB. Hết quota disable Generate + reset time, không gọi provider.
 - [ ] Personal background không trong Admin catalog hoặc curated preset dùng chung.
 
+## US-3.20 — Khám phá, tìm kiếm và phân trang truyện công khai
+
+Nguồn: [05](05-user-stories-phase1.md) US-1.1; [11](11-phase3-technical-roadmap.md) §9.2.2–9.2.3; UI: [04](04-ui-ux-design.md) §4.4 và [04b](04b-page-layouts.md) §1.
+
+- [ ] `/` có GET search form với `q` và quick-filter single-select `genre` URL-backed; Enter/nút submit chạy server-side, clear search bỏ `q`, “Tất cả” bỏ `genre`, đổi một filter reset cursor nhưng giữ filter còn lại. Refresh/back/forward giữ đúng control và kết quả; không gửi request theo từng phím trên Home.
+- [ ] Query rỗng trả catalog mặc định; query có giá trị tìm title/bút danh theo AND-token substring bỏ dấu/case, giới hạn 100 code point. Không typo correction, autocomplete, relevance/AI ranking hoặc tìm trong description/content.
+- [ ] `genre` match exact public facet và kết hợp AND với `q`, không nhập vào search document. `listPublicGenreFacets(6)` lấy động từ Story published, đếm distinct Story và không hardcode taxonomy/derive từ page hiện tại; `listPublicStories()` áp visibility public trong DB, cursor ổn định và chỉ trả card DTO + total/next cursor.
+- [ ] Hero giữ copy hiện có, thêm ba artwork Dark/Light/Sepia đúng nội dung trong section full-width chứa search/genre; Story grid và hành vi khác giữ nguyên. Scrim/fade/token bảo đảm AA, mobile crop chỉ là trang trí, khung dành sẵn không CLS theo `04b` §1/`11` §9.2.3.
+- [ ] Mở Home bằng saved Dark/Light/Sepia không lóe theme mặc định. Khi switch dưới cold/throttled network, chỉ active image ở critical path, giữ ảnh cũ đến khi target load/decode rồi mới swap; không frame trắng, reduced motion không crossfade và không tải cả ba PNG nguồn ngay đầu.
+- [ ] Có skeleton/pending, base-empty, no-result + Xóa bộ lọc, retry error và result status accessible theo `04b` §0/§1. Pagination giữ `q/genre`; public visibility không phụ thuộc param/candidate bên ngoài.
+- [ ] Tách helper/matcher khỏi `SearchInput`; picker Effect/Scene giữ local search trên catalog đã tải. Unit/contract/browser test phủ dấu/case/space/compact alias/multi-token, `q` max, `q + genre`, facet public-only, search-document backfill/parity, payload không rò aggregate/private Story và Hero ở 375/768/1024/1440/200% zoom.
+
 ## Definition of Done
 
 | Mức nghiệm thu | Phạm vi |
 |---|---|
 | Phase 3 cơ bản | US-3.1–3.5: multi-user, dữ liệu bền vững; vẫn tuân thủ migration/authz/validation gates trong `11` §9.3 |
-| Luồng Author + Admin | US-3.14–3.17 trước US-3.11; tiếp tới US-3.12/3.13 |
+| Luồng Author + Discovery + Admin | US-3.14–3.17 trước US-3.20/3.11; tiếp tới US-3.12/3.13 |
 | Toàn bộ scope hiện tại | Mọi US trừ optional US-3.9/3.10; bao gồm media/API/testing, Freesound, AI, production hardening |
 
 Không cần làm mọi US cùng lúc. Freesound/AI không phụ thuộc moderation/catalog Admin; triển khai khi Auth/authorization/quota/storage và điểm tích hợp Author sẵn sàng (`11` §9.6–9.7). Tạm hoãn không biến chúng thành optional. Rating/Comment/Stats UI vẫn ngoài scope theo [10](10-out-of-scope.md).

@@ -8,40 +8,45 @@
 
 - **Breakpoint** (khớp checklist `04`): `375px` (mobile) / `768px` (tablet) / `1024px` (laptop) / `1440px` (desktop). Mobile-first — style mặc định cho 375px, mở rộng dần bằng `md:`/`lg:`/`xl:` của Tailwind.
 - **Spacing:** dùng thang mặc định của Tailwind (bội số 4px). Khoảng cách section chuẩn: `py-8 md:py-12 lg:py-16`; khoảng cách item trong grid: `gap-4 md:gap-6`.
-- **Container:** trang danh sách/chi tiết dùng `max-w-6xl mx-auto px-4` hoặc `max-w-4xl mx-auto px-4`. Riêng khung đọc truyện dùng `max-w-2xl` / `max-w-[65ch]` căn giữa.
+- **Container:** trang danh sách/chi tiết dùng `max-w-6xl mx-auto px-4` hoặc `max-w-4xl mx-auto px-4`; Admin dùng `max-w-7xl` vì bảng quản trị dày hơn. Riêng khung đọc truyện dùng `max-w-2xl` / `max-w-[65ch]` căn giữa.
 - **Z-Index Layering Matrix chuẩn toàn hệ thống (Text-First Architecture):**
   ```
   z-0     SceneLayer & Cinematic Color Grading (BackgroundAsset, Color wash, Depth tint, Ambient aura)
   z-[5]   EffectLayer & Visual/Motion/Particle Effects (toàn bộ hiệu ứng khí quyển, pointer-events-none)
   z-20    Story Text Layer (.prose-reader, StoryBlock, Tiêu đề chương, Drop Cap, Dialogue Box)
   z-50    ProgressBar (fixed top-0, nằm trên ReaderScreenHeader)
-  z-40    AppHeader / ReaderScreenHeader sticky, SettingsPanel drawer
+  z-40    AppHeader / ReaderScreenHeader / AdminSidebar / AdminMobileNav topbar
   z-50    Full Reader Preview Overlay (trong Editor mode)
   z-[60]  Floating Action Dock (PreviewToggle + Save Button)
-  z-[80]  Modals & Backdrops (EffectPicker, ScenePicker)
+  z-[80]  Modal/drawer/sheet backdrop; surface có thể dùng z-[85]
   z-[90]  In-Modal Live Previews (createPortal preview, Scene Live Preview, Popconfirm)
-  z-[100] ConfirmModal (cảnh báo nguy hiểm / rời trang)
+  z-[100] ConfirmModal hoặc dialog nghiệp vụ mở trên một drawer
   ```
 - **Trạng thái chung:**
   - *Loading:* skeleton card cùng kích thước với card thật hoặc dòng text thông báo `glass-card p-12 text-center text-muted-foreground`.
-  - *Empty:* icon `lucide-react` + 1 câu ngắn font-story/ui + nút CTA dẫn về `/`.
-- **Icon:** toàn bộ dùng `lucide-react`, kích thước chạm tối thiểu `44×44px` (`min-h-[44px] min-w-[44px]`).
+  - *Empty:* icon `lucide-react` + 1 câu ngắn font-story/ui + CTA theo ngữ cảnh; empty do search/filter ưu tiên Xóa tìm kiếm/bộ lọc, không mặc định dẫn về `/`.
+- **Icon:** toàn bộ dùng `lucide-react`, không dùng emoji làm icon cấu trúc. Reader/Author mặc định target `44×44px`; Admin áp dụng mật độ và target theo mục 8.5, nhưng icon-only button luôn có vùng bấm đủ rõ và accessible name.
+- **Search boundary:** `SearchInput` chỉ là field dùng chung. Picker Effect/Scene/combobox lọc tức thì catalog đầy đủ đã tải ở client; Home giữ `q/genre`, Admin giữ `q/status` trong URL và lọc/paginate ở server theo `11` §9.2.2. Không tải aggregate Story về client để dùng matcher của picker.
+- **Search accessibility:** mỗi input có label hiển thị hoặc `sr-only` (placeholder không thay label), clear button có accessible name và trả focus về input. Result count/no-result cập nhật trong vùng `role="status" aria-atomic="true"`; chỉ dùng combobox ARIA nếu thật sự có popup suggestion.
 
 ---
 
-## 1. `/` — Trang Chủ / Khám Phá Truyện (US-1.1)
+## 1. `/` — Trang Chủ / Khám Phá Truyện (US-1.1, US-3.20)
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │ AppHeader (sticky, z-40, glass-card blur)                              │
 │  ✨ StoryVerse                     [🕒 Đang đọc] [🔖 Đã lưu]   [User/Theme]│
 ├────────────────────────────────────────────────────────────────────────┤
-│ Hero Section (căn giữa):                                               │
+│ Hero full-bleed (artwork theo Dark/Light/Sepia + scrim/fade):           │
 │  [✨ Trải nghiệm Đọc Truyện Đa Giác Quan] (pill badge)                 │
 │  Nơi Câu Chữ Chạm Tới Cảm Xúc (h1 gradient text)                       │
 │  Đọc truyện sống động với hiệu ứng hình ảnh và âm thanh...             │
+│  Search landmark "Tìm truyện":                                        │
+│   [ Tìm theo tên truyện hoặc tác giả...                ] [Tìm kiếm]    │
+│  Genres: [Tất cả] [Thể loại 1] [Thể loại 2] ...                       │
 ├────────────────────────────────────────────────────────────────────────┤
-│ Section "Truyện Nổi Bật" (BookOpen icon + X truyện có sẵn):            │
+│ Section "Truyện Nổi Bật" / heading theo q + genre (+ tổng kết quả):   │
 │  Grid: 1 cột (mobile) / 2 cột (sm: 640px) / 3 cột (lg: 1024px)         │
 │  ┌────────────────────────┐  ┌────────────────────────┐  ...           │
 │  │ [Cover 16:9 / fallback]│  │ [Cover 16:9 / fallback]│                │
@@ -59,7 +64,20 @@
   - Logo `Sparkles` + "StoryVerse" dẫn về `/`.
   - Menu điều hướng: `Đang đọc` (`Clock`), `Đã lưu` (`Bookmark`).
   - Menu người dùng `UserMenu` tích hợp Theme Switcher (`Dark`, `Light`, `Sepia`).
-- **Hero Section**: Giới thiệu phong cách scrollytelling và định hướng sản phẩm.
+- **Hero Section (`HomeHero`)**:
+  - Là section full-width ngay dưới `AppHeader`; chỉ artwork tràn ngang, content vẫn ở safe zone giữa (`max-w-3xl`, padding mobile). Hero chứa nguyên badge/heading/description hiện có rồi Search + Genres; Story section tiếp theo vẫn `max-w-6xl` trên surface trang, không đặt card lên artwork và không đổi nội dung/chức năng khác của Home.
+  - Dùng ba artwork tĩnh map 1:1 với Dark/Light/Sepia theo `11` §9.2.3. Artwork chỉ trang trí (`alt=""`, không pointer event), `object-cover center top`; lớp scrim trung tâm giữ chữ/control đủ tương phản và fade đáy hòa vào `--color-background`, không để lộ mép chữ nhật của PNG.
+  - Khung có `min-height: clamp(26rem, 34vw, 32rem)` nhưng vẫn nở theo content, nên dành chỗ trước khi ảnh tải và không CLS. Ở mobile, ưu tiên chữ/search/genre trong vùng trống giữa; chấp nhận crop sách/núi ở hai cạnh. Không kéo méo, parallax hoặc thêm ornament ngoài scope Hero này.
+  - Khi đổi theme, giữ ảnh cũ tới khi ảnh mới load/decode rồi crossfade ngắn; reduced motion đổi tức thì sau decode. Initial saved theme không được lóe Dark trước khi sync; loading/performance contract ở `11` §9.2.3 và `09`.
+- **Tìm truyện (`StorySearchForm`)**:
+  - Form GET tới `/`, param canonical `q`; label “Tìm truyện”, placeholder “Tìm theo tên truyện hoặc tác giả…”. Desktop field + nút cùng hàng; mobile field full-width và nút bên dưới/đủ target 44px.
+  - Home dùng submit rõ ràng: Enter hoặc nút “Tìm kiếm” chạy ngay trên server, không request theo từng phím. URL lưu raw query đã trim/collapse; refresh/back/forward phải khôi phục đúng input và kết quả. Clear xóa `q`/cursor nhưng giữ `genre`, submit ngay và trả focus về input.
+  - Đổi query reset cursor. Kết quả phân trang server; không autocomplete/suggestion hoặc client-side relevance trong scope này.
+- **Genres (`HomeGenreFilters`)**:
+  - Hàng quick-filter nằm ngay dưới Search: “Tất cả” + tối đa 6 genre có Story public, do `listPublicGenreFacets()` trả về; không hardcode taxonomy và không suy từ page kết quả đang hiển thị. Không có facet thì ẩn cả hàng.
+  - Mỗi chip là link GET target tối thiểu 44px, giữ `q`, set đúng một `genre` và bỏ cursor; “Tất cả” chỉ bỏ `genre`. Active có state ngoài màu và `aria-current="page"`; mobile `flex-wrap` căn giữa, không buộc horizontal scroll.
+  - `genre` match exact facet và kết hợp AND với `q`; không đưa genre vào free-text search. Heading: không filter → “Truyện Nổi Bật”; chỉ `q` → `Kết quả cho “…”`; chỉ genre → `Thể loại “…”`; có cả hai → `Kết quả cho “…” · Thể loại “…”`. Pagination giữ cả `q/genre`.
+- **Result states**: khi điều hướng, giữ control thao tác được, đánh dấu vùng kết quả `aria-busy`; loading lần đầu/query/filter dùng skeleton đúng card. Không có Story public là base-empty; filter không match là “Không tìm thấy truyện phù hợp” + “Xóa bộ lọc” (bỏ cả `q/genre`). Error giữ query/filter và có Retry.
 - **StoryCard (`bg-card border border-border rounded-xl`)**:
   - Banner trên dùng `aspect-video`: render `cover_image` bằng `object-cover` và `object-position` từ `cover_position`; khi không có cover mới dùng nền chuyển sắc semantic làm fallback. Lớp scrim giữ bookmark và genre đủ tương phản trên mọi ảnh. Nút bookmark `Bookmark` tròn góc trên phải (`min-h-[44px] min-w-[44px]`).
   - Public card, `StoryManageCard` và live preview cạnh `StoryForm` phải giữ cùng tỷ lệ `16:9` và cùng focal point; không dùng chiều cao cố định làm thay đổi crop theo breakpoint.
@@ -229,13 +247,13 @@ Desktop (≥1024px):
 
 ### 5.4. Hộp Thoại Hiệu Ứng (`EffectPicker.tsx`) — Modal `z-[80]`
 - **4 Tab Category**: `Hình Ảnh (Visual)`, `Chuyển Động (Motion)`, `Âm Thanh (Audio)`, `Chuyển Cảnh (Transition)`.
-- **Thanh tìm kiếm thời gian thực**: Lọc theo tên/mô tả; ưu tiên đưa hiệu ứng đang sửa lên đầu.
+- **Thanh tìm kiếm thời gian thực**: Lọc client-side ngay trên catalog active đã tải theo tên/mô tả; state chỉ sống trong modal, không URL/debounce/network. Đây là AND-token substring bỏ dấu/case, không phải fuzzy/typo search; ưu tiên đưa hiệu ứng đang sửa lên đầu.
 - **Bộ tinh chỉnh 4 thông số**: `Intensity` (0.1 - 1.0), `Duration` (200ms - 10000ms; với audio hiển thị là **Giới hạn phát tối đa**), `Delay` (0ms - 3000ms), `Loop` toggle.
 - **Cơ chế Live Preview Portal tức thì (`z-[90]`)** của từng effect (render toàn màn hình 5s), luôn bypass Reader Settings để author xem chính xác cấu hình đang chỉnh.
 - **(Phase 3) Tab `Âm Thanh` nhúng `SoundSourcePicker.tsx`** — 3 tab con `Thư viện của tôi` / `Tải lên` / `Tìm trên Freesound` (`FreesoundSearchPanel.tsx`: ô tìm kiếm debounce, danh sách kết quả kèm nút play preview, nút "Dùng sound này" — disable + dòng lý do + CTA "Kết nối Freesound" nếu chưa liên kết). Xem `08-effects-and-scenes.md` mục 8.9.
 
 ### 5.5. Hộp Thoại Bối Cảnh (`ScenePicker.tsx`) — Modal Lớn `z-[80]`
-- **Tab 1: Scene Preset Có Sẵn (`mode === "preset"`)**: Lưới preset có thumbnail, swatch màu, nút nghe thử Howler và nút `Xem trước` 1-Click.
+- **Tab 1: Scene Preset Có Sẵn (`mode === "preset"`)**: Lưới preset có thumbnail, swatch màu, nút nghe thử Howler và nút `Xem trước` 1-Click. Search Background/Preset/Palette/combobox lọc tức thì client-side trên catalog đã tải; mọi field/tags được đưa vào một matcher, state đóng cùng modal. “Xem thêm” chỉ tăng số item đang render, không phải server cursor.
 - **Tab 2: Tùy Chỉnh Phối Riêng (`mode === "custom"`)**: 4 bước (Backgrounds, Palettes, Scene Effects với popover `clamp()` chống tràn, Ambient Audio).
   - **(Phase 3) Bước 1 "Backgrounds" nhúng `BackgroundSourcePicker.tsx`** — 3 tab con `Thư viện Preset` (global, như hiện tại) / `Tải lên` / `Tạo bằng AI`. Trong `Tải lên`: Author chọn file → client detect image/video → nếu là video thì hiện field poster bắt buộc, quota `đã dùng/10`, và chỉ bật Upload khi đủ cặp hợp lệ; server vẫn detect/validate lại. `AIBackgroundGeneratePanel.tsx`: prompt prefill theo genre/mood — editable, nút "Tạo ảnh", grid đúng **2 ảnh** preview cạnh nhau kèm nút "Dùng ảnh này" riêng từng ảnh, dòng nhỏ hiện số lượt tạo còn lại/ngày. Xem `08-effects-and-scenes.md` mục 8.10.
   - **(Phase 3) Bước 4 "Ambient Audio" nhúng lại `SoundSourcePicker.tsx`** — cùng component với tab Âm Thanh ở `EffectPicker` (mục 5.4), tái sử dụng không viết lại logic.
@@ -405,13 +423,85 @@ reorder riêng vì có thể thành công một nửa.
 
 ### 8.0. Admin shell chung
 
-- Desktop có sidebar: Stories, Effects, Scene Library; mobile dùng sheet navigation từ nút `Menu`.
-- Main content `max-w-7xl mx-auto px-4 md:px-6`, header sticky dưới `AppHeader` khi list dài.
-- Mỗi page có title, mô tả ngắn, search/filter và status/result count. Filter được phản ánh vào URL search params để refresh/back không mất trạng thái.
-- Loading dùng skeleton đúng shape; empty state phân biệt “chưa có dữ liệu” và “không có kết quả lọc”; error state có Retry.
-- Action phá hủy dùng `ConfirmModal` hoặc `Popconfirm`; toast chỉ báo kết quả, không thay thế inline error hoặc error summary.
+- `/admin/**` là back-office tách khỏi Reader/Author: **không render `AppHeader`**. `app/admin/layout.tsx` kiểm `requireRole("admin")`, sau đó render `AdminShell`; link “Về trang đọc” (`/`) luôn khả dụng để thoát ngữ cảnh quản trị.
+- Mọi màu/surface/border/focus dùng semantic design token hiện có và hỗ trợ Dark/Light/Sepia. `ThemeSwitcher` dùng lại `settingsStore`; không tạo cơ chế lưu theme riêng cho Admin.
 
-### 8.1. `/admin/effects` — Effect Library
+#### 8.0.1. Desktop `lg+`
+
+```text
+┌──────────────────────┬──────────────────────────────────────────────┐
+│ Sidebar fixed h-dvh  │ Main scroller h-dvh overflow-y-auto         │
+│ 16rem / 4.5rem       │ content max-w-7xl px-6 py-8                 │
+│ logo + collapse      │ breadcrumb → page header → page content     │
+│ quản trị / hệ thống  │                                              │
+└──────────────────────┴──────────────────────────────────────────────┘
+```
+
+- Sidebar mở rộng rộng `w-64`; thu gọn `w-[72px]`. Header sidebar dùng wordmark hiện có “StoryVerse” + nhãn “Quản trị”, không tạo brand/logo thứ hai. Main bù đúng chiều rộng để không bị che và là vùng cuộn dọc duy nhất; không tạo double scrollbar ở `body`.
+- Nhóm **Quản trị**: “Duyệt truyện” (`/admin/stories`, badge số pending), “Hiệu ứng” (`/admin/effects`), “Bối cảnh” (`/admin/scene-library`). Nhóm **Hệ thống**: “Về trang đọc”, danh tính Admin và `ThemeSwitcher`. Trong rollout theo stage, mục chưa có page phải disabled kèm “Sắp có”/stage label, không để link 404; enable lần lượt ở P3-12/P3-13.
+- Item active suy từ pathname, có cả surface/label/`aria-current="page"`, không chỉ đổi màu. Badge pending là số khi mở rộng và dot có accessible label khi thu gọn.
+- Toggle là button có `aria-expanded`/accessible name. Trạng thái thu gọn chỉ là UI state của shell, mặc định mở rộng và không bắt buộc persist. Khi thu gọn, label/section heading ẩn trực quan nhưng nav item vẫn có accessible name và tooltip dùng được bằng hover lẫn focus.
+
+#### 8.0.2. Mobile và tablet `<lg`
+
+- `AdminMobileNav` thay sidebar cố định bằng topbar sticky `z-40` có nút Menu, nhãn khu vực và action cần thiết; đây là chrome riêng của Admin, không phải `AppHeader`.
+- Menu mở left navigation sheet trên scrim (`z-[80]`, rộng tối đa `20rem` và không vượt viewport), dùng cùng cấu hình nav desktop. Sheet trap focus; `Escape`, scrim, nút Close hoặc chọn route đều đóng; sau khi đóng trả focus về nút Menu. Khóa background scroll trong lúc mở.
+- Main dùng document scroll, `px-4 py-6`; breakpoint đổi qua desktop phải đóng sheet và không mang trạng thái collapsed sang mobile. Nội dung và sticky action chừa safe-area/bottom inset, không overflow ngang ở 375px hoặc landscape.
+
+#### 8.0.3. Khung trang và trạng thái dùng chung
+
+- Main content: breadcrumb (ẩn hoặc rút gọn trên mobile nếu lặp title), `h1`, mô tả ngắn, search/filter/result count. Filter/sort/search có ý nghĩa điều hướng phải phản ánh vào URL search params để refresh/back không mất trạng thái.
+- Loading dùng skeleton đúng shape; empty state phân biệt “chưa có dữ liệu” và “không có kết quả lọc”; error state giữ query hiện tại và có Retry.
+- Toast chỉ báo kết quả. Validation/concurrency/network error phải hiện tại dialog/drawer hoặc error summary tương ứng; action phá hủy/khó hoàn tác dùng `ConfirmModal`.
+
+### 8.1. `/admin/stories` — Kiểm duyệt tác phẩm
+
+Nguồn nghiệp vụ: `02` §2.7 và `12` §12.7; acceptance criteria: `07` US-3.11. UI không tự nới state machine.
+
+#### 8.1.1. Cấu trúc trang và truy vấn
+
+- Breadcrumb “Quản trị / Kiểm duyệt truyện”; title “Kiểm duyệt tác phẩm”; mô tả ngắn về việc xem nội dung trước khi public.
+- Ba summary card chỉ đọc: Chờ duyệt, Đã xuất bản, Bị từ chối. Count là tổng theo status, không đổi theo search/status filter của list.
+- Default `status=pending_review`; khi xem `all`, pending đứng trước rồi sắp xếp theo `submittedAt` mới nhất (`null` sau cùng), với `createdAt`/`id` làm tie-breaker ổn định cho cursor. Status filter gồm `pending_review`, `published`, `rejected`, `draft`, `archived`, `all`; chip/tab dùng button có trạng thái selected. Ở mobile có thể gom cùng lựa chọn vào nút “Bộ lọc”/sheet, không tạo bộ tiêu chí thứ hai.
+- Search server-side theo title hoặc bút danh với contract `11` §9.2.2. Input có draft tức thì nhưng chỉ commit URL sau debounce khoảng `300ms`; Enter/Clear commit ngay, không commit giữa IME composition. Typing dùng replace không scroll để không tạo một history entry mỗi phím. `q`/status đổi thì xóa cursor; “Tải lại” giữ nguyên query/filter. List dùng pagination/cursor, không load toàn bộ aggregate để đếm ở client.
+- Read model mỗi row chỉ gồm cover + focal point, title, genre, bút danh, `submittedAt`, chapter/block/effect counts, status và `meta.updatedAt`; không serialize text block, Effect config hoặc Scene vào list.
+
+#### 8.1.2. Danh sách desktop/mobile
+
+| Desktop `md+` | Mobile `<md` |
+|---|---|
+| Table: Bìa & tên/genre · Tác giả · Ngày gửi · Quy mô · Trạng thái · Thao tác | Card dọc giữ cùng dữ liệu ưu tiên: cover/title/status → author/date → counts → action |
+| Cover `aspect-video object-cover`, áp `object-position: x% y%` | Không dùng table scroll ngang cho thao tác chính |
+| Row action chính “Xem chi tiết” | CTA full-width hoặc cuối card, target rõ ràng |
+
+- Status badge có text + icon/shape, không chỉ màu. `submittedAt = null` hiển thị “Chưa gửi”; các status không phải pending chỉ có action xem.
+- Quyết định duyệt/từ chối **không đặt thành quick action ở row**: admin phải mở chi tiết để đối chiếu nội dung; action chỉ hiện trong footer drawer khi server vẫn trả `pending_review`.
+- Empty state riêng cho queue pending (“Không có tác phẩm chờ duyệt”) và cho filter/search (“Không tìm thấy kết quả” + Xóa bộ lọc). Loading/error theo 8.0.3.
+- Result count/no-result là live status sau khi server response hoàn tất; vùng list dùng `aria-busy` khi navigation pending nhưng không chuyển focus khỏi input.
+
+#### 8.1.3. `StoryReviewDrawer`
+
+- “Xem chi tiết” mở right drawer desktop `max-w-2xl`; mobile là full-screen dialog/sheet. Backdrop `z-[80]`, surface `z-[85]`; header và footer sticky, phần giữa cuộn và chừa padding để footer không che nội dung.
+- Header: title, `StatusBadge`, Close. Body theo thứ tự: cover 16:9 đúng focal point; bút danh + email tài khoản (admin-only); ngày tạo/gửi gần nhất; description; genre; chapter list theo `order`.
+- Mỗi chapter hiển thị title/order, `draft|published`, block count và **block effect** count theo đủ `EffectCategory`: visual/audio/motion/transition. Scene/ambient là domain riêng, không gộp vào `EffectConfig` count; admin kiểm tra nó trong Reader preview. Nút “Đọc thử chương” mở admin-only preview trong tab mới, dùng Reader renderer với full chapter snapshot qua admin DAL; **không** gọi/nới public repository và không làm pending/draft content public.
+- Footer chỉ có “Từ chối” và “Phê duyệt tác phẩm” khi status là `pending_review`; với status khác, footer chỉ có Close. Không cho thao tác trong lúc detail đang loading, submit đang chạy hoặc revision đã stale.
+- Drawer trap focus, `Escape`/Close trả focus về đúng row/card. Nếu không có dữ liệu chưa lưu thì scrim click được đóng. Khi mở dialog con, focus thuộc dialog con và drawer phía sau inert.
+
+#### 8.1.4. Reject và approve
+
+**RejectReasonModal** mở trên drawer ở `z-[100]`, `max-w-lg`:
+
+- Textarea có label, placeholder hướng admin nêu vấn đề để tác giả sửa, counter thời gian thực và validation inline + error summary. Server trim reason rồi yêu cầu `5..2000` ký tự; rỗng/toàn whitespace/ngoài range đều bị chặn.
+- “Hủy bỏ” không đổi state; “Xác nhận từ chối” dùng destructive style và gửi `{ reason, expectedUpdatedAt }`. Submit pending khóa Close/action để tránh gửi lặp.
+
+Approve dùng `useConfirm()` hiện có (`variant: success`, `z-[100]`):
+
+- Title: `Phê duyệt tác phẩm “{title}”?`; mô tả phải nói rõ truyện sẽ public và toàn bộ chapter được chuyển `published`; confirm text “Phê duyệt ngay”.
+- Command gửi `expectedUpdatedAt`; server mới được quyết định transition và publish chapters trong một transaction.
+
+Sau thành công, đóng dialog/drawer, cập nhật row/count hoặc revalidate query rồi toast và trả focus hợp lý. `409` giữ drawer mở, vô hiệu decision cũ và hiện CTA “Tải dữ liệu mới”; không tự retry bằng revision mới. Lỗi khác giữ input/reason để admin sửa hoặc thử lại.
+
+### 8.2. `/admin/effects` — Effect Library
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -457,7 +547,7 @@ mưa rơi        90                         [Edit] [Remove]
 - Dirty drawer khi close/back/overlay click phải mở confirm “Bỏ thay đổi?”. Sau Save thành công giữ focus hợp lý ở row vừa sửa.
 - Khi tắt effect, helper text nói rõ: “Ẩn khỏi lựa chọn/gợi ý mới; nội dung đã lưu vẫn render.”
 
-### 8.2. `/admin/scene-library` — Global Scene Catalog
+### 8.3. `/admin/scene-library` — Global Scene Catalog
 
 Header và tab:
 
@@ -469,7 +559,7 @@ Quản lý nguyên liệu global và curated preset dùng cho lựa chọn mới
 
 Tab dùng semantic tabs (`role=tablist/tab/tabpanel`), hỗ trợ ArrowLeft/ArrowRight/Home/End. Tab active nằm trong URL `?tab=`.
 
-#### 8.2.1. Tab Backgrounds
+#### 8.3.1. Tab Backgrounds
 
 - Toolbar: Search, Type, Motion, Status, Add Background.
 - Visual grid: 1 cột ở 375px, 2 cột ở `sm`, 3 ở `lg`, 4 ở `xl`.
@@ -484,7 +574,7 @@ Tab dùng semantic tabs (`role=tablist/tab/tabpanel`), hỗ trợ ArrowLeft/Arro
 - `motion: looping` thiếu poster phải chặn Save ở client và server.
 - Preview dùng cùng shared `SceneLayer` (bên trong dùng `SceneBackground`); reduced-motion preview chuyển sang poster.
 
-#### 8.2.2. Tab Palettes
+#### 8.3.2. Tab Palettes
 
 - Toolbar: Search, Status, Add Palette.
 - Compact grid: 1/2/3/4 cột theo mobile/`sm`/`lg`/`xl`.
@@ -493,7 +583,7 @@ Tab dùng semantic tabs (`role=tablist/tab/tabpanel`), hỗ trợ ArrowLeft/Arro
 - Preview trên sample Reader frame với body text cố định, Drop Cap/dialogue border để kiểm tra đúng phạm vi palette.
 - Contrast warning phải xuất hiện trước Save; không tự động đổi màu user đã nhập.
 
-#### 8.2.3. Tab Scene Presets — catalog, không phải builder
+#### 8.3.3. Tab Scene Presets — catalog, không phải builder
 
 ```text
 ┌──────────────────────┐ ┌──────────────────────┐
@@ -511,28 +601,28 @@ Tab dùng semantic tabs (`role=tablist/tab/tabpanel`), hỗ trợ ArrowLeft/Arro
 - Metadata drawer hiển thị `id`, `schema_version` và source version ở chế độ read-only để debug.
 - Preview full-screen dùng đúng shared `SceneLayer`, sample story text cố định, có audio Play/Stop rõ ràng; không autoplay audio.
 
-#### 8.2.4. Lifecycle, remove và dependency feedback
+#### 8.3.4. Lifecycle, remove và dependency feedback
 
 - Status badge: Draft, Active, Archived. Author picker chỉ thấy Active.
 - Action “Remove khỏi catalog” mở ConfirmModal mô tả rõ: item không còn xuất hiện cho lựa chọn mới; Scene đã lưu không thay đổi. Preset có thể hiện thêm số Scene lưu provenance.
 - Hard delete chỉ xuất hiện khi `activated_at = null`; không gộp hard delete với Remove. Preset import không được dùng draft Background/Palette làm source.
 - Replace media tạo object key mới; UI không có action xóa trực tiếp storage object.
 
-### 8.3. Quan hệ với Author ScenePicker
+### 8.4. Quan hệ với Author ScenePicker
 
 - `ScenePicker` Tab 1 chỉ đọc curated `ScenePreset.status = active`.
 - `ScenePicker` Tab 2 Custom Scene chỉ đọc Background/Palette active cộng personal background đúng owner.
 - Hai đường đều deep-copy cùng `SceneRenderConfig` vào Scene; Reader không biết Scene đến từ preset hay custom.
 - Author upload ở ScenePicker có thể tạo personal image hoặc video+poster; AI Background vẫn chỉ tạo personal static image, không sinh full ScenePreset.
 
-### 8.4. Responsive & Accessibility gate riêng cho Admin
+### 8.5. Responsive & Accessibility gate riêng cho Admin
 
 - Không bắt buộc mọi click/touch target tối thiểu 44×44px, kích thước còn tùy vào giao diện xung quanh; icon dùng `lucide-react`, không dùng emoji làm icon chính.
-- Drawer/dialog trap focus, `Escape` đóng khi không dirty, trả focus về trigger; destructive confirm đặt initial focus ở Cancel.
+- Navigation sheet/drawer/dialog trap focus, `Escape` đóng khi không dirty/pending, trả focus về trigger; dialog lồng làm surface phía sau inert, destructive confirm đặt initial focus ở Cancel.
 - Form submit lỗi focus vào error summary; mỗi lỗi link/focus đúng field. Không chỉ dùng màu để biểu thị status/error.
-- Keyboard dùng được toàn bộ table action, menu, tabs, color input và Preview controls.
+- Keyboard dùng được sidebar collapse/nav, table/card action, menu, tabs, color input và Preview controls; tab order theo thứ tự nhìn thấy, focus ring không bị sticky header/footer che hoàn toàn.
 - Animation drawer/card/preview tôn trọng `prefers-reduced-motion`; video/particle Preview dùng poster/static fallback.
-- 375px không có horizontal overflow; sticky footer action trong mobile form không che field cuối (`padding-bottom` theo safe area).
+- 375px và mobile landscape không có horizontal overflow; sticky footer action trong mobile form không che field cuối (`padding-bottom` theo safe area).
 - Text/status/controls đạt WCAG AA; thumbnail có alt khi mang thông tin, còn ảnh trang trí dùng alt rỗng.
 
 ---

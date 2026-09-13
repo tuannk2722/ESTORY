@@ -185,7 +185,7 @@ hiển thị cho reader  ⟺  Story.status === "published"  AND  Chapter.status 
 Mọi trang reader-facing phải gọi nhóm public của `StoryRepository` — **không được gọi `getById()`/`getAllForAuthor()`** (các method full luôn trả cả draft, chỉ dành cho author/admin). Cụ thể:
 
 - **Phase 1–2:** `/stories/[storyId]` và `/stories/[storyId]/[chapterId]` dùng `getPublicById()`; home/library dùng `getAllPublic()`.
-- **Phase 3:** `/stories/[storyId]/[chapterId]` chuyển sang `getPublicChapter(storyId, chapterId)` theo `11-phase3-technical-roadmap.md` mục 9.2.1; `/stories/[storyId]` vẫn dùng `getPublicById()`.
+- **Phase 3:** `/stories/[storyId]/[chapterId]` dùng `getPublicChapter(storyId, chapterId)` theo `11` §9.2.1; `/stories/[storyId]` vẫn dùng `getPublicById()`; Home dùng `listPublicStories()` + public genre facets theo §9.2.2, còn library tạm giữ `getAllPublic()`.
 - Việc kiểm tra Story/Chapter status và quan hệ Chapter thuộc đúng Story phải nằm trong Repository; page không tự lọc lại. Public boundary luôn fail-closed khi thiếu/sai status.
 - `ReadingProgress`/`ResumeReading` lưu từ trước phải được đối chiếu với public chapters hiện tại trước khi tạo link. Chapter đã unpublish/xóa thì bỏ vị trí lưu; block đã xóa nhưng chapter còn public thì fallback về đầu chapter, không dẫn reader tới 404/hash hỏng.
 
@@ -197,6 +197,13 @@ Mọi trang reader-facing phải gọi nhóm public của `StoryRepository` — 
 | `published` | Sửa (áp dụng ngay, không cần duyệt lại — personal project, admin không re-review mỗi lần sửa nhỏ), Gỡ truyện (→ `archived`, kèm `ConfirmModal`) |
 | `rejected` | Xem lý do từ chối, Sửa, Gửi lại duyệt (→ `pending_review`) |
 | `archived` | Khôi phục (→ `draft`), Xóa vĩnh viễn (kèm `ConfirmModal` mức cảnh báo cao nhất) |
+
+### 12.7.6. Quyết định của Admin
+
+- Admin xem queue và chi tiết theo layout canonical ở `04b-page-layouts.md` §8.0–8.1. Approve/reject chỉ hiện sau khi mở chi tiết và chỉ khi dữ liệu server hiện tại vẫn là `pending_review`; list row/card không có quick decision bỏ qua bước đối chiếu.
+- Cả hai command nhận `expectedUpdatedAt` và áp dụng invariants ở `02` §2.7. `409` buộc tải lại dữ liệu; UI không tự phát lại command với revision mới.
+- “Đọc thử chương” là preview admin-only dùng Reader renderer nhưng đọc full aggregate qua admin DAL. Nó không gọi hoặc nới `getPublicChapter()` và không làm Story/Chapter chưa public xuất hiện ở home, library hay Reader API.
+- Sau reject, Author thấy status + reason đã trim trong Dashboard/trang quản lý và có thể sửa rồi gửi lại theo §12.7.2. Sau approve, public repository phải phản ánh Story cùng mọi Chapter ngay sau transaction commit.
 
 ---
 
