@@ -91,21 +91,21 @@ enum Role {
 
 // ─── Story & Kiểm duyệt (Mục 2.7) ───
 model Story {
-  id                String      @id @default(cuid())
-  slug              String      @unique
-  title             String
-  authorDisplayName String
+  id                   String      @id @default(cuid())
+  slug                 String      @unique
+  title                String
+  authorDisplayName    String
   searchTextNormalized String
-  description       String
-  coverUrl          String?
-  coverPositionX    Float       @default(50)
-  coverPositionY    Float       @default(50)
-  genre             String[]
-  viewCount         Int         @default(0)
-  status            StoryStatus @default(DRAFT)
-  submittedAt       DateTime?
-  reviewedAt        DateTime?
-  rejectionReason   String?
+  description          String
+  coverUrl             String?
+  coverPositionX       Float       @default(50)
+  coverPositionY       Float       @default(50)
+  genre                String[]
+  viewCount            Int         @default(0)
+  status               StoryStatus @default(DRAFT)
+  submittedAt          DateTime?
+  reviewedAt           DateTime?
+  rejectionReason      String?
 
   authorId     String
   author       User    @relation("StoryAuthor", fields: [authorId], references: [id])
