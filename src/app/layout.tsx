@@ -67,6 +67,7 @@ export const metadata: Metadata = {
 
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { ConfirmProvider } from "@/components/ui/ConfirmModal";
+import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme/theme-presentation";
 
 /* ── Root Layout ─────────────────────────────────────────────── */
 export default function RootLayout({
@@ -81,6 +82,12 @@ export default function RootLayout({
       className={`${playfairDisplay.variable} ${cormorantGaramond.variable} ${outfit.variable} ${beVietnamPro.variable} ${notoSans.variable} ${lora.variable} ${merriweather.variable} ${literata.variable} ${ebGaramond.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          id="story-theme-bootstrap"
+          dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
+        />
+      </head>
       <body className="min-h-dvh flex flex-col bg-[var(--color-background)] text-[var(--color-foreground)] font-ui transition-colors duration-300">
         <ThemeProvider>
           <ConfirmProvider>

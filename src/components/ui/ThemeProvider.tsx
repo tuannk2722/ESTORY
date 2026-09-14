@@ -8,6 +8,7 @@ import { DEFAULT_READER_SETTINGS, settingsStore } from "@/lib/settingsStore";
 import { GUEST_KEYS } from "@/lib/reader-state/local-store";
 import { accountCacheKey } from "@/lib/reader-state/sync-store";
 import { useSettingsSync } from "@/hooks/useSettingsSync";
+import { applyPresentedTheme } from "@/lib/theme/theme-presentation";
 
 interface ReaderSettingsContextType {
   settings: ReaderSettings;
@@ -28,8 +29,9 @@ function SettingsSession({ children }: { children: React.ReactNode }) {
   const isMounted = sync.userId === identity && sync.ready;
   const settings = isMounted ? settingsStore.getSettings() : DEFAULT_READER_SETTINGS;
 
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", settings.theme);
+  useLayoutEffect(() => {
+    if (!isMounted) return;
+    applyPresentedTheme(settings.theme);
     document.documentElement.setAttribute("data-story-font", settings.font_family);
   }, [isMounted, settings.theme, settings.font_family]);
 
@@ -76,7 +78,10 @@ function SettingsSession({ children }: { children: React.ReactNode }) {
   return (
     <ReaderSettingsContext.Provider value={{ settings, isMounted,
       updateSettings: (patch) => { settingsStore.saveSettings(patch); },
-      setTheme: (theme) => { settingsStore.saveSettings({ theme }); },
+      setTheme: (theme) => {
+        const accepted = settingsStore.saveSettings({ theme });
+        applyPresentedTheme(accepted.theme);
+      },
     }}>
       {children}
     </ReaderSettingsContext.Provider>

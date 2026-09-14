@@ -15,7 +15,7 @@ import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent }
 import { coverObjectPosition } from "@/lib/story-cover";
 import type { AuthorStoryListItem } from "@/types/story-management";
 import type { StoryAction } from "./types";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "@/components/ui/StoryStatusBadge";
 import { submitReadiness } from "./storyRules";
 
 interface StoryManageCardProps {

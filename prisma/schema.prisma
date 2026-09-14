@@ -95,6 +95,7 @@ model Story {
   slug              String      @unique
   title             String
   authorDisplayName String
+  searchTextNormalized String
   description       String
   coverUrl          String?
   coverPositionX    Float       @default(50)

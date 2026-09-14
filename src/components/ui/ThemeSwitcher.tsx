@@ -9,7 +9,13 @@ const themes = [
   { id: "sepia", label: "Sepia Warm", shortLabel: "Sepia", icon: Coffee },
 ] as const;
 
-export default function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
+export default function ThemeSwitcher({
+  compact = false,
+  iconOnly = false,
+}: {
+  compact?: boolean;
+  iconOnly?: boolean;
+}) {
   const { settings, setTheme } = useReaderSettings();
   const activeTheme = themes.find((theme) => theme.id === settings.theme) ?? themes[0];
   const nextTheme = themes[(themes.indexOf(activeTheme) + 1) % themes.length];
@@ -25,7 +31,7 @@ export default function ThemeSwitcher({ compact = false }: { compact?: boolean }
         className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-2 text-[var(--color-foreground)] transition-colors hover:border-[var(--color-accent)] hover:bg-[var(--color-muted)] motion-reduce:transition-none sm:px-3"
       >
         <Icon aria-hidden="true" className="h-4 w-4 text-[var(--color-accent)]" />
-        <span className="hidden text-xs font-semibold md:inline">Giao diện</span>
+        <span className={iconOnly ? "sr-only" : "hidden text-xs font-semibold md:inline"}>Giao diện</span>
       </button>
     );
   }

@@ -1,4 +1,4 @@
-import type { CoverPosition, StoryStatus } from "@/types/story";
+import type { CoverPosition } from "@/types/story";
 import type { ManagedChapter } from "@/types/story-management";
 
 export interface StoryFormValue {
@@ -56,11 +56,3 @@ export interface ChapterManagerActions {
   onReorder(chapterIds: string[]): Promise<boolean>;
   onTogglePublication(chapter: ManagedChapter): Promise<boolean>;
 }
-
-export const STORY_STATUS_LABELS: Record<StoryStatus, string> = {
-  draft: "Nháp",
-  pending_review: "Chờ duyệt",
-  published: "Đã xuất bản",
-  rejected: "Bị từ chối",
-  archived: "Lưu trữ",
-};

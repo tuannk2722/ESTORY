@@ -2,9 +2,22 @@
 import fs from "fs/promises";
 import path from "path";
 import { Story } from "@/types/story";
-import type { PublicChapterReaderData, StoryRepository } from "./story-repository";
+import type {
+  CursorPage,
+  PublicChapterReaderData,
+  PublicGenreFacet,
+  PublicStoryListItem,
+  PublicStoryListQuery,
+  StoryRepository,
+} from "./story-repository";
 import type { SceneRepository } from "./scene-repository";
 import { JsonSceneLibraryRepository, JsonSceneRepository } from "./json-scene-repository";
+import { buildStorySearchText, tokenizeSearchText } from "@/lib/search/text-search";
+import {
+  decodePublicStoryCursor,
+  encodePublicStoryCursor,
+  sortPublicGenreFacets,
+} from "./public-story-list";
 
 export function projectPublicStory(story: Story): Story | null {
   // Public boundaries fail closed: malformed legacy content must never become
@@ -57,6 +70,55 @@ export class JsonStoryRepository implements StoryRepository {
     return all
       .map(projectPublicStory)
       .filter((story): story is Story => story !== null);
+  }
+
+  async listPublicStories(
+    input: PublicStoryListQuery,
+  ): Promise<CursorPage<PublicStoryListItem>> {
+    const tokens = tokenizeSearchText(input.q);
+    const after = decodePublicStoryCursor(input.cursor, input);
+    const limit = Math.min(Math.max(Math.trunc(input.limit), 1), 24);
+    const matches = (await this.getAllPublic())
+      .filter((story) => input.genre === null
+        || story.genre.some((genre) => genre.trim() === input.genre))
+      .filter((story) => {
+        const document = buildStorySearchText(story.title, story.author);
+        return tokens.every((token) => document.includes(token));
+      })
+      .sort((left, right) => left.id < right.id ? -1 : left.id > right.id ? 1 : 0);
+    const nextIndex = after === null
+      ? 0
+      : matches.findIndex((story) => story.id > after);
+    const start = nextIndex === -1 ? matches.length : nextIndex;
+    const page = matches.slice(start, start + limit);
+    const items = page.map((story): PublicStoryListItem => ({
+      id: story.id,
+      title: story.title,
+      author: story.author,
+      description: story.description,
+      ...(story.cover_image === undefined ? {} : { cover_image: story.cover_image }),
+      ...(story.cover_position === undefined ? {} : { cover_position: story.cover_position }),
+      genre: [...story.genre],
+    }));
+    return {
+      items,
+      total: matches.length,
+      nextCursor: start + page.length < matches.length && page.length > 0
+        ? encodePublicStoryCursor(input, page[page.length - 1].id)
+        : null,
+    };
+  }
+
+  async listPublicGenreFacets(limit: number): Promise<PublicGenreFacet[]> {
+    const counts = new Map<string, number>();
+    for (const story of await this.getAllPublic()) {
+      const labels = new Set(story.genre.map((genre) => genre.trim()).filter(Boolean));
+      for (const genre of labels) counts.set(genre, (counts.get(genre) ?? 0) + 1);
+    }
+    return sortPublicGenreFacets(
+      [...counts].map(([genre, storyCount]) => ({ genre, storyCount })),
+      limit,
+    );
   }
 
   async getById(id: string): Promise<Story | null> {

@@ -3,7 +3,11 @@ import { serverEnv } from "@/lib/env";
 import { CommandError } from "@/lib/services/command-error";
 import { JsonStoryRepository } from "./json-story-repository";
 import type {
+  CursorPage,
   PublicChapterReaderData,
+  PublicGenreFacet,
+  PublicStoryListItem,
+  PublicStoryListQuery,
   StoryRepository,
 } from "./story-repository";
 import type {
@@ -50,6 +54,10 @@ const activeStoryRead = serverEnv.PHASE3_SHADOW_READ === "true"
 
 // Runtime writes must go through guarded transactional commands from P3-06 onward.
 export const storyRepository: StoryRepository = {
+  listPublicStories: (input: PublicStoryListQuery): Promise<CursorPage<PublicStoryListItem>> =>
+    activeStoryRead.listPublicStories(input),
+  listPublicGenreFacets: (limit: number): Promise<PublicGenreFacet[]> =>
+    activeStoryRead.listPublicGenreFacets(limit),
   getAll: () => activeStoryRead.getAll(),
   getAllPublic: () => activeStoryRead.getAllPublic(),
   getById: (id: string) => activeStoryRead.getById(id),

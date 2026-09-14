@@ -3,6 +3,7 @@ import type { Prisma, PrismaClient } from "@/generated/prisma/client";
 import { databaseJson } from "@/lib/db/json-fields";
 import { assertEffectManifestDatabaseIds, syncEffectManifest } from "@/lib/effects/effect-manifest-sync";
 import { EFFECT_TYPES } from "@/lib/effects/effect-manifest";
+import { buildStorySearchText } from "@/lib/search/text-search";
 import { assertPhase3SourceClean, type Phase3MigrationSource } from "./phase3-source";
 
 export type Phase3MigrationMode = "dry-run" | "apply" | "verify";
@@ -158,6 +159,7 @@ export async function applyPhase3MigrationTransaction(
       slug: story.id,
       title: story.title,
       authorDisplayName: story.author,
+      searchTextNormalized: buildStorySearchText(story.title, story.author),
       description: story.description,
       coverUrl: story.cover_image ?? null,
       coverPositionX: story.cover_position?.x ?? 50,
@@ -248,6 +250,11 @@ export async function verifyPhase3Migration(
     mismatch(issues, actual.title === expected.title && actual.description === expected.description, `Story text mismatch ${expected.id}`);
     mismatch(issues, actual.authorId === ownerId, `Story owner mismatch ${expected.id}`);
     mismatch(issues, actual.authorDisplayName === expected.author, `Story author display mismatch ${expected.id}`);
+    mismatch(
+      issues,
+      actual.searchTextNormalized === buildStorySearchText(expected.title, expected.author),
+      `Story search document mismatch ${expected.id}`,
+    );
     mismatch(issues, actual.status === storyStatus[expected.status], `Story status mismatch ${expected.id}`);
     mismatch(issues, actual.coverUrl === (expected.cover_image ?? null), `Story cover mismatch ${expected.id}`);
     mismatch(

@@ -22,6 +22,7 @@ import type {
   RepositoryReadEvent,
   RepositoryReadObserver,
 } from "@/lib/repositories/read-observability";
+import { buildStorySearchText, normalizeSearchText } from "@/lib/search/text-search";
 
 loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
 
@@ -69,6 +70,44 @@ async function run() {
       );
       assert.equal((await prismaStories.getAllForAuthor(ownerId)).length, source.stories.length);
       assert.deepEqual(await prismaStories.getAllForAuthor("another-owner"), []);
+
+      stage = "public-search-parity";
+      const firstSearchStory = source.stories[0];
+      const searchToken = normalizeSearchText(firstSearchStory.title).split(" ")[0];
+      const searchQueries = [
+        { q: "", genre: null, cursor: null, limit: 2 },
+        { q: searchToken, genre: null, cursor: null, limit: 9 },
+        { q: "", genre: firstSearchStory.genre[0]?.trim() ?? null, cursor: null, limit: 9 },
+        { q: searchToken, genre: firstSearchStory.genre[0]?.trim() ?? null, cursor: null, limit: 9 },
+      ];
+      for (const query of searchQueries) {
+        assert.deepEqual(
+          await prismaStories.listPublicStories(query),
+          await jsonStories.listPublicStories(query),
+        );
+      }
+      const firstPage = await prismaStories.listPublicStories(searchQueries[0]);
+      if (firstPage.nextCursor) {
+        const nextQuery = { ...searchQueries[0], cursor: firstPage.nextCursor };
+        assert.deepEqual(
+          await prismaStories.listPublicStories(nextQuery),
+          await jsonStories.listPublicStories(nextQuery),
+        );
+      }
+      assert.deepEqual(
+        await prismaStories.listPublicGenreFacets(6),
+        await jsonStories.listPublicGenreFacets(6),
+      );
+      const searchDocuments = await tx.story.findMany({
+        where: { id: { in: source.stories.map((story) => story.id) } },
+        select: { id: true, title: true, authorDisplayName: true, searchTextNormalized: true },
+      });
+      for (const row of searchDocuments) {
+        assert.equal(
+          row.searchTextNormalized,
+          buildStorySearchText(row.title, row.authorDisplayName),
+        );
+      }
 
       stage = "story-detail-parity";
       for (const expectedStory of source.stories) {
@@ -131,6 +170,8 @@ async function run() {
       const shadowScenes = new ShadowSceneRepository(jsonScenes, prismaScenes, observer);
       const shadowCatalog = new ShadowSceneLibraryRepository(jsonCatalog, prismaCatalog, observer);
       await shadowStories.getAllPublic();
+      await shadowStories.listPublicStories(searchQueries[0]);
+      await shadowStories.listPublicGenreFacets(6);
       const firstStory = source.stories[0];
       const firstChapter = firstStory.chapters.find((chapter) => chapter.status === "published")!;
       await shadowStories.getPublicById(firstStory.id);

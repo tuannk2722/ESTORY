@@ -25,16 +25,15 @@
         [chapterId]/page.tsx       → (Phase 2) Content editor — soạn block/effect/scene của 1 chương. Route trước đây là `/editor/[storyId]/[chapterId]`, đổi tên ngay từ Phase 2 để không phải move file khi lên Phase 3 (strangler pattern, `01-tech-stack.md` mục 1.3). Ở Phase 2 chưa có `layout.tsx` guard (chưa có auth thật), Phase 3 mới thừa hưởng guard ở trên
   /library/reading/page.tsx        → Danh sách truyện đang đọc dở
   /library/bookmarks/page.tsx      → Danh sách truyện đã đánh dấu lưu
-  /layout.tsx                      → Root Layout (tải font Google, Theme Provider)
+  /layout.tsx                      → Root Layout (font, Theme Provider và inline paint-hint script dùng allowlist trong `/lib/theme/theme-presentation.ts`)
   /globals.css                     → Tailwind base + design tokens + custom keyframes
 
 /components
   /ui                              → AppHeader, Popconfirm, Modal, Button dùng chung
     SearchInput.tsx                → field trình bày controlled/uncontrolled + label/clear/focus; không chứa matcher, debounce, URL hay fetch
     ConfirmModal.tsx               → global `useConfirm`, dialog z-[100] dùng chung Reader/Author/Admin
-    ThemeBootstrapScript.tsx       → script trước first paint chỉ áp theme presentation hint đã allowlist; không đọc/ghi settings thay `settingsStore`
     ThemeSwitcher.tsx              → UI theme dùng `settingsStore`, Admin reuse thay vì tạo state riêng
-    StoryStatusBadge.tsx           → vị trí shared đích của Author `StatusBadge`; Author/Admin dùng chung khi P3-11 nối UI
+    StoryStatusBadge.tsx           → badge trạng thái semantic dùng chung cho Author/Admin
     AuthMenu.tsx                   → (Phase 3) Nút "Đăng nhập" (guest) hoặc nút context-aware "Viết truyện"/"Truyện của tôi" (logged-in) — 12-auth-and-author-management.md mục 12.1
     ProfileModal.tsx               → (Phase 3) avatar/tên/email, badge role, Theme Switcher, menu điều hướng theo role, Đăng xuất — mục 12.3
     IntegrationsSection.tsx        → boundary trong `ProfileModal`; P3-10 chưa render action, P3-15 nối trạng thái Freesound + Kết nối/Ngắt kết nối — `12-auth-and-author-management.md` mục 12.9
@@ -93,6 +92,8 @@
 /lib
   /repositories                    → THÊM MỚI ngay từ Phase 1, xem `11-phase3-technical-roadmap.md` mục 9.2
     story-repository.ts            → StoryRepository; Phase 3 thêm `getPublicChapter()` (§9.2.1), `listPublicStories()` và `listPublicGenreFacets()` (§9.2.2)
+    public-story-list.ts           → cursor gắn với `q/genre` + sắp xếp genre facet deterministic theo số Story giảm dần
+    story-moderation-query.ts      → cursor keyset riêng của moderation, gắn với `q/status`
     json-story-repository.ts       → implementation dùng file JSON (Phase 1–2)
     prisma-story-repository.ts     → implementation dùng Prisma (thêm ở Phase 3, chưa tạo ở Phase 1)
     scene-repository.ts            → (Phase 2) interface SceneLibraryRepository + SceneRepository — xem `08-effects-and-scenes.md` mục 8.7
@@ -112,7 +113,7 @@
   story.ts
   story-search.ts                  → `PublicStoryListItem`, `PublicGenreFacet`, parsed `q/genre/cursor/limit` và `CursorPage`; không chứa Prisma/provider fields
   story-management.ts              → DTO gọn cho dashboard/quản lý Story + Chapter, dùng chung giữa server và Author UI
-  story-moderation.ts              → admin-only queue/count/detail/chapter summary DTO; block-effect counts tách Scene, full content chỉ thuộc preview DAL
+  story-moderation.ts              → admin-only queue/count/detail/chapter summary DTO; chỉ giữ tổng block/effect, Scene và full content chỉ thuộc preview DAL
   settings.ts
   user.ts                          → định nghĩa trước, dùng thật từ Phase 3
   scene.ts                         → (Phase 2) BackgroundAsset, ColorPalette, ScenePreset, Scene — xem `08-effects-and-scenes.md` mục 8.3
@@ -242,26 +243,21 @@
   /upload/[uploadId]/route.ts      → DELETE cancel pending intent đúng owner; best-effort xóa object/bundle
   /auth/[...nextauth]/route.ts
 
-/app/admin (Phase 3)
-  /layout.tsx                      → requireRole(admin) + AdminShell riêng, tuyệt đối không render AppHeader
-  /loading.tsx                     → skeleton đúng shape trong admin shell
-  /page.tsx                        → redirect `/admin/stories`
-  /effects/page.tsx                → US-3.12, table/mobile cards + Effect detail drawer
-  /scene-library/page.tsx          → US-3.13, tab state từ URL
-  /stories/page.tsx                → US-3.11, kiểm duyệt truyện
-  /stories/[storyId]/chapters/[chapterId]/preview/page.tsx → admin-only Reader renderer; full DAL, không public repository
+/app/admin (Phase 3; route groups không đổi URL)
+  /(workspace)/layout.tsx          → requireRole(admin) + AdminShell riêng, tuyệt đối không render AppHeader
+  /(workspace)/page.tsx            → redirect `/admin/stories`
+  /(workspace)/effects/page.tsx    → US-3.12, table/mobile cards + Effect detail drawer
+  /(workspace)/scene-library/page.tsx → US-3.13, tab state từ URL
+  /(workspace)/stories/page.tsx    → US-3.11, kiểm duyệt truyện
+  /(workspace)/stories/loading.tsx → skeleton đúng shape trong admin shell
+  /(workspace)/stories/error.tsx   → lỗi segment + retry
+  /(preview)/stories/[storyId]/chapters/[chapterId]/preview/page.tsx → exact-admin, shell-neutral, dedicated header + shared ReaderPane; full DAL, không public repository
 
 /components/admin
-  AdminShell.tsx                   → desktop main scroller + mobile document scroll
-  AdminSidebar.tsx                 → shared nav config, desktop expanded/collapsed
-  AdminMobileNav.tsx               → sticky Admin topbar + focus-trapped navigation sheet
-  /stories
-    ModerationStatusSummary.tsx
-    ModerationFilters.tsx          → URL-backed status + live search debounce/IME-safe; đổi query/filter reset cursor, không chứa DB matcher
-    StoryModerationTable.tsx
-    StoryModerationCard.tsx
-    StoryReviewDrawer.tsx
-    RejectReasonModal.tsx
+  AdminShell.tsx                   → shell + nav config; desktop sidebar co/mở và mobile sticky topbar/focus-trapped sheet
+  AdminStoryWorkspace.tsx          → summary, URL-backed search/filter IME-safe, table→cards, cursor paging và empty/pending states
+  StoryReviewDrawer.tsx            → detail fetch, chapter preview, approve confirmation, reject modal, stale-409 reload và focus return
+  adminTransport.ts                → client fetch/envelope mapper cho moderation; không chứa quyền hoặc business rule
   /effects
     EffectTable.tsx
     EffectMobileCard.tsx

@@ -16,6 +16,7 @@ import type { ManagedStory } from "@/types/story-management";
 import { databaseJson } from "@/lib/db/json-fields";
 import { snapshotConfig } from "./fixtures/scene-fixtures";
 import { storyCoverUploadFixture } from "./fixtures/media-upload-fixtures";
+import { buildStorySearchText } from "@/lib/search/text-search";
 
 loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
 let stage = "initialize";
@@ -84,6 +85,10 @@ async function run() {
     assert.equal(createdStory.data.cover_image, ownerCover.url);
     assert.equal((await prisma.mediaUpload.findUniqueOrThrow({ where: { id: ownerCover.id } })).status, "CLAIMED");
     assert.equal(createdStory.data.status, "draft");
+    assert.equal(
+      (await prisma.story.findUniqueOrThrow({ where: { slug: createdStory.data.id } })).searchTextNormalized,
+      buildStorySearchText(metadata.title, "Hàn Mặc Tử"),
+    );
     assert.ok(createdStory.data.chapters.every((chapter) => chapter.status === "draft" && chapter.blocks.length === 0));
     assert.equal((await prisma.user.findUniqueOrThrow({ where: { id: owner } })).role, "AUTHOR");
     const outsiderStoryCover = await createCover(outsider);
@@ -135,6 +140,10 @@ async function run() {
     });
     assert.deepEqual(result.data.cover_position, { x: 20, y: 80 });
     result = await service.updateStoryMetadata({ ...context(result), metadata: { ...metadata, title: "Cover and focal point preserved" } });
+    assert.equal(
+      (await prisma.story.findUniqueOrThrow({ where: { slug } })).searchTextNormalized,
+      buildStorySearchText("Cover and focal point preserved", "Hàn Mặc Tử"),
+    );
     assert.equal(result.data.cover_image, replacementCover.url);
     assert.deepEqual(result.data.cover_position, { x: 20, y: 80 });
     const centeredReplacement = await createCover(owner);

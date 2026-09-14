@@ -3,6 +3,12 @@ import { randomUUID } from "node:crypto";
 import { Prisma } from "@/generated/prisma/client";
 import type { Chapter, EffectConfig, StoryBlock } from "@/types/story";
 import type { ManagedChapter, ManagedStory } from "@/types/story-management";
+import type {
+  ModerationListQuery,
+  ModerationStoryDetail,
+  ModerationStoryList,
+  ModerationSummaryCounts,
+} from "@/types/story-moderation";
 import type { Scene } from "@/types/scene";
 import type { StoryActor, StoryAccessRecord } from "@/lib/auth/story-policy";
 import { AuthAccessError } from "@/lib/auth/policy";
@@ -11,9 +17,14 @@ import type { StoryMetadata } from "@/lib/services/story-command-service";
 import { databaseJson } from "@/lib/db/json-fields";
 import { completedMediaUploadSchema } from "@/lib/validation/media-upload-schema";
 import { normalizeCoverPosition } from "@/lib/story-cover";
+import { buildStorySearchText, tokenizeSearchText } from "@/lib/search/text-search";
 import { consoleRepositoryReadObserver, failRepositoryRead } from "./read-observability";
-import { PrismaStoryRepository } from "./prisma-story-repository";
-import { PrismaSceneRepository } from "./prisma-scene-repository";
+import { chapterSelect, mapChapter, PrismaStoryRepository } from "./prisma-story-repository";
+import { mapPrismaScenes, PrismaSceneRepository } from "./prisma-scene-repository";
+import {
+  decodeModerationCursor,
+  encodeModerationCursor,
+} from "./story-moderation-query";
 
 const managedChapterSelect = {
   id: true,
@@ -58,6 +69,33 @@ const chapterStatuses: Record<string, ManagedChapter["status"]> = {
   DRAFT: "draft",
   PUBLISHED: "published",
 };
+
+const moderationStatuses = {
+  draft: "DRAFT",
+  pending_review: "PENDING_REVIEW",
+  published: "PUBLISHED",
+  rejected: "REJECTED",
+  archived: "ARCHIVED",
+} as const;
+
+interface ModerationListRow {
+  internalId: string;
+  slug: string;
+  title: string;
+  authorDisplayName: string;
+  coverUrl: string | null;
+  coverPositionX: number;
+  coverPositionY: number;
+  genre: string[];
+  status: string;
+  submittedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  chapterCount: number;
+  blockCount: number;
+  effectCount: number;
+  pendingRank: number;
+}
 
 function invalidManagementRead(code: string): never {
   return failRepositoryRead(consoleRepositoryReadObserver, code);
@@ -152,6 +190,259 @@ export class PrismaStoryCommandRepository extends PrismaStoryRepository {
     });
     return rows.map(mapManagedStoryRecord);
   }
+  async getModerationSummary(): Promise<ModerationSummaryCounts> {
+    const [pendingReview, published, rejected] = await Promise.all([
+      this.tx.story.count({ where: { status: "PENDING_REVIEW" } }),
+      this.tx.story.count({ where: { status: "PUBLISHED" } }),
+      this.tx.story.count({ where: { status: "REJECTED" } }),
+    ]);
+    return { pendingReview, published, rejected };
+  }
+  async listModerationStories(query: ModerationListQuery): Promise<ModerationStoryList> {
+    const tokens = tokenizeSearchText(query.q);
+    const cursor = decodeModerationCursor(query);
+    const statusSql = query.status === "all"
+      ? Prisma.sql`TRUE`
+      : Prisma.sql`s."status" = ${moderationStatuses[query.status]}::"StoryStatus"`;
+    const searchSql = tokens.map(
+      (token) => Prisma.sql`s."searchTextNormalized" LIKE ${`%${token}%`}`,
+    );
+    const rankSql = Prisma.sql`CASE WHEN s."status" = 'PENDING_REVIEW'::"StoryStatus" THEN 0 ELSE 1 END`;
+    let cursorSql = Prisma.sql`TRUE`;
+    if (cursor) {
+      const createdAt = new Date(cursor.createdAt);
+      if (cursor.submittedAt === null) {
+        cursorSql = Prisma.sql`(
+          ${rankSql} > ${cursor.rank}
+          OR (${rankSql} = ${cursor.rank} AND s."submittedAt" IS NULL AND (
+            s."createdAt" < ${createdAt}
+            OR (s."createdAt" = ${createdAt} AND s."id" > ${cursor.id})
+          ))
+        )`;
+      } else {
+        const submittedAt = new Date(cursor.submittedAt);
+        cursorSql = Prisma.sql`(
+          ${rankSql} > ${cursor.rank}
+          OR (${rankSql} = ${cursor.rank} AND (
+            s."submittedAt" < ${submittedAt}
+            OR s."submittedAt" IS NULL
+            OR (s."submittedAt" = ${submittedAt} AND (
+              s."createdAt" < ${createdAt}
+              OR (s."createdAt" = ${createdAt} AND s."id" > ${cursor.id})
+            ))
+          ))
+        )`;
+      }
+    }
+    const whereSql = Prisma.join([statusSql, ...searchSql, cursorSql], " AND ");
+    const where: Prisma.StoryWhereInput = {
+      ...(query.status === "all" ? {} : { status: moderationStatuses[query.status] }),
+      ...(tokens.length === 0 ? {} : {
+        AND: tokens.map((token) => ({ searchTextNormalized: { contains: token } })),
+      }),
+    };
+    const [summary, total, rows] = await Promise.all([
+      this.getModerationSummary(),
+      this.tx.story.count({ where }),
+      this.tx.$queryRaw<ModerationListRow[]>(Prisma.sql`
+        SELECT
+          s."id" AS "internalId",
+          s."slug",
+          s."title",
+          s."authorDisplayName",
+          s."coverUrl",
+          s."coverPositionX",
+          s."coverPositionY",
+          s."genre",
+          s."status"::text AS "status",
+          s."submittedAt",
+          s."createdAt",
+          s."updatedAt",
+          COUNT(DISTINCT c."id")::int AS "chapterCount",
+          COUNT(DISTINCT b."id")::int AS "blockCount",
+          COUNT(DISTINCT e."id")::int AS "effectCount",
+          ${rankSql}::int AS "pendingRank"
+        FROM "Story" s
+        LEFT JOIN "Chapter" c ON c."storyId" = s."id"
+        LEFT JOIN "StoryBlock" b ON b."chapterId" = c."id"
+        LEFT JOIN "Effect" e ON e."blockId" = b."id"
+        WHERE ${whereSql}
+        GROUP BY s."id"
+        ORDER BY
+          "pendingRank" ASC,
+          s."submittedAt" DESC NULLS LAST,
+          s."createdAt" DESC,
+          s."id" ASC
+        LIMIT ${query.limit + 1}
+      `),
+    ]);
+    const hasNext = rows.length > query.limit;
+    const visible = rows.slice(0, query.limit);
+    const items = visible.map((row) => {
+      const status = storyStatuses[row.status]
+        ?? invalidManagementRead("P3_PRISMA_INVALID_MODERATION_STATUS");
+      if (
+        !row.slug.trim()
+        || !row.authorDisplayName.trim()
+        || !Array.isArray(row.genre)
+        || !Number.isFinite(row.coverPositionX)
+        || !Number.isFinite(row.coverPositionY)
+        || row.coverPositionX < 0
+        || row.coverPositionX > 100
+        || row.coverPositionY < 0
+        || row.coverPositionY > 100
+      ) invalidManagementRead("P3_PRISMA_INVALID_MODERATION_STORY");
+      return {
+        id: row.slug,
+        title: row.title,
+        author: row.authorDisplayName,
+        ...(row.coverUrl === null ? {} : { cover_image: row.coverUrl }),
+        ...(row.coverPositionX === 50 && row.coverPositionY === 50
+          ? {}
+          : { cover_position: { x: row.coverPositionX, y: row.coverPositionY } }),
+        genre: [...row.genre],
+        submittedAt: row.submittedAt?.toISOString() ?? null,
+        chapterCount: row.chapterCount,
+        blockCount: row.blockCount,
+        effectCount: row.effectCount,
+        status,
+        updatedAt: row.updatedAt.toISOString(),
+      };
+    });
+    const last = visible.at(-1);
+    return {
+      summary,
+      items,
+      total,
+      nextCursor: hasNext && last
+        ? encodeModerationCursor(query, {
+            rank: last.pendingRank,
+            submittedAt: last.submittedAt?.toISOString() ?? null,
+            createdAt: last.createdAt.toISOString(),
+            id: last.internalId,
+          })
+        : null,
+    };
+  }
+  async getModerationDetailRecord(slug: string): Promise<{
+    detail: ModerationStoryDetail;
+    updatedAt: Date;
+  } | null> {
+    if (!slug.trim()) return null;
+    const row = await this.tx.story.findUnique({
+      where: { slug },
+      select: {
+        slug: true,
+        title: true,
+        authorDisplayName: true,
+        description: true,
+        coverUrl: true,
+        coverPositionX: true,
+        coverPositionY: true,
+        genre: true,
+        status: true,
+        createdAt: true,
+        submittedAt: true,
+        reviewedAt: true,
+        rejectionReason: true,
+        updatedAt: true,
+        author: { select: { email: true } },
+        chapters: {
+          orderBy: [{ order: "asc" }, { id: "asc" }],
+          select: {
+            id: true,
+            title: true,
+            order: true,
+            status: true,
+            blocks: { select: { _count: { select: { effects: true } } } },
+          },
+        },
+      },
+    });
+    if (!row) return null;
+    const status = storyStatuses[row.status]
+      ?? invalidManagementRead("P3_PRISMA_INVALID_MODERATION_STATUS");
+    if (
+      !row.slug.trim()
+      || !row.authorDisplayName.trim()
+      || !Array.isArray(row.genre)
+      || !Number.isFinite(row.coverPositionX)
+      || !Number.isFinite(row.coverPositionY)
+      || row.coverPositionX < 0
+      || row.coverPositionX > 100
+      || row.coverPositionY < 0
+      || row.coverPositionY > 100
+    ) invalidManagementRead("P3_PRISMA_INVALID_MODERATION_STORY");
+    return {
+      detail: {
+        id: row.slug,
+        title: row.title,
+        author: row.authorDisplayName,
+        authorEmail: row.author.email,
+        description: row.description,
+        ...(row.coverUrl === null ? {} : { cover_image: row.coverUrl }),
+        ...(row.coverPositionX === 50 && row.coverPositionY === 50
+          ? {}
+          : { cover_position: { x: row.coverPositionX, y: row.coverPositionY } }),
+        genre: [...row.genre],
+        status,
+        createdAt: row.createdAt.toISOString(),
+        submittedAt: row.submittedAt?.toISOString() ?? null,
+        reviewedAt: row.reviewedAt?.toISOString() ?? null,
+        rejectionReason: row.rejectionReason,
+        chapters: row.chapters.map((chapter) => {
+          const effectCount = chapter.blocks.reduce((sum, block) => sum + block._count.effects, 0);
+          return {
+            id: chapter.id,
+            title: chapter.title,
+            order: chapter.order,
+            status: chapterStatuses[chapter.status]
+              ?? invalidManagementRead("P3_PRISMA_INVALID_MODERATION_CHAPTER_STATUS"),
+            blockCount: chapter.blocks.length,
+            effectCount,
+          };
+        }),
+      },
+      updatedAt: row.updatedAt,
+    };
+  }
+  async getModerationPreviewRecord(slug: string, chapterId: string) {
+    if (!slug.trim() || !chapterId.trim()) return null;
+    const story = await this.tx.story.findUnique({
+      where: { slug },
+      select: { id: true, slug: true, title: true },
+    });
+    if (!story) return null;
+    const chapter = await this.tx.chapter.findFirst({
+      where: { id: chapterId, storyId: story.id },
+      select: {
+        ...chapterSelect,
+        scenes: {
+          orderBy: { id: "asc" },
+          select: {
+            id: true,
+            chapterId: true,
+            startBlockId: true,
+            endBlockId: true,
+            basedOnPresetId: true,
+            renderConfig: true,
+          },
+        },
+      },
+    });
+    if (!chapter) return null;
+    const mapped = mapChapter(chapter, consoleRepositoryReadObserver);
+    return {
+      story: { id: story.slug, title: story.title },
+      chapter: mapped,
+      scenes: mapPrismaScenes(
+        chapter.scenes,
+        chapter.id,
+        mapped.blocks.map((block) => block.id),
+        consoleRepositoryReadObserver,
+      ),
+    };
+  }
   async getChapterManagementSummary(storyId: string, chapterId: string) {
     if (!storyId.trim() || !chapterId.trim()) return null;
     const row = await this.tx.chapter.findFirst({
@@ -206,20 +497,28 @@ export class PrismaStoryCommandRepository extends PrismaStoryRepository {
     const row = await this.tx.story.create({ data: {
       slug: `${base}-${randomUUID()}`, title: metadata.title, description: metadata.description,
       coverUrl, genre: metadata.genre, authorId: actor.id, authorDisplayName: byline,
+      searchTextNormalized: buildStorySearchText(metadata.title, byline),
       coverPositionX: coverPosition.x, coverPositionY: coverPosition.y,
       chapters: { create: chapters.map((chapter, index) => ({ title: chapter.title, order: index + 1 })) },
     }, select: { slug: true, updatedAt: true } });
     await this.tx.user.updateMany({ where: { id: actor.id, role: "READER" }, data: { role: "AUTHOR" } });
     return row;
   }
-  updateMetadata(id: string, metadata: StoryMetadata, coverUrl: string | undefined, updatedAt: Date) {
+  async updateMetadata(id: string, metadata: StoryMetadata, coverUrl: string | undefined, updatedAt: Date) {
+    const current = await this.tx.story.findUnique({
+      where: { id },
+      select: { authorDisplayName: true },
+    });
+    if (!current) notFound();
     return this.tx.story.update({ where: { id }, data: {
       title: metadata.title, description: metadata.description, ...(coverUrl === undefined ? {} : { coverUrl }),
       ...(metadata.cover_position === undefined ? {} : {
         coverPositionX: metadata.cover_position.x,
         coverPositionY: metadata.cover_position.y,
       }),
-      genre: metadata.genre, updatedAt,
+      genre: metadata.genre,
+      searchTextNormalized: buildStorySearchText(metadata.title, current.authorDisplayName),
+      updatedAt,
     } });
   }
   setStoryState(id: string, status: "DRAFT" | "PENDING_REVIEW" | "ARCHIVED", updatedAt: Date) {
@@ -228,6 +527,34 @@ export class PrismaStoryCommandRepository extends PrismaStoryRepository {
       ...(status === "PENDING_REVIEW" ? { submittedAt: updatedAt, reviewedAt: null, reviewedById: null, rejectionReason: null } : {}),
       ...(status === "DRAFT" ? { submittedAt: null, reviewedAt: null, reviewedById: null, rejectionReason: null } : {}),
     } });
+  }
+  async approveStory(id: string, reviewerId: string, reviewedAt: Date) {
+    await this.tx.story.update({
+      where: { id },
+      data: {
+        status: "PUBLISHED",
+        reviewedAt,
+        reviewedById: reviewerId,
+        rejectionReason: null,
+        updatedAt: reviewedAt,
+      },
+    });
+    await this.tx.chapter.updateMany({
+      where: { storyId: id },
+      data: { status: "PUBLISHED" },
+    });
+  }
+  rejectStory(id: string, reviewerId: string, reason: string, reviewedAt: Date) {
+    return this.tx.story.update({
+      where: { id },
+      data: {
+        status: "REJECTED",
+        reviewedAt,
+        reviewedById: reviewerId,
+        rejectionReason: reason,
+        updatedAt: reviewedAt,
+      },
+    });
   }
   createChapter(storyId: string, title: string, order: number) {
     return this.tx.chapter.create({ data: { storyId, title, order }, select: { id: true } });

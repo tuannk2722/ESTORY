@@ -74,7 +74,7 @@
   - Home dùng submit rõ ràng: Enter hoặc nút “Tìm kiếm” chạy ngay trên server, không request theo từng phím. URL lưu raw query đã trim/collapse; refresh/back/forward phải khôi phục đúng input và kết quả. Clear xóa `q`/cursor nhưng giữ `genre`, submit ngay và trả focus về input.
   - Đổi query reset cursor. Kết quả phân trang server; không autocomplete/suggestion hoặc client-side relevance trong scope này.
 - **Genres (`HomeGenreFilters`)**:
-  - Hàng quick-filter nằm ngay dưới Search: “Tất cả” + tối đa 6 genre có Story public, do `listPublicGenreFacets()` trả về; không hardcode taxonomy và không suy từ page kết quả đang hiển thị. Không có facet thì ẩn cả hàng.
+  - Hàng quick-filter nằm ngay dưới Search: “Tất cả” + tối đa 6 genre có Story public, do `listPublicGenreFacets()` trả về theo `storyCount` từ nhiều xuống ít rồi tie-break deterministic như `11` §9.2.2; UI phải giữ nguyên thứ tự này, không tự alphabetize. Không hardcode taxonomy, không suy từ page kết quả đang hiển thị; không có facet thì ẩn cả hàng.
   - Mỗi chip là link GET target tối thiểu 44px, giữ `q`, set đúng một `genre` và bỏ cursor; “Tất cả” chỉ bỏ `genre`. Active có state ngoài màu và `aria-current="page"`; mobile `flex-wrap` căn giữa, không buộc horizontal scroll.
   - `genre` match exact facet và kết hợp AND với `q`; không đưa genre vào free-text search. Heading: không filter → “Truyện Nổi Bật”; chỉ `q` → `Kết quả cho “…”`; chỉ genre → `Thể loại “…”`; có cả hai → `Kết quả cho “…” · Thể loại “…”`. Pagination giữ cả `q/genre`.
 - **Result states**: khi điều hướng, giữ control thao tác được, đánh dấu vùng kết quả `aria-busy`; loading lần đầu/query/filter dùng skeleton đúng card. Không có Story public là base-empty; filter không match là “Không tìm thấy truyện phù hợp” + “Xóa bộ lọc” (bỏ cả `q/genre`). Error giữ query/filter và có Retry.
@@ -423,7 +423,7 @@ reorder riêng vì có thể thành công một nửa.
 
 ### 8.0. Admin shell chung
 
-- `/admin/**` là back-office tách khỏi Reader/Author: **không render `AppHeader`**. `app/admin/layout.tsx` kiểm `requireRole("admin")`, sau đó render `AdminShell`; link “Về trang đọc” (`/`) luôn khả dụng để thoát ngữ cảnh quản trị.
+- `/admin/**` là back-office tách khỏi Reader/Author, **không render `AppHeader`** và luôn kiểm exact role Admin. Các route workspace nằm trong route group `(workspace)` và dùng `AdminShell`; riêng admin chapter preview nằm trong `(preview)`, không dùng shell để Reader chiếm đúng một viewport/scroll context. Route group không đổi URL. Link “Về trang đọc” (`/`) luôn khả dụng trong workspace để thoát ngữ cảnh quản trị.
 - Mọi màu/surface/border/focus dùng semantic design token hiện có và hỗ trợ Dark/Light/Sepia. `ThemeSwitcher` dùng lại `settingsStore`; không tạo cơ chế lưu theme riêng cho Admin.
 
 #### 8.0.1. Desktop `lg+`
@@ -483,7 +483,7 @@ Nguồn nghiệp vụ: `02` §2.7 và `12` §12.7; acceptance criteria: `07` US-
 
 - “Xem chi tiết” mở right drawer desktop `max-w-2xl`; mobile là full-screen dialog/sheet. Backdrop `z-[80]`, surface `z-[85]`; header và footer sticky, phần giữa cuộn và chừa padding để footer không che nội dung.
 - Header: title, `StatusBadge`, Close. Body theo thứ tự: cover 16:9 đúng focal point; bút danh + email tài khoản (admin-only); ngày tạo/gửi gần nhất; description; genre; chapter list theo `order`.
-- Mỗi chapter hiển thị title/order, `draft|published`, block count và **block effect** count theo đủ `EffectCategory`: visual/audio/motion/transition. Scene/ambient là domain riêng, không gộp vào `EffectConfig` count; admin kiểm tra nó trong Reader preview. Nút “Đọc thử chương” mở admin-only preview trong tab mới, dùng Reader renderer với full chapter snapshot qua admin DAL; **không** gọi/nới public repository và không làm pending/draft content public.
+- Mỗi chapter hiển thị title/order, `draft|published`, block count và **tổng block effect count**; không hiển thị breakdown visual/audio/motion/transition. Scene/ambient là domain riêng, không gộp vào `EffectConfig` count; admin kiểm tra trải nghiệm thực tế trong Reader preview. Nút “Đọc thử chương” mở admin-only preview trong tab mới, dùng dedicated Admin preview header + shared `ReaderPane` với full chapter snapshot qua admin DAL; route preview shell-neutral, header có `data-reader-header`, dùng `font-ui` cùng semantic color/focus tokens để theo Dark/Light/Sepia trong khi canvas truyện vẫn Cinematic Dark, **không** gọi/nới public repository và không làm pending/draft content public.
 - Footer chỉ có “Từ chối” và “Phê duyệt tác phẩm” khi status là `pending_review`; với status khác, footer chỉ có Close. Không cho thao tác trong lúc detail đang loading, submit đang chạy hoặc revision đã stale.
 - Drawer trap focus, `Escape`/Close trả focus về đúng row/card. Nếu không có dữ liệu chưa lưu thì scrim click được đóng. Khi mở dialog con, focus thuộc dialog con và drawer phía sau inert.
 

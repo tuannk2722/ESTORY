@@ -6,7 +6,11 @@ import type {
   ScenePreset,
 } from "@/types/scene";
 import type {
+  CursorPage,
   PublicChapterReaderData,
+  PublicGenreFacet,
+  PublicStoryListItem,
+  PublicStoryListQuery,
   StoryRepository,
 } from "./story-repository";
 import type {
@@ -116,6 +120,22 @@ export class ShadowStoryRepository implements StoryRepository {
       "P3_SHADOW_STORY_GET_ALL_MISMATCH",
       () => this.primary.getAll(),
       () => this.secondary.getAll(),
+    );
+  }
+
+  listPublicStories(input: PublicStoryListQuery): Promise<CursorPage<PublicStoryListItem>> {
+    return this.shadow.compare(
+      "P3_SHADOW_STORY_LIST_PUBLIC_MISMATCH",
+      () => this.primary.listPublicStories(input),
+      () => this.secondary.listPublicStories(input),
+    );
+  }
+
+  listPublicGenreFacets(limit: number): Promise<PublicGenreFacet[]> {
+    return this.shadow.compare(
+      "P3_SHADOW_STORY_GENRE_FACETS_MISMATCH",
+      () => this.primary.listPublicGenreFacets(limit),
+      () => this.secondary.listPublicGenreFacets(limit),
     );
   }
 

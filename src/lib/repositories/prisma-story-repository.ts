@@ -7,10 +7,14 @@ import type {
   StoryBlockType,
   StoryStatus,
 } from "@/types/story";
-import type { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import { effectConfigSchema } from "@/lib/effects/effect-config-schema";
 import type {
+  CursorPage,
   PublicChapterReaderData,
+  PublicGenreFacet,
+  PublicStoryListItem,
+  PublicStoryListQuery,
   StoryRepository,
 } from "./story-repository";
 import {
@@ -25,6 +29,12 @@ import {
   RepositoryReadError,
   type RepositoryReadObserver,
 } from "./read-observability";
+import { tokenizeSearchText } from "@/lib/search/text-search";
+import {
+  decodePublicStoryCursor,
+  encodePublicStoryCursor,
+  sortPublicGenreFacets,
+} from "./public-story-list";
 
 interface EffectRow {
   id: string;
@@ -46,7 +56,7 @@ interface BlockRow {
   effects: EffectRow[];
 }
 
-interface ChapterRow {
+export interface ChapterRow {
   id: string;
   title: string;
   order: number;
@@ -69,6 +79,49 @@ interface StoryRow {
   chapters: ChapterRow[];
 }
 
+const publicStorySelect = {
+  slug: true,
+  title: true,
+  authorDisplayName: true,
+  description: true,
+  coverUrl: true,
+  coverPositionX: true,
+  coverPositionY: true,
+  genre: true,
+} satisfies Prisma.StorySelect;
+
+type PublicStoryRow = Prisma.StoryGetPayload<{ select: typeof publicStorySelect }>;
+
+function mapPublicStory(
+  row: PublicStoryRow,
+  observer: RepositoryReadObserver,
+): PublicStoryListItem {
+  if (
+    !row.slug.trim()
+    || !row.authorDisplayName.trim()
+    || !Array.isArray(row.genre)
+    || !Number.isFinite(row.coverPositionX)
+    || !Number.isFinite(row.coverPositionY)
+    || row.coverPositionX < 0
+    || row.coverPositionX > 100
+    || row.coverPositionY < 0
+    || row.coverPositionY > 100
+  ) {
+    return failRepositoryRead(observer, "P3_PRISMA_INVALID_PUBLIC_STORY");
+  }
+  return {
+    id: row.slug,
+    title: row.title,
+    author: row.authorDisplayName,
+    description: row.description,
+    ...(row.coverUrl === null ? {} : { cover_image: row.coverUrl }),
+    ...(row.coverPositionX === 50 && row.coverPositionY === 50
+      ? {}
+      : { cover_position: { x: row.coverPositionX, y: row.coverPositionY } }),
+    genre: [...row.genre],
+  };
+}
+
 const effectSelect = {
   id: true,
   type: true,
@@ -89,7 +142,7 @@ const blockSelect = {
   effects: { orderBy: { id: "asc" as const }, select: effectSelect },
 } satisfies Prisma.StoryBlockSelect;
 
-const chapterSelect = {
+export const chapterSelect = {
   id: true,
   title: true,
   order: true,
@@ -178,7 +231,7 @@ function mapBlock(
   };
 }
 
-function mapChapter(
+export function mapChapter(
   row: ChapterRow,
   observer: RepositoryReadObserver,
 ): Chapter {
@@ -322,6 +375,61 @@ export class PrismaStoryRepository implements StoryRepository {
 
   getAllPublic(): Promise<Story[]> {
     return this.findStories({ storyStatus: "PUBLISHED" });
+  }
+
+  async listPublicStories(
+    input: PublicStoryListQuery,
+  ): Promise<CursorPage<PublicStoryListItem>> {
+    const db = await resolvePrismaReadClient(this.clientSource);
+    const tokens = tokenizeSearchText(input.q);
+    const baseWhere: Prisma.StoryWhereInput = {
+      status: "PUBLISHED",
+      ...(input.genre === null ? {} : { genre: { has: input.genre } }),
+      ...(tokens.length === 0 ? {} : {
+        AND: tokens.map((token) => ({ searchTextNormalized: { contains: token } })),
+      }),
+    };
+    const after = decodePublicStoryCursor(input.cursor, input);
+    const limit = Math.min(Math.max(Math.trunc(input.limit), 1), 24);
+    const [total, rows] = await Promise.all([
+      db.story.count({ where: baseWhere }),
+      db.story.findMany({
+        where: { ...baseWhere, ...(after === null ? {} : { slug: { gt: after } }) },
+        orderBy: { slug: "asc" },
+        take: limit + 1,
+        select: publicStorySelect,
+      }),
+    ]);
+    const hasNext = rows.length > limit;
+    const visibleRows = rows.slice(0, limit);
+    const items = visibleRows.flatMap((row) => {
+      try {
+        return [mapPublicStory(row, this.observer)];
+      } catch (error) {
+        if (error instanceof RepositoryReadError) return [];
+        throw error;
+      }
+    });
+    return {
+      items,
+      total,
+      nextCursor: hasNext && visibleRows.length > 0
+        ? encodePublicStoryCursor(input, visibleRows[visibleRows.length - 1].slug)
+        : null,
+    };
+  }
+
+  async listPublicGenreFacets(limit: number): Promise<PublicGenreFacet[]> {
+    const db = await resolvePrismaReadClient(this.clientSource);
+    const rows = await db.$queryRaw<Array<{ genre: string; storyCount: number }>>(Prisma.sql`
+      SELECT btrim(item.genre) AS genre, COUNT(DISTINCT story.id)::int AS "storyCount"
+      FROM "Story" AS story
+      CROSS JOIN LATERAL unnest(story.genre) AS item(genre)
+      WHERE story.status = 'PUBLISHED'::"StoryStatus"
+        AND btrim(item.genre) <> ''
+      GROUP BY btrim(item.genre)
+    `);
+    return sortPublicGenreFacets(rows, limit);
   }
 
   getById(id: string): Promise<Story | null> {

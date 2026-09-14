@@ -1,6 +1,19 @@
 // lib/repositories/story-repository.ts
 import type { Chapter, Story } from "@/types/story";
 import type { Scene } from "@/types/scene";
+import type {
+  CursorPage,
+  PublicGenreFacet,
+  PublicStoryListItem,
+  PublicStoryListQuery,
+} from "@/types/story-search";
+
+export type {
+  CursorPage,
+  PublicGenreFacet,
+  PublicStoryListItem,
+  PublicStoryListQuery,
+} from "@/types/story-search";
 
 export interface PublicChapterReaderData {
   story: Pick<Story, "id" | "title">;
@@ -12,6 +25,8 @@ export interface PublicChapterReaderData {
 }
 
 export interface StoryRepository {
+  listPublicStories(input: PublicStoryListQuery): Promise<CursorPage<PublicStoryListItem>>;
+  listPublicGenreFacets(limit: number): Promise<PublicGenreFacet[]>;
   getAll(): Promise<Story[]>;
   getAllPublic(): Promise<Story[]>;
   /** Full author/editor read. Never apply the public chapter projection here. */

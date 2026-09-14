@@ -24,6 +24,8 @@ const story: Story = {
 
 function repository(overrides: Partial<StoryRepository> = {}): StoryRepository {
   return {
+    async listPublicStories() { return { items: [story], total: 1, nextCursor: null }; },
+    async listPublicGenreFacets() { return [{ genre: "test", storyCount: 1 }]; },
     async getAll() { return [story]; },
     async getAllPublic() { return [story]; },
     async getById() { return story; },

@@ -15,7 +15,8 @@ import {
   Search,
   ChevronDown,
 } from "lucide-react";
-import SearchInput, { matchesSearch } from "@/components/ui/SearchInput";
+import SearchInput from "@/components/ui/SearchInput";
+import { matchesSearch } from "@/lib/search/text-search";
 import { getEffectIcon, EFFECT_METADATA } from "@/lib/effects/effectCatalog";
 
 export interface PresetTabProps {

@@ -42,6 +42,10 @@
   --shadow-story-card:      0 14px 34px -24px rgba(0, 0, 0, 0.9);
   --shadow-story-card-hover: 0 22px 48px -26px rgba(56, 189, 248, 0.3), 0 12px 28px -22px rgba(0, 0, 0, 0.95);
   --shadow-story-hero:      0 28px 72px -40px rgba(0, 0, 0, 0.95);
+  --home-hero-placeholder:  #0B1425;
+  --home-hero-scrim:        radial-gradient(circle at 50% 43%, rgba(5, 7, 15, 0.9) 0%, rgba(5, 7, 15, 0.7) 39%, rgba(5, 7, 15, 0.18) 76%);
+  --home-hero-control-surface: rgba(14, 20, 38, 0.94);
+  --home-hero-bottom-fade:  linear-gradient(to bottom, transparent 50%, var(--color-background) 100%);
 
   /* Glassmorphism layer */
   --glass-bg:               rgba(14, 20, 38, 0.7);
@@ -83,6 +87,10 @@
   --shadow-story-card:      0 14px 34px -24px rgba(15, 23, 42, 0.22);
   --shadow-story-card-hover: 0 22px 48px -26px rgba(37, 99, 235, 0.24), 0 12px 28px -22px rgba(15, 23, 42, 0.24);
   --shadow-story-hero:      0 28px 72px -40px rgba(15, 23, 42, 0.4);
+  --home-hero-placeholder:  #F7F1E7;
+  --home-hero-scrim:        radial-gradient(circle at 50% 43%, rgba(253, 251, 247, 0.9) 0%, rgba(253, 251, 247, 0.7) 42%, rgba(253, 251, 247, 0.12) 78%);
+  --home-hero-control-surface: rgba(255, 255, 255, 0.95);
+  --home-hero-bottom-fade:  linear-gradient(to bottom, transparent 50%, var(--color-background) 100%);
 
   --glass-bg:               rgba(255, 255, 255, 0.8);
   --glass-border:           rgba(0, 0, 0, 0.06);
@@ -123,6 +131,10 @@
   --shadow-story-card:      0 14px 34px -24px rgba(68, 47, 24, 0.3);
   --shadow-story-card-hover: 0 22px 48px -26px rgba(146, 64, 14, 0.3), 0 12px 28px -22px rgba(68, 47, 24, 0.28);
   --shadow-story-hero:      0 28px 72px -40px rgba(68, 47, 24, 0.48);
+  --home-hero-placeholder:  #E9D8B7;
+  --home-hero-scrim:        radial-gradient(circle at 50% 43%, rgba(244, 238, 221, 0.91) 0%, rgba(244, 238, 221, 0.72) 42%, rgba(244, 238, 221, 0.14) 78%);
+  --home-hero-control-surface: rgba(250, 243, 225, 0.95);
+  --home-hero-bottom-fade:  linear-gradient(to bottom, transparent 50%, var(--color-background) 100%);
 
   --glass-bg:               rgba(234, 226, 204, 0.8);
   --glass-border:           rgba(44, 36, 22, 0.1);
@@ -303,6 +315,34 @@ body {
 /* Public story cards use an opaque semantic surface in every app theme. */
 .story-card {
   background: var(--color-card);
+}
+
+/* Home Hero renders only the paint-hint variant before hydration. The client
+   keeps the previous decoded layer visible while the next theme image loads. */
+.home-hero-artwork:not([data-managed="true"]) .home-hero-theme-layer {
+  display: none;
+}
+
+html[data-theme="dark"] .home-hero-artwork:not([data-managed="true"]) [data-hero-theme="dark"],
+html[data-theme="light"] .home-hero-artwork:not([data-managed="true"]) [data-hero-theme="light"],
+html[data-theme="sepia"] .home-hero-artwork:not([data-managed="true"]) [data-hero-theme="sepia"] {
+  display: block;
+}
+
+.home-hero-artwork[data-managed="true"] .home-hero-theme-layer {
+  display: none;
+  transition: opacity 180ms ease-out;
+  will-change: opacity;
+}
+
+.home-hero-artwork[data-managed="true"] .home-hero-theme-layer[data-visible="true"] {
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero-artwork[data-managed="true"] .home-hero-theme-layer {
+    transition: none;
+  }
 }
 
 /* Reader Progress Bar — 3px top strip */

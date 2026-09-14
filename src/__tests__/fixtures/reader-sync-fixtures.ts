@@ -25,6 +25,7 @@ export async function createReaderSyncFixture(db: PrismaClient) {
     for (let index = 0; index < 2; index++) {
       const story = await db.story.create({ data: {
         slug: `${prefix}-story-${index}`, title: `Sync fixture ${index}`, authorDisplayName: "Sync Author", authorId: users[3],
+        searchTextNormalized: `sync fixture ${index} sync author syncfixture${index}syncauthor`,
         status: "PUBLISHED", description: "Disposable sync fixture", genre: ["test"],
         chapters: { create: Array.from({ length: 2 }, (_, chapter) => ({
           id: `${prefix}-chapter-${index}-${chapter}`, title: `Chapter ${chapter}`, order: chapter + 1, status: "PUBLISHED" as const,

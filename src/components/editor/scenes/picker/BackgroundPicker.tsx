@@ -7,7 +7,8 @@ import React, { useState, useMemo } from "react";
 import type { BackgroundAsset } from "@/types/scene";
 import { backgroundSnapshotToPresentation } from "@/lib/scenes/scene-presentation";
 import { Check, Film, Sparkles, Search, ChevronDown } from "lucide-react";
-import SearchInput, { matchesSearch } from "@/components/ui/SearchInput";
+import SearchInput from "@/components/ui/SearchInput";
+import { matchesSearch } from "@/lib/search/text-search";
 
 export type BackgroundOption = Pick<BackgroundAsset, "id" | "label" | "mood_tags" | "render">;
 

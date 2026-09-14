@@ -61,14 +61,17 @@ Ask before making an unrequested decision that materially changes:
 
 ### Execution Style
 
-- Work on the assigned task end-to-end with minimal conversational overhead.
-  Do not narrate routine progress, file reads, commands, implementation steps, or internal reasoning.
+- Execute the assigned task end-to-end with minimal user-facing output.
 
-- Continue autonomously until the task is complete or a material decision or genuine blocker requires user input.
+- Unless blocked or user input is required, do not send intermediate progress messages, plans, status summaries, or narration between tool calls.
 
-- Ask when unresolved ambiguity could materially affect architecture, schema, contracts, public behavior, scope, or cause significant rework.
+- Perform routine investigation, file reads, commands, implementation, and validation without conversational updates.
 
-  On completion, report only: key changes, main files affected, validation performed, and unresolved issues if any.
+- Continue autonomously until completion or until an unresolved decision could materially affect architecture, schema, contracts, public behavior, scope, or cause significant rework.
+
+- When user input is required, ask one concise, focused question.
+
+- On completion, report only: key changes, main files affected, validation performed, and unresolved issues if any.
 
 ## 3. Hard Invariants
 

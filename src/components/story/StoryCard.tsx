@@ -3,13 +3,13 @@
 import React from "react";
 import Link from "next/link";
 import { Bookmark } from "lucide-react";
-import { Story } from "@/types/story";
+import type { PublicStoryListItem } from "@/lib/repositories/story-repository";
 import { settingsStore } from "@/lib/settingsStore";
 import { useSettingsSync } from "@/hooks/useSettingsSync";
 import StoryCardVisual from "@/components/story/StoryCardVisual";
 
 export interface StoryCardProps {
-  story: Story;
+  story: PublicStoryListItem;
 }
 
 export default function StoryCard({ story }: StoryCardProps) {

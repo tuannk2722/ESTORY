@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check } from "lucide-react";
-import { matchesSearch } from "./SearchInput";
+import { matchesSearch } from "@/lib/search/text-search";
 import type { LucideIcon } from "lucide-react";
 
 export interface ComboboxOption {

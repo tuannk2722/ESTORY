@@ -6,7 +6,8 @@
 import React, { useId, useMemo, useState } from "react";
 import type { EffectCategory, EffectType } from "@/types/story";
 import { Check, Eye, Play, Search, Square } from "lucide-react";
-import SearchInput, { matchesSearch } from "@/components/ui/SearchInput";
+import SearchInput from "@/components/ui/SearchInput";
+import { matchesSearch } from "@/lib/search/text-search";
 import {
   AUDIO_EFFECT_PRESETS,
   EFFECT_CATEGORIES,
@@ -99,8 +100,8 @@ export const EffectList = React.memo(function EffectList({
                   setSearch("");
                 }}
                 className={`min-h-11 shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs text-editor-action-foreground font-semibold transition-colors motion-reduce:transition-none ${focusRing} ${isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "border border-border/40 bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "border border-border/40 bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground"
                   }`}
               >
                 {category.label}
@@ -113,8 +114,8 @@ export const EffectList = React.memo(function EffectList({
           type="button"
           onClick={() => setSearchOpen((current) => !current)}
           className={`flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg border transition-colors motion-reduce:transition-none ${focusRing} ${searchOpen || search.trim()
-              ? "border-primary/40 bg-primary/15 text-primary"
-              : "border-border bg-secondary/60 text-muted-foreground hover:text-foreground"
+            ? "border-primary/40 bg-primary/15 text-primary"
+            : "border-border bg-secondary/60 text-muted-foreground hover:text-foreground"
             }`}
           aria-label="Tìm kiếm hiệu ứng"
           aria-expanded={searchOpen}
@@ -137,7 +138,7 @@ export const EffectList = React.memo(function EffectList({
               value={search}
               onChange={setSearch}
               autoFocus
-              className="text-xs [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:pr-12"
+              className="[&_button]:min-h-11 [&_button]:min-w-11 [&_input]:pr-12"
             />
           </label>
         </div>
@@ -164,16 +165,16 @@ export const EffectList = React.memo(function EffectList({
                   <div
                     key={preset.src}
                     className={`flex min-h-14 items-center gap-1 rounded-xl border p-1.5 text-xs transition-colors motion-reduce:transition-none ${isSelected
-                        ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/40"
-                        : "border-border bg-secondary/30 text-foreground hover:bg-secondary/70"
+                      ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/40"
+                      : "border-border bg-secondary/30 text-foreground hover:bg-secondary/70"
                       }`}
                   >
                     <button
                       type="button"
                       onClick={() => onToggleAudioPreview(preset.src)}
                       className={`flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md transition-colors motion-reduce:transition-none ${focusRing} ${isPlaying
-                          ? "bg-destructive/15 text-destructive hover:bg-destructive/25"
-                          : "bg-primary/10 text-primary hover:bg-primary/20"
+                        ? "bg-destructive/15 text-destructive hover:bg-destructive/25"
+                        : "bg-primary/10 text-primary hover:bg-primary/20"
                         }`}
                       aria-label={
                         isPlaying
@@ -213,8 +214,8 @@ export const EffectList = React.memo(function EffectList({
                 <div
                   key={meta.type}
                   className={`flex min-h-14 items-stretch gap-1 rounded-xl border text-left transition-colors motion-reduce:transition-none ${isSelected
-                      ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/40 shadow-xs"
-                      : "border-border bg-secondary/30 text-foreground hover:border-border hover:bg-secondary/70"
+                    ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/40 shadow-xs"
+                    : "border-border bg-secondary/30 text-foreground hover:border-border hover:bg-secondary/70"
                     }`}
                 >
                   <button

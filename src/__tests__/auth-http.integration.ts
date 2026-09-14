@@ -46,6 +46,7 @@ async function run() {
     await prisma.session.create({ data: { userId: ids[0], sessionToken: tokens.expired, expires: new Date(Date.now() - 60_000) } });
     await prisma.story.create({ data: {
       slug: fixtureSlug, authorId: ids[2], authorDisplayName: "HTTP fixture", title: "HTTP fixture",
+      searchTextNormalized: "http fixture http fixture httpfixturehttpfixture",
       description: "Fixture", genre: [], chapters: { create: { id: fixtureChapter, title: "Fixture", order: 1 } },
     } });
     stage = "production server startup";

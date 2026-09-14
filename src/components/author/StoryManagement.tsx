@@ -29,7 +29,7 @@ import { CoverUploadProgress } from "./CoverUploader";
 import FormErrorSummary from "./FormErrorSummary";
 import LiveStoryCardPreview from "./LiveStoryCardPreview";
 import PublishStoryButton from "./PublishStoryButton";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "@/components/ui/StoryStatusBadge";
 import StoryForm from "./StoryForm";
 import { isStoryMutable, validateStoryForm } from "./storyRules";
 import type { ChapterManagerActions, StoryFieldErrors, StoryFormValue } from "./types";
