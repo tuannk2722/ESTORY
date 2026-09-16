@@ -85,7 +85,7 @@ Curated ScenePreset
 - Background dùng discriminated schema theo `kind`; gradient tuyến tính (`gradient`) và radial (`radial_gradient`) dùng typed fields theo `02-data-schema.md` mục 2.9, không nhận raw CSS; particle không nhận raw JSON mà dùng `composition_key` đã đăng ký.
 - `motion: "looping"` bắt buộc `poster_frame`.
 - Palette tint lưu cả `color` và `opacity`; mọi màu phải parse được và Preview đạt contrast theo `09-non-functional-requirements.md`.
-- Ambient effect phải active ở thời điểm chọn và technical manifest cho phép scope `scene`; tối đa một audio ambient, không trùng type, audio phải `loop: true`.
+- Ambient effect thuộc Admin phải active ở thời điểm chọn; audio khả dụng theo code, không qua DB overlay. Technical manifest phải cho phép scope `scene`; tối đa một audio ambient, không trùng type, audio phải `loop: true`.
 - `SceneRenderConfig.schema_version` bắt đầu ở `1`; mapper chịu trách nhiệm nâng legacy snapshot khi đọc/migrate.
 - Media object key là immutable. Thay file tạo key mới; không overwrite key đã nằm trong snapshot.
 
@@ -149,10 +149,11 @@ UI canonical ở `04b-page-layouts.md` mục 8; acceptance criteria ở `07-user
 ### 8.5.1. Effect catalog
 
 - Technical manifest trong code sở hữu ID/category/icon/defaults/renderer/allowed scope.
-- DB overlay sở hữu label/description/is_active/keyword/weight.
+- DB overlay sở hữu label/description/is_active/keyword/weight cho tập Admin; `audio` và từng built-in audio preset do dev quản lý trong code. Không có overlay audio ở trạng thái đích; contract và cutover theo `02` §2.6.
 - Admin không tạo effect type, không đổi technical field và không chỉnh default slider.
 - `is_active = false` ẩn effect khỏi mọi lựa chọn/gợi ý mới nhưng Reader vẫn render effect đã lưu.
-- Dictionary normalize Unicode trước khi unique/match; editor nhận dictionary một lần trong aggregate payload.
+- Dictionary giữ NFKC/lowercase vi-VN/trim/collapse whitespace để unique và block onBlur suggestion. Search effect dùng NFKC + matcher bỏ dấu/case, AND token trên metadata + keyword, không đổi ranking. Áp dụng block picker, scene effect combobox và Admin effect search; không mở rộng sang search Background/Palette/ScenePreset.
+- Editor nhận dictionary một lần trong aggregate payload, nhóm keyword theo effect một lần để tái sử dụng; không request theo phím/block. Weight chỉ cho suggestion; sửa dictionary có hiệu lực khi editor tải lại catalog. Built-in audio search dùng keyword từng preset trong code, không dùng `EffectKeywordSuggestion.audio`.
 
 ### 8.5.2. Scene catalog
 

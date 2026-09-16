@@ -6,10 +6,11 @@
 import React from "react";
 import { EffectConfig, EffectType } from "@/types/story";
 import {
-  EFFECT_METADATA,
   AUDIO_EFFECT_PRESETS,
   getEffectIcon,
 } from "@/lib/effects/effectCatalog";
+import { getAuthorEffectPresentation } from "@/lib/effects/effect-authoring";
+import { useEditorEffectCatalog } from "../EditorProvider";
 import { Sparkles, Plus, X } from "lucide-react";
 
 export interface BlockEffectsProps {
@@ -31,6 +32,7 @@ export const BlockEffects = React.memo(function BlockEffects({
   onEditEffect,
   onDeleteEffect,
 }: BlockEffectsProps) {
+  const effectCatalog = useEditorEffectCatalog();
   return (
     <>
       {/* 1. Keyword Suggestions Chips (US-2.3) */}
@@ -41,7 +43,7 @@ export const BlockEffects = React.memo(function BlockEffects({
             Gợi ý hiệu ứng:
           </span>
           {suggestions.slice(0, 3).map((sug) => {
-            const meta = EFFECT_METADATA[sug.effect_type];
+            const meta = getAuthorEffectPresentation(effectCatalog, sug.effect_type);
             return (
               <button
                 key={sug.effect_type}
@@ -70,7 +72,7 @@ export const BlockEffects = React.memo(function BlockEffects({
 
         {effects.map((eff) => {
           const Icon = getEffectIcon(eff.type, eff.category);
-          const meta = EFFECT_METADATA[eff.type];
+          const meta = getAuthorEffectPresentation(effectCatalog, eff.type);
           const effectLabel =
             eff.category === "audio"
               ? AUDIO_EFFECT_PRESETS.find((preset) => preset.src === eff.audio_src)?.label ||

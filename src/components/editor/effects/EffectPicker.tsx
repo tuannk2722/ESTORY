@@ -8,7 +8,8 @@ import type { EffectCategory, EffectConfig, EffectType } from "@/types/story";
 import { Check, Sliders, Sparkles } from "lucide-react";
 import { EditorDialog } from "@/components/editor/shared/EditorDialog";
 import { createEffectConfig } from "@/lib/effects/effectFactory";
-import { EFFECT_METADATA } from "@/lib/effects/effectCatalog";
+import { getActiveEffectDefinition, getAuthorEffectPresentation } from "@/lib/effects/effect-authoring";
+import { useEditorEffectCatalog } from "../EditorProvider";
 import { EffectConfigForm, type EffectConfigUpdate } from "./EffectConfigForm";
 import { EffectList } from "./EffectList";
 import { EffectPreview } from "./EffectPreview";
@@ -26,13 +27,16 @@ const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card";
 
 function createInitialDraft(
+  effectCatalog: ReturnType<typeof useEditorEffectCatalog>,
   initialEffect?: EffectConfig | null,
   presetType?: EffectType | null
 ): EffectConfig | null {
   if (initialEffect) {
     return createEffectConfig(initialEffect.type, initialEffect);
   }
-  return presetType ? createEffectConfig(presetType) : null;
+  return presetType && getActiveEffectDefinition(effectCatalog, presetType)?.allowed_scopes.includes("block")
+    ? createEffectConfig(presetType)
+    : null;
 }
 
 export function EffectPicker(props: EffectPickerProps) {
@@ -46,16 +50,17 @@ function EffectPickerDialog({
   initialEffect,
   presetType,
 }: EffectPickerProps) {
+  const effectCatalog = useEditorEffectCatalog();
   const [selectedCategory, setSelectedCategory] = useState<EffectCategory>(
     () =>
       initialEffect
-        ? EFFECT_METADATA[initialEffect.type].category
+        ? getAuthorEffectPresentation(effectCatalog, initialEffect.type).category
         : presetType
-          ? EFFECT_METADATA[presetType].category
-          : "visual"
+          ? getAuthorEffectPresentation(effectCatalog, presetType).category
+          : effectCatalog.effects.find((effect) => effect.allowed_scopes.includes("block"))?.category ?? "visual"
   );
   const [draft, setDraft] = useState<EffectConfig | null>(() =>
-    createInitialDraft(initialEffect, presetType)
+    createInitialDraft(effectCatalog, initialEffect, presetType)
   );
   const [previewEffect, setPreviewEffect] = useState<EffectConfig | null>(null);
   const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -96,12 +101,12 @@ function EffectPickerDialog({
 
   const handleSelectCategory = useCallback((category: EffectCategory) => {
     setSelectedCategory(category);
-    if (category === "audio") {
+    if (category === "audio" && getActiveEffectDefinition(effectCatalog, "audio")?.allowed_scopes.includes("block")) {
       setDraft((current) =>
         current?.type === "audio" ? current : createEffectConfig("audio")
       );
     }
-  }, []);
+  }, [effectCatalog]);
 
   const handleSelectAudioPreset = useCallback((audioSrc: string) => {
     setDraft((current) =>
@@ -148,10 +153,24 @@ function EffectPickerDialog({
   );
 
   const isDraftInCurrentCategory = draft?.category === selectedCategory;
+  const isRetainedInitialEffect = Boolean(
+    draft
+    && initialEffect
+    && draft.id === initialEffect.id
+    && draft.type === initialEffect.type,
+  );
+  const isDraftAvailable = Boolean(
+    draft
+    && (
+      isRetainedInitialEffect
+      || getActiveEffectDefinition(effectCatalog, draft.type)?.allowed_scopes.includes("block")
+    ),
+  );
   const normalizedAudioSrc = draft?.audio_src?.trim() ?? "";
   const isSaveDisabled =
     !draft ||
     !isDraftInCurrentCategory ||
+    !isDraftAvailable ||
     (draft.type === "audio" && !normalizedAudioSrc);
 
   const handleSave = () => {

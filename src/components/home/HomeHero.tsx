@@ -28,7 +28,7 @@ export default function HomeHero({
             </span>
           </h1>
           <p className="font-story text-lg leading-relaxed text-[var(--color-muted-foreground)] md:text-xl">
-            Đọc truyện sống động với hiệu ứng hình ảnh và âm thanh tự động kích hoạt theo từng dòng văn bạn đang theo dõi.
+            Đọc và sáng tác những câu chuyện sống động với bối cảnh, âm thanh và hiệu ứng tương tác kích hoạt theo từng dòng văn.
           </p>
         </div>
 

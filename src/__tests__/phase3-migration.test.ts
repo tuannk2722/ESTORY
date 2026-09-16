@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { buildEffectKeywordSeed, normalizeEffectKeyword } from "@/lib/effects/effect-keywords";
-import { EFFECT_TYPES } from "@/lib/effects/effect-manifest";
+import { ADMIN_MANAGED_EFFECT_TYPES } from "@/lib/effects/effect-management";
 import { assertPhase3SourceClean, loadPhase3MigrationSource } from "@/lib/migration/phase3-source";
 
 export async function runPhase3MigrationTests() {
@@ -21,10 +21,10 @@ export async function runPhase3MigrationTests() {
     backgrounds: 41,
     palettes: 20,
     scenePresets: 39,
-    effectDefinitions: 25,
+    effectDefinitions: ADMIN_MANAGED_EFFECT_TYPES.length,
     effectKeywords: keywordSeed.entries.length,
   });
-  assert.equal(source.effectDefinitions.length, EFFECT_TYPES.length);
+  assert.equal(source.effectDefinitions.length, ADMIN_MANAGED_EFFECT_TYPES.length);
   assert.ok(source.stories.every((story) => story.status === "published" && story.chapters.every((chapter) => chapter.status === "published")));
   assert.ok(source.backgrounds.every((background) => background.scope === "global" && !background.owner_id));
   assert.ok(source.scenes.every((scene) => scene.render_config.schema_version === 1));

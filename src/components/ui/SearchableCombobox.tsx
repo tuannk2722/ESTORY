@@ -12,7 +12,7 @@ export interface ComboboxOption {
   id: string;
   label: string;
   description?: string;
-  /** Các giá trị text dùng để fuzzy search (label luôn được search tự động) */
+  /** Text dùng để tìm kiếm theo token (label luôn được search tự động). */
   searchTexts?: string[];
   /** Icon hiển thị bên trái option */
   icon?: LucideIcon | React.ComponentType<{ className?: string }>;
@@ -43,6 +43,8 @@ export interface SearchableComboboxProps {
   placeholder?: string;
   /** Search placeholder */
   searchPlaceholder?: string;
+  /** Optional domain matcher; the default preserves shared picker search behavior. */
+  searchMatcher?: (query: string, ...values: string[]) => boolean;
   /** Custom className cho container */
   className?: string;
 }
@@ -58,6 +60,7 @@ export default function SearchableCombobox({
   onToggleSelect,
   placeholder = "Chọn...",
   searchPlaceholder = "Tìm kiếm...",
+  searchMatcher = matchesSearch,
   className = "",
 }: SearchableComboboxProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -76,8 +79,11 @@ export default function SearchableCombobox({
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    // Close on click, after mouseup. Removing an open menu on mousedown
+    // can shrink a dialog's scroll area and move another combobox before mouseup.
+    // Capture also works inside dialogs that stop click bubbling to their backdrop.
+    document.addEventListener("click", handleClickOutside, true);
+    return () => document.removeEventListener("click", handleClickOutside, true);
   }, [isOpen]);
 
   // Focus search input when opening
@@ -97,7 +103,7 @@ export default function SearchableCombobox({
   };
 
   const filteredOptions = options.filter((o) =>
-    matchesSearch(searchQuery, o.label, ...(o.searchTexts || []))
+    searchMatcher(searchQuery, o.label, ...(o.searchTexts || []))
   );
 
   // Single select handler

@@ -6,7 +6,9 @@
 import React from "react";
 import { StoryBlock } from "@/types/story";
 import { SceneBlockInfo } from "@/lib/scenes/sceneSelectors";
-import { EFFECT_METADATA, getEffectIcon } from "@/lib/effects/effectCatalog";
+import { getEffectIcon } from "@/lib/effects/effectCatalog";
+import { getAuthorEffectPresentation } from "@/lib/effects/effect-authoring";
+import { useEditorEffectCatalog } from "@/components/editor/EditorProvider";
 import { Layers } from "lucide-react";
 
 export interface TimelineItemProps {
@@ -30,6 +32,7 @@ export const TimelineItem = React.memo(function TimelineItem({
   onSelectBlock,
   onSelectRangeBlock,
 }: TimelineItemProps) {
+  const effectCatalog = useEditorEffectCatalog();
   const previewText =
     block.text.trim().length > 0 ? block.text.trim() : "(Đoạn văn trống)";
 
@@ -111,7 +114,7 @@ export const TimelineItem = React.memo(function TimelineItem({
         <div className="flex flex-wrap gap-1 pt-1 border-t border-border/30 pl-1">
           {block.effects.map((eff) => {
             const Icon = getEffectIcon(eff.type, eff.category);
-            const meta = EFFECT_METADATA[eff.type];
+            const meta = getAuthorEffectPresentation(effectCatalog, eff.type);
             return (
               <span
                 key={eff.id}

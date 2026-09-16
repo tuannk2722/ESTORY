@@ -11,7 +11,7 @@ export interface EffectTechnicalDefinition {
   constraints: typeof EFFECT_CONFIG_CONSTRAINTS;
 }
 
-// Shared technical constraints; labels and activation belong to the overlay.
+// Shared constraints; effect-management.ts selects code or DB presentation/availability.
 export const EFFECT_CONFIG_CONSTRAINTS = deepFreeze({
   intensity: { min: 0, max: 1 },
   duration_ms: { min: 0 },

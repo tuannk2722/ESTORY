@@ -1,5 +1,7 @@
+import { isAdminManagedEffect } from "./effect-management";
 import { createHash } from "node:crypto";
-import { KEYWORD_EFFECT_DICTIONARY } from "@/lib/effectSuggestion";
+import { KEYWORD_EFFECT_DICTIONARY } from "./effect-keyword-seed-data";
+import { normalizeEffectKeyword } from "./effect-keyword-normalization";
 import type { EffectType } from "@/types/story";
 
 export interface EffectKeywordSeedEntry {
@@ -15,9 +17,7 @@ export interface EffectKeywordSeed {
   duplicateCount: number;
 }
 
-export function normalizeEffectKeyword(input: string): string {
-  return input.normalize("NFKC").toLocaleLowerCase("vi-VN").trim().replace(/\s+/gu, " ");
-}
+export { normalizeEffectKeyword } from "./effect-keyword-normalization";
 
 function keywordId(effectId: EffectType, normalizedKeyword: string): string {
   const digest = createHash("sha256")
@@ -37,6 +37,7 @@ export function buildEffectKeywordSeed(): EffectKeywordSeed {
   let duplicateCount = 0;
 
   for (const mapping of KEYWORD_EFFECT_DICTIONARY) {
+    if (!isAdminManagedEffect(mapping.effect_type)) throw new Error("Code-managed effects cannot have DB keywords");
     const weight = Math.round(mapping.baseConfidence * 100);
     if (!Number.isInteger(weight) || weight < 1 || weight > 100) {
       throw new Error(`Invalid keyword weight for effect ${mapping.effect_type}`);

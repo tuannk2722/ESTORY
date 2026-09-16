@@ -33,7 +33,6 @@ async function run() {
   const errorStatus = (status: number) => (error: unknown) =>
     (error instanceof CommandError || error instanceof AuthAccessError) && error.status === status;
   const metadata = { title: "Thử nghiệm P3-06", description: "Test content", genre: ["Fantasy"] };
-  let createdAudioDefinition = false;
   try {
     await prisma.user.createMany({ data: [
       { id: owner, email: `${owner}@example.invalid`, name: "Profile", role: "READER" },
@@ -375,16 +374,9 @@ async function run() {
     })).data, null);
 
     stage = "personal audio reference ownership";
-    const audioDefinition = await prisma.effectDefinition.findUnique({ where: { effectId: "audio" } });
-    if (!audioDefinition) {
-      await prisma.effectDefinition.create({ data: { effectId: "audio", label: "Audio" } });
-      createdAudioDefinition = true;
-    }
-    if (audioDefinition?.isActive !== false) {
-      const foreign = await prisma.audioAsset.create({ data: { ownerId: outsider, source: "upload", title: "Private", url: "/private.mp3", durationMs: 1000 } });
-      const audioBlock: StoryBlock = { ...blocks[0], effects: [{ id: `${prefix}-audio-effect`, type: "audio", category: "audio", intensity: 1, duration_ms: 1000, audio_src: foreign.url, audio_asset_id: foreign.id }] };
-      await assert.rejects(scenes.replaceEditor({ ...chapterContext(deleteSecond), blocks: [audioBlock], scenes: [] }), errorStatus(404));
-    }
+    const foreign = await prisma.audioAsset.create({ data: { ownerId: outsider, source: "upload", title: "Private", url: "/private.mp3", durationMs: 1000 } });
+    const audioBlock: StoryBlock = { ...blocks[0], effects: [{ id: `${prefix}-audio-effect`, type: "audio", category: "audio", intensity: 1, duration_ms: 1000, audio_src: foreign.url, audio_asset_id: foreign.id }] };
+    await assert.rejects(scenes.replaceEditor({ ...chapterContext(deleteSecond), blocks: [audioBlock], scenes: [] }), errorStatus(404));
     const { storyRepository, sceneRepository } = await import("@/lib/repositories");
     await assert.rejects(storyRepository.save(createdStory.data), errorStatus(503));
     await assert.rejects(sceneRepository.replaceLegacyChapterScenes(slug, first.id, []), errorStatus(503));
@@ -399,7 +391,6 @@ async function run() {
       await tx.chapter.deleteMany({ where: { story: { authorId: { in: users } } } });
       await tx.story.deleteMany({ where: { authorId: { in: users } } });
       await tx.user.deleteMany({ where: { id: { in: users } } });
-      if (createdAudioDefinition) await tx.effectDefinition.delete({ where: { effectId: "audio" } });
     });
     await prisma.$disconnect();
   }

@@ -27,7 +27,8 @@ Nếu vẫn chưa phân xử được, nêu mâu thuẫn trước khi code phầ
 - **P3-08:** quyết định import guest một lần và bằng chứng sync tại [P3-08 verification](verification/p3-08.md); gate CI/deployment ghi riêng.
 - **P3-09:** R2 upload intent/provider, video+poster/quota và bằng chứng Local + Neon dev + live R2 tại [P3-09 verification](verification/p3-09.md); domain claim/UI và deployment thuộc các stage sau.
 - **P3-10:** Auth/Profile UI, wizard cover claim, Author dashboard/management và protected admin landing tại [P3-10 verification](verification/p3-10.md); local/Neon/browser, GitHub Actions và Vercel preview đã được xác nhận xanh.
-- **P3-11:** Search/list foundation, Home discovery/genre/theme artwork và Story moderation tại [P3-11 verification](verification/p3-11.md); implementation + static/unit/build gates sau moderation refactor đã xanh, DB/HTTP rerun, browser visual smoke và CI/Vercel của changeset này còn chờ.
+- **P3-11:** Search/list foundation, Home discovery/genre/theme artwork và Story moderation tại [P3-11 verification](verification/p3-11.md); user xác nhận baseline/tests, GitHub Actions và Vercel Preview đều xanh ngày 2026-09-14.
+- **P3-12:** Effect Admin và follow-up code-owned audio/keyword search tại [P3-12 verification](verification/p3-12.md); contract hiện tại ở `02` §2.6, cleanup/rollback trong verification. Gate baseline 2026-09-15 và follow-up 2026-09-16 ghi riêng; GitHub Actions/Vercel Preview còn chờ.
 - **Trạng thái task tạm:** `.codex/TASK.md` nếu có, theo AGENTS. Runbook/task state chỉ điều phối công việc; không thay nguồn quyết định và không chép lại schema/rule.
 - **Stack/version đang cài:** `package.json`, `pnpm-lock.yaml`, `.nvmrc`. Lệnh local/CI/deploy: README.
 
@@ -62,7 +63,7 @@ Bảng này bổ sung bước đọc chung phía trên. Số `02`, `08`… là f
 | Auth UI/Author | `02` §2.5/2.7; `07` US-3.14–3.17; `12` §12.1–12.7; `04b` §6–7 | `src/components/ui/`, `src/app/author/` |
 | Story moderation | `02` §2.7; `07` US-3.11; `11` §9.5; `12` §12.7.6; `04b` §8.0–8.1; `09`; `10` | `src/app/admin/`, `src/components/admin/`; queue/detail/private preview/decision đã triển khai ở P3-11 |
 | Settings/progress/bookmark/theme | `02` §2.3–2.5; `07` US-3.4; Home paint hint: `11` §9.2.3/§9.5; `12` §12.7.4 | `src/lib/settingsStore.ts`, `src/components/ui/ThemeProvider.tsx`, `src/lib/theme/` |
-| Effect Admin | `02` §2.6; `07` US-3.12; `08` §8.5.1; `11` §9.4; `04b` §8.0/8.2/8.5 | Manifest/projector ở `src/lib/effects/`; Admin UI là đích Phase 3 |
+| Effect Admin | `02` §2.6; `07` US-3.12; `08` §8.5.1; `11` §9.4; `04b` §8.0/8.2/8.5 | P3-12: manifest sync/catalog/service/API ở `src/lib` + `src/app/api`; responsive Admin UI ở `src/app/admin/(workspace)/effects` |
 | Scene catalog/Preset import | `02` §2.9; `07` US-3.13; `08` §8.3/8.5–8.7; `11` §9.4b; `04b` §8.0/8.3–8.5 | `src/lib/repositories/scene-repository.ts`, `src/lib/scenes/` |
 | Storage/Freesound/AI background | `07` US-3.6/3.18/3.19; `02` §2.5/2.9/2.11; `08` §8.9 hoặc §8.10; `12` §12.9 nếu Freesound; `11` §9.4c/9.6; `09` | Chưa tích hợp ở mốc P3-01; vị trí đích trong `03` |
 | CI/testing/hardening | `07` US-3.8; `09`; `11` §9.6; README | `.github/workflows/ci.yml`, `scripts/`, `src/__tests__/` |

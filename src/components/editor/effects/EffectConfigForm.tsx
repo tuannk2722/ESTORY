@@ -6,7 +6,9 @@
 import React, { useId } from "react";
 import type { EffectConfig } from "@/types/story";
 import { Clock, Repeat, Sliders, Timer, Volume2 } from "lucide-react";
-import { EFFECT_METADATA, getEffectIcon } from "@/lib/effects/effectCatalog";
+import { getEffectIcon } from "@/lib/effects/effectCatalog";
+import { getAuthorEffectPresentation } from "@/lib/effects/effect-authoring";
+import { useEditorEffectCatalog } from "../EditorProvider";
 
 export type EffectConfigUpdate = Partial<
   Pick<
@@ -34,6 +36,7 @@ export const EffectConfigForm = React.memo(function EffectConfigForm({
   onChange,
   embedded = false,
 }: EffectConfigFormProps) {
+  const effectCatalog = useEditorEffectCatalog();
   const intensityId = useId();
   const durationId = useId();
   const delayId = useId();
@@ -42,7 +45,7 @@ export const EffectConfigForm = React.memo(function EffectConfigForm({
   const audioSrc = effect.audio_src ?? "";
   const durationValue =
     effect.duration_ms >= 200 ? Math.min(effect.duration_ms, 10000) : 2000;
-  const meta = EFFECT_METADATA[effect.type];
+  const meta = getAuthorEffectPresentation(effectCatalog, effect.type);
   const Icon = getEffectIcon(effect.type, effect.category);
 
   return (

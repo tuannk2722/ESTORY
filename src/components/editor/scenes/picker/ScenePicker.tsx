@@ -19,6 +19,8 @@ import { PresetTab } from "./PresetTab";
 import { CustomSceneTab } from "./CustomSceneTab";
 import { ScenePreview } from "./ScenePreview";
 import { ScenePickerFooter, ScenePickerModeTabs } from "./ScenePickerControls";
+import { useEditorEffectCatalog } from "@/components/editor/EditorProvider";
+import { hasOnlyActiveEffects } from "@/lib/effects/effect-authoring";
 
 export interface ScenePickerProps {
   isOpen: boolean;
@@ -58,15 +60,24 @@ export function ScenePicker({
   blocks = [],
   sceneLibrary,
 }: ScenePickerProps) {
+  const effectCatalog = useEditorEffectCatalog();
   const [mode, setMode] = useState<"preset" | "custom">(
-    () => getInitialMode(initialScene, sceneLibrary)
+    () => initialScene && !hasOnlyActiveEffects(effectCatalog, initialScene.render_config.ambient_effects)
+      ? "custom"
+      : getInitialMode(initialScene, sceneLibrary)
   );
   const [draft, setDraft] = useState(() =>
     initialScene ? sceneToDraft(initialScene) : createEmptySceneDraft()
   );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  const { scenePresets: presets } = sceneLibrary;
+  const presets = useMemo(
+    () => sceneLibrary.scenePresets.filter(
+      (preset) =>
+        hasOnlyActiveEffects(effectCatalog, preset.render_config.ambient_effects),
+    ),
+    [effectCatalog, sceneLibrary.scenePresets],
+  );
   const renderConfig = useMemo(() => draftToRenderConfig(draft), [draft]);
   // The saved snapshot remains editable even when no catalog ingredient exists.
   const savedBackgroundId = "snapshot:current-background";
@@ -86,8 +97,9 @@ export function ScenePicker({
   }, [onClose]);
 
   const handleSelectPreset = useCallback((preset: ScenePreset) => {
+    if (!hasOnlyActiveEffects(effectCatalog, preset.render_config.ambient_effects)) return;
     setDraft(presetToDraft(preset));
-  }, []);
+  }, [effectCatalog]);
 
   const handleQuickPreviewPreset = useCallback(
     (event: React.MouseEvent, preset: ScenePreset) => {

@@ -266,9 +266,9 @@ export interface AppUser {
 > User mới mặc định `reader`, tự nâng lên `author` ngay khi tạo truyện đầu tiên (không cần admin duyệt bước đổi role). Nhưng **truyện họ tạo vẫn phải qua kiểm duyệt admin trước khi publish công khai** — mục 2.7.
 > `freesound_connection`, `freesound_import_quota`, `ai_background_quota` chỉ có ý nghĩa/hiệu lực từ Phase 3 (cùng lý do `AppUser` "CHƯA dùng ở Phase 1–2" ở trên) — nhưng định nghĩa sẵn trong shape để không phải đổi DTO giữa chừng. `AppUser` là allowlist client-safe: mapper chỉ chiếu trạng thái kết nối/tên Freesound và quota đã chuẩn hóa; credential mã hóa chỉ tồn tại phía server. Chi tiết luồng dùng 2 quota này ở mục 2.11 và `08-effects-and-scenes.md` mục 8.9 → 8.10.
 
-## 2.6. Effect Library — technical manifest + admin overlay
+## 2.6. Effect Library — technical manifest, code-owned audio và admin overlay
 
-`EffectType` (mục 2.1), renderer và constraint kỹ thuật vẫn là **nguồn chân lý trong code**. Phase 3 không biến DB thành nơi định nghĩa renderer. Contract được tách thành hai lớp:
+`EffectType` (mục 2.1), renderer và constraint kỹ thuật vẫn là **nguồn chân lý trong code**. `effect-management.ts` phân loại quyền quản lý: `audio` thuộc code; các effect còn lại thuộc Admin. DB chỉ có overlay cho tập `ADMIN_MANAGED_EFFECT_TYPES`, không yêu cầu một dòng cho mọi technical type.
 
 ```typescript
 // lib/effects/effect-manifest.ts — CODE ONLY, không phải bảng DB
@@ -287,7 +287,7 @@ export interface EffectTechnicalDefinition {
 
 // types/effect-admin.ts — DB overlay do admin quản lý
 export interface EffectDefinition {
-  effect_id: EffectType;                    // PK; phải tồn tại trong technical manifest
+  effect_id: EffectType;                    // PK; phải thuộc ADMIN_MANAGED_EFFECT_TYPES
   label: string;
   description?: string;
   is_active: boolean;
@@ -300,22 +300,33 @@ export interface EffectKeywordSuggestion {
   keyword: string;                          // text admin nhập, VD "mưa rơi"
   normalized_keyword: string;               // NFKC + lowercase vi-VN + trim + collapse whitespace
   effect_id: EffectType;
-  weight: number;                           // integer 1..100; số lớn ưu tiên hơn
+  weight: number;                           // integer 1..100; chỉ ưu tiên block suggestion, không rank search
 }
 
-// Projection cho Author/Admin UI sau khi service merge manifest + DB overlay
+// Admin projection có revision DB; không dùng làm Author DTO.
 export interface ManagedEffectDefinition
   extends EffectTechnicalDefinition,
     Omit<EffectDefinition, "effect_id"> {}
+
+export type AuthorEffectDefinition = Omit<ManagedEffectDefinition, "created_at" | "updated_at">;
+export interface EffectAuthorCatalog {
+  effects: AuthorEffectDefinition[];         // active admin effects + code-owned audio
+  keywords: EffectKeywordSuggestion[];       // chỉ active admin effects
+}
 ```
 
 Quy tắc bất biến:
 
-- Admin chỉ sửa `label`, `description`, `is_active` và keyword/weight; **không** tạo `EffectType`, đổi ID/category/icon/renderer, chỉnh default slider hoặc visibility riêng từng picker.
+- Admin chỉ sửa `label`, `description`, `is_active` và keyword/weight của effect thuộc Admin; UI và mutation schema/service đều không cho sửa audio. Không tạo `EffectType`, đổi ID/category/icon/renderer, chỉnh default slider hoặc visibility riêng từng picker.
 - `(effect_id, normalized_keyword)` là unique. Migrate dictionary Phase 2 bằng `weight = round(baseConfidence * 100)`; không để song song hai cách chấm điểm.
-- Author catalog/suggestion chỉ dùng effect `is_active = true`. Danh sách này được load một lần trong editor aggregate, không fetch riêng theo từng block.
+- Author catalog lấy audio metadata từ code (`effect-seed.ts`) với `is_active: true`; effect thuộc Admin lấy overlay active từ DB. Không dựng timestamp/overlay giả cho audio. Catalog/dictionary load một lần trong editor aggregate, không fetch theo block hoặc phím tìm kiếm.
+- `EffectKeywordSuggestion` giữ nguyên bảng và unique key, dùng cho block onBlur suggestion và search ở block effect picker, scene effect combobox, Admin effect list. Search NFKC rồi bỏ dấu/case theo matcher dùng chung, AND token trên label/description/technical ID + toàn bộ keyword; giữ scope/category/status và thứ tự hiện có. Không thay normalization unique bằng chuỗi bỏ dấu, không dùng weight để rank search. Editor thấy keyword mới ở lần tải catalog tiếp theo.
+- Audio preset có label/src/keyword riêng trong code (`AUDIO_EFFECT_PRESETS`), không có keyword DB chung cho `audio`. Author vẫn chọn nguồn/chỉnh thông số/gắn hoặc gỡ audio và dùng AudioAsset cá nhân; Reader vẫn có mute/settings.
+- Lưu effect mới: chỉ các type thuộc Admin cần overlay active. Audio vẫn qua technical/URL/parameter validation, Scene scope/unique type/audio-loop rule và AudioAsset ownership + URL matching như trước. Block audio lưu trong bảng `Effect`, scene audio trong JSON snapshot; `Effect.type` không có FK tới `EffectDefinition`. Không đổi dữ liệu truyện hoặc schema_version khi chuyển quyền.
 - Reader render `EffectConfig` đã lưu qua manifest/`EffectRegistry` và **không kiểm tra `is_active`**; tắt effect không hồi tố nội dung cũ.
-- Deployment chạy manifest sync idempotent: tạo overlay còn thiếu, báo lỗi nếu DB có ID không tồn tại trong manifest. Test phải chứng minh tập ID của `EffectType`, manifest và registry khớp nhau.
+- Seed/deployment sync chỉ tạo overlay/keyword cho tập Admin; không overwrite metadata/keyword Admin trong deployment rerun. ID không thuộc technical manifest phải fail. Technical parity (`EffectType` = manifest = registry) tách biệt DB parity (overlay = tập Admin).
+- Trạng thái đích không có `EffectDefinition.audio` và keyword con. Code mới bỏ qua dòng legacy trong thời gian cutover; cleanup explicit sau khi instance/job cũ dừng, có backup trước delete. Không gắn cleanup vào pre-deploy migration/sync. Xem runbook `verification/p3-12.md`; không chạy lại full P3-04 migration để cập nhật DB đang dùng.
+- Xóa overlay audio chỉ cascade keyword của nó, không xóa `Effect`, Scene, `AudioAsset` hay file. Ngừng cung cấp một preset không được xóa/thay nội dung file ở URL đã nằm trong snapshot.
 
 ## 2.7. Kiểm duyệt truyện (admin duyệt/publish — hiệu lực từ Phase 3)
 

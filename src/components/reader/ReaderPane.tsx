@@ -8,6 +8,7 @@ import { buildSceneByBlockId } from "@/lib/scenes/sceneSelectors";
 import { scrollToEditorBlock } from "@/lib/editor/scrollToBlock";
 import StoryBlock from "./StoryBlock";
 import ChapterNav from "./ChapterNav";
+import CreationInvitation from "./CreationInvitation";
 import SceneLayer from "../scenes/SceneLayer";
 import { useResumeCommit } from "@/hooks/useResumeCommit";
 import { useActiveReaderBlock } from "@/hooks/useActiveReaderBlock";
@@ -188,6 +189,7 @@ export default function ReaderPane({
               prevChapterId={prevChapterId}
               nextChapterId={nextChapterId}
             />
+            <CreationInvitation storyFontClass={fontFamilyClass} />
           </div>
         )}
       </SceneLayer>

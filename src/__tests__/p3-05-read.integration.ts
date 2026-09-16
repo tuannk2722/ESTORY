@@ -45,6 +45,18 @@ async function run() {
         },
       });
       stage = "apply-fixture";
+      // Existing admin metadata is authoritative; additive migration only supplies missing overlays.
+      const existingDefinitions = new Map((await tx.effectDefinition.findMany()).map((row) => [row.effectId, row]));
+      const expectedKeywords = await tx.effectKeywordSuggestion.findMany();
+      const keywordIds = new Set(expectedKeywords.map((row) => row.id));
+      const keywordKeys = new Set(expectedKeywords.map((row) => `${row.effectId}\0${row.normalizedKeyword}`));
+      for (const seed of source.effectKeywords) {
+        // Admin may edit a seeded keyword while retaining its ID; createMany skips either unique conflict.
+        if (keywordIds.has(seed.id) || keywordKeys.has(`${seed.effectId}\0${seed.normalizedKeyword}`)) continue;
+        expectedKeywords.push(seed);
+        keywordIds.add(seed.id);
+        keywordKeys.add(`${seed.effectId}\0${seed.normalizedKeyword}`);
+      }
       await applyPhase3MigrationTransaction(tx, source, ownerId);
 
       const events: RepositoryReadEvent[] = [];
@@ -146,7 +158,10 @@ async function run() {
       assert.deepEqual(
         definitions.map(({ effect_id, label, description, is_active }) => ({ effect_id, label, description, is_active })),
         source.effectDefinitions
-          .map(({ effectId, label, description, isActive }) => ({ effect_id: effectId, label, description, is_active: isActive }))
+          .map((seed) => {
+            const row = existingDefinitions.get(seed.effectId) ?? seed;
+            return { effect_id: seed.effectId, label: row.label, description: row.description ?? undefined, is_active: row.isActive };
+          })
           .sort((left, right) => left.effect_id.localeCompare(right.effect_id)),
       );
       stage = "effect-keyword-parity";
@@ -160,7 +175,8 @@ async function run() {
         keywords
           .map(({ keyword, normalized_keyword, effect_id, weight }) => ({ keyword, normalized_keyword, effect_id, weight }))
           .sort(keywordOrder),
-        source.effectKeywords
+        expectedKeywords
+          .filter((row) => source.effectDefinitions.some((definition) => definition.effectId === row.effectId))
           .map(({ keyword, normalizedKeyword, effectId, weight }) => ({ keyword, normalized_keyword: normalizedKeyword, effect_id: effectId, weight }))
           .sort(keywordOrder),
       );

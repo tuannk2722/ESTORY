@@ -9,6 +9,7 @@ import { BlockToolbar } from "./BlockToolbar";
 import { AutoGrowTextarea } from "./AutoGrowTextarea";
 import { BlockEffects } from "./BlockEffects";
 import { detectEffectKeywords } from "@/lib/effectSuggestion";
+import { useEditorEffectCatalog } from "../EditorProvider";
 
 export interface BlockCardProps {
   block: StoryBlock;
@@ -53,6 +54,7 @@ export const BlockCard = React.memo(function BlockCard({
   onDragEnd,
   onDragOver,
 }: BlockCardProps) {
+  const effectCatalog = useEditorEffectCatalog();
   const [isBlurred, setIsBlurred] = useState<boolean>(false);
   const [suggestions, setSuggestions] = useState<
     ReturnType<typeof detectEffectKeywords>
@@ -69,10 +71,12 @@ export const BlockCard = React.memo(function BlockCard({
 
   const handleBlur = useCallback(() => {
     setSuggestions(
-      block.text.trim() ? detectEffectKeywords(block.text).slice(0, 3) : []
+      block.text.trim()
+        ? detectEffectKeywords(block.text, effectCatalog.keywords).slice(0, 3)
+        : []
     );
     setIsBlurred(true);
-  }, [block.text]);
+  }, [block.text, effectCatalog.keywords]);
 
   return (
     <div

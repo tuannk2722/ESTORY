@@ -3,6 +3,7 @@
 
 "use client";
 
+import { matchesEffectSearch } from "@/lib/effects/effect-search";
 import React, { useState, useCallback, useMemo } from "react";
 import { EffectConfig } from "@/types/story";
 import { AUDIO_EFFECT_PRESETS } from "@/lib/effects/effectCatalog";
@@ -10,6 +11,8 @@ import { createAudioEffect } from "@/lib/effects/effectFactory";
 import { Music, VolumeX, Play, Square } from "lucide-react";
 import SearchableCombobox, { ComboboxOption } from "@/components/ui/SearchableCombobox";
 import { useAudioPreview } from "@/components/editor/effects/useAudioPreview";
+import { useEditorEffectCatalog } from "@/components/editor/EditorProvider";
+import { getActiveEffectDefinition } from "@/lib/effects/effect-authoring";
 
 export interface SceneAudioEditorProps {
   ambientAudio: EffectConfig | null;
@@ -22,6 +25,10 @@ export const SceneAudioEditor = React.memo(function SceneAudioEditor({
   onChangeAudio,
   initialAudioSrc,
 }: SceneAudioEditorProps) {
+  const effectCatalog = useEditorEffectCatalog();
+  const activeAudio = Boolean(
+    getActiveEffectDefinition(effectCatalog, "audio")?.allowed_scopes.includes("scene"),
+  );
   const {
     previewingAudioSrc,
     togglePlayAudio,
@@ -62,7 +69,7 @@ export const SceneAudioEditor = React.memo(function SceneAudioEditor({
     const items = AUDIO_EFFECT_PRESETS.map((preset) => ({
       id: preset.src,
       label: preset.label,
-      searchTexts: [preset.label, preset.src],
+      searchTexts: [preset.label, preset.src, "audio", ...preset.keywords],
       icon: Music,
     }));
 
@@ -86,18 +93,25 @@ export const SceneAudioEditor = React.memo(function SceneAudioEditor({
         searchTexts: ["không", "none", "tắt"],
         icon: VolumeX,
       },
-      ...audioPresetItems,
-      {
+      ...(activeAudio ? audioPresetItems : []),
+      ...(activeAudio ? [{
         id: "__custom__",
         label: "Nhập URL thủ công...",
         searchTexts: ["custom", "url", "thủ công", "nhập"],
         icon: Music,
-      },
+      }] : currentSrc ? [{
+        id: "__retained__",
+        label: "Âm thanh đã lưu · đã ngừng",
+        searchTexts: ["đã lưu", "đã ngừng"],
+        icon: Music,
+      }] : []),
     ];
-  }, [audioPresetItems]);
+  }, [activeAudio, audioPresetItems, currentSrc]);
 
   const audioComboboxValue = !currentSrc
     ? "__none__"
+    : !activeAudio
+      ? "__retained__"
     : AUDIO_EFFECT_PRESETS.some((p) => p.src === currentSrc)
       ? currentSrc
       : "__custom__";
@@ -107,6 +121,8 @@ export const SceneAudioEditor = React.memo(function SceneAudioEditor({
     if (id === "__none__") {
       setShowCustomAudioInput(false);
       onChangeAudio(null);
+    } else if (id === "__retained__") {
+      return;
     } else if (id === "__custom__") {
       setShowCustomAudioInput(true);
       const customSrc = AUDIO_EFFECT_PRESETS.some((preset) => preset.src === currentSrc)
@@ -122,6 +138,7 @@ export const SceneAudioEditor = React.memo(function SceneAudioEditor({
   return (
     <div className="space-y-3 font-editor">
       <SearchableCombobox
+        searchMatcher={matchesEffectSearch}
         label="Âm Thanh Nền (Ambient Audio)"
         icon={Music}
         options={audioComboboxOptions}

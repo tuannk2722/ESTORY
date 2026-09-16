@@ -3,14 +3,18 @@
 
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import { matchesEffectSearch } from "@/lib/effects/effect-search";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { EffectConfig, EffectType } from "@/types/story";
 import {
-  EFFECT_METADATA,
   getEffectIcon,
-  isSceneEffectType,
 } from "@/lib/effects/effectCatalog";
+import {
+  getActiveEffectDefinition,
+  getAuthorEffectPresentation,
+  getSelectableEffects,
+} from "@/lib/effects/effect-authoring";
 import { createEffectConfig } from "@/lib/effects/effectFactory";
 import { Sparkles, X, Trash2 } from "lucide-react";
 import SearchableCombobox, { ComboboxOption } from "@/components/ui/SearchableCombobox";
@@ -18,6 +22,7 @@ import {
   EffectConfigForm,
   type EffectConfigUpdate,
 } from "@/components/editor/effects/EffectConfigForm";
+import { useEditorEffectCatalog, useEditorEffectSearchKeywords } from "@/components/editor/EditorProvider";
 
 export interface SceneEffectsEditorProps {
   ambientEffects: EffectConfig[];
@@ -30,23 +35,25 @@ export const SceneEffectsEditor = React.memo(function SceneEffectsEditor({
   onChangeEffects,
   isLoop = true,
 }: SceneEffectsEditorProps) {
+  const effectCatalog = useEditorEffectCatalog();
+  const searchKeywords = useEditorEffectSearchKeywords();
   const [editingEffectId, setEditingEffectId] = useState<string | null>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const badgeRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [popoverPos, setPopoverPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
-  const effectComboboxOptions: ComboboxOption[] = Object.values(EFFECT_METADATA)
-    .filter((meta) => isSceneEffectType(meta.type))
-    .map((meta) => {
-      const Icon = getEffectIcon(meta.type, meta.category);
+  const effectComboboxOptions = useMemo<ComboboxOption[]>(() => getSelectableEffects(effectCatalog, "scene")
+    .filter((effect) => effect.id !== "audio")
+    .map((effect) => {
+      const Icon = getEffectIcon(effect.id, effect.category);
       return {
-        id: meta.type,
-        label: meta.label.split(" (")[0],
-        description: meta.description,
-        searchTexts: [meta.label, meta.description, meta.category, meta.type],
+        id: effect.id,
+        label: effect.label.split(" (")[0],
+        description: effect.description,
+        searchTexts: [effect.label, effect.description ?? "", effect.category, effect.id, ...(searchKeywords.get(effect.id) ?? [])],
         icon: Icon,
       };
-    });
+    }), [effectCatalog, searchKeywords]);
 
   // Calculate and clamp popover position so it NEVER overflows or clips
   const updatePopoverPosition = useCallback(() => {
@@ -121,6 +128,8 @@ export const SceneEffectsEditor = React.memo(function SceneEffectsEditor({
   }, [editingEffectId]);
 
   const handleAddEffect = (type: string) => {
+    const active = getActiveEffectDefinition(effectCatalog, type as EffectType);
+    if (!active?.allowed_scopes.includes("scene") || active.id === "audio") return;
     const existing = ambientEffects.find((e) => e.type === type);
     if (existing) {
       setEditingEffectId(existing.id);
@@ -186,6 +195,7 @@ export const SceneEffectsEditor = React.memo(function SceneEffectsEditor({
         {/* Dropdown thu gọn */}
         <div className="w-full sm:w-72 shrink-0">
           <SearchableCombobox
+            searchMatcher={matchesEffectSearch}
             label="Thêm Hiệu Ứng Vào Bối Cảnh"
             icon={Sparkles}
             options={effectComboboxOptions}
@@ -201,7 +211,7 @@ export const SceneEffectsEditor = React.memo(function SceneEffectsEditor({
           <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0 pb-0.5">
             {ambientEffects.map((eff) => {
               const Icon = getEffectIcon(eff.type, eff.category);
-              const meta = EFFECT_METADATA[eff.type];
+              const meta = getAuthorEffectPresentation(effectCatalog, eff.type);
               const effectLabel = meta?.label?.split(" (")[0] || eff.type;
               const isEditing = editingEffectId === eff.id;
 
@@ -210,8 +220,11 @@ export const SceneEffectsEditor = React.memo(function SceneEffectsEditor({
                   key={eff.id}
                   className={`rounded-xl border text-xs font-semibold flex items-stretch overflow-hidden transition-all ${isEditing
                     ? "bg-primary text-editor-action-foreground border-primary shadow-sm ring-2 ring-primary/30"
-                    : "bg-card border-border text-foreground hover:border-primary/50 hover:bg-secondary/40"
+                    : meta.isActive
+                      ? "bg-card border-border text-foreground hover:border-primary/50 hover:bg-secondary/40"
+                      : "border-dashed border-amber-500/50 bg-amber-500/10 text-foreground"
                     }`}
+                  title={meta.isActive ? undefined : "Hiệu ứng đã lưu; hiện không còn dành cho lựa chọn mới"}
                 >
                   <button
                     type="button"
@@ -223,7 +236,7 @@ export const SceneEffectsEditor = React.memo(function SceneEffectsEditor({
                     className="flex min-h-8 items-center gap-2 px-3 py-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                   >
                     <Icon className="w-3.5 h-3.5" aria-hidden="true" />
-                    <span>{effectLabel}</span>
+                    <span>{effectLabel}{meta.isActive ? "" : " · đã ngừng"}</span>
                   </button>
                   <button
                     type="button"
@@ -244,7 +257,7 @@ export const SceneEffectsEditor = React.memo(function SceneEffectsEditor({
       {/* Popover Chỉnh Thông Số Chống Tràn Màn Hình */}
       {activeEditingEffect && popoverPos && (() => {
         const Icon = getEffectIcon(activeEditingEffect.type, activeEditingEffect.category);
-        const meta = EFFECT_METADATA[activeEditingEffect.type];
+        const meta = getAuthorEffectPresentation(effectCatalog, activeEditingEffect.type);
         const effectLabel = meta?.label?.split(" (")[0] || activeEditingEffect.type;
 
         return createPortal(

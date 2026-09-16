@@ -7,13 +7,18 @@ import React, { useId, useMemo, useState } from "react";
 import type { EffectCategory, EffectType } from "@/types/story";
 import { Check, Eye, Play, Search, Square } from "lucide-react";
 import SearchInput from "@/components/ui/SearchInput";
-import { matchesSearch } from "@/lib/search/text-search";
+import { matchesEffectSearch } from "@/lib/effects/effect-search";
 import {
   AUDIO_EFFECT_PRESETS,
   EFFECT_CATEGORIES,
-  EFFECT_METADATA,
   getEffectIcon,
 } from "@/lib/effects/effectCatalog";
+import {
+  getActiveEffectDefinition,
+  getAuthorEffectPresentation,
+  getSelectableEffects,
+} from "@/lib/effects/effect-authoring";
+import { useEditorEffectCatalog, useEditorEffectSearchKeywords } from "../EditorProvider";
 
 export interface EffectListProps {
   selectedType: EffectType | null;
@@ -43,37 +48,53 @@ export const EffectList = React.memo(function EffectList({
   onPreviewEffect,
   onToggleAudioPreview,
 }: EffectListProps) {
+  const effectCatalog = useEditorEffectCatalog();
+  const searchKeywords = useEditorEffectSearchKeywords();
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const searchId = useId();
 
   const filteredEffects = useMemo(() => {
-    const effects = Object.values(EFFECT_METADATA).filter(
-      (meta) =>
-        meta.category === selectedCategory &&
-        meta.type !== "audio" &&
-        matchesSearch(search, meta.label, meta.description, meta.type)
+    const effects = getSelectableEffects(effectCatalog, "block", selectedCategory).filter(
+      (effect) =>
+        effect.id !== "audio" &&
+        matchesEffectSearch(search, effect.label, effect.description ?? "", effect.id, ...(searchKeywords.get(effect.id) ?? []))
     );
 
     if (!search.trim() && initialEffectType) {
       const selectedIndex = effects.findIndex(
-        (meta) => meta.type === initialEffectType
+        (effect) => effect.id === initialEffectType
       );
       if (selectedIndex > 0) {
         const [selectedEffect] = effects.splice(selectedIndex, 1);
-        effects.unshift(selectedEffect);
+        if (selectedEffect) effects.unshift(selectedEffect);
       }
     }
 
     return effects;
-  }, [initialEffectType, search, selectedCategory]);
+  }, [effectCatalog, searchKeywords, initialEffectType, search, selectedCategory]);
+
+  const activeAudio = Boolean(
+    getActiveEffectDefinition(effectCatalog, "audio")?.allowed_scopes.includes("block"),
+  );
 
   const filteredAudioPresets = useMemo(
     () =>
-      AUDIO_EFFECT_PRESETS.filter((preset) =>
-        matchesSearch(search, preset.label, preset.src, "audio")
-      ),
-    [search]
+      activeAudio
+        ? AUDIO_EFFECT_PRESETS.filter((preset) =>
+            matchesEffectSearch(search, preset.label, preset.src, "audio", ...preset.keywords)
+          )
+        : [],
+    [activeAudio, search]
+  );
+
+  const retainedPresentation = initialEffectType
+    ? getAuthorEffectPresentation(effectCatalog, initialEffectType)
+    : null;
+  const retainedUnavailable = Boolean(retainedPresentation && !retainedPresentation.isActive);
+  const visibleCategories = EFFECT_CATEGORIES.filter((category) =>
+    getSelectableEffects(effectCatalog, "block", category.id).length > 0
+    || (retainedUnavailable && retainedPresentation?.category === category.id),
   );
 
   const resultCount =
@@ -88,7 +109,7 @@ export const EffectList = React.memo(function EffectList({
           className="flex min-w-0 items-center gap-1.5 overflow-x-auto py-0.5 custom-scrollbar"
           aria-label="Nhóm hiệu ứng"
         >
-          {EFFECT_CATEGORIES.map((category) => {
+          {visibleCategories.map((category) => {
             const isActive = selectedCategory === category.id;
             return (
               <button
@@ -132,9 +153,9 @@ export const EffectList = React.memo(function EffectList({
           className="border-b border-border/60 bg-secondary/40 px-4 py-2.5 motion-safe:animate-fade-in sm:px-6"
         >
           <label className="block">
-            <span className="sr-only">Tìm theo tên, mã hoặc mô tả hiệu ứng</span>
+            <span className="sr-only">Tìm theo tên, mã, mô tả hoặc từ khóa hiệu ứng</span>
             <SearchInput
-              placeholder="Tìm theo tên, mã hoặc mô tả hiệu ứng..."
+              placeholder="Tìm theo tên, mã, mô tả hoặc từ khóa..."
               value={search}
               onChange={setSearch}
               autoFocus
@@ -152,8 +173,17 @@ export const EffectList = React.memo(function EffectList({
         <div
           className="grid max-h-56 grid-cols-1 gap-2.5 overflow-y-auto pr-1 custom-scrollbar sm:grid-cols-2"
         >
+          {retainedUnavailable && retainedPresentation?.category === selectedCategory && !search.trim() && (
+            <div className="col-span-full flex min-h-14 items-center gap-2.5 rounded-xl border border-dashed border-amber-500/50 bg-amber-500/10 p-3 text-left text-xs">
+              <retainedPresentation.icon className="h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
+              <span className="min-w-0">
+                <span className="block font-semibold text-foreground">{retainedPresentation.label}</span>
+                <span className="block text-muted-foreground">Hiệu ứng đã lưu này không còn dành cho lựa chọn mới, nhưng bạn vẫn có thể chỉnh thông số hiện tại.</span>
+              </span>
+            </div>
+          )}
           {selectedCategory === "audio" ? (
-            filteredAudioPresets.length === 0 ? (
+            filteredAudioPresets.length === 0 && !(retainedUnavailable && retainedPresentation?.category === selectedCategory) ? (
               <EmptySearchResult />
             ) : (
               filteredAudioPresets.map((preset) => {
@@ -203,56 +233,58 @@ export const EffectList = React.memo(function EffectList({
                 );
               })
             )
-          ) : filteredEffects.length === 0 ? (
+          ) : filteredEffects.length === 0 && !(retainedUnavailable && retainedPresentation?.category === selectedCategory) ? (
             <EmptySearchResult />
           ) : (
-            filteredEffects.map((meta) => {
-              const isSelected = selectedType === meta.type;
-              const Icon = getEffectIcon(meta.type, meta.category);
+            <>
+              {filteredEffects.map((effect) => {
+                const isSelected = selectedType === effect.id;
+                const Icon = getEffectIcon(effect.id, effect.category);
 
-              return (
-                <div
-                  key={meta.type}
-                  className={`flex min-h-14 items-stretch gap-1 rounded-xl border text-left transition-colors motion-reduce:transition-none ${isSelected
-                    ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/40 shadow-xs"
-                    : "border-border bg-secondary/30 text-foreground hover:border-border hover:bg-secondary/70"
-                    }`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => onSelectType(meta.type)}
-                    aria-pressed={isSelected}
-                    className={`flex min-w-0 flex-1 items-start gap-2.5 rounded-xl p-3 text-left ${focusRing}`}
+                return (
+                  <div
+                    key={effect.id}
+                    className={`flex min-h-14 items-stretch gap-1 rounded-xl border text-left transition-colors motion-reduce:transition-none ${isSelected
+                      ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/40 shadow-xs"
+                      : "border-border bg-secondary/30 text-foreground hover:border-border hover:bg-secondary/70"
+                      }`}
                   >
-                    <Icon
-                      className={`mt-0.5 h-4 w-4 shrink-0 ${isSelected ? "text-primary" : "text-accent"
-                        }`}
-                      aria-hidden="true"
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-xs font-bold">
-                        {meta.label}
+                    <button
+                      type="button"
+                      onClick={() => onSelectType(effect.id)}
+                      aria-pressed={isSelected}
+                      className={`flex min-w-0 flex-1 items-start gap-2.5 rounded-xl p-3 text-left ${focusRing}`}
+                    >
+                      <Icon
+                        className={`mt-0.5 h-4 w-4 shrink-0 ${isSelected ? "text-primary" : "text-accent"
+                          }`}
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-xs font-bold">
+                          {effect.label}
+                        </span>
+                        <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
+                          {effect.description}
+                        </span>
                       </span>
-                      <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
-                        {meta.description}
-                      </span>
-                    </span>
-                    {isSelected && (
-                      <Check className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onPreviewEffect(meta.type)}
-                    className={`flex min-h-11 min-w-11 shrink-0 items-center justify-center self-center rounded-md text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary motion-reduce:transition-none ${focusRing}`}
-                    title="Xem trước 5 giây"
-                    aria-label={`Xem trước ${meta.label}`}
-                  >
-                    <Eye className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                </div>
-              );
-            })
+                      {isSelected && (
+                        <Check className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onPreviewEffect(effect.id)}
+                      className={`flex min-h-11 min-w-11 shrink-0 items-center justify-center self-center rounded-md text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary motion-reduce:transition-none ${focusRing}`}
+                      title="Xem trước 5 giây"
+                      aria-label={`Xem trước ${effect.label}`}
+                    >
+                      <Eye className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                );
+              })}
+            </>
           )}
         </div>
       </div>

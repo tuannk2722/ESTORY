@@ -1,6 +1,6 @@
 import type { EffectType } from '@/types/story';
 
-// Initial JSON-era presentation values, preserved for migration and compatibility.
+// Defaults for admin overlay seeding / retained snapshots; live presentation for code-owned audio.
 export const EFFECT_PRESENTATION_SEED = {
   sunbeam: { label: "Vệt Nắng Xiên (Sunbeam)", description: "Tia nắng vàng ấm áp xiên qua kẽ lá, ánh sáng hoàng hôn bồng bềnh" },
   candle_flicker: { label: "Ánh Nến Lập Lòe (Candle Flicker)", description: "Quầng lửa ấm áp bập bùng, tàn đóm nến bay lập lòe trong đêm" },

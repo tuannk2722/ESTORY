@@ -20,13 +20,13 @@ Khớp `AuthMenu.tsx` (`03-file-structure.md`), wireframe 2 trạng thái ở `0
 
 | Trạng thái | Hiển thị trên `AppHeader` |
 |---|---|
-| **Guest** (chưa đăng nhập) | ... [🌗 Theme]  [ Đăng nhập ] (mở OAuth Google/GitHub qua Auth.js) |
+| **Guest** (chưa đăng nhập) | ... [🌗 Theme]  [ ✍️ Viết truyện ]  [ Đăng nhập ]. "Viết truyện" mở OAuth dialog hướng sáng tác (copy/icon khác dialog Đăng nhập chung), sau khi auth thành công redirect `/author/stories/new`. "Đăng nhập" mở OAuth dialog chung, redirect về trang hiện tại. |
 | **Logged-in, role = `reader`** | ... [🌗 Theme]  [ ✍️ Viết truyện ]  (Avatar) → mở `ProfileModal`. Nút **"✍️ Viết truyện"** (dẫn thẳng `/author/stories/new`) |
 | **Logged-in, role = `author`/`admin`** | ... [🌗 Theme]  [ 📚 Truyện của tôi ]  (Avatar) → mở `ProfileModal`. Việc kết nối Freesound chỉ nằm trong `IntegrationsSection` của modal hoặc CTA theo ngữ cảnh trong picker; không thêm nút Freesound riêng trên navbar. |
 | **Logged-in, role = `admin`** | Thêm mục "Quản trị" trong `ProfileModal` dẫn `/admin`. P3-10 cung cấp landing được bảo vệ để link không 404; P3-11 thay landing bằng shell/moderation và redirect `/admin/stories`. |
 
-- Đọc truyện **không** yêu cầu đăng nhập (giữ nguyên US-3.3). Nút "Viết truyện"/"Truyện của tôi" chỉ hiện khi đã login.
-- Nút navbar là **context-aware theo role**, không tồn tại song song 2 nút — tránh rối UI. Trang `/author` (dashboard) sẽ có nút riêng "+ Tạo truyện mới" để tạo thêm truyện tiếp theo, navbar chỉ giữ 1 điểm vào duy nhất phù hợp với trạng thái hiện tại.
+- Đọc truyện **không** yêu cầu đăng nhập (giữ nguyên US-3.3). Guest cũng thấy nút "Viết truyện" trên navbar để biết StoryVerse có tính năng sáng tác — bấm vào sẽ được yêu cầu đăng nhập theo đúng context.
+- Nút navbar là **context-aware theo role**, không tồn tại song song 2 nút cùng đích — tránh rối UI. Trang `/author` (dashboard) sẽ có nút riêng "+ Tạo truyện mới" để tạo thêm truyện tiếp theo, navbar chỉ giữ 1 điểm vào duy nhất phù hợp với trạng thái hiện tại.
 
 ---
 
@@ -53,8 +53,8 @@ Nội dung modal (top-down):
 3. Theme Switcher (Dark/Light/Sepia) — giữ nguyên hành vi cũ.
 4. `IntegrationsSection.tsx` là boundary dành sẵn cho khối "Liên kết tài khoản", nhưng P3-10 **không render Freesound row/action** vì OAuth, connection projection và Import thuộc P3-15. Khi P3-15 triển khai, khối chỉ hiện với `role >= author` và tuân theo mục 12.9.
 5. Menu liên kết theo role:
-   - `role >= author`: "📚 Truyện của tôi" → `/author`.
    - `role === admin`: "🛠️ Trang quản trị" → `/admin`.
+   - "Truyện của tôi" **không** nằm trong modal vì đã hiện trực tiếp trên navbar cho `author`/`admin`.
 6. Nút "Đăng xuất".
 
 ---

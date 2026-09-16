@@ -170,7 +170,7 @@ model Effect {
   id           String      @id @default(cuid())
   blockId      String
   block        StoryBlock  @relation(fields: [blockId], references: [id])
-  type         String // khớp EffectType (Mục 2.1) / EffectDefinition.effectId (Mục 2.6)
+  type         String // EffectType; no FK to EffectDefinition (code-owned audio has no overlay)
   category     String // "visual" | "audio" | "motion" | "transition"
   intensity    Float
   durationMs   Int
@@ -235,7 +235,7 @@ model UserSettings {
 
 // ─── Effect Library do admin quản lý (Mục 2.6) ───
 model EffectDefinition {
-  effectId    String                    @id // khớp EffectType/technical manifest
+  effectId    String                    @id // ADMIN_MANAGED_EFFECT_TYPES; code-owned audio has no overlay
   label       String
   description String?
   isActive    Boolean                   @default(true)

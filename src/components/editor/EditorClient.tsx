@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { ArrowLeft, Layers, ListOrdered, Loader2, Save } from "lucide-react";
 import { Story } from "@/types/story";
 import { Scene, SceneLibraryData } from "@/types/scene";
+import type { EffectAuthorCatalog } from "@/types/effect-admin";
 import { EditorProvider } from "./EditorProvider";
 import { useEditorClientController } from "./useEditorClientController";
 import BlockEditor from "./blocks/BlockEditor";
@@ -39,6 +40,7 @@ export interface EditorClientProps {
   initialScenes?: Scene[];
   initialRevision: string;
   sceneLibrary?: SceneLibraryData;
+  effectCatalog: EffectAuthorCatalog;
 }
 
 function EditorClientInner({
@@ -236,7 +238,7 @@ function EditorClientInner({
   );
 }
 
-export default function EditorClient({ initialStory, chapterId, initialScenes = [], initialRevision, sceneLibrary = EMPTY_SCENE_LIBRARY }: EditorClientProps) {
+export default function EditorClient({ initialStory, chapterId, initialScenes = [], initialRevision, sceneLibrary = EMPTY_SCENE_LIBRARY, effectCatalog }: EditorClientProps) {
   const chapter = initialStory.chapters.find((item) => item.id === chapterId);
   if (!chapter) return <div className="p-8 text-center text-muted-foreground">Không tìm thấy chương truyện này.</div>;
   return (
@@ -244,6 +246,7 @@ export default function EditorClient({ initialStory, chapterId, initialScenes = 
       initialChapter={chapter}
       initialScenes={initialScenes}
       initialRevision={initialRevision}
+      effectCatalog={effectCatalog}
     >
       <EditorClientInner story={initialStory} sceneLibrary={sceneLibrary} />
     </EditorProvider>

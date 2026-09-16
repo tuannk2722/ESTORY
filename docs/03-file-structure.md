@@ -34,8 +34,9 @@
     ConfirmModal.tsx               → global `useConfirm`, dialog z-[100] dùng chung Reader/Author/Admin
     ThemeSwitcher.tsx              → UI theme dùng `settingsStore`, Admin reuse thay vì tạo state riêng
     StoryStatusBadge.tsx           → badge trạng thái semantic dùng chung cho Author/Admin
-    AuthMenu.tsx                   → (Phase 3) Nút "Đăng nhập" (guest) hoặc nút context-aware "Viết truyện"/"Truyện của tôi" (logged-in) — 12-auth-and-author-management.md mục 12.1
-    ProfileModal.tsx               → (Phase 3) avatar/tên/email, badge role, Theme Switcher, menu điều hướng theo role, Đăng xuất — mục 12.3
+    AuthMenu.tsx                   → (Phase 3) Nút "Đăng nhập" và "Viết truyện" (guest — mở OAuth dialog hướng sáng tác) hoặc nút context-aware "Viết truyện"/"Truyện của tôi" (logged-in) — 12-auth-and-author-management.md mục 12.1
+    LoginDialog.tsx                → (Phase 3) OAuth dialog dùng chung (biến thể general và creator) với focus trap, Esc, backdrop
+    ProfileModal.tsx               → (Phase 3) avatar/tên/email, badge role, Theme Switcher, menu điều hướng theo role (không lặp "Truyện của tôi" vì đã có trên navbar), Đăng xuất — mục 12.3
     IntegrationsSection.tsx        → boundary trong `ProfileModal`; P3-10 chưa render action, P3-15 nối trạng thái Freesound + Kết nối/Ngắt kết nối — `12-auth-and-author-management.md` mục 12.9
   /story                           → StoryCard/StoryCardVisual nhận shape tương thích `PublicStoryListItem`, không bắt full Story aggregate; thêm StoryCoverImage, StoryDetailActions, ChapterList
     StorySearchForm.tsx            → Home GET form (`q`) + submit/clear/pending; không filter dữ liệu ở client
@@ -60,6 +61,7 @@
     SettingsPanel.tsx              → Bảng điều khiển cài đặt đọc (Theme, Font, Cỡ chữ, Effect toggles)
     ProgressBar.tsx                → Thanh tiến độ cuộn trang (fixed top-0, z-50 trên Reader header)
     ChapterNav.tsx                 → Điều hướng chuyển chương trước/sau
+    CreationInvitation.tsx         → (Phase 3) Lời mời sáng tác sau ChapterNav, tự ẩn với author/admin
     ResumeReadingModal.tsx         → Modal gợi ý tiếp tục chương đang đọc dở
     AttributionFooter.tsx          → (Phase 3) Cuối mỗi chapter, liệt kê "Nguồn âm thanh" — tính động từ AudioAsset.attribution của các sound đang dùng trong chương, không lưu bảng riêng — `08-effects-and-scenes.md` mục 8.9.3
   /effects

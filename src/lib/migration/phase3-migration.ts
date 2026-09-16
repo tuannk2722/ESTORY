@@ -2,7 +2,7 @@ import { isDeepStrictEqual } from "node:util";
 import type { Prisma, PrismaClient } from "@/generated/prisma/client";
 import { databaseJson } from "@/lib/db/json-fields";
 import { assertEffectManifestDatabaseIds, syncEffectManifest } from "@/lib/effects/effect-manifest-sync";
-import { EFFECT_TYPES } from "@/lib/effects/effect-manifest";
+import { ADMIN_MANAGED_EFFECT_TYPES } from "@/lib/effects/effect-management";
 import { buildStorySearchText } from "@/lib/search/text-search";
 import { assertPhase3SourceClean, type Phase3MigrationSource } from "./phase3-source";
 
@@ -364,7 +364,7 @@ export async function verifyPhase3Migration(
   }
 
   const definitionIds = definitions.map((row) => row.effectId).sort();
-  mismatch(issues, isDeepStrictEqual(definitionIds, [...EFFECT_TYPES].sort()), "Effect manifest/overlay ID mismatch");
+  mismatch(issues, isDeepStrictEqual(definitionIds, [...ADMIN_MANAGED_EFFECT_TYPES].sort()), "Effect manifest/overlay ID mismatch");
   const keywordRows = new Map(keywords.map((row) => [`${row.effectId}\0${row.normalizedKeyword}`, row] as const));
   mismatch(issues, keywordRows.size === source.counts.effectKeywords, "Effect keyword count mismatch");
   for (const expected of source.effectKeywords) {

@@ -8,10 +8,14 @@ import type { AuthorStoryListItem, ManagedStoryData } from "@/types/story-manage
 import type { ModerationListQuery } from "@/types/story-moderation";
 import { moderationListQuerySchema } from "@/lib/validation/story-moderation-schema";
 import type { PrismaStoryCommandRepository } from "@/lib/repositories/prisma-story-command-repository";
+import { EffectCatalogService } from "@/lib/effects/effect-catalog-service";
 
 /** Authorized full reads and revision share one consistent database snapshot. */
 export class StoryDataAccess {
-  constructor(private readonly transactions = new StoryCommandTransactions()) {}
+  constructor(
+    private readonly transactions = new StoryCommandTransactions(),
+    private readonly effectCatalogService = new EffectCatalogService(),
+  ) {}
   authorize(actorId: string, storyId: string, chapterId?: string) {
     return this.transactions.transaction(async (repository) => {
       await authorizeStory(repository, actorId, storyId, chapterId);
@@ -55,9 +59,12 @@ export class StoryDataAccess {
     validateCommand(z.strictObject({ actorId: idSchema, storyId: idSchema, chapterId: idSchema }), { actorId, storyId, chapterId });
     return this.transactions.transaction(async (repository) => {
       const { story } = await authorizeStory(repository, actorId, storyId, chapterId);
-      const chapter = await repository.getChapter(storyId, chapterId);
-      const scenes = await repository.getScenes(storyId, chapterId);
-      return { data: { chapter, scenes }, meta: { updatedAt: story.updatedAt.toISOString() } };
+      const [chapter, scenes, effectCatalog] = await Promise.all([
+        repository.getChapter(storyId, chapterId),
+        repository.getScenes(storyId, chapterId),
+        this.effectCatalogService.getActiveCatalog(),
+      ]);
+      return { data: { chapter, scenes, effectCatalog }, meta: { updatedAt: story.updatedAt.toISOString() } };
     });
   }
 

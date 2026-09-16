@@ -3,6 +3,7 @@
 
 "use client";
 
+import { groupEffectSearchKeywords } from "@/lib/effects/effect-search";
 import React, {
   createContext,
   useContext,
@@ -11,6 +12,7 @@ import React, {
 } from "react";
 import { Chapter, StoryBlock, EffectConfig } from "@/types/story";
 import { Scene } from "@/types/scene";
+import type { EffectAuthorCatalog } from "@/types/effect-admin";
 import {
   EditorState,
   editorReducer,
@@ -53,8 +55,10 @@ export interface EditorCommands {
 }
 
 interface EditorContextValue {
+  effectSearchKeywords: ReturnType<typeof groupEffectSearchKeywords>;
   state: EditorState;
   commands: EditorCommands;
+  effectCatalog: EffectAuthorCatalog;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -63,6 +67,7 @@ export interface EditorProviderProps {
   initialChapter: Chapter;
   initialScenes?: Scene[];
   initialRevision: string;
+  effectCatalog: EffectAuthorCatalog;
   children: React.ReactNode;
 }
 
@@ -70,6 +75,7 @@ export function EditorProvider({
   initialChapter,
   initialScenes = [],
   initialRevision,
+  effectCatalog,
   children,
 }: EditorProviderProps) {
   const [state, dispatch] = useReducer(
@@ -150,9 +156,10 @@ export function EditorProvider({
     };
   }, []);
 
+  const effectSearchKeywords = useMemo(() => groupEffectSearchKeywords(effectCatalog.keywords), [effectCatalog.keywords]);
   const contextValue = useMemo(
-    () => ({ state, commands }),
-    [state, commands]
+    () => ({ state, commands, effectCatalog, effectSearchKeywords }),
+    [state, commands, effectCatalog, effectSearchKeywords]
   );
 
   return (
@@ -176,4 +183,12 @@ export function useEditorState(): EditorState {
 
 export function useEditorCommands(): EditorCommands {
   return useEditor().commands;
+}
+
+export function useEditorEffectCatalog(): EffectAuthorCatalog {
+  return useEditor().effectCatalog;
+}
+
+export function useEditorEffectSearchKeywords() {
+  return useEditor().effectSearchKeywords;
 }

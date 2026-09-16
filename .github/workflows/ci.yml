@@ -85,10 +85,13 @@ jobs:
       - run: pnpm test:auth:db
       - run: pnpm test:migration:db
       - run: pnpm test:reads:db
+      - run: pnpm effects:sync-manifest
+      - run: pnpm test:effects:db
       - run: pnpm test:commands:db
       - run: pnpm test:sync:db
       - run: pnpm test:media:db
       - run: pnpm build
       - run: pnpm test:auth:http
       - run: pnpm test:commands:http
+      - run: pnpm test:effects:http
       - run: pnpm test:sync:http

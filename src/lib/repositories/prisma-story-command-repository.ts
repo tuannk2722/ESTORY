@@ -1,3 +1,4 @@
+import { isAdminManagedEffect } from "@/lib/effects/effect-management";
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { Prisma } from "@/generated/prisma/client";
@@ -601,8 +602,10 @@ export class PrismaStoryCommandRepository extends PrismaStoryRepository {
   }
   async assertEffectReferences(actorId: string, effects: EffectConfig[], existing: EffectConfig[]) {
     const retained = new Map(existing.map((effect) => [effect.id, effect]));
-    const newlySelected = effects.filter((effect) => retained.get(effect.id)?.type !== effect.type);
-    const active = await this.tx.effectDefinition.findMany({ where: {
+    const newlySelected = effects.filter((effect) =>
+      isAdminManagedEffect(effect.type) && retained.get(effect.id)?.type !== effect.type,
+    );
+    const active = newlySelected.length === 0 ? [] : await this.tx.effectDefinition.findMany({ where: {
       effectId: { in: newlySelected.map((effect) => effect.type) }, isActive: true,
     }, select: { effectId: true } });
     if (newlySelected.some((effect) => !active.some((row) => row.effectId === effect.type))) {

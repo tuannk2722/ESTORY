@@ -1,9 +1,10 @@
+import { ADMIN_MANAGED_EFFECT_TYPES } from "@/lib/effects/effect-management";
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
 import { effectConfigSchema } from "@/lib/effects/effect-config-schema";
-import { EFFECT_MANIFEST, EFFECT_TYPES } from "@/lib/effects/effect-manifest";
+import { EFFECT_MANIFEST } from "@/lib/effects/effect-manifest";
 import { EFFECT_PRESENTATION_SEED } from "@/lib/effects/effect-seed";
 import { buildEffectKeywordSeed } from "@/lib/effects/effect-keywords";
 import { resolveBackgroundAsset, resolveLegacyScene, resolvePalette, legacyPresetToRenderConfig } from "@/lib/scenes/scene-mappers";
@@ -308,7 +309,7 @@ export async function loadPhase3MigrationSource(
   validateSceneRanges(scenes, stories);
 
   const keywords = buildEffectKeywordSeed();
-  const effectDefinitions = EFFECT_TYPES.map((effectId) => ({
+  const effectDefinitions = ADMIN_MANAGED_EFFECT_TYPES.map((effectId) => ({
     effectId,
     label: EFFECT_PRESENTATION_SEED[effectId].label,
     description: EFFECT_PRESENTATION_SEED[effectId].description,

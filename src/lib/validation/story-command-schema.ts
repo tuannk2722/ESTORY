@@ -3,6 +3,7 @@ import { effectConfigSchema } from "@/lib/effects/effect-config-schema";
 import { sceneSchema } from "@/lib/scenes/scene-render-config";
 import { mediaUrlSchema } from "@/lib/scenes/render-values";
 import { CommandError } from "@/lib/services/command-error";
+import { effectAuthorCatalogSchema } from "./effect-admin-schema";
 
 export const idSchema = z.string().trim().min(1).max(200).regex(/^[^\s/\\\u0000-\u001f]+$/);
 const titleSchema = z.string().trim().min(1);
@@ -77,6 +78,9 @@ export const replaceContentSchema = chapterContextSchema.extend({ blocks: z.arra
 export const replaceScenesSchema = chapterContextSchema.extend({ scenes: z.array(sceneSchema) });
 export const replaceEditorSchema = replaceContentSchema.extend({ scenes: z.array(sceneSchema) });
 export const editorDataSchema = z.strictObject({ chapter: chapterSchema, scenes: z.array(sceneSchema) });
+export const editorBootstrapDataSchema = editorDataSchema.extend({
+  effectCatalog: effectAuthorCatalogSchema,
+});
 export const commandMetaSchema = z.strictObject({ updatedAt: z.iso.datetime() });
 
 export function validateCommand<S extends z.ZodType>(schema: S, input: unknown): z.output<S> {

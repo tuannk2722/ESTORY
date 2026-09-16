@@ -17,7 +17,9 @@ import {
 } from "lucide-react";
 import SearchInput from "@/components/ui/SearchInput";
 import { matchesSearch } from "@/lib/search/text-search";
-import { getEffectIcon, EFFECT_METADATA } from "@/lib/effects/effectCatalog";
+import { getEffectIcon } from "@/lib/effects/effectCatalog";
+import { getAuthorEffectPresentation } from "@/lib/effects/effect-authoring";
+import { useEditorEffectCatalog } from "@/components/editor/EditorProvider";
 
 export interface PresetTabProps {
   presets: ScenePreset[];
@@ -36,6 +38,7 @@ export const PresetTab = React.memo(function PresetTab({
   onSelectPreset,
   onQuickPreview,
 }: PresetTabProps) {
+  const effectCatalog = useEditorEffectCatalog();
   const [search, setSearch] = useState<string>("");
   const [searchOpen, setSearchOpen] = useState<boolean>(false);
   const [visibleCount, setVisibleCount] = useState<number>(INITIAL_PRESET_LIMIT);
@@ -248,7 +251,7 @@ export const PresetTab = React.memo(function PresetTab({
 
                 {nonAudioEffects.map((eff) => {
                   const Icon = getEffectIcon(eff.type, eff.category);
-                  const meta = EFFECT_METADATA[eff.type];
+                  const meta = getAuthorEffectPresentation(effectCatalog, eff.type);
                   return (
                     <span
                       key={eff.id || eff.type}

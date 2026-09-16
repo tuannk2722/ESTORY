@@ -517,7 +517,9 @@ exports.runP310BrowserSmoke = async function ({
     const profile = page.getByRole("dialog").filter({ hasText: "Tác giả" });
     await profile.waitFor();
     await page.waitForFunction(() => document.activeElement?.getAttribute("aria-label") === "Đóng hồ sơ");
-    assert.equal(await profile.getByRole("link", { name: /Truyện của tôi/ }).count(), 1);
+    // "Truyện của tôi" should be on the navbar, NOT duplicated inside ProfileModal
+    assert.equal(await profile.getByRole("link", { name: /Truyện của tôi/ }).count(), 0, "ProfileModal must not duplicate 'Truyện của tôi' — it belongs on the navbar");
+    assert.equal(await page.getByRole("navigation", { name: "Điều hướng chính" }).getByRole("link", { name: /Truyện của tôi/ }).count(), 1, "'Truyện của tôi' link must be present on the navbar for author");
     assert.equal(await profile.getByRole("button", { name: "Đóng hồ sơ", exact: true }).evaluate(node => node === document.activeElement), true);
     await page.keyboard.press("Escape");
     assert.equal(await profileTrigger.evaluate(node => node === document.activeElement), true);

@@ -20,3 +20,38 @@ export interface EffectKeywordSuggestion {
 
 export interface ManagedEffectDefinition
   extends EffectTechnicalDefinition, Omit<EffectDefinition, "effect_id"> {}
+
+export interface ManagedEffectAdminItem extends ManagedEffectDefinition {
+  keywords: EffectKeywordSuggestion[];
+}
+
+export type AuthorEffectDefinition = Omit<ManagedEffectDefinition, "created_at" | "updated_at">;
+
+export interface EffectAuthorCatalog {
+  effects: AuthorEffectDefinition[];
+  keywords: EffectKeywordSuggestion[];
+}
+
+export type EffectAdminStatusFilter = "active" | "inactive" | "all";
+export type EffectAdminCategoryFilter = Exclude<EffectTechnicalDefinition["category"], "audio"> | "all";
+
+export interface EffectAdminListQuery {
+  q: string;
+  category: EffectAdminCategoryFilter;
+  status: EffectAdminStatusFilter;
+  cursor: string | null;
+}
+
+export interface EffectAdminCapabilities {
+  canCreateEffect: false;
+  canEditTechnicalFields: false;
+  canEditMetadata: true;
+  canManageKeywords: true;
+}
+
+export interface EffectAdminList {
+  items: ManagedEffectAdminItem[];
+  total: number;
+  nextCursor: string | null;
+  capabilities: EffectAdminCapabilities;
+}

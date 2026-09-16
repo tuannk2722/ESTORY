@@ -41,7 +41,8 @@
 │ Hero full-bleed (artwork theo Dark/Light/Sepia + scrim/fade):           │
 │  [✨ Trải nghiệm Đọc Truyện Đa Giác Quan] (pill badge)                 │
 │  Nơi Câu Chữ Chạm Tới Cảm Xúc (h1 gradient text)                       │
-│  Đọc truyện sống động với hiệu ứng hình ảnh và âm thanh...             │
+│  Đọc và sáng tác những câu chuyện sống động với bối cảnh, âm thanh       │
+│  và hiệu ứng tương tác kích hoạt theo từng dòng văn.                     │
 │  Search landmark "Tìm truyện":                                        │
 │   [ Tìm theo tên truyện hoặc tác giả...                ] [Tìm kiếm]    │
 │  Genres: [Tất cả] [Thể loại 1] [Thể loại 2] ...                       │
@@ -146,6 +147,11 @@
 │       ─ StoryBlock 3 (Paragraph / Heading) ─                           │
 │                                                                        │
 │     [ ← Chương Trước ]                       [ Chương Sau → ] (z-20)   │
+│                                                                        │
+│     CreationInvitation (z-20, chỉ Guest/Reader, ẩn Author/Admin):       │
+│       ✦ Bạn cũng có một câu chuyện muốn kể?                             │
+│       Tạo câu chuyện của riêng bạn với bối cảnh, âm thanh…              │
+│       [ Bắt đầu sáng tác → ]                                           │
 │                                                                        │
 │     (Phase 3) AttributionFooter — "Nguồn âm thanh" nếu có (z-20)       │
 └────────────────────────────────────────────────────────────────────────┘
@@ -274,12 +280,12 @@ Logic đầy đủ (khi nào đổi role, quyền truy cập...) ở `12-auth-an
 ### 6.1. `AppHeader` — 3 trạng thái bên phải
 
 ```
-Guest:            ... [🌗 Theme]  [ Đăng nhập ]
+Guest:            ... [🌗 Theme]  [ ✍️ Viết truyện ]  [ Đăng nhập ]
 Reader đã login:  ... [🌗 Theme]  [ ✍️ Viết truyện ]  (Avatar) 
 Author/Admin:     ... [🌗 Theme]  [ 📚 Truyện của tôi ]  (Avatar)
 ```
 - Vùng menu điều hướng (`Đang đọc`/`Đã lưu`) giữ nguyên như mục 1, không đổi theo trạng thái login.
-- Nút "Đăng nhập" mở popup OAuth (Google/GitHub) qua Auth.js — không mở trang riêng.
+- Guest: "Viết truyện" mở OAuth dialog hướng sáng tác (redirect `/author/stories/new`); "Đăng nhập" mở OAuth dialog chung (redirect trang hiện tại).
 - Click Avatar (không phải nút chính) → mở `ProfileModal` (`z-[80]`, cùng tầng modal với `EffectPicker`/`ScenePicker`).
 
 ### 6.2. `ProfileModal` (`z-[80]`, căn giữa hoặc trượt từ góc phải trên xuống dưới Avatar)
@@ -296,12 +302,12 @@ Author/Admin:     ... [🌗 Theme]  [ 📚 Truyện của tôi ]  (Avatar)
 │  🔗 Liên kết tài khoản          │  ← bắt đầu render khi P3-15 có connection projection
 │    Freesound: [Đã kết nối ✓ | Kết nối] │  ← P3-15, mục 12.9
 ├───────────────────────────────┤
-│  📚 Truyện của tôi          →  │  ← chỉ hiện nếu role >= author
 │  🛠️ Trang quản trị          →  │  ← chỉ hiện nếu role === admin
 ├───────────────────────────────┤
 │  🚪 Đăng xuất                  │
 └───────────────────────────────┘
 ```
+"Truyện của tôi" không nằm trong modal vì đã hiện trực tiếp trên navbar cho `author`/`admin`.
 - Dùng `glass-card` + `rounded-xl` như các card khác, không cần backdrop tối toàn màn hình (khác `EffectPicker`) vì đây là menu ngữ cảnh nhỏ, đóng khi click ra ngoài.
 - P3-10 chỉ tạo boundary `IntegrationsSection.tsx`, không render row/action giả. Từ P3-15, khối "Liên kết tài khoản" chỉ hiện với `role >= author`: đã kết nối → tên Freesound + "Ngắt kết nối"; chưa kết nối → "Kết nối" mở OAuth. Chi tiết ở `12-auth-and-author-management.md` mục 12.9.
 
@@ -505,7 +511,7 @@ Sau thành công, đóng dialog/drawer, cập nhật row/count hoặc revalidate
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
-│ Effects                                      25 technical effects       │
+│ Effects                                      [số effect thuộc Admin]    │
 │ [Search]                    [Category] [Status]                         │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Effect                  Technical ID       Category   Status   Action   │
@@ -519,7 +525,8 @@ Sau thành công, đóng dialog/drawer, cập nhật row/count hoặc revalidate
 - Desktop `md+`: table/list là surface chính, header cột rõ và row action bằng button có accessible name.
 - Mobile `<md`: mỗi row chuyển thành compact card; không ép table scroll ngang cho thao tác chính.
 - Technical ID/category hiển thị muted và read-only. Không có Create Effect.
-- Search match label, description và technical ID; category/status filter kết hợp AND.
+- Chỉ liệt kê effect thuộc Admin; không có dòng/danh mục audio. URL cũ `category=audio` được canonicalize về `all`. Audio preset, nhãn và keyword nguồn âm do code quản lý theo `02` §2.6.
+- Search match label, description, technical ID và keyword bằng AND token bỏ dấu/case sau NFKC; category/status filter kết hợp AND. Không đổi thứ tự theo weight.
 - Toggle trạng thái không đặt trực tiếp trong row để tránh thao tác nhầm; thực hiện trong drawer rồi Save.
 
 Click `Edit` mở right drawer desktop (`max-w-xl`) hoặc full-height bottom sheet/mobile dialog:
@@ -533,7 +540,7 @@ Label         [................................]
 Description   [................................]
 Status        [Active switch]
 
-Keyword suggestions
+Search and suggestion keywords
 [Keyword................] [Weight 1..100] [Add]
 mưa            95                         [Edit] [Remove]
 mưa rơi        90                         [Edit] [Remove]

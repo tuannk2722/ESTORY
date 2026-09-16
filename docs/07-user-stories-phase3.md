@@ -88,6 +88,9 @@ Nguồn: [02](02-data-schema.md) §2.6; [08](08-effects-and-scenes.md) §8.5.1; 
 - [ ] Keyword integer weight 1..100; unique `(effect_id, normalized_keyword)` sau NFKC/lowercase vi-VN/trim/collapse whitespace.
 - [ ] Inactive ẩn khỏi picker/suggestion mới, Reader vẫn render effect đã lưu; editor load catalog/dictionary một lần trong aggregate, không per-block request.
 - [ ] Manifest sync idempotent; test type/manifest/registry ID parity; technical ID lạ trong DB phải fail/report.
+- [ ] Audio do code quản lý; Admin không thấy danh mục/dòng audio và API không cho sửa metadata/keyword audio. Author vẫn chọn audio cho block/scene, dùng URL/AudioAsset và lưu snapshot như trước; DB active gate chỉ cho effect thuộc Admin.
+- [ ] Author catalog không có revision/timestamp DB; audio được chiếu từ code, effect khác từ overlay active. Xóa overlay/keyword audio bằng cleanup có backup sau cutover; seed/sync không tái tạo và nội dung cũ vẫn phát.
+- [ ] Keyword mở rộng search block effect picker, scene effect combobox và Admin list; AND token qua metadata + keyword, NFKC và bỏ dấu/case, không bỏ scope/category/status, không đổi thứ tự/weight ranking. Giữ gợi ý block onBlur; keyword audio preset do code sở hữu. Chuẩn hóa unique vẫn giữ dấu.
 
 ## US-3.13 — Scene Admin & snapshot integration
 
@@ -103,8 +106,8 @@ Nguồn: [02](02-data-schema.md) §2.9; [08](08-effects-and-scenes.md) §8.3–8
 
 Nguồn: [12](12-auth-and-author-management.md) §12.1–12.3; UI: [04b](04b-page-layouts.md) §6.
 
-- [ ] Guest có Login; reader đã login có “Viết truyện” → `/author/stories/new`; author/admin có “Truyện của tôi” → `/author`.
-- [ ] Avatar mở ProfileModal: avatar/name/email, badge ẩn với reader, Theme Switcher, role links (author→Dashboard, admin→protected landing `/admin`), logout. P3-10 chỉ chuẩn bị integrations boundary; Freesound projection/action được nghiệm thu ở P3-15 theo §12.3/12.9.
+- [ ] Guest có Login và “Viết truyện” (mở login dialog hướng sáng tác, redirect `/author/stories/new`); reader đã login có “Viết truyện” → `/author/stories/new`; author/admin có “Truyện của tôi” → `/author`.
+- [ ] Avatar mở ProfileModal: avatar/name/email, badge ẩn với reader, Theme Switcher, role links (admin→protected landing `/admin`, “Truyện của tôi” không lặp trong modal vì đã có trên navbar), logout. P3-10 chỉ chuẩn bị integrations boundary; Freesound projection/action được nghiệm thu ở P3-15 theo §12.3/12.9.
 
 ## US-3.15 — Nâng role khi tạo truyện đầu tiên
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
-import { BookOpen, ChevronRight, LogOut, Shield, User, X } from "lucide-react";
+import { ChevronRight, LogOut, Shield, User, X } from "lucide-react";
 import { signOut } from "next-auth/react";
 import type { SessionUser } from "@/lib/auth/policy";
 import IntegrationsSection from "./IntegrationsSection";
@@ -158,28 +158,17 @@ export default function ProfileModal({ user, onClose, triggerRef }: ProfileModal
 
       <IntegrationsSection />
 
-      {user.role !== "reader" ? (
+      {user.role === "admin" ? (
         <div className="border-b border-[var(--color-border)] py-2">
           <Link
-            href="/author"
+            href="/admin"
             onClick={onClose}
             className="flex min-h-[44px] items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold text-[var(--color-foreground)] transition-colors hover:bg-[var(--color-muted)] motion-reduce:transition-none"
           >
-            <BookOpen aria-hidden="true" className="h-4 w-4 text-[var(--color-accent)]" />
-            <span className="flex-1">Truyện của tôi</span>
+            <Shield aria-hidden="true" className="h-4 w-4 text-[var(--color-accent)]" />
+            <span className="flex-1">Trang quản trị</span>
             <ChevronRight aria-hidden="true" className="h-4 w-4 text-[var(--color-muted-foreground)]" />
           </Link>
-          {user.role === "admin" ? (
-            <Link
-              href="/admin"
-              onClick={onClose}
-              className="flex min-h-[44px] items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold text-[var(--color-foreground)] transition-colors hover:bg-[var(--color-muted)] motion-reduce:transition-none"
-            >
-              <Shield aria-hidden="true" className="h-4 w-4 text-[var(--color-accent)]" />
-              <span className="flex-1">Trang quản trị</span>
-              <ChevronRight aria-hidden="true" className="h-4 w-4 text-[var(--color-muted-foreground)]" />
-            </Link>
-          ) : null}
         </div>
       ) : null}
 

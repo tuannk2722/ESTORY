@@ -451,3 +451,13 @@ pnpm build
 
 Playwright là tooling optional ngoài dependency app. Chi tiết contract, accessibility,
 responsive, regression, cleanup và gate CI/Vercel còn lại: [P3-10 verification](docs/verification/p3-10.md).
+## Effect audio cutover (P3-12 follow-up)
+
+Audio is code-owned; Admin overlays and keyword search apply to the remaining effects.
+After deploying the new application and stopping old instances/jobs sharing the database,
+run `pnpm effects:retire-audio` (dry-run), then
+`pnpm effects:retire-audio --apply --backup <new-private-file>`.
+The backup directory must exist. Keep the backup outside git and public assets.
+This is a post-deploy data cleanup, **not** part of pre-deploy Prisma migrations or manifest
+sync. Fresh databases never seed the audio overlay. See the
+[cutover, verification and rollback runbook](docs/verification/p3-12.md).

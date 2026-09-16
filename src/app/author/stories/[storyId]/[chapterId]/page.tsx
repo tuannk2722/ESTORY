@@ -30,6 +30,7 @@ export default async function EditorPage({ params }: EditorPageProps) {
       chapterId={chapterId}
       initialScenes={editor.data.scenes}
       initialRevision={editor.meta.updatedAt}
+      effectCatalog={editor.data.effectCatalog}
       sceneLibrary={{ backgrounds, palettes, scenePresets }}
     />
   );

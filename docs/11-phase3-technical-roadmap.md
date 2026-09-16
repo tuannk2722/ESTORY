@@ -366,7 +366,7 @@ model Effect {
   id           String      @id @default(cuid())
   blockId      String
   block        StoryBlock  @relation(fields: [blockId], references: [id])
-  type         String      // khớp EffectType (Mục 2.1) / EffectDefinition.effectId (Mục 2.6)
+  type         String      // khớp EffectType; không có FK tới EffectDefinition (audio không có overlay)
   category     String      // "visual" | "audio" | "motion" | "transition"
   intensity    Float
   durationMs   Int
@@ -671,7 +671,7 @@ Quota video Author cấp một `videoSlot` 1..10 trong transaction/serializable 
 ## 9.6. Storage, Admin catalog, integrations, CI/CD
 
 - **Storage:** cover/audio/background upload qua `MediaStorageProvider`, R2 Standard là implementation mặc định. File lớn dùng conditional presigned PUT 10 phút; server quyết định owner/purpose/key/MIME/limit. Object key immutable; public read dùng custom domain. Image/poster 5 MiB, audio 8 MiB/5 phút, background video 50 MiB dùng chung Admin/Author; Author video có poster và trần 10 intent complete/chưa cleanup.
-- **Effect admin:** manifest sync + DB overlay/keywords; active chỉ ảnh hưởng lựa chọn mới.
+- **Effect admin:** manifest sync + DB overlay/keywords cho tập Admin; audio thuộc code (`02` §2.6). Active chỉ ảnh hưởng lựa chọn mới của effect thuộc Admin. Keyword thêm matching cho effect search, không đổi weight ranking của suggestion.
 - **Scene admin:** typed Background/Palette catalog + curated Preset metadata. Preset mới đi qua developer import; không có admin builder.
 - **Integrations:** Freesound và AI chạy sau Auth/authorization/storage/quota. AI dùng generation session/từng variant hoặc phương án khác chỉ sau payload spike chứng minh an toàn.
 - **CI/CD:** dựng skeleton từ đầu; production gate gồm lint/typecheck/test/Prisma validate/build, migration verification, accessibility/security regression.

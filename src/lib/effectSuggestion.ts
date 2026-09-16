@@ -1,7 +1,6 @@
-// lib/effectSuggestion.ts
-// Phase 2: Gợi ý effect theo từ khóa trong text (US-2.3)
-
-import { EffectType } from "@/types/story";
+import type { EffectKeywordSuggestion } from "@/types/effect-admin";
+import type { EffectType } from "@/types/story";
+import { normalizeEffectKeyword } from "@/lib/effects/effect-keyword-normalization";
 
 export interface EffectSuggestion {
   keyword: string;
@@ -9,284 +8,41 @@ export interface EffectSuggestion {
   confidence: number;
 }
 
-export interface KeywordEffectMapping {
-  effect_type: EffectType;
-  keywords: string[];
-  baseConfidence: number;
-}
+/** Suggest from the active dictionary loaded once with the editor aggregate. */
+export function suggestEffectsForText(
+  text: string,
+  dictionary: readonly EffectKeywordSuggestion[],
+): EffectSuggestion[] {
+  const normalizedText = normalizeEffectKeyword(text);
+  if (!normalizedText) return [];
 
-export const KEYWORD_EFFECT_DICTIONARY: KeywordEffectMapping[] = [
-  {
-    effect_type: "lightning_flash",
-    keywords: [
-      "sấm",
-      "chớp",
-      "chói lòa",
-      "chớp sáng",
-      "sấm sét",
-      "sáng lòa",
-      "tia chớp",
-      "chói lọi",
-      "sấm nổ",
-      "rạch ngang",
-      "đoàng",
-    ],
-    baseConfidence: 0.95,
-  },
-  {
-    effect_type: "particle_rain",
-    keywords: [
-      "mưa",
-      "mưa bão",
-      "lộp độp",
-      "trút nước",
-      "giọt mưa",
-      "xối xả",
-      "mưa rào",
-      "ràn rạt",
-      "nước mưa",
-      "ướt sũng",
-      "mưa tuôn",
-    ],
-    baseConfidence: 0.9,
-  },
-  {
-    effect_type: "particle_snow",
-    keywords: [
-      "tuyết",
-      "bông tuyết",
-      "tuyết rơi",
-      "giá rét",
-      "băng giá",
-      "lạnh buốt",
-      "tuyết trắng",
-      "bão tuyết",
-    ],
-    baseConfidence: 0.9,
-  },
-  {
-    effect_type: "particle_fire",
-    keywords: [
-      "lửa",
-      "ngọn lửa",
-      "bùng cháy",
-      "thiêu rụi",
-      "rực sáng",
-      "tàn tro",
-      "đốm lửa",
-      "cháy rực",
-      "hỏa hoạn",
-      "bốc hỏa",
-    ],
-    baseConfidence: 0.9,
-  },
-  {
-    effect_type: "particle_smoke",
-    keywords: [
-      "khói",
-      "sương mù",
-      "mờ mịt",
-      "bốc lên",
-      "khói sương",
-      "làn khói",
-      "mịt mù",
-      "sương lạnh",
-      "khói đen",
-    ],
-    baseConfidence: 0.85,
-  },
-  {
-    effect_type: "particle_fireflies",
-    keywords: [
-      "lân tinh",
-      "đom đóm",
-      "đốm sáng",
-      "phù du",
-      "ma quái",
-      "lơ lửng",
-      "xanh lục",
-      "huyền ảo",
-      "chập chờn",
-    ],
-    baseConfidence: 0.85,
-  },
-  {
-    effect_type: "screen_shake",
-    keywords: [
-      "rung chuyển",
-      "chấn động",
-      "nổ tung",
-      "rung lắc",
-      "sập",
-      "ầm ầm",
-      "đinh tai",
-      "chao đảo",
-      "rung bần bật",
-      "va đập",
-    ],
-    baseConfidence: 0.9,
-  },
-  {
-    effect_type: "screen_blur",
-    keywords: [
-      "mờ ảo",
-      "choáng váng",
-      "mờ dần",
-      "hoa mắt",
-      "mất phương hướng",
-      "mờ mịt",
-      "nhòa đi",
-      "chóng mặt",
-    ],
-    baseConfidence: 0.8,
-  },
-  {
-    effect_type: "text_shake",
-    keywords: [
-      "run rẩy",
-      "hét lớn",
-      "thất thanh",
-      "kinh hãi",
-      "kêu la",
-      "sợ hãi",
-      "lắp bắp",
-      "hoảng loạn",
-      "gào thét",
-    ],
-    baseConfidence: 0.85,
-  },
-  {
-    effect_type: "text_grow",
-    keywords: [
-      "khổng lồ",
-      "to lớn",
-      "phóng to",
-      "trỗi dậy",
-      "sừng sững",
-      "gầm rú",
-      "khủng khiếp",
-      "dâng trào",
-    ],
-    baseConfidence: 0.8,
-  },
-  {
-    effect_type: "text_fade_flashback",
-    keywords: [
-      "ngày ấy",
-      "năm xưa",
-      "quá khứ",
-      "hồi ức",
-      "nhớ lại",
-      "ký ức",
-      "thuở trước",
-      "ngày xưa",
-      "năm 1974",
-    ],
-    baseConfidence: 0.85,
-  },
-  {
-    effect_type: "typewriter",
-    keywords: [
-      "nhật ký",
-      "ghi chép",
-      "bức thư",
-      "dòng chữ",
-      "trang sổ",
-      "bản thảo",
-      "đọc đến",
-      "gõ phím",
-    ],
-    baseConfidence: 0.85,
-  },
-  {
-    effect_type: "bg_color_shift",
-    keywords: [
-      "hoàng hôn",
-      "u ám",
-      "bóng tối",
-      "đổi màu",
-      "nhuộm tím",
-      "màn đêm",
-      "chân trời",
-      "bình minh",
-      "tím sẫm",
-      "rực đỏ",
-    ],
-    baseConfidence: 0.8,
-  },
-  {
-    effect_type: "transition_fade",
-    keywords: [
-      "bước sang",
-      "chuyển cảnh",
-      "kết thúc",
-      "bắt đầu",
-      "phần tiếp theo",
-      "phần i",
-      "phần ii",
-      "phần iii",
-      "phần iv",
-      "phần v",
-    ],
-    baseConfidence: 0.75,
-  },
-  {
-    effect_type: "transition_page_tear",
-    keywords: [
-      "xé rách",
-      "lật trang",
-      "đóng lại",
-      "khép lại",
-      "chia cắt",
-      "xé toạc",
-      "kết thúc trọn vẹn",
-    ],
-    baseConfidence: 0.8,
-  },
-  {
-    effect_type: "vibration",
-    keywords: [
-      "rung tim",
-      "nhịp tim",
-      "nhói buốt",
-      "rùng mình",
-      "sống lưng",
-      "giật mình",
-      "lạnh toát",
-    ],
-    baseConfidence: 0.8,
-  },
-];
+  const suggestions = new Map<EffectType, EffectSuggestion>();
+  for (const entry of dictionary) {
+    if (!entry.normalized_keyword || !normalizedText.includes(entry.normalized_keyword)) continue;
 
-/**
- * Gợi ý hiệu ứng dựa trên nội dung văn bản (dùng ở Phase 2 Author Editor - US-2.3)
- * Gợi ý KHÔNG tự động áp dụng — tác giả luôn phải xác nhận.
- */
-export function suggestEffectsForText(text: string): EffectSuggestion[] {
-  if (!text || typeof text !== "string") return [];
-
-  const lowerText = text.toLowerCase();
-  const suggestionsMap = new Map<EffectType, EffectSuggestion>();
-
-  for (const entry of KEYWORD_EFFECT_DICTIONARY) {
-    for (const kw of entry.keywords) {
-      if (lowerText.includes(kw.toLowerCase())) {
-        const existing = suggestionsMap.get(entry.effect_type);
-        // Ưu tiên từ khóa dài hơn hoặc có độ tin cậy cao hơn
-        if (!existing || kw.length > existing.keyword.length) {
-          suggestionsMap.set(entry.effect_type, {
-            keyword: kw,
-            effect_type: entry.effect_type,
-            confidence: entry.baseConfidence,
-          });
-        }
-      }
+    const candidate: EffectSuggestion = {
+      keyword: entry.keyword,
+      effect_type: entry.effect_id,
+      confidence: entry.weight / 100,
+    };
+    const current = suggestions.get(entry.effect_id);
+    if (
+      !current
+      || candidate.confidence > current.confidence
+      || (
+        candidate.confidence === current.confidence
+        && entry.normalized_keyword.length > normalizeEffectKeyword(current.keyword).length
+      )
+    ) {
+      suggestions.set(entry.effect_id, candidate);
     }
   }
 
-  // Chuyển Map thành Array và sắp xếp theo confidence giảm dần
-  return Array.from(suggestionsMap.values()).sort(
-    (a, b) => b.confidence - a.confidence
+  return [...suggestions.values()].sort(
+    (left, right) =>
+      right.confidence - left.confidence
+      || normalizeEffectKeyword(right.keyword).length - normalizeEffectKeyword(left.keyword).length
+      || left.effect_type.localeCompare(right.effect_type),
   );
 }
 

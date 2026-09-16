@@ -58,8 +58,7 @@ const administrationItems: NavigationItem[] = [
     label: "Hiệu ứng",
     href: "/admin/effects",
     icon: WandSparkles,
-    enabled: false,
-    stage: "P3-12",
+    enabled: true,
   },
   {
     label: "Bối cảnh",
