@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import { PenLine, User } from "lucide-react";
 import { signIn } from "next-auth/react";
@@ -25,14 +25,9 @@ export default function LoginDialog({
   variant = "general",
   redirectTo,
 }: LoginDialogProps) {
-  const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const descId = useId();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Focus trap & keyboard handler
   useEffect(() => {
@@ -76,7 +71,7 @@ export default function LoginDialog({
     };
   }, [isOpen, onClose, triggerRef]);
 
-  if (!mounted || !isOpen) return null;
+  if (typeof document === "undefined" || !isOpen) return null;
 
   const isCreator = variant === "creator";
   const title = isCreator ? "Bắt đầu sáng tác" : "Đăng nhập StoryVerse";
