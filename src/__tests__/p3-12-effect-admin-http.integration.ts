@@ -5,6 +5,7 @@ import { once } from "node:events";
 import { createServer } from "node:net";
 import { resolve } from "node:path";
 import { loadEnvConfig } from "@next/env";
+import { DEFAULT_SCENE_ACCENT_COLOR } from "@/lib/scenes/scene-visual-policy";
 import { buildStorySearchText } from "@/lib/search/text-search";
 
 loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
@@ -191,9 +192,9 @@ async function run() {
     const scene = {
       id: `${marker}-scene`, chapter_id: chapterId, start_block_id: blocks[0].id, end_block_id: blocks[0].id,
       render_config: {
-        schema_version: 1,
+        schema_version: 2,
         background: { motion: "static", render_data: { kind: "image", media_url: "/covers/local-test.svg" } },
-        palette: { primary: "#ffffff", secondary: "#eeeeee", accent: "#cccccc", background_tint: { color: "#000000", opacity: 0.2 } },
+        visual_treatment: { mode: "original", accent_color: DEFAULT_SCENE_ACCENT_COLOR },
         ambient_effects: [{ ...audio, id: `${marker}-scene-audio`, loop: true }],
       },
     };
