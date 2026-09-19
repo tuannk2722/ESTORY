@@ -43,6 +43,7 @@ export class PrismaSceneCommandService implements SceneCommandService, EditorCom
     ];
     await repository.assertEffectReferences(actor.id, effects(nextBlocks, nextScenes), effects(currentChapter.blocks, currentScenes));
     await repository.assertPresetReferences(nextScenes, currentScenes);
+    await repository.assertSceneWriteCompatibility(nextScenes, currentScenes);
     if (blocks !== undefined) await repository.replaceBlocks(chapterId, nextBlocks);
     if (scenes !== undefined) await repository.replaceScenes(chapterId, nextScenes);
     return editorDataSchema.parse({

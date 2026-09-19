@@ -38,6 +38,8 @@
     "effects:sync-manifest": "node --conditions=react-server scripts/run-typescript-tests.cjs scripts/sync-effect-manifest.ts",
     "test:effects:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/p3-12-effect-admin.integration.ts",
     "test:effects:http": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/p3-12-effect-admin-http.integration.ts",
+    "test:scene-catalog:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/p3-13-scene-catalog.integration.ts",
+    "test:scene-catalog:http": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/p3-13-scene-catalog-http.integration.ts",
     "measure:search:db": "node --conditions=react-server scripts/run-typescript-tests.cjs scripts/measure-p3-11-search.ts",
     "test:sync:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/reader-sync.integration.ts",
     "test:sync:http": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/reader-sync-http.integration.ts",

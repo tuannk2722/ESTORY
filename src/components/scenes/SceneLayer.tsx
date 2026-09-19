@@ -10,13 +10,23 @@ import { isEffectAllowedWithReducedMotion } from "@/lib/effects/effectPlayback";
 import { calculateEffectVolume } from "@/lib/reader/readerMetrics";
 import type { SceneRenderConfig } from "@/types/scene";
 import { renderConfigToPresentation } from "@/lib/scenes/scene-presentation";
+import {
+  MAX_SCENE_ATMOSPHERE_OPACITY,
+  SCENE_BODY_TEXT_COLOR,
+  SCENE_READABILITY_MIN_OPACITY,
+  SCENE_READABILITY_SCRIM_RGB,
+} from "@/lib/scenes/scene-visual-policy";
 import SceneAmbientAudio from "./SceneAmbientAudio";
 import SceneBackground from "./SceneBackground";
+
+const READER_SCRIM_MASK =
+  "linear-gradient(to right, transparent 0%, black calc(50% - 21rem), black calc(50% + 21rem), transparent 100%)";
 
 export interface SceneLayerProps {
   renderConfig?: SceneRenderConfig | null;
   reducedMotion?: boolean;
   isAudioPaused?: boolean;
+  contained?: boolean;
   children?: React.ReactNode;
 }
 
@@ -122,6 +132,7 @@ export default function SceneLayer({
   renderConfig,
   reducedMotion = false,
   isAudioPaused = false,
+  contained = false,
   children,
 }: SceneLayerProps) {
   const presentation = useMemo(
@@ -130,6 +141,7 @@ export default function SceneLayer({
   );
   const backgroundAsset = presentation?.background;
   const colorPalette = presentation?.palette;
+  const visualTreatment = presentation?.visualTreatment;
   const sceneEffects = renderConfig?.ambient_effects;
   const { settings } = useReaderSettings();
   const isMobile = useMobileDetect();
@@ -175,14 +187,26 @@ export default function SceneLayer({
     [playableVisualEffects]
   );
 
-  const paletteStyle = useMemo<React.CSSProperties>(() => {
-    if (!colorPalette) return {};
-    return {
-      "--color-primary": colorPalette.colors.primary,
-      "--color-secondary": colorPalette.colors.secondary,
-      "--color-accent": colorPalette.colors.accent,
-    } as React.CSSProperties;
-  }, [colorPalette]);
+  const sceneStyle = useMemo<React.CSSProperties>(() => {
+    if (colorPalette) {
+      return {
+        "--color-primary": colorPalette.colors.primary,
+        "--color-secondary": colorPalette.colors.secondary,
+        "--color-accent": colorPalette.colors.accent,
+        "--scene-detail-text-color": colorPalette.colors.accent,
+      } as React.CSSProperties;
+    }
+    if (visualTreatment) {
+      return {
+        // Scene colors belong to the story art, not app controls such as ChapterNav.
+        "--scene-accent-color": visualTreatment.accent_color,
+        "--scene-heading-text-color": SCENE_BODY_TEXT_COLOR,
+        "--scene-dropcap-text-color": SCENE_BODY_TEXT_COLOR,
+        "--scene-detail-text-color": SCENE_BODY_TEXT_COLOR,
+      } as React.CSSProperties;
+    }
+    return {};
+  }, [colorPalette, visualTreatment]);
 
   const crossfadeDuration = reducedMotion ? 0 : 0.8;
   const ambientVolume = calculateEffectVolume(
@@ -193,8 +217,8 @@ export default function SceneLayer({
 
   return (
     <div
-      className="scene-layer relative w-full min-h-screen transition-colors duration-700 ease-out"
-      style={paletteStyle}
+      className={`scene-layer relative w-full transition-colors duration-700 ease-out ${contained ? "h-full" : "min-h-screen"}`}
+      style={sceneStyle}
     >
       <AnimatePresence mode="sync">
         {backgroundAsset && (
@@ -207,11 +231,57 @@ export default function SceneLayer({
               duration: crossfadeDuration,
               ease: [0.4, 0, 0.2, 1],
             }}
-            className="fixed inset-0 z-0 overflow-hidden pointer-events-none"
+            className={`${contained ? "absolute" : "fixed"} inset-0 z-0 overflow-hidden pointer-events-none`}
           >
             <SceneBackground
               asset={backgroundAsset}
               reducedMotion={reducedMotion}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence mode="sync">
+        {visualTreatment && (
+          <motion.div
+            key={visualTreatment.mode === "auto"
+              ? `visual-treatment:auto:${visualTreatment.accent_color}:${visualTreatment.atmosphere.color}:${visualTreatment.atmosphere.opacity}:${visualTreatment.derivation_version}`
+              : `visual-treatment:original:${visualTreatment.accent_color}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: crossfadeDuration,
+              ease: [0.4, 0, 0.2, 1],
+            }}
+            data-scene-visual-treatment={visualTreatment.mode}
+            className={`${contained ? "absolute" : "fixed"} inset-0 z-0 overflow-hidden pointer-events-none`}
+            aria-hidden="true"
+          >
+            {visualTreatment.mode === "auto" && (
+              <div
+                data-scene-atmosphere="true"
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle at 50% -12%, ${visualTreatment.atmosphere.color} 0%, transparent 64%)`,
+                  opacity: Math.min(
+                    MAX_SCENE_ATMOSPHERE_OPACITY,
+                    Math.max(0, visualTreatment.atmosphere.opacity)
+                  ),
+                }}
+              />
+            )}
+            <div
+              data-scene-readability-scrim="true"
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  `radial-gradient(ellipse 80% 125% at 50% 50%, rgba(${SCENE_READABILITY_SCRIM_RGB.join(", ")}, 0.68) 0%, rgba(${SCENE_READABILITY_SCRIM_RGB.join(", ")}, 0.62) 58%, rgba(${SCENE_READABILITY_SCRIM_RGB.join(", ")}, ${SCENE_READABILITY_MIN_OPACITY}) 100%)`,
+                // The Reader fades outside its copy column. A contained preview
+                // has no outer gutter, so keep its entire sample readable.
+                maskImage: contained ? "none" : READER_SCRIM_MASK,
+                WebkitMaskImage: contained ? "none" : READER_SCRIM_MASK,
+              }}
             />
           </motion.div>
         )}
@@ -228,7 +298,7 @@ export default function SceneLayer({
               duration: crossfadeDuration,
               ease: [0.4, 0, 0.2, 1],
             }}
-            className="fixed inset-0 z-0 overflow-hidden pointer-events-none"
+            className={`${contained ? "absolute" : "fixed"} inset-0 z-0 overflow-hidden pointer-events-none`}
           >
             <div
               className="absolute inset-0 pointer-events-none"
@@ -286,7 +356,7 @@ export default function SceneLayer({
         />
       )}
 
-      <div className="relative z-20 w-full max-w-2xl mx-auto">
+      <div className={`relative z-20 w-full max-w-2xl mx-auto ${contained ? "h-full" : ""}`}>
         {children}
       </div>
     </div>

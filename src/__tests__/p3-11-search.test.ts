@@ -38,6 +38,7 @@ export async function runP311SearchTests() {
   );
   assert.equal(matchesSearch("demgiong", "Đêm Giông", "Nguyễn Du"), true);
   assert.equal(matchesSearch("giong nguyen", "Đêm Giông", "Nguyễn Du"), true);
+  assert.equal(matchesSearch("lighthouse hy vong", "bg-lighthouse-night", "Hải đăng", "hy vọng"), true);
   assert.equal(matchesSearch("dem gioong", "Đêm Giông", "Nguyễn Du"), false);
 
   const parsed = parsePublicStorySearchParams({

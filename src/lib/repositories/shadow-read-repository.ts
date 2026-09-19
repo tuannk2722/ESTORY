@@ -14,6 +14,7 @@ import type {
   StoryRepository,
 } from "./story-repository";
 import type {
+  SceneCompatibilityLibraryRepository,
   SceneLibraryRepository,
   SceneRepository,
 } from "./scene-repository";
@@ -204,12 +205,14 @@ export class ShadowSceneRepository implements SceneRepository {
   }
 }
 
-export class ShadowSceneLibraryRepository implements SceneLibraryRepository {
+type FullSceneLibraryRepository = SceneLibraryRepository & SceneCompatibilityLibraryRepository;
+
+export class ShadowSceneLibraryRepository implements FullSceneLibraryRepository {
   private readonly shadow: ShadowReader;
 
   constructor(
-    private readonly primary: SceneLibraryRepository,
-    private readonly secondary: SceneLibraryRepository,
+    private readonly primary: FullSceneLibraryRepository,
+    private readonly secondary: FullSceneLibraryRepository,
     observer: RepositoryReadObserver = consoleRepositoryReadObserver,
   ) {
     this.shadow = new ShadowReader(observer);

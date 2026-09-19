@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { Chapter, EffectConfig, EffectType, StoryBlock } from "@/types/story";
 import { LegacyScene as Scene } from "@/types/scene-legacy";
 import {
-  sceneLibraryRepository,
+  legacySceneLibraryRepository,
   sceneRepository,
   storyRepository,
 } from "@/lib/repositories";
@@ -229,9 +229,9 @@ export async function saveEditorSnapshot(
   const [story, existingScenes, backgrounds, palettes, presets] = await Promise.all([
     storyRepository.getById(storyId),
     sceneRepository.getLegacyByChapter(storyId, chapterId),
-    sceneLibraryRepository.getBackgrounds(),
-    sceneLibraryRepository.getPalettes(),
-    sceneLibraryRepository.getScenePresets(),
+    legacySceneLibraryRepository.getBackgrounds(),
+    legacySceneLibraryRepository.getPalettes(),
+    legacySceneLibraryRepository.getScenePresets(),
   ]);
 
   if (!story || story.id !== storyId) {

@@ -1,5 +1,5 @@
 import { AlertCircle } from "lucide-react";
-import { effectAdminErrorMessage, EffectAdminRequestError } from "../effectAdminTransport";
+import { effectAdminErrorMessage, EffectAdminRequestError } from "./effectAdminTransport";
 
 export interface FieldError {
   id: string;

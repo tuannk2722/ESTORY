@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { ArrowLeft, Layers, ListOrdered, Loader2, Save } from "lucide-react";
 import { Story } from "@/types/story";
-import { Scene, SceneLibraryData } from "@/types/scene";
+import type { Scene, SceneAuthoringLibraryData } from "@/types/scene";
 import type { EffectAuthorCatalog } from "@/types/effect-admin";
 import { EditorProvider } from "./EditorProvider";
 import { useEditorClientController } from "./useEditorClientController";
@@ -28,10 +28,8 @@ const ScenePicker = dynamic(() => import("./scenes/picker/ScenePicker"), {
   loading: () => null,
 });
 
-const EMPTY_SCENE_LIBRARY: SceneLibraryData = {
+const EMPTY_SCENE_LIBRARY: SceneAuthoringLibraryData = {
   backgrounds: [],
-  palettes: [],
-  scenePresets: [],
 };
 
 export interface EditorClientProps {
@@ -39,7 +37,7 @@ export interface EditorClientProps {
   chapterId: string;
   initialScenes?: Scene[];
   initialRevision: string;
-  sceneLibrary?: SceneLibraryData;
+  sceneLibrary?: SceneAuthoringLibraryData;
   effectCatalog: EffectAuthorCatalog;
 }
 
@@ -48,7 +46,7 @@ function EditorClientInner({
   sceneLibrary,
 }: {
   story: Story;
-  sceneLibrary: SceneLibraryData;
+  sceneLibrary: SceneAuthoringLibraryData;
 }) {
   const controller = useEditorClientController(story);
   const {
@@ -92,7 +90,6 @@ function EditorClientInner({
       onProceedToCreate={handleProceedSceneRange}
       rangeStartId={state.range.startId}
       rangeEndId={state.range.endId}
-      sceneLibrary={sceneLibrary}
     />
   );
   const timeline = (

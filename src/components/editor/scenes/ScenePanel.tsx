@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useMemo } from "react";
-import { Scene, SceneLibraryData } from "@/types/scene";
+import type { Scene } from "@/types/scene";
 import { StoryBlock } from "@/types/story";
 import { ChevronLeft, ChevronRight, Layers, Plus } from "lucide-react";
 import { buildBlockIndexMap } from "@/lib/scenes/sceneRange";
@@ -29,7 +29,6 @@ export interface ScenePanelProps {
   onProceedToCreate: () => void;
   rangeStartId: string | null;
   rangeEndId: string | null;
-  sceneLibrary: SceneLibraryData;
 }
 
 const focusRing =
@@ -50,13 +49,7 @@ function ScenePanelComponent({
   onProceedToCreate,
   rangeStartId,
   rangeEndId,
-  sceneLibrary,
 }: ScenePanelProps) {
-  const { scenePresets } = sceneLibrary;
-  const presetMap = useMemo(
-    () => new Map(scenePresets.map((preset) => [preset.id, preset])),
-    [scenePresets]
-  );
   const blockIndexMap = useMemo(() => buildBlockIndexMap(blocks), [blocks]);
   const rangeStatusMap = useMemo(
     () => buildSceneRangeStatusMap(scenes, blockIndexMap, blocks.length),
@@ -223,7 +216,6 @@ function ScenePanelComponent({
                 index={index}
                 rangeStatus={rangeStatus}
                 isActive={isActive}
-                presetMap={presetMap}
                 onScrollToStart={handleScrollToBlock}
                 onOpenScenePicker={onOpenScenePicker}
                 onDeleteScene={onDeleteScene}
@@ -253,7 +245,6 @@ export const ScenePanel = React.memo(
     previous.isSelectingRange === next.isSelectingRange &&
     previous.rangeStartId === next.rangeStartId &&
     previous.rangeEndId === next.rangeEndId &&
-    previous.sceneLibrary === next.sceneLibrary &&
     previous.onSelectBlock === next.onSelectBlock &&
     previous.onOpenScenePicker === next.onOpenScenePicker &&
     previous.onDeleteScene === next.onDeleteScene &&

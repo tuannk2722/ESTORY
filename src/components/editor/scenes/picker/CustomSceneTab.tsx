@@ -1,84 +1,133 @@
-// src/components/editor/scenes/picker/CustomSceneTab.tsx
-// Tab 2: Tùy Chỉnh Phối Riêng — Quy trình 4 bước tùy biến tự do (khớp 100% UI gốc)
-
 "use client";
 
-import React, { useCallback } from "react";
-import { SceneDraft } from "@/lib/scenes/sceneDraft";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  convertDraftToV2,
+  type SceneDraft,
+} from "@/lib/scenes/sceneDraft";
+import {
+  createOriginalVisualTreatment,
+  deriveVisualTreatmentFromBackground,
+} from "@/lib/scenes/visual-treatment";
+import type { BackgroundRenderSnapshot } from "@/types/scene";
+import type { EffectConfig } from "@/types/story";
 import type { BackgroundOption } from "./BackgroundPicker";
-import type { PaletteOption } from "./PalettePicker";
-import { EffectConfig } from "@/types/story";
 import { BackgroundPicker } from "./BackgroundPicker";
-import { PalettePicker } from "./PalettePicker";
 import { SceneEffectsEditor } from "./SceneEffectsEditor";
 import { SceneAudioEditor } from "./SceneAudioEditor";
+import {
+  VisualTreatmentControl,
+  type TreatmentDerivationStatus,
+} from "./VisualTreatmentControl";
 
 export interface CustomSceneTabProps {
   draft: SceneDraft;
-  onChangeDraft: (updater: (prev: SceneDraft) => SceneDraft) => void;
+  onChangeDraft: (updater: (previous: SceneDraft) => SceneDraft) => void;
   backgrounds: BackgroundOption[];
-  palettes: PaletteOption[];
   initialBackgroundId?: string;
-  initialPaletteId?: string;
   initialAudioSrc?: string;
   isLoop?: boolean;
 }
+
+const SAVED_BACKGROUND_ID = "snapshot:current-background";
 
 export const CustomSceneTab = React.memo(function CustomSceneTab({
   draft,
   onChangeDraft,
   backgrounds,
-  palettes,
   initialBackgroundId,
-  initialPaletteId,
   initialAudioSrc,
   isLoop = true,
 }: CustomSceneTabProps) {
-  const handleSelectBackground = useCallback(
-    (bgId: string) => {
-      onChangeDraft((prev) => ({
-        ...prev,
-        backgroundId: bgId === "snapshot:current-background" ? "" : bgId,
-        background: structuredClone(backgrounds.find(item => item.id === bgId)?.render ?? prev.background),
-      }));
+  const derivationRequest = useRef(0);
+  const [derivationStatus, setDerivationStatus] =
+    useState<TreatmentDerivationStatus>("idle");
+
+  useEffect(
+    () => () => {
+      derivationRequest.current += 1;
     },
-    [backgrounds, onChangeDraft]
+    [],
   );
 
-  const handleSelectPalette = useCallback(
-    (palId: string) => {
-      onChangeDraft((prev) => ({
-        ...prev,
-        paletteId: palId === "snapshot:current-palette" ? "" : palId,
-        palette: structuredClone(palettes.find(item => item.id === palId)?.colors ?? prev.palette),
-      }));
+  const deriveAutoTreatment = useCallback(
+    (background: BackgroundRenderSnapshot) => {
+      const request = ++derivationRequest.current;
+      const fallback = createOriginalVisualTreatment();
+      setDerivationStatus("deriving");
+      onChangeDraft((previous) =>
+        convertDraftToV2(previous, fallback, "auto"),
+      );
+
+      void deriveVisualTreatmentFromBackground(background).then((treatment) => {
+        if (derivationRequest.current !== request) return;
+        onChangeDraft((previous) =>
+          convertDraftToV2(previous, treatment, treatment.mode),
+        );
+        setDerivationStatus(treatment.mode === "auto" ? "ready" : "fallback");
+      });
     },
-    [palettes, onChangeDraft]
+    [onChangeDraft],
+  );
+
+  const handleSelectBackground = useCallback(
+    (backgroundId: string) => {
+      // Re-selecting the current snapshot is a no-op. In particular, opening a
+      // legacy Scene and clicking "Nền hiện tại" must not opt it into v2.
+      if (backgroundId === draft.backgroundId) return;
+      const selected = backgrounds.find((item) => item.id === backgroundId);
+      if (!selected) return;
+      const background = structuredClone(selected.render);
+
+      onChangeDraft((previous) => ({
+        ...previous,
+        backgroundId: backgroundId === SAVED_BACKGROUND_ID ? "" : backgroundId,
+        background,
+      }));
+      deriveAutoTreatment(background);
+    },
+    [backgrounds, deriveAutoTreatment, draft.backgroundId, onChangeDraft],
+  );
+
+  const handleTreatmentChange = useCallback(
+    (mode: "auto" | "original") => {
+      if (!draft.background) return;
+      if (mode === "auto") {
+        deriveAutoTreatment(structuredClone(draft.background));
+        return;
+      }
+
+      derivationRequest.current += 1;
+      setDerivationStatus("idle");
+      onChangeDraft((previous) =>
+        convertDraftToV2(previous, createOriginalVisualTreatment(), "original"),
+      );
+    },
+    [deriveAutoTreatment, draft.background, onChangeDraft],
   );
 
   const handleChangeEffects = useCallback(
     (effects: EffectConfig[]) => {
-      onChangeDraft((prev) => ({
-        ...prev,
+      onChangeDraft((previous) => ({
+        ...previous,
         ambientEffects: effects,
       }));
     },
-    [onChangeDraft]
+    [onChangeDraft],
   );
 
   const handleChangeAudio = useCallback(
     (audio: EffectConfig | null) => {
-      onChangeDraft((prev) => ({
-        ...prev,
+      onChangeDraft((previous) => ({
+        ...previous,
         ambientAudio: audio,
       }));
     },
-    [onChangeDraft]
+    [onChangeDraft],
   );
 
   return (
     <div className="space-y-6 font-editor">
-      {/* 1. Chọn Bối Cảnh Nền (Background) */}
       <BackgroundPicker
         backgrounds={backgrounds}
         selectedBackgroundId={draft.backgroundId}
@@ -86,31 +135,28 @@ export const CustomSceneTab = React.memo(function CustomSceneTab({
         initialBackgroundId={initialBackgroundId}
       />
 
-      {/* 2. Bảng Màu & Âm Thanh Nền (Grid 2 Cột) */}
-      <div className="p-5 rounded-2xl bg-secondary/30 border border-border/60 space-y-4">
-        <label className="text-sm font-bold text-foreground flex items-center gap-2 font-ui">
-          2. Phối Màu & Âm Thanh Nền
-        </label>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Dropdown 1: Bảng Màu */}
-          <PalettePicker
-            palettes={palettes}
-            selectedPaletteId={draft.paletteId}
-            onSelectPalette={handleSelectPalette}
-            initialPaletteId={initialPaletteId}
+      <section className="space-y-4 rounded-2xl border border-border/60 bg-secondary/30 px-4 py-3">
+        <h3 className="text-sm font-bold text-foreground font-ui">
+          2. Màu sắc &amp; âm thanh nền
+        </h3>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(17.5rem,0.8fr)]">
+          <VisualTreatmentControl
+            mode={draft.treatmentMode}
+            status={derivationStatus}
+            disabled={!draft.background}
+            onChange={handleTreatmentChange}
           />
-
-          {/* Dropdown 2: Âm Thanh Nền */}
-          <SceneAudioEditor
-            ambientAudio={draft.ambientAudio}
-            onChangeAudio={handleChangeAudio}
-            initialAudioSrc={initialAudioSrc}
-          />
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-foreground">Âm thanh nền</p>
+            <SceneAudioEditor
+              ambientAudio={draft.ambientAudio}
+              onChangeAudio={handleChangeAudio}
+              initialAudioSrc={initialAudioSrc}
+            />
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* 3. Hiệu Ứng Không Gian Đa Tầng */}
       <SceneEffectsEditor
         ambientEffects={draft.ambientEffects}
         onChangeEffects={handleChangeEffects}

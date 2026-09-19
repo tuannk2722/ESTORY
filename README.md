@@ -400,14 +400,16 @@ Use R2 Standard and a different bucket or `R2_KEY_PREFIX` for each environment.
 `R2_PUBLIC_BASE_URL` is the HTTPS custom domain used in immutable media URLs;
 Cloudflare's `r2.dev` URL is suitable only for local/development traffic.
 
-Browser direct PUT requires this bucket CORS shape, with exact application origins
-for the current environment (never use `*` for production):
+Browser direct PUT and Scene v2 auto treatment require this bucket CORS shape,
+with exact application origins for the current environment (never use `*` for
+production). `GET` lets the Author client read image/poster pixels; the Reader
+never derives colors at runtime.
 
 ```json
 [
   {
     "AllowedOrigins": ["http://localhost:3000"],
-    "AllowedMethods": ["PUT"],
+    "AllowedMethods": ["GET", "PUT"],
     "AllowedHeaders": ["Content-Type", "Cache-Control", "If-None-Match"],
     "ExposeHeaders": ["ETag"],
     "MaxAgeSeconds": 3600
@@ -427,9 +429,12 @@ pnpm test:media:db
 pnpm test:media:r2
 ```
 
-`test:media:r2` cần cả Neon dev và sáu biến R2, tạo object/row fixture dung lượng
-nhỏ rồi dọn trong `finally`; không chạy mặc định trong CI nếu môi trường chưa có
-Cloudflare secrets. Test không in credential, presigned URL, object key hoặc row.
+`test:media:r2` cần cả Neon dev, sáu biến R2 và `P3_14_PLAYWRIGHT_MODULE` trỏ tới
+Playwright cài ngoài dependency app (`P3_14_BROWSER_CHANNEL` mặc định là `msedge`). Test tạo
+object/row fixture dung lượng nhỏ, xác minh exact-origin CORS bằng HTTP rồi tải ảnh cross-origin
+trong browser và đọc pixel qua canvas; toàn bộ fixture được dọn trong `finally`. Suite không chạy
+mặc định trong CI khi môi trường chưa có Cloudflare secrets/browser tooling và không in credential,
+presigned URL, object key hoặc row.
 
 ## Auth UI & Author management (P3-10)
 

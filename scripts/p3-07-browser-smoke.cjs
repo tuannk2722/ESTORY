@@ -4,7 +4,7 @@ const assert = require("node:assert/strict");
 const { resolve } = require("node:path");
 const { mkdir } = require("node:fs/promises");
 
-exports.runP307BrowserSmoke = async function ({ origin, storyId, chapterId, token, makeDraft }) {
+exports.runP307BrowserSmoke = async function ({ origin, storyId, chapterId, token, makeDraft, seedLegacyReaderFixture }) {
   const { chromium } = require(resolve(process.env.P3_07_PLAYWRIGHT_MODULE));
   const browser = await chromium.launch({ channel: process.env.P3_07_BROWSER_CHANNEL || "msedge", headless: true });
   const artifacts = resolve("../.tools/p3-07-browser/artifacts");
@@ -36,8 +36,10 @@ exports.runP307BrowserSmoke = async function ({ origin, storyId, chapterId, toke
       background: { render_data: { kind: "image", media_url: "/scene-backgrounds/lighthouse-night.png" }, motion: "static" },
       ambient_effects: [{ ...firstScene.render_config.ambient_effects[0], id: `${chapterId}-ambient-two`, audio_src: "/audio/gentle_rain_falling.mp3" }],
     } };
-    const fixtureSave = await fixture.request.put(fixtureUrl, { headers: { origin }, data: { blocks: mediaBlocks, scenes: [firstScene, secondScene], expectedUpdatedAt: original.meta.updatedAt } });
-    assert.equal(fixtureSave.status(), 200);
+    // These v1 snapshots model already-migrated compatibility data. Author HTTP
+    // writes intentionally reject new v1 Scenes after the P3-14 cutover, so the
+    // integration owner seeds them through its database fixture boundary.
+    await seedLegacyReaderFixture({ blocks: mediaBlocks, scenes: [firstScene, secondScene] });
     await fixture.close();
     const guest = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     const reader = await guest.newPage();
@@ -95,6 +97,9 @@ exports.runP307BrowserSmoke = async function ({ origin, storyId, chapterId, toke
     await page.keyboard.press("Escape");
     assert.equal(await page.getByRole("button", { name: /^Chỉnh sửa Scene #1$/ }).evaluate(node => node === document.activeElement), true);
     await page.getByRole("button", { name: /^Chỉnh sửa Scene #1$/ }).click();
+    assert.equal(await page.getByRole("tab", { name: /Scene Preset/ }).count(), 0);
+    assert.equal(await page.getByText("Chọn Bảng Màu", { exact: false }).count(), 0);
+    await page.getByRole("button", { name: /Nền hiện tại/ }).click();
     assert.equal(await page.getByRole("button", { name: "Cập Nhật Scene", exact: true }).isEnabled(), true);
     await page.getByRole("button", { name: "Cập Nhật Scene", exact: true }).click();
     await page.locator("textarea").first().fill("P3-07 browser text save");
@@ -130,6 +135,26 @@ exports.runP307BrowserSmoke = async function ({ origin, storyId, chapterId, toke
     await page.reload();
     await page.getByRole("button", { name: /^Chỉnh sửa Scene #1$/ }).click();
     assert.equal(Number(await page.getByRole("dialog").getByRole("slider").inputValue()), changedVolume);
+    await page.getByText("Scene này đang giữ bảng màu cũ.", { exact: false }).waitFor();
+    await page.getByRole("radio", { name: /Tự động/ }).click();
+    await page.getByText("Đã tạo màu nhấn từ bối cảnh", { exact: false }).waitFor();
+    await page.getByRole("button", { name: "Cập Nhật Scene", exact: true }).click();
+    await save(page, 200);
+    const convertedAuto = await read();
+    assert.equal(convertedAuto.data.scenes[0].render_config.schema_version, 2);
+    assert.equal(convertedAuto.data.scenes[0].render_config.visual_treatment.mode, "auto");
+    assert.match(convertedAuto.data.scenes[0].render_config.visual_treatment.accent_color, /^#[0-9a-f]{6}$/);
+    assert.equal("palette" in convertedAuto.data.scenes[0].render_config, false);
+    assert.equal(convertedAuto.data.scenes[0].based_on_preset_id, undefined);
+    await page.getByRole("button", { name: /^Chỉnh sửa Scene #1$/ }).click();
+    assert.equal(await page.getByRole("radio", { name: /Tự động/ }).getAttribute("aria-checked"), "true");
+    await page.getByRole("radio", { name: /Giữ màu gốc/ }).click();
+    await page.getByRole("button", { name: "Cập Nhật Scene", exact: true }).click();
+    await save(page, 200);
+    const convertedOriginal = await read();
+    assert.equal(convertedOriginal.data.scenes[0].render_config.visual_treatment.mode, "original");
+    await page.getByRole("button", { name: /^Chỉnh sửa Scene #1$/ }).click();
+    assert.equal(await page.getByRole("radio", { name: /Giữ màu gốc/ }).getAttribute("aria-checked"), "true");
     await page.keyboard.press("Escape");
     await page.screenshot({ path: resolve(artifacts, "editor-desktop.png") });
     for (const width of [375, 768, 1024]) {
@@ -143,7 +168,10 @@ exports.runP307BrowserSmoke = async function ({ origin, storyId, chapterId, toke
     const stale = await owner.newPage();
     watch(stale);
     await stale.goto(pageUrl);
+    await stale.locator("textarea").first().waitFor();
+    await stale.waitForFunction(() => document.querySelector("textarea")?.value === "P3-07 preview save");
     await stale.locator("textarea").first().fill("Stale tab text must not overwrite");
+    assert.equal(await stale.locator("textarea").first().inputValue(), "Stale tab text must not overwrite");
     await page.locator("textarea").first().fill("Winning browser edit");
     await save(page, 200);
     await save(stale, 409);

@@ -24,6 +24,7 @@ let stage = "initialize";
 async function run() {
   const { prisma } = await import("@/lib/db/prisma");
   const prefix = `p3-06-${randomUUID()}`;
+  const legacyPresetId = `${prefix}-legacy-preset`;
   const owner = `${prefix}-owner`, outsider = `${prefix}-outsider`, admin = `${prefix}-admin`, blank = `${prefix}-blank`;
   const users = [owner, outsider, admin, blank];
   const service = new PrismaStoryCommandService();
@@ -100,7 +101,18 @@ async function run() {
     const chapterContext = (current: CommandResult<unknown>, chapterId = first.id, actorId = owner) => ({ ...context(current, actorId), chapterId });
     const block = (suffix: string): StoryBlock => ({ id: `${prefix}-${suffix}`, type: "paragraph", text: "Content", effects: [] });
     const blocks = [block("one"), block("two")];
-    const scene: Scene = { id: `${prefix}-scene`, chapter_id: first.id, start_block_id: blocks[0].id, end_block_id: blocks[1].id, render_config: snapshotConfig() };
+    const scene: Scene = {
+      id: `${prefix}-scene`,
+      chapter_id: first.id,
+      start_block_id: blocks[0].id,
+      end_block_id: blocks[1].id,
+      render_config: {
+        schema_version: 2,
+        background: structuredClone(snapshotConfig().background),
+        visual_treatment: { mode: "original", accent_color: "#38bdf8" },
+        ambient_effects: [],
+      },
+    };
 
     stage = "ownership role and ID swapping";
     await assert.rejects(dal.getStory(outsider, slug), errorStatus(404));
@@ -184,8 +196,87 @@ async function run() {
     await assert.rejects(service.submitForReview(context(result)), errorStatus(409));
 
     stage = "aggregate save snapshot and stale revision";
+    await prisma.scenePreset.create({ data: {
+      id: legacyPresetId,
+      label: "Legacy compatibility fixture",
+      moodTags: [],
+      status: "ACTIVE",
+      activatedAt: new Date(),
+      renderConfig: databaseJson.presetRenderConfig.write(snapshotConfig()),
+      sourceVersion: 1,
+      sourceChecksum: prefix,
+    } });
+    const legacyScene: Scene = {
+      ...scene,
+      based_on_preset_id: legacyPresetId,
+      render_config: snapshotConfig(),
+    };
+    await assert.rejects(
+      scenes.replaceEditor({
+        ...chapterContext(result),
+        blocks,
+        scenes: [{ ...legacyScene, based_on_preset_id: undefined }],
+      }),
+      (error: unknown) => error instanceof CommandError
+        && error.status === 409
+        && error.body.error.code === "SCENE_V1_AUTHORING_RETIRED",
+    );
     const saved = await scenes.replaceEditor({ ...chapterContext(result), blocks, scenes: [scene] });
     assert.deepEqual(saved.data.scenes, [scene]);
+    await assert.rejects(
+      scenes.replaceEditor({
+        ...chapterContext(saved),
+        blocks,
+        scenes: [{ ...scene, based_on_preset_id: legacyPresetId }],
+      }),
+      (error: unknown) => error instanceof CommandError
+        && error.status === 409
+        && error.body.error.code === "PRESET_PROVENANCE_RETIRED",
+    );
+    // Simulate an already-migrated v1 Scene. A passive edit/save must retain
+    // both its exact snapshot and legacy provenance without an active lookup.
+    await prisma.scene.update({
+      where: { id: scene.id },
+      data: {
+        basedOnPresetId: legacyPresetId,
+        renderConfig: databaseJson.sceneRenderConfig.write(snapshotConfig()),
+      },
+    });
+    await assert.rejects(
+      scenes.replaceEditor({
+        ...chapterContext(saved),
+        blocks,
+        scenes: [{ ...legacyScene, based_on_preset_id: undefined }],
+      }),
+      (error: unknown) => error instanceof CommandError
+        && error.status === 409
+        && error.body.error.code === "PRESET_PROVENANCE_RETIRED",
+    );
+    const legacySaved = await scenes.replaceEditor({
+      ...chapterContext(saved),
+      blocks,
+      scenes: [legacyScene],
+    });
+    assert.deepEqual(legacySaved.data.scenes, [legacyScene]);
+    await assert.rejects(
+      scenes.replaceEditor({
+        ...chapterContext(legacySaved),
+        blocks,
+        scenes: [{
+          ...legacyScene,
+          render_config: {
+            ...snapshotConfig(),
+            palette: {
+              ...snapshotConfig().palette,
+              accent: "#123456",
+            },
+          },
+        }],
+      }),
+      (error: unknown) => error instanceof CommandError
+        && error.status === 409
+        && error.body.error.code === "SCENE_V1_VISUAL_EDIT_RETIRED",
+    );
     await prisma.effect.create({ data: {
       id: `${prefix}-projection-effect`, blockId: blocks[0].id,
       type: "particle_rain", category: "visual", intensity: 0.5, durationMs: 1_000,
@@ -195,8 +286,46 @@ async function run() {
     assert.equal(managedAfterContent.data.story.chapters[0].effectCount, 1);
     assert.ok(!("blocks" in managedAfterContent.data.story.chapters[0]));
     await assert.rejects(scenes.replaceEditor({ ...chapterContext(result), blocks, scenes: [scene] }), errorStatus(409));
-    const changed = await service.replaceChapterContent({ ...chapterContext(saved), blocks: blocks.map((b) => ({ ...b, text: "Changed" })) });
-    assert.deepEqual((await dal.getEditor(owner, slug, first.id)).data.scenes, [scene]);
+    const changedBlocks = blocks.map((block) => ({ ...block, text: "Changed" }));
+    const changedContent = await service.replaceChapterContent({
+      ...chapterContext(legacySaved),
+      blocks: changedBlocks,
+    });
+    assert.deepEqual((await dal.getEditor(owner, slug, first.id)).data.scenes, [legacyScene]);
+    const v2Scene: Scene = {
+      ...scene,
+      render_config: {
+        schema_version: 2,
+        background: structuredClone(scene.render_config.background),
+        visual_treatment: {
+          mode: "auto",
+          accent_color: "#38bdf8",
+          atmosphere: { color: "#172554", opacity: 0.1 },
+          derivation_version: 1,
+        },
+        ambient_effects: structuredClone(scene.render_config.ambient_effects),
+      },
+    };
+    const changed = await scenes.replaceEditor({
+      ...chapterContext(changedContent),
+      blocks: changedBlocks,
+      scenes: [v2Scene],
+    });
+    assert.deepEqual(
+      (await dal.getEditor(owner, slug, first.id)).data.scenes,
+      [v2Scene],
+      "An explicit conversion persists and reloads the resolved v2 snapshot",
+    );
+    await assert.rejects(
+      scenes.replaceEditor({
+        ...chapterContext(changed),
+        blocks: changedBlocks,
+        scenes: [{ ...scene, render_config: snapshotConfig() }],
+      }),
+      (error: unknown) => error instanceof CommandError
+        && error.status === 409
+        && error.body.error.code === "SCENE_VERSION_DOWNGRADE",
+    );
     const beforeFailure = await dal.getEditor(owner, slug, first.id);
     stage = "range malformed JSON and transaction rollback";
     for (const bad of [
@@ -390,6 +519,7 @@ async function run() {
       await tx.readingProgress.deleteMany({ where: { OR: [{ userId: { in: users } }, { story: { authorId: { in: users } } }] } });
       await tx.chapter.deleteMany({ where: { story: { authorId: { in: users } } } });
       await tx.story.deleteMany({ where: { authorId: { in: users } } });
+      await tx.scenePreset.deleteMany({ where: { id: legacyPresetId } });
       await tx.user.deleteMany({ where: { id: { in: users } } });
     });
     await prisma.$disconnect();

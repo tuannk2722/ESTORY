@@ -24,8 +24,41 @@ export default function SceneBackground({
   if (!asset) return null;
 
   const shouldRenderStatic = reducedMotion && asset.motion === "looping";
+  const shouldAnimate = !reducedMotion && asset.motion === "looping";
 
   if (shouldRenderStatic) {
+    const staticLayer = asset.poster_frame ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={asset.poster_frame}
+        alt=""
+        className="h-full w-full object-cover object-center"
+      />
+    ) : asset.type === "image" && !imageError ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={asset.value}
+        alt=""
+        className="h-full w-full object-cover object-center"
+        onError={() => setImageError(true)}
+      />
+    ) : asset.type === "gradient" ? (
+      <div className="h-full w-full" style={{ background: asset.value }} />
+    ) : asset.type === "particle_composition" ? (
+      <div
+        className="h-full w-full"
+        style={{
+          background: isParticleCompositionKey(asset.value)
+            ? PARTICLE_COMPOSITION_REGISTRY[asset.value].background
+            : "radial-gradient(ellipse at center, #0f172a 0%, #020617 100%)",
+        }}
+      />
+    ) : (
+      <div
+        className="h-full w-full"
+        style={{ background: "radial-gradient(ellipse at center, #1b263b 0%, #0d1b2a 60%, #050b14 100%)" }}
+      />
+    );
     return (
       <div
         data-background-id={asset.id}
@@ -34,24 +67,7 @@ export default function SceneBackground({
         style={{ opacity }}
         aria-hidden="true"
       >
-        {asset.poster_frame ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={asset.poster_frame}
-            alt=""
-            className="w-full h-full object-cover object-center"
-          />
-        ) : (
-          <div
-            className="w-full h-full"
-            style={{
-              background:
-                asset.type === "gradient"
-                  ? asset.value
-                  : "radial-gradient(ellipse at center, #1b263b 0%, #0d1b2a 60%, #050b14 100%)",
-            }}
-          />
-        )}
+        {staticLayer}
         <div
           className="absolute inset-0"
           style={{
@@ -77,7 +93,7 @@ export default function SceneBackground({
           className="absolute inset-0 w-full h-full"
           style={{ background: asset.value }}
           animate={
-            !reducedMotion
+            shouldAnimate
               ? {
                   scale: [1, 1.04, 1],
                   opacity: [0.95, 1, 0.95],
@@ -100,9 +116,9 @@ export default function SceneBackground({
               key={asset.value}
               src={asset.value}
               alt={asset.label}
-              initial={{ scale: 1.02, opacity: 0.9 }}
+              initial={shouldAnimate ? { scale: 1.02, opacity: 0.9 } : { scale: 1, opacity: 1 }}
               animate={
-                !reducedMotion
+                shouldAnimate
                   ? {
                       scale: [1.02, 1.08, 1.04, 1.02],
                       x: ["0%", "-1.5%", "1%", "0%"],

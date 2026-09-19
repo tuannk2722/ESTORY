@@ -1,17 +1,53 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
+import { resolve } from "node:path";
+import { deflateSync } from "node:zlib";
 import { loadEnvConfig } from "@next/env";
 
 loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
 
+function crc32(bytes: Buffer): number {
+  let crc = 0xffffffff;
+  for (const byte of bytes) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function pngChunk(type: string, data: Buffer): Buffer {
+  const typeBytes = Buffer.from(type, "ascii");
+  const chunk = Buffer.alloc(12 + data.length);
+  chunk.writeUInt32BE(data.length, 0);
+  typeBytes.copy(chunk, 4);
+  data.copy(chunk, 8);
+  chunk.writeUInt32BE(crc32(Buffer.concat([typeBytes, data])), 8 + data.length);
+  return chunk;
+}
+
 function png(): Buffer {
-  const bytes = Buffer.alloc(24);
-  Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(bytes);
-  bytes.writeUInt32BE(13, 8);
-  bytes.write("IHDR", 12, "ascii");
-  bytes.writeUInt32BE(1280, 16);
-  bytes.writeUInt32BE(720, 20);
-  return bytes;
+  const width = 1280;
+  const height = 720;
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr.set([8, 6, 0, 0, 0], 8); // RGBA, 8-bit, no interlace.
+
+  const row = Buffer.alloc(1 + width * 4);
+  for (let offset = 1; offset < row.length; offset += 4) {
+    row.set([56, 189, 248, 255], offset);
+  }
+  const pixels = Buffer.alloc(row.length * height);
+  for (let y = 0; y < height; y += 1) row.copy(pixels, y * row.length);
+
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    pngChunk("IHDR", ihdr),
+    pngChunk("IDAT", deflateSync(pixels)),
+    pngChunk("IEND", Buffer.alloc(0)),
+  ]);
 }
 
 function mp4(): Buffer {
@@ -29,6 +65,8 @@ async function run() {
   const { serverEnv } = await import("@/lib/env");
   const env = requireR2Environment(serverEnv);
   assert.ok(env.AUTH_URL, "AUTH_URL is required for the R2 browser CORS smoke");
+  const playwrightModule = process.env.P3_14_PLAYWRIGHT_MODULE ?? process.env.P3_07_PLAYWRIGHT_MODULE;
+  assert.ok(playwrightModule, "P3_14_PLAYWRIGHT_MODULE is required for the live canvas pixel-read gate");
 
   const { prisma } = await import("@/lib/db/prisma");
   const { PrismaMediaUploadStore } = await import("@/lib/repositories/prisma-media-upload-store");
@@ -78,7 +116,11 @@ async function run() {
       },
     });
     assert.ok(preflight.ok, `R2 CORS preflight failed with status ${preflight.status}`);
-    assert.ok([origin, "*"].includes(preflight.headers.get("access-control-allow-origin") ?? ""));
+    assert.equal(
+      preflight.headers.get("access-control-allow-origin"),
+      origin,
+      "R2 CORS must echo the exact configured application origin",
+    );
     const allowedHeaders = (preflight.headers.get("access-control-allow-headers") ?? "").toLowerCase();
     assert.ok(allowedHeaders === "*" || ["content-type", "cache-control", "if-none-match"]
       .every((header) => allowedHeaders.includes(header)), "R2 CORS does not allow every signed PUT header");
@@ -90,9 +132,30 @@ async function run() {
       { width: completedImage.media.primary.width, height: completedImage.media.primary.height },
       { width: 1280, height: 720 },
     );
-    const publicImage = await fetch(completedImage.media.primary.url, { cache: "no-store" });
+    const publicImage = await fetch(completedImage.media.primary.url, {
+      cache: "no-store",
+      headers: { Origin: origin },
+    });
     assert.ok(publicImage.ok, `R2 public media URL failed with status ${publicImage.status}`);
+    assert.equal(
+      publicImage.headers.get("access-control-allow-origin"),
+      origin,
+      "R2 public GET must allow the app origin so Scene auto treatment can read pixels",
+    );
     assert.deepEqual(Buffer.from(await publicImage.arrayBuffer()), imageBytes);
+    stage = "cross-origin browser image decode and canvas pixel read";
+    const { readCrossOriginCanvasPixel } = await import(resolve("scripts/p3-14-r2-canvas-smoke.cjs"));
+    assert.notEqual(new URL(completedImage.media.primary.url).origin, origin, "Canvas gate requires cross-origin media");
+    assert.deepEqual(
+      await readCrossOriginCanvasPixel({
+        appOrigin: origin,
+        imageUrl: completedImage.media.primary.url,
+        playwrightModule,
+        browserChannel: process.env.P3_14_BROWSER_CHANNEL ?? "msedge",
+      }),
+      [56, 189, 248, 255],
+      "Author browser must decode R2 media and read its canvas pixels",
+    );
 
     stage = "video and required poster bundle";
     const videoBytes = mp4();
@@ -130,7 +193,7 @@ async function run() {
     const expiredPut = await fetch(expiring.url, { method: "PUT", headers: expiring.headers, body: requestBody(imageBytes) });
     assert.equal(expiredPut.status, 403, "Expired presigned URL must be rejected");
 
-    console.log("P3-09 live R2: CORS, conditional PUT/reuse, expiry, public delivery, image/video+poster completion and cancellation cleanup passed");
+    console.log("P3-09/P3-14 live R2 passed: exact-origin PUT/GET CORS, Edge cross-origin canvas pixel read, conditional reuse/expiry, image/video+poster completion and cleanup");
   } finally {
     if (ownerId) {
       const rows = await prisma.mediaUpload.findMany({ where: { ownerId }, select: { objectKey: true, posterObjectKey: true } });

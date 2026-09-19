@@ -14,7 +14,7 @@
 - **Author Editor**: tra cứu guideline cho dashboard/form UX.
 - **Admin Portal**: tra cứu tập trung cho responsive sidebar, table→card, form validation và drawer/dialog focus; vẫn dùng semantic token/theme hiện có, không sinh một design system hoặc bộ màu riêng cho `/admin/**`.
 - **Landing/Story list page**: tra cứu style tổng thể (typography scale, spacing system) để nhất quán toàn app.
-- **Scene Palette Library** (xem `02-data-schema.md` mục 2.9 và `08-effects-and-scenes.md` mục 8.5): tra cứu phối màu theo mood truyện thay vì tự chọn ngẫu nhiên — mỗi `ColorPalette` điều khiển màu + opacity lớp phủ (`background_tint`) và điểm nhấn (`primary`, `accent`). Riêng canvas đọc truyện luôn dùng Cinematic Dark với chữ `#F8FAFC`; Theme Light/Sepia chỉ áp dụng cho app chrome, không đổi màu thân chữ truyện.
+- **Scene visual treatment** (xem `02-data-schema.md` mục 2.9 và `08-effects-and-scenes.md` mục 8.3–8.4): Scene mới chỉ cho Author chọn `Tự động` hoặc `Giữ màu gốc`. `Tự động` derive accent/aura nhẹ từ background và lưu resolved snapshot; `Giữ màu gốc` không color-grade ảnh. Không tạo thêm Palette catalog hoặc yêu cầu Author phối màu thủ công. Canvas đọc truyện vẫn dùng chữ `#F8FAFC` và neutral readability scrim do renderer kiểm soát; Theme Light/Sepia chỉ áp dụng cho app chrome. `ColorPalette` bốn kênh chỉ còn là compatibility của Scene v1 tới audit P3-17.
 - Có thể tra cứu thủ công trước khi giao task cho AI:
 ```bash
 # Khi chạy từ bên trong my-storytelling-app:

@@ -2,7 +2,6 @@
 
 import {
   Ban,
-  BookCheck,
   BookOpen,
   CheckCircle2,
   ChevronRight,
@@ -239,16 +238,11 @@ export default function AdminStoryWorkspace({
       </nav>
 
       <header className="mt-1 sm:mt-4">
-        <div className="flex items-start gap-3">
-          <span className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary)]/15 text-[var(--color-primary)]">
-            <BookCheck aria-hidden="true" className="h-5 w-5" />
-          </span>
-          <div>
-            <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Kiểm duyệt tác phẩm</h1>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--color-muted-foreground)] sm:text-base">
-              Đối chiếu nội dung và trải nghiệm đọc trước khi tác phẩm được xuất bản công khai.
-            </p>
-          </div>
+        <div className="flex items-start flex-col">
+          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Kiểm duyệt tác phẩm</h1>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--color-muted-foreground)] sm:text-base">
+            Đối chiếu nội dung và trải nghiệm đọc trước khi tác phẩm được xuất bản công khai.
+          </p>
         </div>
       </header>
 
@@ -288,7 +282,7 @@ export default function AdminStoryWorkspace({
                   className={`inline-flex min-h-11 items-center justify-center rounded-xl border px-3 text-sm font-semibold transition-colors motion-reduce:transition-none ${query.status === filter.id
                     ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
                     : "border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground)] hover:bg-[var(--color-muted)]"
-                  } disabled:cursor-wait disabled:opacity-65`}
+                    } disabled:cursor-wait disabled:opacity-65`}
                 >
                   {filter.label}
                 </button>

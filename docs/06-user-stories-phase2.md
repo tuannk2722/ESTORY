@@ -51,6 +51,8 @@
 - [ ] Trạng thái `isSaving`: Icon xoay tròn `Loader2`, vô hiệu hóa nút bấm chống click đúp, thông báo toast 6 giây.
 - [ ] Nút `ArrowLeft` trên Header tích hợp `ConfirmModal` (`z-[100]`) cảnh báo trước khi rời trang nếu có thay đổi chưa lưu.
 
+> **Ghi chú kế thừa từ P3-14 (2026-09-18):** US-2.7–US-2.9 bên dưới ghi lại UX/contract Phase 2 và vẫn là bằng chứng migration cho Scene v1. Chúng không còn mô tả luồng tạo Scene mới. Target Phase 3 là Background-first, `SceneRenderConfig` v2 và hai treatment `Tự động`/`Giữ màu gốc` theo `02` §2.9, `04b` §5.5 và `08` §8.3–8.4. Không viết lại checklist lịch sử thành thể như v2 đã tồn tại ở Phase 2.
+
 **US-2.7 — Quản lý & Gán Scene cho dải block (`ScenePanel` & `ScenePicker`)**
 > Là tác giả, tôi muốn quản lý và gán bối cảnh môi trường cho từng dải block liên tiếp.
 - [ ] `ScenePanel.tsx` bên trái (`sticky top-20`, hỗ trợ thu gọn `w-14` / mở rộng `w-72`):

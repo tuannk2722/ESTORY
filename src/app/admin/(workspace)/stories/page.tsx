@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AdminStoryWorkspace from "@/components/admin/AdminStoryWorkspace";
+import AdminStoryWorkspace from "@/components/admin/stories/AdminStoryWorkspace";
 import { requirePageRole } from "@/lib/auth/page-guards";
 import { StoryDataAccess } from "@/lib/services/story-dal";
 import { parseModerationSearchParams } from "@/lib/validation/story-moderation-schema";

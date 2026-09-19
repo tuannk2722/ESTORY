@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import type { useConfirm } from "@/components/ui/ConfirmModal";
 import type { EffectKeywordSuggestion } from "@/types/effect-admin";
 import { normalizeEffectKeyword } from "@/lib/effects/effect-keyword-normalization";
-import { createEffectKeyword, deleteEffectKeyword, updateEffectKeyword, EffectAdminRequestError, type EffectAdminListItem } from "../effectAdminTransport";
+import { createEffectKeyword, deleteEffectKeyword, updateEffectKeyword, EffectAdminRequestError, type EffectAdminListItem } from "./effectAdminTransport";
 import { InlineError, toFieldErrors, type FieldError } from "./EffectAdminErrors";
 
 export default function KeywordEditor({

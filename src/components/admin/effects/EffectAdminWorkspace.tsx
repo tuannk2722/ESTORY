@@ -7,7 +7,6 @@ import {
   Pencil,
   RefreshCw,
   SearchX,
-  WandSparkles,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -27,7 +26,7 @@ import {
   type EffectAdminList,
   type EffectAdminListItem,
   type EffectAdminListQuery,
-} from "../effectAdminTransport";
+} from "./effectAdminTransport";
 import EffectAdminDrawer from "./EffectAdminDrawer";
 
 const CATEGORY_OPTIONS = [
@@ -244,12 +243,9 @@ export default function EffectAdminWorkspace({ query }: { query: EffectAdminList
 
       <header className="mt-1 sm:mt-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <span className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary)]/15 text-[var(--color-primary)]"><WandSparkles aria-hidden="true" className="h-5 w-5" /></span>
-            <div>
-              <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Thư viện hiệu ứng</h1>
-              <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--color-muted-foreground)] sm:text-base">Quản lý tên, mô tả, trạng thái và từ khóa tìm kiếm, gợi ý của hiệu ứng.</p>
-            </div>
+          <div className="flex items-start flex-col">
+            <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Thư viện hiệu ứng</h1>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--color-muted-foreground)] sm:text-base">Quản lý tên, mô tả, trạng thái và từ khóa tìm kiếm, gợi ý của hiệu ứng.</p>
           </div>
         </div>
       </header>

@@ -9,6 +9,9 @@ import { snapshotConfig } from "./fixtures/scene-fixtures";
 import { EditorSaveError, saveEditorAggregate } from "@/lib/editor/editorTransport";
 import { sceneToDraft, draftToScene } from "@/lib/scenes/sceneDraft";
 import { databaseJson } from "@/lib/db/json-fields";
+import { PrismaStoryCommandRepository } from "@/lib/repositories/prisma-story-command-repository";
+import type { Scene } from "@/types/scene";
+import type { StoryBlock } from "@/types/story";
 import { resolve } from "node:path";
 import { storyCoverUploadFixture } from "./fixtures/media-upload-fixtures";
 
@@ -70,9 +73,13 @@ async function run() {
   }
   async function json(path: string, method: string, body: unknown, status = 200, actor = 0) {
     const response = await request(path, { method, headers: headers(actor), body: JSON.stringify(body) });
-    assert.equal(response.status, status);
-    assert.equal(response.headers.get("cache-control"), "private, no-store");
     const result = await response.json();
+    assert.equal(
+      response.status,
+      status,
+      `${method} ${path} returned ${response.status}: ${JSON.stringify(result).slice(0, 500)}`,
+    );
+    assert.equal(response.headers.get("cache-control"), "private, no-store");
     if (status >= 400) {
       assert.deepEqual(Object.keys(result), ["error"]);
       assert.equal(typeof result.error.code, "string");
@@ -220,8 +227,24 @@ async function run() {
     const blocks = [{ id: `${prefix}-block`, type: "paragraph", text: "HTTP content", effects: [] }];
     const presetId = `${prefix}-preset`;
     await prisma.scenePreset.create({ data: { id: presetId, label: "Snapshot source", moodTags: [], status: "ACTIVE", renderConfig: databaseJson.presetRenderConfig.write(snapshotConfig()), sourceChecksum: "fixture" } });
-    const scene = { id: `${prefix}-scene`, chapter_id: chapterId, start_block_id: blocks[0].id, end_block_id: blocks[0].id, based_on_preset_id: presetId, render_config: snapshotConfig() };
-    const saved = await json(editor, "PUT", { ...revision(created), blocks, scenes: [scene] });
+    const plainScene = { id: `${prefix}-scene`, chapter_id: chapterId, start_block_id: blocks[0].id, end_block_id: blocks[0].id, render_config: snapshotConfig() };
+    const scene = { ...plainScene, based_on_preset_id: presetId };
+    const retiredProvenance = await json(editor, "PUT", { ...revision(created), blocks, scenes: [scene] }, 409);
+    assert.equal(retiredProvenance.error.code, "PRESET_PROVENANCE_RETIRED");
+    const retiredV1Authoring = await json(editor, "PUT", { ...revision(created), blocks, scenes: [plainScene] }, 409);
+    assert.equal(retiredV1Authoring.error.code, "SCENE_V1_AUTHORING_RETIRED");
+    const initialSaved = await json(editor, "PUT", { ...revision(created), blocks, scenes: [] });
+    // Simulate migrated compatibility data, then prove the normal HTTP save path
+    // retains it without creating a fresh preset association.
+    await prisma.scene.create({ data: {
+      id: plainScene.id,
+      chapterId,
+      startBlockId: blocks[0].id,
+      endBlockId: blocks[0].id,
+      basedOnPresetId: presetId,
+      renderConfig: databaseJson.sceneRenderConfig.write(snapshotConfig()),
+    } });
+    const saved = await json(editor, "PUT", { ...revision(initialSaved), blocks, scenes: [scene] });
     assert.deepEqual(saved.data.scenes, [scene]);
     await json(editor, "PUT", { ...revision(created), blocks, scenes: [scene] }, 409);
     const textEdit = await json(chapter, "PUT", { ...revision(saved), blocks: [{ ...blocks[0], text: "New text" }] });
@@ -264,10 +287,30 @@ async function run() {
     if (process.env.P3_07_PLAYWRIGHT_MODULE) {
       const browserScript = resolve("scripts/p3-07-browser-smoke.cjs");
       const { runP307BrowserSmoke } = await import(browserScript);
-      await runP307BrowserSmoke({ origin, storyId, chapterId, token: tokens[0], makeDraft: async () => {
-        await prisma.story.update({ where: { slug: storyId }, data: { status: "DRAFT" } });
-        await prisma.chapter.update({ where: { id: chapterId }, data: { status: "DRAFT" } });
-      } });
+      await runP307BrowserSmoke({
+        origin,
+        storyId,
+        chapterId,
+        token: tokens[0],
+        seedLegacyReaderFixture: async (fixture: { blocks: StoryBlock[]; scenes: Scene[] }) => {
+          await prisma.$transaction(async (tx) => {
+            const repository = new PrismaStoryCommandRepository(tx);
+            await repository.replaceScenes(chapterId, []);
+            await repository.replaceBlocks(chapterId, fixture.blocks);
+            await repository.replaceScenes(chapterId, fixture.scenes);
+            const story = await repository.getAccessRecord(storyId);
+            assert.ok(story);
+            await tx.story.update({
+              where: { id: story.id },
+              data: { updatedAt: new Date(Math.max(Date.now(), story.updatedAt.getTime() + 1)) },
+            });
+          });
+        },
+        makeDraft: async () => {
+          await prisma.story.update({ where: { slug: storyId }, data: { status: "DRAFT" } });
+          await prisma.chapter.update({ where: { id: chapterId }, data: { status: "DRAFT" } });
+        },
+      });
     }
     if (process.env.P3_10_PLAYWRIGHT_MODULE) {
       const browserScript = resolve("scripts/p3-10-browser-smoke.cjs");
@@ -410,6 +453,7 @@ async function run() {
 run().catch((error: unknown) => {
   console.error(`P3-06 HTTP integration failed at: ${stage}`);
   if (error instanceof Error) {
+    console.error(error.message.slice(0, 1_000));
     if (error instanceof EditorSaveError) console.error(`Client save status: ${error.status}; code: ${error.code}`);
     const line = error.stack?.split("\n").find((entry) => entry.includes("p3-06-http.integration.ts:"));
     if (line) console.error(line.trim());

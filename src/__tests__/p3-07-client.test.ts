@@ -1,8 +1,16 @@
 import assert from "node:assert/strict";
 import type { Chapter, EffectConfig } from "@/types/story";
-import type { Scene, ScenePreset } from "@/types/scene";
+import type { Scene, ScenePreset, SceneRenderConfigV1 } from "@/types/scene";
 import { snapshotConfig } from "./fixtures/scene-fixtures";
-import { sceneToDraft, draftToScene, presetToDraft, draftMatchesPreset, draftToRenderConfig } from "@/lib/scenes/sceneDraft";
+import {
+  convertDraftToV2,
+  createEmptySceneDraft,
+  sceneToDraft,
+  draftToScene,
+  presetToDraft,
+  draftMatchesPreset,
+  draftToRenderConfig,
+} from "@/lib/scenes/sceneDraft";
 import { createInitialEditorState, editorReducer } from "@/lib/editor/editorReducer";
 import { buildBlockIndexMap, updateScenesAfterBlockDelete, validateBlockMoveAgainstScenes } from "@/lib/scenes/sceneRange";
 import { buildSceneByBlockId } from "@/lib/scenes/sceneSelectors";
@@ -19,11 +27,12 @@ export async function runP307ClientTests() {
   ] };
   const rain: EffectConfig = { id: "rain", type: "particle_rain", category: "visual", intensity: .3, duration_ms: 1200, loop: true };
   const audio: EffectConfig = { id: "ambient", type: "audio", category: "audio", audio_src: "/ambient.mp3", audio_asset_id: "owner-audio", intensity: .4, duration_ms: 0, loop: true };
-  const scene: Scene = { id: "scene", chapter_id: chapter.id, start_block_id: "a", end_block_id: "c", based_on_preset_id: "archived-preset", render_config: {
+  const sceneConfig: SceneRenderConfigV1 = {
     ...snapshotConfig(),
     background: { render_data: { kind: "radial_gradient", shape: "ellipse", center: { x: .23, y: .71 }, stops: [{ color: "#123456", position: 0 }, { color: "#000000", position: 1 }] }, motion: "static" },
     ambient_effects: [rain, audio],
-  } };
+  };
+  const scene: Scene = { id: "scene", chapter_id: chapter.id, start_block_id: "a", end_block_id: "c", based_on_preset_id: "archived-preset", render_config: sceneConfig };
   const params = { id: scene.id, chapterId: chapter.id, startBlockId: "a", endBlockId: "c" };
 
   // No catalog is supplied: opening/saving must preserve every render field,
@@ -35,13 +44,31 @@ export async function runP307ClientTests() {
   const editedScene = draftToScene(edited, params);
   assert.equal(editedScene.based_on_preset_id, scene.based_on_preset_id);
   assert.deepEqual(editedScene.render_config.background, scene.render_config.background);
-  assert.equal(scene.render_config.palette.background_tint.opacity, .35);
+  assert.equal(sceneConfig.palette.background_tint.opacity, .35);
   assert.equal(scene.render_config.ambient_effects[1].intensity, .4);
   const malformed = sceneToDraft(scene);
   malformed.ambientAudio!.loop = false;
   assert.equal(draftToRenderConfig(malformed), null);
 
-  const preset: ScenePreset = { id: "preset", label: "Standalone media", status: "active", mood_tags: [], render_config: { ...scene.render_config, background: { render_data: { kind: "image", media_url: "/preset-only.webp" }, motion: "static" } } };
+  const newDraft = createEmptySceneDraft();
+  newDraft.background = structuredClone(scene.render_config.background);
+  const newConfig = draftToRenderConfig(newDraft);
+  assert.equal(newConfig?.schema_version, 2, "New Scenes use the v2 contract");
+  if (newConfig?.schema_version === 2) {
+    assert.equal(newConfig.visual_treatment.mode, "original", "The saveable fallback is available before auto derivation finishes");
+  }
+
+  const converted = convertDraftToV2(sceneToDraft(scene), {
+    mode: "auto",
+    accent_color: "#38bdf8",
+    atmosphere: { color: "#172554", opacity: 0.1 },
+    derivation_version: 1,
+  }, "auto");
+  const convertedScene = draftToScene(converted, params);
+  assert.equal(convertedScene.render_config.schema_version, 2);
+  assert.equal(convertedScene.based_on_preset_id, undefined, "An explicit v2 treatment removes legacy preset provenance");
+
+  const preset: ScenePreset = { id: "preset", label: "Standalone media", status: "active", mood_tags: [], render_config: { ...sceneConfig, background: { render_data: { kind: "image", media_url: "/preset-only.webp" }, motion: "static" } } };
   const picked = presetToDraft(preset);
   assert.equal(draftMatchesPreset(picked, preset), true);
   assert.notEqual(picked.ambientEffects[0].id, rain.id);

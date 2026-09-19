@@ -156,7 +156,7 @@ export default function ReaderPane({
       >
         <div id="effect-portal-root" className="pointer-events-none" />
         <header className="relative z-20 mb-12 text-center pt-6">
-          <span className="font-ui text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)]">
+          <span className="font-ui text-xs font-semibold uppercase tracking-widest text-[var(--scene-detail-text-color,var(--color-accent))]">
             {chapter.title.split(":")[0] || `Chương ${chapter.order}`}
           </span>
           <h1 className="font-display text-3xl md:text-5xl font-bold tracking-tight text-[#F8FAFC] mt-2">

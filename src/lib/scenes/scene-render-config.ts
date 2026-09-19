@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { omitUndefined } from "@/lib/immutable";
-import type { Scene, SceneRenderConfig } from "@/types/scene";
+import type {
+  Scene,
+  SceneRenderConfig,
+  SceneRenderConfigV1,
+  SceneRenderConfigV2,
+} from "@/types/scene";
 import { effectConfigSchema } from "@/lib/effects/effect-config-schema";
 import { isEffectAllowedInScope } from "@/lib/effects/effect-manifest";
 import { mediaUrlSchema, renderColorSchema } from "./render-values";
@@ -59,12 +64,47 @@ export const paletteRenderSnapshotSchema = z.strictObject({
   background_tint: z.strictObject({ color: renderColorSchema, opacity: z.number().min(0).max(1) }),
 });
 
-export const sceneRenderConfigSchema = z.strictObject({
+export const canonicalSceneColorSchema = z.string().regex(
+  /^#[0-9a-f]{6}$/,
+  "Expected a canonical lowercase #rrggbb color"
+);
+
+export const sceneVisualTreatmentV2Schema = z.discriminatedUnion("mode", [
+  z.strictObject({
+    mode: z.literal("original"),
+    accent_color: canonicalSceneColorSchema,
+  }),
+  z.strictObject({
+    mode: z.literal("auto"),
+    accent_color: canonicalSceneColorSchema,
+    atmosphere: z.strictObject({
+      color: canonicalSceneColorSchema,
+      // The snapshot contract accepts 0..1. SceneLayer owns the visual safety
+      // clamp so old/future resolved snapshots stay parseable.
+      opacity: z.number().min(0).max(1),
+    }),
+    derivation_version: z.literal(1),
+  }),
+]);
+
+const sceneRenderConfigV1BaseSchema = z.strictObject({
   schema_version: z.literal(1),
   background: backgroundRenderSnapshotSchema,
   palette: paletteRenderSnapshotSchema,
   ambient_effects: z.array(effectConfigSchema),
-}).superRefine((config, context) => {
+});
+
+const sceneRenderConfigV2BaseSchema = z.strictObject({
+  schema_version: z.literal(2),
+  background: backgroundRenderSnapshotSchema,
+  visual_treatment: sceneVisualTreatmentV2Schema,
+  ambient_effects: z.array(effectConfigSchema),
+});
+
+function validateSceneAmbientEffects(
+  config: { ambient_effects: Array<z.infer<typeof effectConfigSchema>> },
+  context: z.RefinementCtx,
+) {
   const types = new Set<string>();
   config.ambient_effects.forEach((effect, index) => {
     const path = ["ambient_effects", index];
@@ -79,7 +119,20 @@ export const sceneRenderConfigSchema = z.strictObject({
       context.addIssue({ code: "custom", path: [...path, "loop"], message: "Ambient audio must loop" });
     }
   });
-});
+}
+
+// Keep the rules on each version schema as well as the union. Preset and
+// migration compatibility paths intentionally parse v1 directly.
+export const sceneRenderConfigV1Schema = sceneRenderConfigV1BaseSchema
+  .superRefine(validateSceneAmbientEffects);
+
+export const sceneRenderConfigV2Schema = sceneRenderConfigV2BaseSchema
+  .superRefine(validateSceneAmbientEffects);
+
+export const sceneRenderConfigSchema = z.discriminatedUnion("schema_version", [
+  sceneRenderConfigV1Schema,
+  sceneRenderConfigV2Schema,
+]);
 
 export const sceneSchema = z.strictObject({
   id: z.string().min(1), chapter_id: z.string().min(1),
@@ -93,4 +146,16 @@ export function parseSceneRenderConfig(input: unknown): SceneRenderConfig {
 }
 export function parseScene(input: unknown): Scene {
   return sceneSchema.parse(input);
+}
+
+export function isSceneRenderConfigV1(
+  config: SceneRenderConfig
+): config is SceneRenderConfigV1 {
+  return config.schema_version === 1;
+}
+
+export function isSceneRenderConfigV2(
+  config: SceneRenderConfig
+): config is SceneRenderConfigV2 {
+  return config.schema_version === 2;
 }

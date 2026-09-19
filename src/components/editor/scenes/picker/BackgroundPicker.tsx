@@ -46,10 +46,8 @@ export const BackgroundPicker = React.memo(function BackgroundPicker({
 
   const filteredBackgrounds = useMemo(() => {
     if (!search.trim()) return orderedBackgrounds;
-    return orderedBackgrounds.filter(
-      (bg) =>
-        matchesSearch(search, bg.label) ||
-        bg.mood_tags.some((tag) => matchesSearch(search, tag))
+    return orderedBackgrounds.filter((background) =>
+      matchesSearch(search, background.id, background.label, ...background.mood_tags),
     );
   }, [orderedBackgrounds, search]);
 
@@ -96,7 +94,7 @@ export const BackgroundPicker = React.memo(function BackgroundPicker({
               setSearch(v);
               setVisibleCount(INITIAL_BACKGROUND_LIMIT);
             }}
-            placeholder="Tìm bối cảnh theo tên, loại..."
+            placeholder="Tìm bối cảnh theo tên hoặc mood tag..."
             className="mb-3"
             autoFocus={true}
           />

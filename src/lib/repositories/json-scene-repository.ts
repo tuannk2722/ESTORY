@@ -4,12 +4,12 @@ import type { BackgroundAsset, ColorPalette, ScenePreset, Scene } from '@/types/
 import type { Chapter } from '@/types/story';
 import type { LegacyBackgroundAsset, LegacyColorPalette, LegacyScenePreset, LegacyScene } from '@/types/scene-legacy';
 import type { StoryRepository } from './story-repository';
-import type { SceneLibraryRepository, SceneRepository, LegacySceneLibraryRepository, LegacySceneRepository } from './scene-repository';
+import type { SceneCompatibilityLibraryRepository, SceneLibraryRepository, SceneRepository, LegacySceneLibraryRepository, LegacySceneRepository } from './scene-repository';
 import { legacyPresetToRenderConfig, resolveBackgroundAsset, resolveLegacyScene, resolvePalette } from '@/lib/scenes/scene-mappers';
-import { parseScene, parseSceneRenderConfig } from '@/lib/scenes/scene-render-config';
+import { parseScene, sceneRenderConfigV1Schema } from '@/lib/scenes/scene-render-config';
 import { validateSceneRange, buildBlockIndexMap } from '@/lib/scenes/sceneRange';
 
-export class JsonSceneLibraryRepository implements SceneLibraryRepository, LegacySceneLibraryRepository {
+export class JsonSceneLibraryRepository implements SceneLibraryRepository, SceneCompatibilityLibraryRepository, LegacySceneLibraryRepository {
   constructor(private readonly rootDirectory = process.cwd()) {}
 
   private async readJsonFile<T>(filename: string): Promise<T[]> {
@@ -45,7 +45,7 @@ export class JsonSceneLibraryRepository implements SceneLibraryRepository, Legac
     const needsLegacy = active.some(item => !('render_config' in item));
     const [backgrounds, palettes] = needsLegacy ? await Promise.all([this.getBackgrounds(), this.getPalettes()]) : [[], []];
     return active.map(item => 'render_config' in item
-      ? { ...structuredClone(item), render_config: parseSceneRenderConfig(item.render_config) }
+      ? { ...structuredClone(item), render_config: sceneRenderConfigV1Schema.parse(item.render_config) }
       : { id: item.id, label: item.label, mood_tags: [...item.mood_tags], status: 'active', render_config: legacyPresetToRenderConfig(item, backgrounds.filter(asset => (asset.scope ?? 'global') === 'global'), palettes) });
   }
 }

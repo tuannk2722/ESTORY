@@ -77,13 +77,13 @@
     Timeline.tsx                   → Cột 3: Timeline toàn cảnh, Scene ribbon, jump cuộn mượt
     PreviewToggle.tsx              → Bộ gạt chế độ Soạn thảo / Xem trước
     EffectPicker.tsx               → Modal cấu hình effect z-[80] + Live Preview portal z-[90]. Tab "Âm Thanh" nhúng `SoundSourcePicker.tsx` (Phase 3) — mục 8.9
-    ScenePicker.tsx                → Modal phối bối cảnh z-[80] + Full Live Preview overlay z-[90]. Tab 2 bước 1 nhúng `BackgroundSourcePicker.tsx`, bước 4 nhúng `SoundSourcePicker.tsx` (Phase 3) — mục 8.9, 8.10
+    ScenePicker.tsx                → Modal Background-first z-[80] + Full Live Preview z-[90]; Scene mới chọn Background, treatment Auto/Original, ambient effect/audio; v1 chỉ convert khi Author đổi Background/treatment
     SoundSourcePicker.tsx          → (Phase 3) Sub-panel chọn nguồn âm thanh, dùng chung ở `EffectPicker` (tab Âm Thanh) & `ScenePicker` (bước 4): 3 tab con "Thư viện của tôi" / "Tải lên" / "Tìm trên Freesound" — `08-effects-and-scenes.md` mục 8.9
     FreesoundSearchPanel.tsx       → (Phase 3) Ô tìm kiếm debounce + danh sách kết quả + preview phát trực tiếp + nút "Dùng sound này" (disable kèm CTA connect nếu chưa liên kết Freesound) — mục 8.9.1, 8.9.2
-    BackgroundSourcePicker.tsx     → (Phase 3) Sub-panel chọn nguồn bối cảnh ở bước 1 `ScenePicker` Tab 2: 3 tab con "Thư viện Preset" (global) / "Tải lên" (ảnh hoặc video + poster bắt buộc) / "Tạo bằng AI" — mục 8.10
+    BackgroundSourcePicker.tsx     → (Phase 3) Sub-panel chọn Background global/cá nhân; P3-16 nối "Tải lên" (ảnh hoặc video + poster) / "Tạo bằng AI" vào cùng flow v2 — mục 8.10
     AIBackgroundGeneratePanel.tsx  → (Phase 3) Ô prompt prefill sẵn theo genre/mood (editable), nút "Tạo ảnh", hiển thị đúng 2 ảnh preview kèm nút "Dùng ảnh này" từng ảnh, hiển thị số lượt còn lại/ngày — mục 8.10.2
   /scenes                          → Render tầng bối cảnh (Phase 2)
-    SceneLayer.tsx                 → Wrapper bối cảnh, 3-tier color grading, Howler audio ambient (z-0)
+    SceneLayer.tsx                 → Shared renderer union: v1 giữ 3-tier grading; v2 dùng resolved Auto/Original + neutral readability scrim
     SceneBackground.tsx            → Render BackgroundAsset (image/gradient/particle_composition/video)
     SceneAmbientAudio.tsx          → Wrap Howler.js cho nhạc nền bối cảnh (loop nền êm dịu)
 
@@ -118,7 +118,7 @@
   story-moderation.ts              → admin-only queue/count/detail/chapter summary DTO; chỉ giữ tổng block/effect, Scene và full content chỉ thuộc preview DAL
   settings.ts
   user.ts                          → định nghĩa trước, dùng thật từ Phase 3
-  scene.ts                         → (Phase 2) BackgroundAsset, ColorPalette, ScenePreset, Scene — xem `08-effects-and-scenes.md` mục 8.3
+  scene.ts                         → BackgroundAsset + SceneRenderConfig v1/v2; ColorPalette/ScenePreset chỉ còn compatibility v1 — xem `08-effects-and-scenes.md` mục 8.3
 
 /public
   /audio/*
@@ -155,7 +155,7 @@
     prisma-scene-repository.ts     → query Scene bằng cả storyId + chapterId; trả render_config snapshot
     effect-admin-repository.ts       → P3-05 read contract cho EffectDefinition overlay + keyword; P3-12 mở rộng mutation có guard
     prisma-effect-admin-repository.ts → Prisma implementation; không chứa renderer/defaults
-    prisma-scene-catalog-repository.ts → global Background/Palette/curated Preset, filter lifecycle/scope
+    prisma-scene-catalog-repository.ts → Background global active cho flow mới; Palette/Preset chỉ giữ read compatibility tới audit P3-17
     prisma-background-asset-repository.ts → personal BackgroundAsset theo owner (mục 8.10)
     prisma-audio-asset-repository.ts      → implement AudioAssetRepository (mục 8.9) — `08-effects-and-scenes.md` mục 8.7
   /integrations/freesound
@@ -180,15 +180,16 @@
     story-command-context.ts       → transaction + authorization + conditional revision update dùng chung
     story-dal.ts                   → full Story/editor read và moderation summary/detail/preview projections có quyền + revision trong cùng snapshot DB
     admin-effect-service.ts        → role guard, overlay/keyword mutation, manifest sync/read projection
-    admin-scene-catalog-service.ts → lifecycle/dependency/media rules cho Background/Palette/Preset
-    scene-preset-import-service.ts → validate/upsert curated SceneRenderConfig; không overwrite metadata admin ngoài cờ explicit
+    admin-scene-catalog-service.ts → lifecycle/dependency/media rules cho Background; freeze Palette/Preset legacy tại cutover P3-14
   /storage
     media-storage-provider.ts      → interface server-only cho presign/head/range/delete; không để Route/UI gọi SDK R2 trực tiếp
     r2-media-storage-provider.ts   → R2 S3 implementation; conditional presigned PUT, public custom-domain URL
     runtime-media-storage.ts       → ghép R2 provider + Prisma upload-intent store; thiếu cấu hình trả lỗi 503 an toàn
   /scenes
-    scene-render-config.ts         → schema/version/mappers; resolve custom/preset thành runtime snapshot
-    particle-composition-registry.ts → key + Zod schema + renderer cho particle composition được phép
+    scene-render-config.ts         → discriminated parser/mappers v1/v2; v1 semantics bất biến, Scene mới serialize v2
+    scene-visual-policy.ts         → constants accent/atmosphere/scrim dùng chung; Reader chỉ import policy này
+    visual-treatment.ts            → deterministic Author-client derivation + fallback Original; Reader không import/chạy derivation
+    particle-composition-registry.ts → key + Zod schema + renderer và optional source-color hint cho particle composition được phép
   /validation
     story-command-schema.ts        → strict Zod DTO, command/result schemas và byline policy P3-06
     story-search-schema.ts         → parse/cap/canonicalize `q/genre/cursor/limit` cho public list; semantics ở `11` §9.2.2
@@ -197,8 +198,8 @@
     audio-asset-schema.ts          → Zod schema cho upload/import audio (định dạng, dung lượng — `08-effects-and-scenes.md` mục 8.9.4)
     background-asset-schema.ts     → Zod schema cho upload/generate background (định dạng, dung lượng, prompt — mục 8.10)
     effect-admin-schema.ts         → label/description/active + keyword/weight 1..100/Unicode normalization
-    scene-catalog-schema.ts        → discriminated Background, Palette tint opacity, lifecycle, preset metadata
-    scene-render-config-schema.ts  → `schema_version: 1`, ambient scope/unique/audio constraints
+    scene-catalog-schema.ts        → discriminated Background/lifecycle; Palette/Preset schema chỉ phục vụ compatibility P3-13/v1
+    scene-render-config-schema.ts  → strict union `schema_version: 1 | 2`, ambient scope/unique/audio và treatment v2
 
 /app/api
   /stories/route.ts                → GET danh sách quản lý của author hiện tại + POST createStoryWithChapters; đều protected. Home public đọc repository trực tiếp, không overload route này
@@ -215,7 +216,7 @@
   /stories/[storyId]/chapters/[chapterId]/editor/route.ts → GET/PUT snapshot aggregate Chapter + Scenes; PUT nhận blocks/scenes/expectedUpdatedAt (P3-06)
   /stories/[storyId]/chapters/[chapterId]/scenes/route.ts → PUT replace Scene snapshots có membership/range validation (P3-06)
   /effect-catalog/route.ts         → GET active merged catalog + dictionary cho Author; Reader không dùng
-  /scene-library/route.ts          → GET active global Background/Palette/curated Preset cho Author; Reader không dùng
+  /scene-library/route.ts          → GET active global Background cho Author flow v2; không trả Palette/Preset cho lựa chọn mới; Reader không dùng
   /admin/stories/route.ts          → GET moderation summary counts + paginated list/filter/search (admin only)
   /admin/stories/[storyId]/route.ts → GET moderation detail projection + revision; không trả blocks/effects của mọi chapter
   /admin/stories/[storyId]/approve/route.ts → POST pending→published + review metadata + publish mọi Chapter
@@ -224,10 +225,10 @@
   /admin/effects/[effectId]/keywords/route.ts → POST/PATCH/DELETE keyword (admin only)
   /admin/scene-library/backgrounds/route.ts → GET/POST global Background; typed validation
   /admin/scene-library/backgrounds/[id]/route.ts → PATCH/archive/hard-delete guard
-  /admin/scene-library/palettes/route.ts → GET/POST Palette
-  /admin/scene-library/palettes/[id]/route.ts → PATCH/archive/hard-delete guard
-  /admin/scene-library/presets/route.ts → GET curated catalog; không có UI-create endpoint
-  /admin/scene-library/presets/[id]/route.ts → PATCH metadata/status/archive; render_config read-only với admin
+  /admin/scene-library/palettes/route.ts → P3-13 compatibility endpoint; freeze write/hide UI tại P3-14 cutover
+  /admin/scene-library/palettes/[id]/route.ts → compatibility only tới reference audit P3-17
+  /admin/scene-library/presets/route.ts → compatibility only; không phát triển importer/catalog mới
+  /admin/scene-library/presets/[id]/route.ts → compatibility only tới reference audit P3-17
   /integrations/freesound
     /connect/route.ts              → GET, khởi tạo OAuth authorize redirect — `12-auth-and-author-management.md` mục 12.9
     /callback/route.ts             → GET, exchange code → lưu credential ciphertext server-only; AppUser chỉ nhận connection status
@@ -257,28 +258,28 @@
 
 /components/admin
   AdminShell.tsx                   → shell + nav config; desktop sidebar co/mở và mobile sticky topbar/focus-trapped sheet
-  AdminStoryWorkspace.tsx          → summary, URL-backed search/filter IME-safe, table→cards, cursor paging và empty/pending states
-  StoryReviewDrawer.tsx            → detail fetch, chapter preview, approve confirmation, reject modal, stale-409 reload và focus return
-  adminTransport.ts                → client fetch/envelope mapper cho moderation; không chứa quyền hoặc business rule
+  /stories
+    AdminStoryWorkspace.tsx        → summary, URL-backed search/filter IME-safe, table→cards, cursor paging và empty/pending states
+    StoryReviewDrawer.tsx          → detail fetch, chapter preview, approve confirmation, reject modal, stale-409 reload và focus return
+    storyModerationTransport.ts    → client fetch/envelope mapper cho moderation; không chứa quyền hoặc business rule
   /effects
-    EffectTable.tsx
-    EffectMobileCard.tsx
-    EffectDetailDrawer.tsx
+    effectAdminTransport.ts        → client fetch/envelope mapper cho Effect Admin
+    EffectAdminWorkspace.tsx       → filter/search và table/mobile cards
+    EffectAdminDrawer.tsx          → form chi tiết và keyword management
+    EffectAdminErrors.tsx          → thông báo lỗi theo response
     EffectKeywordEditor.tsx
     EffectPreview.tsx              → reuse renderer thật, không tạo renderer admin riêng
   /scene-library
-    SceneLibraryTabs.tsx
-    BackgroundGrid.tsx
-    BackgroundForm.tsx             → form phân nhánh theo kind
-    PaletteGrid.tsx
-    PaletteForm.tsx
-    ScenePresetGrid.tsx
-    ScenePresetMetadataDrawer.tsx  → không chứa builder
+    sceneCatalogTransport.ts       → client fetch/envelope mapper + upload cho Scene Catalog
+    SceneCatalogWorkspace.tsx      → filter/search và grid Background; P3-14 ẩn Palette/Preset
+    SceneCatalogCards.tsx          → card Background và Palette compatibility
+    BackgroundEditor.tsx           → form phân nhánh theo kind
+    PaletteEditor.tsx              → P3-13 historical UI; ẩn/freeze sau P3-14 cutover
+    SceneCatalogFormParts.tsx / SceneCatalogMediaField.tsx → field và media upload dùng lại
     SceneCatalogPreview.tsx        → reuse SceneLayer
 
 /scripts
   sync-effect-manifest.ts          → idempotent seed/check DB overlay theo technical manifest
-  import-curated-scene-presets.ts  → developer-only import; validate trước upsert
   verify-phase3-migration.ts       → count + snapshot/reference/media validation
 
 /prisma
@@ -288,7 +289,7 @@
 
 **Quy tắc đặt file effect mới:** mỗi `EffectType` = 1 component riêng trong `/components/effects/visual|audio`, đăng ký vào `EffectRegistry.ts`. Không nhét nhiều effect logic vào 1 file lớn. Quy tắc này không đổi ở bất kỳ phase nào. Danh sách `EffectType` ở `02-data-schema.md` mục 2.1, thư viện effect ban đầu ở `08-effects-and-scenes.md` mục 8.2.
 
-**Quy tắc đặt file Scene:** `/components/scenes` sở hữu shared renderer `SceneLayer`. Reader, Author Preview và Admin Preview đều reuse component này; khi hoàn tất P3-01, prop runtime của nó là `SceneRenderConfig` duy nhất. Giữ tên `SceneLayer` hiện có theo strangler pattern, không tạo thêm component renderer đồng nghĩa. Scene không có renderer riêng theo từng preset và Reader không fetch Scene library để resolve ID.
+**Quy tắc đặt file Scene:** `/components/scenes` sở hữu shared renderer `SceneLayer`. Reader, Author Preview và Admin Preview đều reuse component này; prop runtime là union `SceneRenderConfig` v1/v2. Giữ tên `SceneLayer` hiện có theo strangler pattern, không tạo component renderer đồng nghĩa. Nhánh v1 phải giữ nguyên hình ảnh; nhánh v2 nhận treatment đã resolve. Reader không import thuật toán derive, không fetch Scene library và không resolve ID.
 
 ---
 ← Về `00-INDEX.md` | Trước: `02-data-schema.md` | Tiếp theo: `04-ui-ux-design.md` (xem thêm `08-effects-and-scenes.md` cho cấu trúc file Scene)

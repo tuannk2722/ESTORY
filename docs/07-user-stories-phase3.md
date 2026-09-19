@@ -92,22 +92,24 @@ Nguồn: [02](02-data-schema.md) §2.6; [08](08-effects-and-scenes.md) §8.5.1; 
 - [ ] Author catalog không có revision/timestamp DB; audio được chiếu từ code, effect khác từ overlay active. Xóa overlay/keyword audio bằng cleanup có backup sau cutover; seed/sync không tái tạo và nội dung cũ vẫn phát.
 - [ ] Keyword mở rộng search block effect picker, scene effect combobox và Admin list; AND token qua metadata + keyword, NFKC và bỏ dấu/case, không bỏ scope/category/status, không đổi thứ tự/weight ranking. Giữ gợi ý block onBlur; keyword audio preset do code sở hữu. Chuẩn hóa unique vẫn giữ dấu.
 
-## US-3.13 — Scene Admin & snapshot integration
+## US-3.13 — Scene Admin, snapshot compatibility & Scene authoring v2
 
 Nguồn: [02](02-data-schema.md) §2.9; [08](08-effects-and-scenes.md) §8.3–8.7; UI: [04b](04b-page-layouts.md) §8.3–8.5.
 
-- [ ] `/admin/scene-library` có Backgrounds/Palettes/Scene Presets; Background chỉ global, typed kinds/registered particle, looping có poster, từ chối raw CSS/particle JSON. Palette đủ bốn kênh, tint color + opacity, sample Reader Preview.
-- [ ] Lifecycle draft/active/archived; Author chỉ active, Remove = archive, hard-delete chỉ `activated_at = null`. Preset chỉ developer seed/import; Admin Preview/sửa label/description/mood/thumbnail/status/remove, không builder/Create.
-- [ ] Custom/preset cùng deep-copy `SceneRenderConfig`; Reader không resolve background/palette ID hay fetch Scene library. Ambient chỉ scope scene, unique type, ≤1 audio loop.
-- [ ] Replace key mới; archive/delete không xóa media đang dùng. ConfirmModal nêu dependency/impact và Scene cũ giữ nguyên; preset có thể hiện provenance count; cleanup storage riêng.
-- [ ] Không personal background trong Admin response/UI, không global AudioAsset library. Nghiệm thu responsive 375px/keyboard/focus/error summary/AA/reduced motion và target size theo gate §8.5 của `04b`.
+- [ ] **P3-13 historical:** `/admin/scene-library` đã xây Background/Palette Admin theo contract v1; Background chỉ global, typed kinds/registered particle, looping có poster, từ chối raw CSS/particle JSON. Verification P3-13 vẫn là bằng chứng lịch sử và không bị viết lại theo v2.
+- [ ] **P3-14 target:** Scene mới dùng Background-first + `SceneRenderConfig` v2; Author chỉ có `Tự động` mặc định và `Giữ màu gốc`. Không có Palette, Preset, accent/strength/advanced trong lựa chọn mới.
+- [ ] Parser/renderer v1 giữ nguyên. Chỉ Author chủ động thay Background/treatment mới chuyển Scene v1 sang v2; mở/sửa nội dung/save/reload thông thường không tự migrate. Reader chỉ render snapshot và không fetch Scene library/derive màu.
+- [ ] Auto derivation chạy deterministic một lần ở client từ image/video poster/typed gradient hoặc optional particle registry hint, lưu accent/aura đã resolve dưới lowercase `#rrggbb`; thiếu hint/decode/CORS lỗi fallback `original` và không chặn Save. Neutral readability scrim thuộc renderer v2, không phải input Author.
+- [ ] `ColorPalette`/`ScenePreset` soft-retire: freeze/ẩn UI và không trả cho lựa chọn mới, không repurpose/import thêm; giữ bảng/data/provenance/parser tới reference audit P3-17. Không bulk-migrate Scene hoặc xóa migration/record legacy.
+- [ ] Background lifecycle draft/active/archived không đổi; Author chỉ thấy active và personal đúng owner. Replace dùng key mới, archive/delete không xóa media snapshot; cleanup storage riêng.
+- [ ] Sửa Background search để AND-token match trên một document gồm label/ID/toàn bộ mood tag. Nghiệm thu 375px/keyboard/focus/error summary/AA/reduced motion và target size theo §8.5 của `04b`.
 
 ## US-3.14 — Navbar & Profile Modal
 
 Nguồn: [12](12-auth-and-author-management.md) §12.1–12.3; UI: [04b](04b-page-layouts.md) §6.
 
 - [ ] Guest có Login và “Viết truyện” (mở login dialog hướng sáng tác, redirect `/author/stories/new`); reader đã login có “Viết truyện” → `/author/stories/new`; author/admin có “Truyện của tôi” → `/author`.
-- [ ] Avatar mở ProfileModal: avatar/name/email, badge ẩn với reader, Theme Switcher, role links (admin→protected landing `/admin`, “Truyện của tôi” không lặp trong modal vì đã có trên navbar), logout. P3-10 chỉ chuẩn bị integrations boundary; Freesound projection/action được nghiệm thu ở P3-15 theo §12.3/12.9.
+- [ ] Avatar mở ProfileModal: avatar/name/email, badge ẩn với reader, role links (admin→protected landing `/admin`), logout. P3-10 chỉ chuẩn bị integrations boundary; Freesound projection/action được nghiệm thu ở P3-15 theo §12.3/12.9.
 
 ## US-3.15 — Nâng role khi tạo truyện đầu tiên
 
@@ -159,6 +161,7 @@ Nguồn: [08](08-effects-and-scenes.md) §8.10 **đầy đủ**; [02](02-data-sc
 - [ ] Chọn ảnh AI gửi index + bytes; verify owner/expiry/hash rồi lưu đúng một ảnh + personal static/image asset + prompt gốc. Ảnh kia không storage; commit không trừ quota lần hai.
 - [ ] Preview/commit có request/response cap + test 413, không trả hai base64 trong một Vercel response 4.5MB. Hết quota disable Generate + reset time, không gọi provider.
 - [ ] Personal background không trong Admin catalog hoặc curated preset dùng chung.
+- [ ] Asset upload/AI vừa commit đi vào cùng Background-first flow v2. Image dùng chính ảnh, video dùng poster để derive `auto`; cache/lưu resolved treatment như Background global, fallback `original` không chặn Save và không tạo Palette/Preset.
 
 ## US-3.20 — Khám phá, tìm kiếm và phân trang truyện công khai
 

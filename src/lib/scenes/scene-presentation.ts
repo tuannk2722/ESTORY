@@ -1,13 +1,30 @@
-import type { BackgroundRenderSnapshot, SceneRenderConfig } from "@/types/scene";
+import type {
+  BackgroundRenderSnapshot,
+  SceneRenderConfig,
+  SceneVisualTreatmentV2,
+} from "@/types/scene";
 import type { LegacyBackgroundAsset, LegacyColorPalette } from "@/types/scene-legacy";
 
-/** Temporary presentation adapter for the shared renderer; never resolves catalog IDs. */
-export function renderConfigToPresentation(renderConfig: SceneRenderConfig): {
+export interface ScenePresentation {
   background: LegacyBackgroundAsset;
-  palette: LegacyColorPalette;
-  tintOpacity: number;
-} {
-  const { background, palette } = renderConfig;
+  /** Present only for the legacy v1 rendering path. */
+  palette?: LegacyColorPalette;
+  tintOpacity?: number;
+  /** Present only for v2. Values are already resolved in the Scene snapshot. */
+  visualTreatment?: SceneVisualTreatmentV2;
+}
+
+/** Temporary presentation adapter for the shared renderer; never resolves catalog IDs. */
+export function renderConfigToPresentation(renderConfig: SceneRenderConfig): ScenePresentation {
+  const { background } = renderConfig;
+  if (renderConfig.schema_version === 2) {
+    return {
+      background: backgroundSnapshotToPresentation(background),
+      visualTreatment: renderConfig.visual_treatment,
+    };
+  }
+
+  const { palette } = renderConfig;
   return {
     background: backgroundSnapshotToPresentation(background),
     palette: {

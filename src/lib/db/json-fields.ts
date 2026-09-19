@@ -1,6 +1,10 @@
 import { z } from "zod";
 import type { Prisma } from "@/generated/prisma/client";
-import { backgroundRenderSnapshotSchema, sceneRenderConfigSchema } from "@/lib/scenes/scene-render-config";
+import {
+  backgroundRenderSnapshotSchema,
+  sceneRenderConfigSchema,
+  sceneRenderConfigV1Schema,
+} from "@/lib/scenes/scene-render-config";
 
 const effectsByCategorySchema = z.strictObject({
   visual: z.boolean(), audio: z.boolean(), motion: z.boolean(), transition: z.boolean(),
@@ -30,6 +34,6 @@ function jsonField<S extends z.ZodType>(field: string, schema: S) {
 export const databaseJson = {
   backgroundRender: jsonField("BackgroundAsset.render", backgroundRenderSnapshotSchema),
   sceneRenderConfig: jsonField("Scene.renderConfig", sceneRenderConfigSchema),
-  presetRenderConfig: jsonField("ScenePreset.renderConfig", sceneRenderConfigSchema),
+  presetRenderConfig: jsonField("ScenePreset.renderConfig", sceneRenderConfigV1Schema),
   effectsByCategory: jsonField("UserSettings.effectsByCategory", effectsByCategorySchema),
 };

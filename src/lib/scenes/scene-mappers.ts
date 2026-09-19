@@ -1,7 +1,20 @@
-import type { BackgroundAsset, ColorPalette, Scene, SceneLibraryData, ScenePreset, SceneRenderConfig } from "@/types/scene";
+import type {
+  BackgroundAsset,
+  ColorPalette,
+  SceneLibraryData,
+  ScenePreset,
+  SceneRenderConfigV1,
+  SceneV1,
+} from "@/types/scene";
 import type { LegacyBackgroundAsset, LegacyColorPalette, LegacyScene, LegacyScenePreset } from "@/types/scene-legacy";
 import type { SceneDraft } from "./sceneDraft";
-import { backgroundRenderSnapshotSchema, paletteRenderSnapshotSchema, parseScene, parseSceneRenderConfig } from "./scene-render-config";
+import {
+  backgroundRenderSnapshotSchema,
+  isSceneRenderConfigV1,
+  paletteRenderSnapshotSchema,
+  parseScene,
+  sceneRenderConfigV1Schema,
+} from "./scene-render-config";
 import { legacyBackgroundToSnapshot } from "./legacy-background";
 
 export function legacyPaletteToSnapshot(palette: LegacyColorPalette) {
@@ -18,12 +31,12 @@ export function legacyPaletteToSnapshot(palette: LegacyColorPalette) {
 
 export function resolveLegacyScene(
   legacy: LegacyScene, backgrounds: readonly LegacyBackgroundAsset[], palettes: readonly LegacyColorPalette[],
-): Scene {
+): SceneV1 {
   const background = backgrounds.find((item) => item.id === legacy.background_id);
   const palette = palettes.find((item) => item.id === legacy.palette_id);
   if (!background) throw new Error(`Scene ${legacy.id}: missing background ${legacy.background_id}`);
   if (!palette) throw new Error(`Scene ${legacy.id}: missing palette ${legacy.palette_id}`);
-  return parseScene({
+  const scene = parseScene({
     id: legacy.id, chapter_id: legacy.chapter_id,
     start_block_id: legacy.start_block_id, end_block_id: legacy.end_block_id,
     ...(legacy.based_on_preset_id ? { based_on_preset_id: legacy.based_on_preset_id } : {}),
@@ -34,15 +47,19 @@ export function resolveLegacyScene(
       ambient_effects: legacy.effects ?? [],
     },
   });
+  if (!isSceneRenderConfigV1(scene.render_config)) {
+    throw new Error(`Scene ${legacy.id}: expected a v1 compatibility snapshot`);
+  }
+  return scene as SceneV1;
 }
 
-export function presetToRenderConfig(preset: ScenePreset): SceneRenderConfig {
-  return parseSceneRenderConfig(preset.render_config);
+export function presetToRenderConfig(preset: ScenePreset): SceneRenderConfigV1 {
+  return sceneRenderConfigV1Schema.parse(preset.render_config);
 }
 
 export function legacyPresetToRenderConfig(
   preset: LegacyScenePreset, backgrounds: readonly LegacyBackgroundAsset[], palettes: readonly LegacyColorPalette[],
-): SceneRenderConfig {
+): SceneRenderConfigV1 {
   return resolveLegacyScene({
     ...preset, chapter_id: "preset", start_block_id: "preset", end_block_id: "preset",
   }, backgrounds, palettes).render_config;
@@ -50,12 +67,17 @@ export function legacyPresetToRenderConfig(
 
 /** Catalogs must already be scoped by the calling repository to the actor. */
 export function customDraftToRenderConfig(
-  draft: Pick<SceneDraft, "backgroundId" | "paletteId" | "ambientAudio" | "ambientEffects">, catalogs: Pick<SceneLibraryData, "backgrounds" | "palettes">,
-): SceneRenderConfig {
+  draft: {
+    backgroundId: string;
+    paletteId: string;
+    ambientAudio: SceneDraft["ambientAudio"];
+    ambientEffects: SceneDraft["ambientEffects"];
+  }, catalogs: Pick<SceneLibraryData, "backgrounds" | "palettes">,
+): SceneRenderConfigV1 {
   const background = catalogs.backgrounds.find((item) => item.id === draft.backgroundId && item.status === "active");
   const palette = catalogs.palettes.find((item) => item.id === draft.paletteId && item.status === "active");
   if (!background || !palette) throw new Error("Custom scenes require an active background and palette");
-  return parseSceneRenderConfig({
+  return sceneRenderConfigV1Schema.parse({
     schema_version: 1, background: background.render, palette: palette.colors,
     ambient_effects: [...draft.ambientEffects, ...(draft.ambientAudio ? [draft.ambientAudio] : [])],
   });

@@ -3,7 +3,7 @@ import type { ApiFailure } from "@/types/api";
 export class CommandError extends Error {
   readonly body: ApiFailure;
   constructor(
-    readonly status: 400 | 401 | 403 | 404 | 409 | 413 | 429 | 503,
+    readonly status: 400 | 401 | 403 | 404 | 409 | 410 | 413 | 429 | 503,
     code: string,
     message: string,
     fieldErrors?: Record<string, string[]>,

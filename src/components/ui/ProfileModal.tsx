@@ -7,7 +7,6 @@ import { ChevronRight, LogOut, Shield, User, X } from "lucide-react";
 import { signOut } from "next-auth/react";
 import type { SessionUser } from "@/lib/auth/policy";
 import IntegrationsSection from "./IntegrationsSection";
-import ThemeSwitcher from "./ThemeSwitcher";
 
 interface ProfileModalProps {
   user: SessionUser;
@@ -151,10 +150,6 @@ export default function ProfileModal({ user, onClose, triggerRef }: ProfileModal
       >
         <X aria-hidden="true" className="h-5 w-5" />
       </button>
-
-      <div className="border-b border-[var(--color-border)] py-4">
-        <ThemeSwitcher />
-      </div>
 
       <IntegrationsSection />
 

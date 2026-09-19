@@ -37,7 +37,7 @@ import {
   getModerationDetail,
   moderationErrorMessage,
   submitModerationDecision,
-} from "./adminTransport";
+} from "./storyModerationTransport";
 
 const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
   dateStyle: "medium",

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import type { Scene, ScenePreset } from "@/types/scene";
+import type { Scene } from "@/types/scene";
 import { renderConfigToPresentation } from "@/lib/scenes/scene-presentation";
 import { SceneRangeStatus } from "@/lib/scenes/sceneSelectors";
 import {
@@ -20,7 +20,6 @@ export interface SceneCardProps {
   index: number;
   rangeStatus: SceneRangeStatus;
   isActive: boolean;
-  presetMap: Map<string, ScenePreset>;
   onScrollToStart: (blockId: string) => void;
   onOpenScenePicker: (
     startBlockId: string,
@@ -38,23 +37,19 @@ export const SceneCard = React.memo(function SceneCard({
   index,
   rangeStatus,
   isActive,
-  presetMap,
   onScrollToStart,
   onOpenScenePicker,
   onDeleteScene,
 }: SceneCardProps) {
   const confirm = useConfirm();
-  const { background, palette } = renderConfigToPresentation(scene.render_config);
-  const preset = scene.based_on_preset_id
-    ? presetMap.get(scene.based_on_preset_id)
-    : undefined;
+  const { background, palette, visualTreatment } = renderConfigToPresentation(scene.render_config);
 
   const rangeText = rangeStatus.valid
     ? rangeStatus.startIndex === rangeStatus.endIndex
       ? `#${rangeStatus.startIndex + 1}`
       : `#${rangeStatus.startIndex + 1} → #${rangeStatus.endIndex + 1}`
     : "Dải không hợp lệ";
-  const sceneLabel = preset?.label || background?.label || `Scene #${index + 1}`;
+  const sceneLabel = background?.label || `Scene #${index + 1}`;
   const hasAudio = scene.render_config.ambient_effects?.some(
     (effect) => effect.type === "audio" || effect.category === "audio"
   );
@@ -136,7 +131,7 @@ export const SceneCard = React.memo(function SceneCard({
               {palette && (
                 <span
                   className="flex items-center gap-1 p-1 rounded bg-background/80 border border-border/50"
-                  title={`Bảng màu: ${palette.label}`}
+                  title="Màu tương thích cũ"
                 >
                   {[palette.colors.primary, palette.colors.accent, palette.colors.secondary].map(
                     (color, swatchIndex) => (
@@ -147,6 +142,19 @@ export const SceneCard = React.memo(function SceneCard({
                       />
                     )
                   )}
+                </span>
+              )}
+              {visualTreatment && (
+                <span
+                  className="flex items-center gap-1 rounded border border-border/50 bg-background/80 px-1.5 py-1 text-[10px] text-muted-foreground"
+                  title={visualTreatment.mode === "auto" ? "Màu tự động từ bối cảnh" : "Giữ màu nền gốc"}
+                >
+                  <span
+                    className="h-2 w-2 rounded-full border border-white/20"
+                    style={{ backgroundColor: visualTreatment.accent_color }}
+                    aria-hidden="true"
+                  />
+                  {visualTreatment.mode === "auto" ? "Tự động" : "Màu gốc"}
                 </span>
               )}
               {hasAudio && (

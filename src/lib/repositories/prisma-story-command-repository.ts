@@ -1,6 +1,7 @@
 import { isAdminManagedEffect } from "@/lib/effects/effect-management";
 import "server-only";
 import { randomUUID } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import { Prisma } from "@/generated/prisma/client";
 import type { Chapter, EffectConfig, StoryBlock } from "@/types/story";
 import type { ManagedChapter, ManagedStory } from "@/types/story-management";
@@ -620,11 +621,62 @@ export class PrismaStoryCommandRepository extends PrismaStoryRepository {
     }
   }
   async assertPresetReferences(scenes: Scene[], existing: Scene[]) {
-    const retained = new Map(existing.map((scene) => [scene.id, scene.based_on_preset_id]));
+    const retained = new Map(existing.map((scene) => [scene.id, scene]));
     for (const scene of scenes) {
-      if (!scene.based_on_preset_id || retained.get(scene.id) === scene.based_on_preset_id) continue;
-      const preset = await this.tx.scenePreset.findFirst({ where: { id: scene.based_on_preset_id, status: "ACTIVE" }, select: { id: true } });
-      if (!preset) notFound();
+      const previous = retained.get(scene.id);
+      if (!previous) {
+        if (!scene.based_on_preset_id) continue;
+      } else if (previous.based_on_preset_id === scene.based_on_preset_id) {
+        continue;
+      } else if (
+        previous.based_on_preset_id
+        && !scene.based_on_preset_id
+        && previous.render_config.schema_version === 1
+        && scene.render_config.schema_version === 2
+      ) {
+        // The explicit v1 -> v2 authoring conversion retires preset provenance.
+        continue;
+      }
+      conflict(
+        "PRESET_PROVENANCE_RETIRED",
+        "Scene preset provenance cannot be attached, changed or removed outside an explicit v2 conversion.",
+      );
+    }
+  }
+  async assertSceneWriteCompatibility(scenes: Scene[], existing: Scene[]) {
+    const retained = new Map(existing.map((scene) => [scene.id, scene]));
+    for (const scene of scenes) {
+      const previous = retained.get(scene.id);
+      if (!previous) {
+        if (scene.render_config.schema_version === 1) {
+          conflict(
+            "SCENE_V1_AUTHORING_RETIRED",
+            "New Scenes must use the Scene v2 authoring contract.",
+          );
+        }
+        continue;
+      }
+
+      if (previous.render_config.schema_version === 2) {
+        if (scene.render_config.schema_version === 1) {
+          conflict(
+            "SCENE_VERSION_DOWNGRADE",
+            "A Scene v2 snapshot cannot be downgraded to v1.",
+          );
+        }
+        continue;
+      }
+
+      if (scene.render_config.schema_version === 2) continue;
+      if (
+        !isDeepStrictEqual(scene.render_config.background, previous.render_config.background)
+        || !isDeepStrictEqual(scene.render_config.palette, previous.render_config.palette)
+      ) {
+        conflict(
+          "SCENE_V1_VISUAL_EDIT_RETIRED",
+          "Changing a legacy Scene background or palette requires an explicit v2 conversion.",
+        );
+      }
     }
   }
   async replaceBlocks(chapterId: string, blocks: StoryBlock[]) {

@@ -13,12 +13,10 @@ export default async function EditorPage({ params }: EditorPageProps) {
   const { storyId, chapterId } = await params;
   const session = await requirePageStoryAccess(storyId, chapterId, `/author/stories/${encodeURIComponent(storyId)}/${encodeURIComponent(chapterId)}`);
   const dal = new StoryDataAccess();
-  const [story, editor, backgrounds, palettes, scenePresets] = await Promise.all([
+  const [story, editor, backgrounds] = await Promise.all([
     dal.getStory(session.user.id, storyId),
     dal.getEditor(session.user.id, storyId, chapterId),
     sceneLibraryRepository.getActiveGlobalBackgrounds(),
-    sceneLibraryRepository.getActivePalettes(),
-    sceneLibraryRepository.getActiveScenePresets(),
   ]).catch((error: unknown) => {
     if (error instanceof CommandError && error.status === 404) notFound();
     throw error;
@@ -31,7 +29,7 @@ export default async function EditorPage({ params }: EditorPageProps) {
       initialScenes={editor.data.scenes}
       initialRevision={editor.meta.updatedAt}
       effectCatalog={editor.data.effectCatalog}
-      sceneLibrary={{ backgrounds, palettes, scenePresets }}
+      sceneLibrary={{ backgrounds }}
     />
   );
 }

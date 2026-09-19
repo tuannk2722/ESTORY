@@ -3,6 +3,10 @@ import type { LegacyBackgroundAsset, LegacyColorPalette, LegacyScenePreset, Lega
 
 export interface SceneLibraryRepository {
   getActiveGlobalBackgrounds(): Promise<BackgroundAsset[]>;
+}
+
+/** Compatibility/audit reads only; never expose this as the authoring catalog. */
+export interface SceneCompatibilityLibraryRepository {
   getActivePalettes(): Promise<ColorPalette[]>;
   getActiveScenePresets(): Promise<ScenePreset[]>;
 }

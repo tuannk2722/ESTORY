@@ -45,17 +45,16 @@ Luồng cụ thể:
 
 ## 12.3. Profile Modal
 
-Khớp `ProfileModal.tsx` (`03-file-structure.md`), wireframe ở `04b-page-layouts.md` mục 6.2. Thay thế `UserMenu` cũ (giữ nguyên phần Theme Switcher đã có, bổ sung thêm phần tài khoản).
+Khớp `ProfileModal.tsx` (`03-file-structure.md`), wireframe ở `04b-page-layouts.md` mục 6.2.
 
 Nội dung modal (top-down):
 1. Avatar + tên + email.
 2. Badge vai trò: chỉ hiện khi `role !== "reader"` (VD: "Tác giả", "Quản trị viên") — reader thường không cần thấy badge "Reader" gây rối mắt.
-3. Theme Switcher (Dark/Light/Sepia) — giữ nguyên hành vi cũ.
-4. `IntegrationsSection.tsx` là boundary dành sẵn cho khối "Liên kết tài khoản", nhưng P3-10 **không render Freesound row/action** vì OAuth, connection projection và Import thuộc P3-15. Khi P3-15 triển khai, khối chỉ hiện với `role >= author` và tuân theo mục 12.9.
-5. Menu liên kết theo role:
+3. `IntegrationsSection.tsx` là boundary dành sẵn cho khối "Liên kết tài khoản", nhưng P3-10 **không render Freesound row/action** vì OAuth, connection projection và Import thuộc P3-15. Khi P3-15 triển khai, khối chỉ hiện với `role >= author` và tuân theo mục 12.9.
+4. Menu liên kết theo role:
    - `role === admin`: "🛠️ Trang quản trị" → `/admin`.
    - "Truyện của tôi" **không** nằm trong modal vì đã hiện trực tiếp trên navbar cho `author`/`admin`.
-6. Nút "Đăng xuất".
+5. Nút "Đăng xuất".
 
 ---
 

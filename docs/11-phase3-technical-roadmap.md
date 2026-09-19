@@ -460,7 +460,7 @@ Quy tắc mapper bắt buộc:
 
 ## 9.4b. Prisma schema mở rộng — Scene catalog + runtime snapshot
 
-> Map từ contract canonical ở `02-data-schema.md` mục 2.9. Background/Palette là ingredient catalog; curated Preset và Scene đều lưu `SceneRenderConfig` snapshot. Không tạo foreign key runtime từ Scene sang Background/Palette.
+> Map từ contract canonical ở `02-data-schema.md` mục 2.9. Schema Prisma hiện hữu được giữ ở P3-14: Background là catalog sống; `ColorPalette`/`ScenePreset` là compatibility data v1 tới audit P3-17. `Scene.renderConfig` là JSON union v1/v2 và không có foreign key runtime tới Background/Palette.
 
 ```prisma
 enum CatalogStatus {
@@ -513,7 +513,7 @@ model ScenePreset {
   moodTags       String[]
   status         CatalogStatus @default(DRAFT)
   activatedAt    DateTime?
-  renderConfig   Json          // SceneRenderConfig schema_version=1; runtime source
+  renderConfig   Json          // legacy SceneRenderConfig v1; compatibility source tới P3-17
   sourceVersion  Int           @default(1)
   sourceChecksum String
   createdAt      DateTime      @default(now())
@@ -531,7 +531,7 @@ model Scene {
   endBlockId      String
   basedOnPresetId String?
   basedOnPreset   ScenePreset? @relation(fields: [basedOnPresetId], references: [id], onDelete: SetNull)
-  renderConfig    Json         // deep snapshot; Reader không resolve catalog ID
+  renderConfig    Json         // deep snapshot SceneRenderConfig v1 | v2; Reader không resolve catalog ID
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
@@ -541,13 +541,15 @@ model Scene {
 
 Validation/service rules:
 
-- `BackgroundAsset.render`/`ScenePreset.renderConfig`/`Scene.renderConfig` là JSON nhưng không phải free-form: parse bằng discriminated Zod schema và `schema_version` trước khi write/read.
+- `BackgroundAsset.render`/`ScenePreset.renderConfig`/`Scene.renderConfig` là JSON nhưng không phải free-form: parse bằng discriminated Zod schema. Scene parser dùng strict `schema_version: 1 | 2`; nhánh v1 không đổi semantics, nhánh v2 validate resolved Auto/Original treatment.
 - `SceneCommandService` xác minh Story–Chapter–Block membership, ownership và non-overlap trong transaction.
 - `render.poster_frame` bắt buộc khi `render.motion = looping`; personal upload nhận image/static hoặc video/looping + poster, còn AI chỉ tạo image/static; global admin query không bao giờ trả personal asset.
 - Personal upload/AI commit service tạo `status = ACTIVE` ngay sau khi storage verify thành công; `DRAFT` mặc định chủ yếu dành cho global Admin catalog/import.
 - `activatedAt` được set lần đầu khi chuyển Active và không xóa lại. “Remove” chuyển Archived; hard delete record yêu cầu `activatedAt = null`. Object storage cleanup vẫn cần reference audit riêng.
 - Media key bất biến; DB delete và object cleanup là hai operation tách biệt.
-- Migration legacy resolve `background_id`/`palette_id`/`effects` thành snapshot. Missing ID/media/checksum làm verify fail, không âm thầm fallback.
+- Migration legacy đã resolve `background_id`/`palette_id`/`effects` thành snapshot v1. Missing ID/media/checksum vẫn làm verify fail, không âm thầm fallback. P3-14 không sửa migration đó, không bulk-convert v1 và không xóa Palette/Preset rows.
+- Scene mới ghi v2 không có Palette ID/Preset lookup. Author client derive Auto một lần rồi gửi resolved lowercase `#rrggbb`; service chỉ validate/persist snapshot, Reader không derive.
+- Palette/Preset create/activate/import bị freeze tại cutover; Author aggregate mới không trả chúng. `basedOnPresetId` chỉ giữ provenance legacy và không được gắn mới.
 
 ## 9.4c. Prisma schema mở rộng — Media upload intents & Personal Media Assets (xem `08-effects-and-scenes.md` mục 8.9 → 8.10)
 
@@ -670,9 +672,9 @@ Quota video Author cấp một `videoSlot` 1..10 trong transaction/serializable 
 
 ## 9.6. Storage, Admin catalog, integrations, CI/CD
 
-- **Storage:** cover/audio/background upload qua `MediaStorageProvider`, R2 Standard là implementation mặc định. File lớn dùng conditional presigned PUT 10 phút; server quyết định owner/purpose/key/MIME/limit. Object key immutable; public read dùng custom domain. Image/poster 5 MiB, audio 8 MiB/5 phút, background video 50 MiB dùng chung Admin/Author; Author video có poster và trần 10 intent complete/chưa cleanup.
+- **Storage:** cover/audio/background upload qua `MediaStorageProvider`, R2 Standard là implementation mặc định. File lớn dùng conditional presigned PUT 10 phút; server quyết định owner/purpose/key/MIME/limit. Object key immutable; public read dùng custom domain. Image/poster 5 MiB, audio 8 MiB/5 phút, background video 50 MiB dùng chung Admin/Author; Author video có poster và trần 10 intent complete/chưa cleanup. P3-14 bổ sung CORS GET theo allowlist app origin và live canvas pixel-read smoke cho Auto derivation; gate signed PUT P3-09 không chứng minh GET canvas hợp lệ.
 - **Effect admin:** manifest sync + DB overlay/keywords cho tập Admin; audio thuộc code (`02` §2.6). Active chỉ ảnh hưởng lựa chọn mới của effect thuộc Admin. Keyword thêm matching cho effect search, không đổi weight ranking của suggestion.
-- **Scene admin:** typed Background/Palette catalog + curated Preset metadata. Preset mới đi qua developer import; không có admin builder.
+- **Scene admin/authoring:** typed Background catalog tiếp tục hoạt động. P3-13 Palette UI và ScenePreset data soft-retire tại P3-14: ẩn/freeze khỏi lựa chọn mới, giữ compatibility tới audit P3-17. Scene mới dùng client-derived Auto hoặc Original và resolved v2 snapshot; không developer preset importer/recipe.
 - **Integrations:** Freesound và AI chạy sau Auth/authorization/storage/quota. AI dùng generation session/từng variant hoặc phương án khác chỉ sau payload spike chứng minh an toàn.
 - **CI/CD:** dựng skeleton từ đầu; production gate gồm lint/typecheck/test/Prisma validate/build, migration verification, accessibility/security regression.
 
@@ -689,10 +691,11 @@ Quota video Author cấp một `videoSlot` 1..10 trong transaction/serializable 
 9. Settings/progress/bookmark sync và media storage.
 10. Auth/Author UI, moderation.
 11. Effect Admin.
-12. Background/Palette Admin.
-13. Curated ScenePreset import/catalog + snapshot Reader cleanup.
-14. Freesound, AI background.
-15. Production hardening.
+12. Background/Palette Admin (P3-13 historical baseline).
+13. Scene Authoring v2 + client Auto treatment + Palette/Preset soft-retirement; giữ v1 renderer/data.
+14. Freesound personal audio.
+15. Personal upload/AI Background tái sử dụng flow v2/derivation.
+16. Production hardening + reference audit compatibility trước mọi forward drop.
 
 ---
 ← Về `00-INDEX.md` | Trước: `10-out-of-scope.md` | Tiếp theo: `12-auth-and-author-management.md`

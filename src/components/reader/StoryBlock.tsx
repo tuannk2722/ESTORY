@@ -37,7 +37,7 @@ export default function StoryBlock({
       {/* Render văn bản theo type */}
       {block.type === "heading" && (
         <div className="my-10 text-center">
-          <h2 className="font-display text-2xl md:text-3xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#F8FAFC] via-[var(--color-primary,#38BDF8)] to-[#F8FAFC] inline-block pb-3 border-b-2 border-[var(--color-accent,#E2B714)]/60">
+          <h2 className="font-display text-2xl md:text-3xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#F8FAFC] via-[var(--scene-heading-text-color,var(--color-primary,#38BDF8))] to-[#F8FAFC] inline-block pb-3 border-b-2 border-[var(--scene-accent-color,var(--color-accent,#E2B714))]/60">
             {block.text}
           </h2>
         </div>
@@ -53,7 +53,7 @@ export default function StoryBlock({
       )}
 
       {block.type === "dialogue" && (
-        <div className="dialogue-box my-8 p-5 md:p-6 rounded-r-2xl border-l-4 border-[var(--color-accent,#E2B714)] shadow-xl transition-all duration-500">
+        <div className="dialogue-box my-8 p-5 md:p-6 rounded-r-2xl border-l-4 border-[var(--scene-accent-color,var(--color-accent,#E2B714))] shadow-xl transition-all duration-500">
           <p className={`font-story ${storyFontClass} text-[length:inherit] leading-[inherit] text-[#F8FAFC] transition-all duration-300`}>
             {block.text}
           </p>

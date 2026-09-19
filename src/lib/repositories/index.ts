@@ -13,6 +13,7 @@ import type {
 import type {
   LegacySceneLibraryRepository,
   LegacySceneRepository,
+  SceneCompatibilityLibraryRepository,
   SceneLibraryRepository,
   SceneRepository,
 } from "./scene-repository";
@@ -84,11 +85,13 @@ const activeSceneRead = serverEnv.PHASE3_SHADOW_READ === "true"
   ? new ShadowSceneRepository(selectedSceneRead, otherSceneRead)
   : selectedSceneRead;
 
-const selectedSceneLibraryRead: SceneLibraryRepository =
+type FullSceneLibraryRepository = SceneLibraryRepository & SceneCompatibilityLibraryRepository;
+
+const selectedSceneLibraryRead: FullSceneLibraryRepository =
   serverEnv.PHASE3_SCENE_READ_SOURCE === "prisma"
     ? prismaSceneLibraryRepository
     : jsonSceneLibraryRepository;
-const otherSceneLibraryRead: SceneLibraryRepository =
+const otherSceneLibraryRead: FullSceneLibraryRepository =
   serverEnv.PHASE3_SCENE_READ_SOURCE === "prisma"
     ? jsonSceneLibraryRepository
     : prismaSceneLibraryRepository;
@@ -107,17 +110,23 @@ export const sceneRepository: SceneRepository & LegacySceneRepository = {
   replaceLegacyChapterScenes: async () => { throw new CommandError(503, "LEGACY_WRITES_DISABLED", "Use transactional content commands."); },
 };
 
-export const sceneLibraryRepository: SceneLibraryRepository &
-  LegacySceneLibraryRepository = {
-    getActiveGlobalBackgrounds: () =>
-      activeSceneLibraryRead.getActiveGlobalBackgrounds(),
-    getActivePalettes: () => activeSceneLibraryRead.getActivePalettes(),
-    getActiveScenePresets: () =>
-      activeSceneLibraryRead.getActiveScenePresets(),
-    getBackgrounds: () => jsonSceneLibraryRepository.getBackgrounds(),
-    getPalettes: () => jsonSceneLibraryRepository.getPalettes(),
-    getScenePresets: () => jsonSceneLibraryRepository.getScenePresets(),
-  };
+export const sceneLibraryRepository: SceneLibraryRepository = {
+  getActiveGlobalBackgrounds: () =>
+    activeSceneLibraryRead.getActiveGlobalBackgrounds(),
+};
+
+/** Kept for migration parity/reference audit through P3-17, outside authoring. */
+export const sceneCompatibilityLibraryRepository: SceneCompatibilityLibraryRepository = {
+  getActivePalettes: () => activeSceneLibraryRead.getActivePalettes(),
+  getActiveScenePresets: () => activeSceneLibraryRead.getActiveScenePresets(),
+};
+
+/** Phase-2 JSON bridge only; runtime writes are disabled. */
+export const legacySceneLibraryRepository: LegacySceneLibraryRepository = {
+  getBackgrounds: () => jsonSceneLibraryRepository.getBackgrounds(),
+  getPalettes: () => jsonSceneLibraryRepository.getPalettes(),
+  getScenePresets: () => jsonSceneLibraryRepository.getScenePresets(),
+};
 
 // Effect overlay/keyword reads are DB-owned from P3-04 onward. P3-12 adds
 // guarded mutations and the manifest merge service.
@@ -127,6 +136,7 @@ export * from "./story-repository";
 export * from "./json-story-repository";
 export * from "./prisma-story-repository";
 export * from "./scene-repository";
+export * from "./scene-catalog-admin-repository";
 export * from "./json-scene-repository";
 export * from "./prisma-scene-repository";
 export * from "./prisma-scene-catalog-repository";

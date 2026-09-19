@@ -377,7 +377,7 @@ export interface Comment {
 
 ## 2.9. Scene — catalog model và runtime snapshot
 
-`EffectConfig` chỉ mô tả hiệu ứng chấm phá của một block. Scene là bối cảnh cho một dải block và dùng **runtime snapshot**, không giữ live reference tới Background/Palette catalog.
+`EffectConfig` chỉ mô tả hiệu ứng chấm phá của một block. Scene là bối cảnh cho một dải block và dùng **runtime snapshot**, không giữ live reference tới catalog. Từ P3-14, contract là union có version: v1 được giữ nguyên để Scene cũ render y hệt; Scene tạo mới dùng v2 theo luồng Background-first và không còn phụ thuộc Palette/Preset.
 
 ```typescript
 // types/scene.ts
@@ -423,12 +423,37 @@ export interface PaletteRenderSnapshot {
   };
 }
 
-export interface SceneRenderConfig {
+// Compatibility contract: không đổi field hoặc semantics của v1.
+export interface SceneRenderConfigV1 {
   schema_version: 1;
   background: BackgroundRenderSnapshot;
   palette: PaletteRenderSnapshot;
   ambient_effects: EffectConfig[];
 }
+
+export type SceneVisualTreatmentV2 =
+  | {
+      mode: "original";
+      accent_color: string;                  // system accent đã resolve, lowercase #rrggbb
+    }
+  | {
+      mode: "auto";
+      accent_color: string;                  // kết quả derive đã resolve, lowercase #rrggbb
+      atmosphere: {
+        color: string;                       // aura nhẹ; không phải full-screen color wash
+        opacity: number;                     // 0..1; renderer clamp theo policy an toàn
+      };
+      derivation_version: 1;
+    };
+
+export interface SceneRenderConfigV2 {
+  schema_version: 2;
+  background: BackgroundRenderSnapshot;
+  visual_treatment: SceneVisualTreatmentV2;
+  ambient_effects: EffectConfig[];
+}
+
+export type SceneRenderConfig = SceneRenderConfigV1 | SceneRenderConfigV2;
 
 export interface BackgroundAsset {
   id: string;
@@ -460,7 +485,7 @@ export interface ScenePreset {
   mood_tags: string[];
   status: CatalogStatus;
   activated_at?: string;
-  render_config: SceneRenderConfig;          // curated snapshot do developer seed/import
+  render_config: SceneRenderConfigV1;        // compatibility data legacy; không tạo preset mới
 }
 
 export interface Scene {
@@ -475,15 +500,20 @@ export interface Scene {
 
 Quy tắc bất biến:
 
-- Custom ScenePicker resolve Background + Palette + ambient effects/audio thành `SceneRenderConfig`; curated `ScenePreset` đã chứa sẵn cùng contract. Cả hai đường đều tạo `Scene.render_config` bằng deep copy.
-- Reader chỉ dùng `Scene.render_config`, không fetch toàn bộ `/api/scene-library` và không resolve `background_id`/`palette_id` lúc runtime.
+- Reader chỉ dùng `Scene.render_config`, không fetch toàn bộ `/api/scene-library`, không resolve catalog ID và không chạy lại auto derivation lúc runtime.
+- Parser/renderer v1 giữ nguyên Palette snapshot và toàn bộ semantics hiện tại. Không bulk-migrate, không reinterpret v1 và không sửa snapshot cũ chỉ để chuẩn hóa cú pháp màu.
+- Scene mới dùng v2. Author chỉ thấy hai lựa chọn treatment: `auto` mặc định và `original`; không có Palette, accent picker, strength hoặc advanced editor trong scope hiện tại.
+- `auto` derive ở Author client một lần khi chọn/thay Background: image dùng media chính, video dùng poster, linear/radial gradient dùng typed stops, particle composition dùng optional source-color hint thuộc code-owned registry. Thiếu hint hoặc decode/CORS lỗi fallback `original` với system accent và không chặn Save. Kết quả được cache trong draft rồi ghi **giá trị đã resolve** vào snapshot; cùng input + `derivation_version` phải cho cùng output.
+- `original` không color-grade background. `accent_color` của mode này được resolve từ một code-owned `DEFAULT_SCENE_ACCENT` hợp lệ, không đọc CSS/theme lúc Reader render. Cả hai mode vẫn dùng neutral readability scrim do renderer v2 sở hữu; scrim không phải field Author chỉnh.
+- Mọi màu mới do v2 serialize dùng lowercase `#rrggbb`. Parser v1 tiếp tục chấp nhận các CSS color hợp lệ đã lưu, gồm RGB/HSL/named color.
+- Mở/sửa nội dung một Scene v1 không tự chuyển version. Chỉ khi Author chủ động thay Background hoặc treatment thì editor thông báo và lưu Scene đó thành v2. Provenance legacy không được dùng để render hoặc tạo lựa chọn Preset mới.
 - `SceneRenderConfig.ambient_effects` chỉ nhận effect có `allowed_scopes` chứa `scene`; tối đa một audio ambient, không trùng `EffectType`, và audio ambient phải `loop: true`.
 - Media URL trong snapshot dùng object key bất biến. Replace upload tạo key mới; archive/xóa record catalog không được xóa object còn được snapshot sử dụng.
-- Author picker chỉ thấy catalog `active`; Reader vẫn render snapshot của Scene cũ dù nguồn đã archived.
+- Author picker mới chỉ thấy Background global `active` và Background personal đúng owner; Reader vẫn render snapshot của Scene cũ dù nguồn đã archived.
 - Personal Background chuyển thẳng `active` sau khi upload/AI commit thành công (không qua admin draft/review), chỉ owner nhìn thấy; admin global catalog không quản lý lifecycle của nó.
 - Personal Background do author upload có thể là static image hoặc looping video. Video bắt buộc có `poster_frame`, dùng cùng giới hạn file với Admin và bị giới hạn tối đa 10 video đã upload/chưa cleanup cho mỗi owner; AI vẫn chỉ tạo static image.
-- `ScenePreset` mới chỉ được developer seed/import bằng script. Admin được Preview, sửa metadata/thumbnail/status và remove khỏi catalog; admin **không** có preset builder.
-- Background global và Palette có vòng đời `draft → active → archived`. “Remove” là archive mặc định; hard-delete record chỉ khi `activated_at = null`. Storage cleanup vẫn phải reference-audit riêng.
+- Background global có vòng đời `draft → active → archived`. “Remove” là archive mặc định; hard-delete record chỉ khi `activated_at = null`. Storage cleanup vẫn phải reference-audit riêng.
+- `ColorPalette` và `ScenePreset` là compatibility data v1. P3-14 freeze create/activate, ẩn khỏi Admin/Author flow mới và không repurpose; giữ bảng, record, parser và provenance tới reference audit P3-17 rồi mới quyết định drop bằng forward migration.
 - Background theo kind phải validate bằng discriminated schema. Không nhận raw CSS hoặc particle JSON tùy ý; particle dùng `composition_key` đã đăng ký trong code.
 - Gradient tuyến tính giữ `kind: "gradient"` + `angle_deg`. Radial dùng `kind: "radial_gradient"`, `shape`, `center` và ≥2 stops có position tăng không giảm trong 0..1; extent cố định `farthest-corner`. Đây là bổ sung đã được duyệt ngày 2026-09-05 để giữ bốn nền radial legacy, thuộc schema version 1 trước khi có dữ liệu snapshot production.
 - Các Scene trong cùng Chapter không chồng lấn. Repository/service nhận cả `storyId` và `chapterId`; không tin `chapterId` đơn lẻ từ client.

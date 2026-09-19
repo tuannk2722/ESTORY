@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useEffect, useId, useMemo, useRef } from "react";
-import { ArrowLeft, Check, Palette } from "lucide-react";
+import { ArrowLeft, Check, Sparkles } from "lucide-react";
 import type { SceneRenderConfig } from "@/types/scene";
 import type { StoryBlock as StoryBlockType } from "@/types/story";
 import { STORY_FONT_OPTIONS } from "@/types/settings";
@@ -129,7 +129,7 @@ function ScenePreviewDialog({
       aria-modal="true"
       aria-labelledby={titleId}
       tabIndex={-1}
-      className="scene-live-preview-overlay fixed inset-0 z-[100] overflow-y-auto bg-background font-story outline-none"
+      className="scene-live-preview-overlay fixed inset-0 z-[100] overflow-y-auto bg-background font-editor outline-none"
     >
       <header
         data-reader-header
@@ -140,14 +140,14 @@ function ScenePreviewDialog({
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
-            className="flex min-h-11 items-center gap-1.5 rounded-xl border border-border bg-secondary/80 px-3 py-2 text-xs font-editor transition-colors hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none md:text-sm"
+            className="flex min-h-11 items-center gap-1.5 rounded-xl border border-border bg-secondary/80 px-3 py-2 text-xs transition-colors hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none md:text-sm"
             aria-label="Quay lại chỉnh sửa Scene"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             <span className="hidden sm:inline">Quay lại chỉnh sửa</span>
           </button>
 
-          <div className="min-w-0 font-editor">
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="rounded-md border border-primary/30 bg-primary/15 px-2 py-0.5 font-mono text-[10px] font-bold tracking-wider text-primary">
                 PREVIEW
@@ -161,15 +161,19 @@ function ScenePreviewDialog({
               {renderConfig && (
                 <span className="flex items-center gap-1.5">
                   <span aria-hidden="true">•</span>
-                  <Palette className="h-3 w-3 text-accent" aria-hidden="true" />
-                  Bảng màu hiện tại
+                  <Sparkles className="h-3 w-3 text-accent" aria-hidden="true" />
+                  {renderConfig.schema_version === 2
+                    ? renderConfig.visual_treatment.mode === "auto"
+                      ? "Màu tự động"
+                      : "Giữ màu gốc"
+                    : "Màu tương thích cũ"}
                 </span>
               )}
             </div>
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2 font-editor">
+        <div className="flex shrink-0 items-center gap-2">
           <ReaderPlaybackStatus />
 
           <button
@@ -192,7 +196,7 @@ function ScenePreviewDialog({
         <div id="effect-portal-root" className="pointer-events-none" />
         <main
           ref={contentRef}
-          className="prose-reader font-size-lg px-4 py-12 md:px-6"
+          className={`prose-reader font-size-${settings.font_size || "lg"} px-4 py-12 md:px-6`}
         >
           {previewBlocks.map((block) => (
             <StoryBlock

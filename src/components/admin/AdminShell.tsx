@@ -64,8 +64,7 @@ const administrationItems: NavigationItem[] = [
     label: "Bối cảnh",
     href: "/admin/scene-library",
     icon: Layers3,
-    enabled: false,
-    stage: "P3-13",
+    enabled: true,
   },
 ];
 

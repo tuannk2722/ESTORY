@@ -16,8 +16,10 @@ import { runP310AuthorClientTests } from "./p3-10-author-client.test";
 import { runP311SearchTests } from "./p3-11-search.test";
 import { runP311ModerationTests } from "./p3-11-moderation.test";
 import { runP312EffectAdminTests } from "./p3-12-effect-admin.test";
+import { runP313SceneCatalogTests } from "./p3-13-scene-catalog.test";
+import { runSceneVisualTreatmentTests } from "./scene-visual-treatment.test";
 
-Promise.all([runSceneRepositoryTests(), runAuthTests(), runPhase3MigrationTests(), runShadowReadTests(), runStoryCommandTests(), runP307ClientTests(), runReaderSyncTests(), runMediaUploadTests(), runP310AuthorClientTests(), runP311SearchTests(), runP311ModerationTests(), runP312EffectAdminTests()]).then(() => {
+Promise.all([runSceneRepositoryTests(), runAuthTests(), runPhase3MigrationTests(), runShadowReadTests(), runStoryCommandTests(), runP307ClientTests(), runReaderSyncTests(), runMediaUploadTests(), runP310AuthorClientTests(), runP311SearchTests(), runP311ModerationTests(), runP312EffectAdminTests(), runP313SceneCatalogTests(), runSceneVisualTreatmentTests()]).then(() => {
   console.log("All Reader, Effect, Scene and repository tests completed successfully");
 }).catch((error: unknown) => {
   console.error(error);

@@ -6,7 +6,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import SceneLayer from "@/components/scenes/SceneLayer";
 import { deepFreeze } from "@/lib/immutable";
 import { createEffectConfig } from "@/lib/effects/effectFactory";
-import { parseScene, parseSceneRenderConfig } from "@/lib/scenes/scene-render-config";
+import {
+  parseScene,
+  parseSceneRenderConfig,
+  sceneRenderConfigV1Schema,
+} from "@/lib/scenes/scene-render-config";
 import { customDraftToRenderConfig, legacyPresetToRenderConfig, presetToRenderConfig, resolveBackgroundAsset, resolveLegacyScene, resolvePalette } from "@/lib/scenes/scene-mappers";
 import { legacyBackgroundToSnapshot } from "@/lib/scenes/legacy-background";
 import { renderConfigToPresentation } from "@/lib/scenes/scene-presentation";
@@ -55,7 +59,14 @@ for (const effects of [
   [createEffectConfig("text_shake")], [createEffectConfig("screen_shake")],
   [rain, { ...rain, id: "second-rain" }], [audio, { ...audio, id: "second-audio" }],
   [{ ...audio, loop: false }], [{ ...audio, loop: undefined }],
-]) assert.throws(() => parseSceneRenderConfig({ ...snapshotConfig(), ambient_effects: effects }));
+]) {
+  const invalidConfig = { ...snapshotConfig(), ambient_effects: effects };
+  assert.throws(() => parseSceneRenderConfig(invalidConfig));
+  assert.throws(
+    () => sceneRenderConfigV1Schema.parse(invalidConfig),
+    "The direct v1 compatibility parser must keep ambient-effect invariants",
+  );
+}
 const validAudio = parseSceneRenderConfig({ ...snapshotConfig(), ambient_effects: [audio, rain] });
 assert.equal(validAudio.ambient_effects[0].audio_asset_id, "private-audio");
 assert.deepEqual(JSON.parse(JSON.stringify(validAudio)), validAudio);

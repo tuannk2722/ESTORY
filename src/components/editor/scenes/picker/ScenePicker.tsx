@@ -2,25 +2,19 @@
 
 import React, { useCallback, useMemo, useState } from "react";
 import { Layers } from "lucide-react";
-import { Scene, SceneLibraryData, ScenePreset } from "@/types/scene";
-import { StoryBlock } from "@/types/story";
+import type { Scene, SceneAuthoringLibraryData } from "@/types/scene";
+import type { StoryBlock } from "@/types/story";
 import {
   createEmptySceneDraft,
   draftToRenderConfig,
-  draftMatchesPreset,
   draftToScene,
-  presetToDraft,
-  sceneMatchesPreset,
   sceneToDraft,
 } from "@/lib/scenes/sceneDraft";
 import { createSceneId } from "@/lib/editor/ids";
 import { EditorDialog } from "@/components/editor/shared/EditorDialog";
-import { PresetTab } from "./PresetTab";
 import { CustomSceneTab } from "./CustomSceneTab";
 import { ScenePreview } from "./ScenePreview";
-import { ScenePickerFooter, ScenePickerModeTabs } from "./ScenePickerControls";
-import { useEditorEffectCatalog } from "@/components/editor/EditorProvider";
-import { hasOnlyActiveEffects } from "@/lib/effects/effect-authoring";
+import { ScenePickerFooter } from "./ScenePickerControls";
 
 export interface ScenePickerProps {
   isOpen: boolean;
@@ -31,23 +25,10 @@ export interface ScenePickerProps {
   initialScene?: Scene | null;
   chapterId: string;
   blocks?: StoryBlock[];
-  sceneLibrary: SceneLibraryData;
+  sceneLibrary: SceneAuthoringLibraryData;
 }
 
-function getInitialMode(
-  initialScene: Scene | null | undefined,
-  library: SceneLibraryData | undefined
-): "preset" | "custom" {
-  if (!initialScene) return "preset";
-  if (!initialScene.based_on_preset_id || !library) return "custom";
-
-  const sourcePreset = library.scenePresets.find(
-    (preset) => preset.id === initialScene.based_on_preset_id
-  );
-  return sourcePreset && sceneMatchesPreset(initialScene, sourcePreset)
-    ? "preset"
-    : "custom";
-}
+const SAVED_BACKGROUND_ID = "snapshot:current-background";
 
 export function ScenePicker({
   isOpen,
@@ -60,55 +41,34 @@ export function ScenePicker({
   blocks = [],
   sceneLibrary,
 }: ScenePickerProps) {
-  const effectCatalog = useEditorEffectCatalog();
-  const [mode, setMode] = useState<"preset" | "custom">(
-    () => initialScene && !hasOnlyActiveEffects(effectCatalog, initialScene.render_config.ambient_effects)
-      ? "custom"
-      : getInitialMode(initialScene, sceneLibrary)
-  );
   const [draft, setDraft] = useState(() =>
-    initialScene ? sceneToDraft(initialScene) : createEmptySceneDraft()
+    initialScene ? sceneToDraft(initialScene) : createEmptySceneDraft(),
   );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-
-  const presets = useMemo(
-    () => sceneLibrary.scenePresets.filter(
-      (preset) =>
-        hasOnlyActiveEffects(effectCatalog, preset.render_config.ambient_effects),
-    ),
-    [effectCatalog, sceneLibrary.scenePresets],
-  );
   const renderConfig = useMemo(() => draftToRenderConfig(draft), [draft]);
-  // The saved snapshot remains editable even when no catalog ingredient exists.
-  const savedBackgroundId = "snapshot:current-background";
-  const savedPaletteId = "snapshot:current-palette";
-  const backgrounds = useMemo(() => [
-    ...(draft.background && !draft.backgroundId ? [{ id: savedBackgroundId, label: "Nền hiện tại", mood_tags: [], render: draft.background }] : []),
-    ...sceneLibrary.backgrounds,
-  ], [draft.background, draft.backgroundId, sceneLibrary.backgrounds]);
-  const palettes = useMemo(() => [
-    ...(draft.palette && !draft.paletteId ? [{ id: savedPaletteId, label: "Bảng màu hiện tại", mood_tags: [], colors: draft.palette }] : []),
-    ...sceneLibrary.palettes,
-  ], [draft.palette, draft.paletteId, sceneLibrary.palettes]);
+
+  // A saved snapshot stays editable after its catalog item is archived or removed.
+  const backgrounds = useMemo(
+    () => [
+      ...(draft.background && !draft.backgroundId
+        ? [
+            {
+              id: SAVED_BACKGROUND_ID,
+              label: "Nền hiện tại",
+              mood_tags: [],
+              render: draft.background,
+            },
+          ]
+        : []),
+      ...sceneLibrary.backgrounds,
+    ],
+    [draft.background, draft.backgroundId, sceneLibrary.backgrounds],
+  );
 
   const handleClose = useCallback(() => {
     setIsPreviewOpen(false);
     onClose();
   }, [onClose]);
-
-  const handleSelectPreset = useCallback((preset: ScenePreset) => {
-    if (!hasOnlyActiveEffects(effectCatalog, preset.render_config.ambient_effects)) return;
-    setDraft(presetToDraft(preset));
-  }, [effectCatalog]);
-
-  const handleQuickPreviewPreset = useCallback(
-    (event: React.MouseEvent, preset: ScenePreset) => {
-      event.stopPropagation();
-      handleSelectPreset(preset);
-      setIsPreviewOpen(true);
-    },
-    [handleSelectPreset]
-  );
 
   const { rangeLabel, selectedBlocks, normalizedRange } = useMemo(() => {
     const startIndex = blocks.findIndex((block) => block.id === startBlockId);
@@ -134,33 +94,16 @@ export function ScenePicker({
   }, [blocks, endBlockId, startBlockId]);
 
   const activeBackground = useMemo(
-    () => backgrounds.find((background) => background.id === (draft.backgroundId || savedBackgroundId)),
-    [backgrounds, draft.backgroundId]
+    () =>
+      backgrounds.find(
+        (background) =>
+          background.id ===
+          (draft.backgroundId || (draft.background ? SAVED_BACKGROUND_ID : "")),
+      ),
+    [backgrounds, draft.background, draft.backgroundId],
   );
-  const previewSceneLabel = useMemo(() => {
-    if (draft.sourcePresetId) {
-      const preset = presets.find((item) => item.id === draft.sourcePresetId);
-      if (preset) {
-        return draftMatchesPreset(draft, preset)
-          ? preset.label
-          : `${preset.label} · đã tùy chỉnh`;
-      }
-    }
-    return activeBackground?.label || "Bối Cảnh Tùy Chỉnh";
-  }, [activeBackground, draft, presets]);
-
-  const selectedPresetId = useMemo(() => {
-    if (!draft.sourcePresetId) return undefined;
-    const sourcePreset = presets.find(
-      (preset) => preset.id === draft.sourcePresetId
-    );
-    return sourcePreset && draftMatchesPreset(draft, sourcePreset)
-      ? sourcePreset.id
-      : undefined;
-  }, [draft, presets]);
-
-  const isSaveDisabled =
-    renderConfig === null || normalizedRange === null;
+  const previewSceneLabel = activeBackground?.label || "Bối cảnh tùy chỉnh";
+  const isSaveDisabled = renderConfig === null || normalizedRange === null;
 
   const handleSave = useCallback(() => {
     if (isSaveDisabled || !normalizedRange) return;
@@ -185,12 +128,9 @@ export function ScenePicker({
 
   const footer = (
     <ScenePickerFooter
-      mode={mode}
       editing={Boolean(initialScene)}
       disabled={isSaveDisabled}
-      onPreview={() => {
-        setIsPreviewOpen(true);
-      }}
+      onPreview={() => setIsPreviewOpen(true)}
       onSave={handleSave}
     />
   );
@@ -200,36 +140,30 @@ export function ScenePicker({
       <EditorDialog
         isOpen={isOpen}
         onClose={handleClose}
-        title={initialScene ? "Chỉnh Sửa Scene" : "Gán Scene Cho Dải Block"}
+        title={initialScene ? "Chỉnh sửa Scene" : "Gán Scene cho dải block"}
         description={`Áp dụng cho: ${rangeLabel}`}
-        icon={<Layers className="w-6 h-6" aria-hidden="true" />}
+        icon={<Layers className="h-6 w-6" aria-hidden="true" />}
         maxWidth="max-w-4xl"
         footer={footer}
       >
-        <ScenePickerModeTabs mode={mode} presetCount={presets.length} onChange={setMode} />
-
-        {mode === "preset" ? (
-          <PresetTab
-            presets={presets}
-            selectedPresetId={selectedPresetId}
-            initialPresetId={initialScene?.based_on_preset_id}
-            onSelectPreset={handleSelectPreset}
-            onQuickPreview={handleQuickPreviewPreset}
-          />
-        ) : (
-          <CustomSceneTab
-            draft={{ ...draft, backgroundId: draft.backgroundId || savedBackgroundId, paletteId: draft.paletteId || savedPaletteId }}
-            onChangeDraft={setDraft}
-            backgrounds={backgrounds}
-            palettes={palettes}
-            initialBackgroundId={savedBackgroundId}
-            initialPaletteId={savedPaletteId}
-            initialAudioSrc={initialScene?.render_config.ambient_effects?.find(
-              (effect) => effect.type === "audio" || effect.category === "audio"
-            )?.audio_src}
-            isLoop
-          />
-        )}
+        <CustomSceneTab
+          draft={{
+            ...draft,
+            backgroundId:
+              draft.backgroundId || (draft.background ? SAVED_BACKGROUND_ID : ""),
+          }}
+          onChangeDraft={setDraft}
+          backgrounds={backgrounds}
+          initialBackgroundId={
+            draft.background && !draft.backgroundId
+              ? SAVED_BACKGROUND_ID
+              : undefined
+          }
+          initialAudioSrc={initialScene?.render_config.ambient_effects.find(
+            (effect) => effect.type === "audio" || effect.category === "audio",
+          )?.audio_src}
+          isLoop
+        />
       </EditorDialog>
 
       <ScenePreview

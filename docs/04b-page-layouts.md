@@ -235,7 +235,7 @@ Desktop (≥1024px):
   - Bước 1: Nhấp chọn block bắt đầu.
   - Bước 2: Nhấp chọn block kết thúc.
   - Chặn lập tức nếu dải chọn giao thoa với Scene khác trong chương.
-- **Thẻ Scene chi tiết**: Thumbnail trực quan, swatch 3 màu, icon nhạc/hạt, nút xem vị trí, sửa (`ScenePicker`) và xóa (`ConfirmModal` + Optimistic UI).
+- **Thẻ Scene chi tiết**: Thumbnail trực quan, nhãn treatment `Tự động`/`Giữ màu gốc` cho v2 (Scene v1 có thể giữ swatch legacy), icon nhạc/hạt, nút xem vị trí, sửa (`ScenePicker`) và xóa (`ConfirmModal` + Optimistic UI).
 
 ### 5.2. Cột 2: BlockEditor — Vùng Soạn Thảo Trung Tâm
 - **Cấu trúc Block Card**:
@@ -259,11 +259,16 @@ Desktop (≥1024px):
 - **(Phase 3) Tab `Âm Thanh` nhúng `SoundSourcePicker.tsx`** — 3 tab con `Thư viện của tôi` / `Tải lên` / `Tìm trên Freesound` (`FreesoundSearchPanel.tsx`: ô tìm kiếm debounce, danh sách kết quả kèm nút play preview, nút "Dùng sound này" — disable + dòng lý do + CTA "Kết nối Freesound" nếu chưa liên kết). Xem `08-effects-and-scenes.md` mục 8.9.
 
 ### 5.5. Hộp Thoại Bối Cảnh (`ScenePicker.tsx`) — Modal Lớn `z-[80]`
-- **Tab 1: Scene Preset Có Sẵn (`mode === "preset"`)**: Lưới preset có thumbnail, swatch màu, nút nghe thử Howler và nút `Xem trước` 1-Click. Search Background/Preset/Palette/combobox lọc tức thì client-side trên catalog đã tải; mọi field/tags được đưa vào một matcher, state đóng cùng modal. “Xem thêm” chỉ tăng số item đang render, không phải server cursor.
-- **Tab 2: Tùy Chỉnh Phối Riêng (`mode === "custom"`)**: 4 bước (Backgrounds, Palettes, Scene Effects với popover `clamp()` chống tràn, Ambient Audio).
-  - **(Phase 3) Bước 1 "Backgrounds" nhúng `BackgroundSourcePicker.tsx`** — 3 tab con `Thư viện Preset` (global, như hiện tại) / `Tải lên` / `Tạo bằng AI`. Trong `Tải lên`: Author chọn file → client detect image/video → nếu là video thì hiện field poster bắt buộc, quota `đã dùng/10`, và chỉ bật Upload khi đủ cặp hợp lệ; server vẫn detect/validate lại. `AIBackgroundGeneratePanel.tsx`: prompt prefill theo genre/mood — editable, nút "Tạo ảnh", grid đúng **2 ảnh** preview cạnh nhau kèm nút "Dùng ảnh này" riêng từng ảnh, dòng nhỏ hiện số lượt tạo còn lại/ngày. Xem `08-effects-and-scenes.md` mục 8.10.
-  - **(Phase 3) Bước 4 "Ambient Audio" nhúng lại `SoundSourcePicker.tsx`** — cùng component với tab Âm Thanh ở `EffectPicker` (mục 5.4), tái sử dụng không viết lại logic.
-- **Full Interactive Live Preview Overlay (`z-[90]`)**: Xem trước toàn màn hình với 5 lớp kết xuất thực tế. Header riêng hiển thị trạng thái Reader Settings đang ảnh hưởng đến preview.
+- **Luồng Background-first cho Scene mới:** không còn tab Preset/Custom hoặc bước chọn Palette. Trình tự là chọn dải block → chọn Background → chọn treatment → ambient effects → ambient audio → Preview/Save.
+- **Chọn Background:** hiển thị Background global `active` và personal asset đúng owner. Search lọc tức thì trên catalog đã tải bằng AND-token substring bỏ dấu/case; gọi một matcher với label/ID/toàn bộ `mood_tags` để token có thể match xuyên field. “Xem thêm” chỉ batching render, không phải cursor/network.
+  - P3-16 nối `Tải lên` và `Tạo bằng AI` vào cùng `BackgroundSourcePicker`. Video bắt buộc poster, hiện quota `đã dùng/10`; AI vẫn trả đúng hai preview để Author chọn một. Asset vừa commit đi thẳng vào flow hiện tại, không tạo Palette/Preset.
+- **Treatment:** segmented control chỉ có `Tự động` (mặc định) và `Giữ màu gốc`; không có accent picker, strength hoặc Advanced.
+  - `Tự động` phân tích image/video poster/typed gradient một lần ở client; particle dùng optional source-color hint từ code-owned registry. UI hiển thị trạng thái đang xử lý, cập nhật Preview bằng accent/aura nhẹ và lưu resolved snapshot. Không phủ color wash bão hòa toàn màn hình.
+  - `Giữ màu gốc` không color-grade background; hệ thống dùng accent an toàn. Nếu decode/CORS/derive lỗi, UI fallback về mode này, báo trạng thái không chặn và vẫn cho Save.
+  - Cả hai mode luôn có neutral readability scrim cố định theo renderer: vùng chữ được che đủ đậm, mép chuyển mềm ra ngoài vùng chữ, không tạo khung chữ nhật. Author không thấy hoặc chỉnh field này.
+- **Ambient effects/audio:** giữ picker effect theo scope Scene và tái sử dụng `SoundSourcePicker.tsx`; các constraint unique type/≤1 audio loop không đổi.
+- **Scene v1:** mở để xem hoặc sửa nội dung không đổi renderer/snapshot. Khi Author chủ động thay Background hoặc treatment, modal báo Scene sẽ chuyển sang cơ chế màu mới và Save thành v2; không tự convert khi chỉ mở/đóng hoặc lưu nội dung khác.
+- **Full Interactive Live Preview Overlay (`z-[90]`)**: dùng đúng shared `SceneLayer` v1/v2. Header riêng hiển thị Reader Settings; Preview v2 phải đánh giá chữ trên background + neutral scrim thực tế.
 
 ### 5.6. Floating Action Dock (`fixed bottom-6 z-[60]`)
 - Cố định ở giữa đáy màn hình, luôn nổi ở cả chế độ Soạn Thảo và Xem Trước:
@@ -297,8 +302,6 @@ Author/Admin:     ... [🌗 Theme]  [ 📚 Truyện của tôi ]  (Avatar)
 │  email@example.com             │
 │  [Badge: Tác giả]  ← chỉ hiện nếu role != reader
 ├───────────────────────────────┤
-│  🌗 Giao diện: [Dark|Light|Sepia] │
-├───────────────────────────────┤
 │  🔗 Liên kết tài khoản          │  ← bắt đầu render khi P3-15 có connection projection
 │    Freesound: [Đã kết nối ✓ | Kết nối] │  ← P3-15, mục 12.9
 ├───────────────────────────────┤
@@ -307,7 +310,6 @@ Author/Admin:     ... [🌗 Theme]  [ 📚 Truyện của tôi ]  (Avatar)
 │  🚪 Đăng xuất                  │
 └───────────────────────────────┘
 ```
-"Truyện của tôi" không nằm trong modal vì đã hiện trực tiếp trên navbar cho `author`/`admin`.
 - Dùng `glass-card` + `rounded-xl` như các card khác, không cần backdrop tối toàn màn hình (khác `EffectPicker`) vì đây là menu ngữ cảnh nhỏ, đóng khi click ra ngoài.
 - P3-10 chỉ tạo boundary `IntegrationsSection.tsx`, không render row/action giả. Từ P3-15, khối "Liên kết tài khoản" chỉ hiện với `role >= author`: đã kết nối → tên Freesound + "Ngắt kết nối"; chưa kết nối → "Kết nối" mở OAuth. Chi tiết ở `12-auth-and-author-management.md` mục 12.9.
 
@@ -556,21 +558,22 @@ mưa rơi        90                         [Edit] [Remove]
 
 ### 8.3. `/admin/scene-library` — Global Scene Catalog
 
-Header và tab:
+Trạng thái đích sau P3-14 chỉ quản lý Background global cho lựa chọn mới:
 
 ```text
 Scene Library
-Quản lý nguyên liệu global và curated preset dùng cho lựa chọn mới.
-[ Backgrounds ] [ Palettes ] [ Scene Presets ]
+Quản lý bối cảnh global dùng cho Scene mới.
+[ Backgrounds ]
 ```
 
-Tab dùng semantic tabs (`role=tablist/tab/tabpanel`), hỗ trợ ArrowLeft/ArrowRight/Home/End. Tab active nằm trong URL `?tab=`.
+P3-13 đã bàn giao Backgrounds/Palettes và placeholder Scene Presets bị disabled theo stage cũ. P3-14 không viết lại bằng chứng đó: tab Palette bị ẩn/freeze, tab Preset không được mở triển khai; URL cũ phải fallback an toàn về Backgrounds. Nếu còn nhiều tab khả dụng trong giai đoạn chuyển tiếp, dùng semantic tabs (`role=tablist/tab/tabpanel`) và giữ state trong `?tab=`.
 
 #### 8.3.1. Tab Backgrounds
 
 - Toolbar: Search, Type, Motion, Status, Add Background.
 - Visual grid: 1 cột ở 375px, 2 cột ở `sm`, 3 ở `lg`, 4 ở `xl`.
-- Card: thumbnail/poster ratio cố định, label, type, motion/status badge, tối đa ba mood tag + “+N”, Preview, Edit, More.
+- Card: thumbnail/poster ratio cố định và luôn tĩnh trong grid, status overlay góc trên phải, label tối đa hai dòng, type/motion, tối đa ba mood tag + “+N”, action Chỉnh sửa và More. Chỉnh sửa mở drawer có Preview dùng renderer thật; không lặp action Preview riêng trên card.
+- List search/paginate ở server, dùng matcher AND-token substring bỏ dấu/case trên label/technical ID/mood tag; mỗi trang tối đa 12 mục và đổi search/filter/tab phải reset cursor.
 - Chỉ query `scope: "global"`; personal background tuyệt đối không xuất hiện.
 - Form add/edit thay đổi theo `type`:
   - Image: upload `jpg`/`png`/`webp` tối đa 5 MiB, luôn static.
@@ -579,18 +582,21 @@ Tab dùng semantic tabs (`role=tablist/tab/tabpanel`), hỗ trợ ArrowLeft/Arro
   - Particle composition: combobox `composition_key` đã đăng ký + field config theo schema; không có textarea raw JSON.
 - Upload có progress, Cancel/Retry và trạng thái processing. Save disabled trong lúc upload/validate.
 - `motion: looping` thiếu poster phải chặn Save ở client và server.
-- Preview dùng cùng shared `SceneLayer` (bên trong dùng `SceneBackground`); reduced-motion preview chuyển sang poster.
+- Preview Background luôn dùng shared `SceneLayer` v2 trong khung giới hạn với treatment `original` như Author chọn “Giữ màu gốc”: không tự gán Palette/tint, vẫn có neutral readability scrim và system accent cho trang trí. Background tĩnh hiển thị trực tiếp, không có nút bật/tắt. Chỉ Background `motion: looping` mới có Preview/Dừng: ban đầu giữ cùng bố cục Reader nhưng dùng poster/khung tĩnh, bấm Preview mới chạy chuyển động, bấm Dừng trở lại khung tĩnh. Thumbnail trên card luôn tĩnh không color-grade; reduced-motion preview chuyển sang poster. Preview Palette compatibility chỉ áp Palette được truyền vào tường minh.
 
-#### 8.3.2. Tab Palettes
+#### 8.3.2. Tab Palettes — compatibility P3-13, ẩn/freeze tại cutover P3-14
+
+Các dòng dưới ghi lại UI đã bàn giao ở P3-13 để phục vụ rollback/audit. Sau cutover, không có entry point Admin tạo, sửa hoặc activate Palette; flow Author mới không đọc catalog này. Bảng và endpoint compatibility được giữ tới reference audit P3-17.
 
 - Toolbar: Search, Status, Add Palette.
 - Compact grid: 1/2/3/4 cột theo mobile/`sm`/`lg`/`xl`.
-- Card hiển thị primary, secondary, accent, background tint đã áp opacity, label, mood tags/status và action Preview/Edit/More.
+- Card hiển thị primary, secondary, accent, background tint đã áp đúng opacity, status overlay, label, mood tags và action Chỉnh sửa/More. Preview nằm trong drawer chỉnh sửa để card giữ một CTA chính.
+- List dùng cùng search/cursor contract với Backgrounds, tối đa 12 mục mỗi trang.
 - Form có bốn channel; `background_tint` gồm color picker, text hex và opacity slider/input đồng bộ.
 - Preview trên sample Reader frame với body text cố định, Drop Cap/dialogue border để kiểm tra đúng phạm vi palette.
 - Contrast warning phải xuất hiện trước Save; không tự động đổi màu user đã nhập.
 
-#### 8.3.3. Tab Scene Presets — catalog, không phải builder
+#### 8.3.3. Tab Scene Presets — compatibility legacy, không triển khai product flow mới
 
 ```text
 ┌──────────────────────┐ ┌──────────────────────┐
@@ -602,25 +608,26 @@ Tab dùng semantic tabs (`role=tablist/tab/tabpanel`), hỗ trợ ArrowLeft/Arro
 └──────────────────────┘ └──────────────────────┘
 ```
 
-- Không có nút Create và không có Background/Palette/Effects/Audio builder.
-- Empty state hướng developer tới script import; không hướng admin sang Custom ScenePicker.
-- Admin chỉ Preview full Scene, sửa `label`, `description`, `mood_tags`, thumbnail, status và Remove khỏi catalog.
-- Metadata drawer hiển thị `id`, `schema_version` và source version ở chế độ read-only để debug.
-- Preview full-screen dùng đúng shared `SceneLayer`, sample story text cố định, có audio Play/Stop rõ ràng; không autoplay audio.
+- Không có nút Create, builder hoặc developer importer mới.
+- P3-14 ẩn tab khỏi navigation và không expose Preset cho lựa chọn Scene mới. Dữ liệu/endpoint/metadata legacy chỉ được giữ để Reader v1, migration verification, rollback và reference audit P3-17 hoạt động.
+- Nếu công cụ compatibility nội bộ cần Preview khi audit, nó dùng đúng shared `SceneLayer` v1, sample story text cố định và audio Play/Stop rõ ràng; không autoplay audio.
 
 #### 8.3.4. Lifecycle, remove và dependency feedback
 
-- Status badge: Draft, Active, Archived. Author picker chỉ thấy Active.
-- Action “Remove khỏi catalog” mở ConfirmModal mô tả rõ: item không còn xuất hiện cho lựa chọn mới; Scene đã lưu không thay đổi. Preset có thể hiện thêm số Scene lưu provenance.
-- Hard delete chỉ xuất hiện khi `activated_at = null`; không gộp hard delete với Remove. Preset import không được dùng draft Background/Palette làm source.
+- Background tiếp tục dùng Draft/Active/Archived; Author picker mới chỉ thấy Background Active.
+- Action “Remove khỏi catalog” của Background mở ConfirmModal mô tả rõ: item không còn xuất hiện cho lựa chọn mới; Scene đã lưu không thay đổi.
+- Hard delete Background chỉ xuất hiện khi `activated_at = null`; không gộp hard delete với Remove.
+- Palette/Preset không nhận create/activate mới sau cutover và không được hard-delete trước audit P3-17. P3-17 mới đếm references/rollback dependency rồi quyết định forward migration; không sửa migration lịch sử.
 - Replace media tạo object key mới; UI không có action xóa trực tiếp storage object.
 
 ### 8.4. Quan hệ với Author ScenePicker
 
-- `ScenePicker` Tab 1 chỉ đọc curated `ScenePreset.status = active`.
-- `ScenePicker` Tab 2 Custom Scene chỉ đọc Background/Palette active cộng personal background đúng owner.
-- Hai đường đều deep-copy cùng `SceneRenderConfig` vào Scene; Reader không biết Scene đến từ preset hay custom.
-- Author upload ở ScenePicker có thể tạo personal image hoặc video+poster; AI Background vẫn chỉ tạo personal static image, không sinh full ScenePreset.
+- Scene mới chỉ đọc Background global `active` cộng personal Background đúng owner. Author không chọn Palette/Preset và aggregate mới không cần tải hai catalog legacy.
+- Chọn `Tự động` derive treatment một lần ở Author client từ image/poster/gradient hoặc particle registry hint, cache trong draft và deep-copy Background + resolved treatment + ambient effects/audio vào `SceneRenderConfig` v2. Reader không chạy derive và không biết catalog source.
+- `Giữ màu gốc` lưu mode `original` với system accent đã resolve; background không nhận color wash nhưng neutral readability scrim vẫn tồn tại.
+- Derive lỗi hoặc media cross-origin không đọc được phải fallback `original`, không chặn Save. Remote media phục vụ auto cần CORS GET cho origin ứng dụng theo `09`.
+- Scene v1 tiếp tục render bằng Palette snapshot cũ. Chỉ thao tác thay Background/treatment có chủ đích mới chuyển Scene đó sang v2; edit nội dung/reload không tự đổi version.
+- Author upload có thể tạo personal image hoặc video+poster; AI Background chỉ tạo personal static image. P3-16 đưa asset mới vào cùng flow v2 và tái sử dụng derivation, không sinh ColorPalette/ScenePreset.
 
 ### 8.5. Responsive & Accessibility gate riêng cho Admin
 

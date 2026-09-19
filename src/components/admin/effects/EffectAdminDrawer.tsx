@@ -20,7 +20,7 @@ import {
   updateEffectMetadata,
   type EffectAdminCapabilities,
   type EffectAdminListItem,
-} from "../effectAdminTransport";
+} from "./effectAdminTransport";
 import KeywordEditor from "./EffectKeywordEditor";
 import { ErrorSummary, InlineError, toFieldErrors, type FieldError } from "./EffectAdminErrors";
 import EffectPreview from "./EffectPreview";

@@ -29,6 +29,8 @@ Nếu vẫn chưa phân xử được, nêu mâu thuẫn trước khi code phầ
 - **P3-10:** Auth/Profile UI, wizard cover claim, Author dashboard/management và protected admin landing tại [P3-10 verification](verification/p3-10.md); local/Neon/browser, GitHub Actions và Vercel preview đã được xác nhận xanh.
 - **P3-11:** Search/list foundation, Home discovery/genre/theme artwork và Story moderation tại [P3-11 verification](verification/p3-11.md); user xác nhận baseline/tests, GitHub Actions và Vercel Preview đều xanh ngày 2026-09-14.
 - **P3-12:** Effect Admin và follow-up code-owned audio/keyword search tại [P3-12 verification](verification/p3-12.md); contract hiện tại ở `02` §2.6, cleanup/rollback trong verification. Gate baseline 2026-09-15 và follow-up 2026-09-16 ghi riêng; GitHub Actions/Vercel Preview còn chờ.
+- **P3-13:** Background/Palette Admin historical baseline tại [P3-13 verification](verification/p3-13.md). P3-14 soft-retire Palette khỏi flow mới nhưng không viết lại bằng chứng P3-13.
+- **P3-14:** Scene Authoring v2/Auto treatment và soft-retire Palette/Preset tại [P3-14 verification](verification/p3-14.md); implementation cùng các gate code/runtime trực tiếp đã xanh. Stage chưa đạt toàn bộ gate vì strict P3-04 seed parity còn hai mutable runtime drift; GitHub Actions/Vercel Preview cũng còn chờ push/deploy.
 - **Trạng thái task tạm:** `.codex/TASK.md` nếu có, theo AGENTS. Runbook/task state chỉ điều phối công việc; không thay nguồn quyết định và không chép lại schema/rule.
 - **Stack/version đang cài:** `package.json`, `pnpm-lock.yaml`, `.nvmrc`. Lệnh local/CI/deploy: README.
 
@@ -64,7 +66,7 @@ Bảng này bổ sung bước đọc chung phía trên. Số `02`, `08`… là f
 | Story moderation | `02` §2.7; `07` US-3.11; `11` §9.5; `12` §12.7.6; `04b` §8.0–8.1; `09`; `10` | `src/app/admin/`, `src/components/admin/`; queue/detail/private preview/decision đã triển khai ở P3-11 |
 | Settings/progress/bookmark/theme | `02` §2.3–2.5; `07` US-3.4; Home paint hint: `11` §9.2.3/§9.5; `12` §12.7.4 | `src/lib/settingsStore.ts`, `src/components/ui/ThemeProvider.tsx`, `src/lib/theme/` |
 | Effect Admin | `02` §2.6; `07` US-3.12; `08` §8.5.1; `11` §9.4; `04b` §8.0/8.2/8.5 | P3-12: manifest sync/catalog/service/API ở `src/lib` + `src/app/api`; responsive Admin UI ở `src/app/admin/(workspace)/effects` |
-| Scene catalog/Preset import | `02` §2.9; `07` US-3.13; `08` §8.3/8.5–8.7; `11` §9.4b; `04b` §8.0/8.3–8.5 | `src/lib/repositories/scene-repository.ts`, `src/lib/scenes/` |
+| Scene catalog/Authoring v2 | `02` §2.9; `07` US-3.13; `08` §8.3–8.7; `11` §9.4b/9.6; `04b` §5.5/8.3–8.5; compatibility audit: `10` | `src/lib/repositories/scene-repository.ts`, `src/lib/scenes/`, `src/components/editor/scenes/` |
 | Storage/Freesound/AI background | `07` US-3.6/3.18/3.19; `02` §2.5/2.9/2.11; `08` §8.9 hoặc §8.10; `12` §12.9 nếu Freesound; `11` §9.4c/9.6; `09` | Chưa tích hợp ở mốc P3-01; vị trí đích trong `03` |
 | CI/testing/hardening | `07` US-3.8; `09`; `11` §9.6; README | `.github/workflows/ci.yml`, `scripts/`, `src/__tests__/` |
 

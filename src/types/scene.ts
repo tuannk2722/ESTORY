@@ -22,12 +22,37 @@ export interface PaletteRenderSnapshot {
   accent: string;
   background_tint: { color: string; opacity: number };
 }
-export interface SceneRenderConfig {
+
+/** Legacy snapshot contract. Its rendering semantics must remain unchanged. */
+export interface SceneRenderConfigV1 {
   schema_version: 1;
   background: BackgroundRenderSnapshot;
   palette: PaletteRenderSnapshot;
   ambient_effects: EffectConfig[];
 }
+
+export type SceneVisualTreatmentV2 =
+  | {
+      mode: 'original';
+      /** Resolved, canonical lowercase #rrggbb used for reader accents. */
+      accent_color: string;
+    }
+  | {
+      mode: 'auto';
+      /** Resolved snapshot values. The reader never analyzes background media. */
+      accent_color: string;
+      atmosphere: { color: string; opacity: number };
+      derivation_version: 1;
+    };
+
+export interface SceneRenderConfigV2 {
+  schema_version: 2;
+  background: BackgroundRenderSnapshot;
+  visual_treatment: SceneVisualTreatmentV2;
+  ambient_effects: EffectConfig[];
+}
+
+export type SceneRenderConfig = SceneRenderConfigV1 | SceneRenderConfigV2;
 export interface BackgroundAsset {
   id: string;
   label: string;
@@ -56,7 +81,8 @@ export interface ScenePreset {
   mood_tags: string[];
   status: CatalogStatus;
   activated_at?: string;
-  render_config: SceneRenderConfig;
+  /** Compatibility-only presets remain v1 and cannot create v2 scenes. */
+  render_config: SceneRenderConfigV1;
 }
 export interface Scene {
   id: string;
@@ -66,8 +92,16 @@ export interface Scene {
   based_on_preset_id?: string;
   render_config: SceneRenderConfig;
 }
+export type SceneV1 = Omit<Scene, 'render_config'> & {
+  render_config: SceneRenderConfigV1;
+};
 export interface SceneLibraryData {
   backgrounds: BackgroundAsset[];
   palettes: ColorPalette[];
   scenePresets: ScenePreset[];
+}
+
+/** Background-first catalog DTO for Scene authoring v2. */
+export interface SceneAuthoringLibraryData {
+  backgrounds: BackgroundAsset[];
 }
