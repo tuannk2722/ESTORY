@@ -7,6 +7,8 @@ import { createServer } from "node:net";
 import { resolve } from "node:path";
 import { loadEnvConfig } from "@next/env";
 import { databaseJson } from "@/lib/db/json-fields";
+import { SCENE_CATALOG_ADMIN_PAGE_SIZE } from "@/lib/validation/scene-catalog-schema";
+import { seedSceneCatalogPaginationFixtures } from "./fixtures/scene-catalog-pagination-fixtures";
 
 loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
 let stage = "initialize";
@@ -149,28 +151,37 @@ async function run() {
     assert.equal(isolated.data.items.some((item: { id: string }) => item.id === personalId), false);
     assert.equal(isolated.data.total, 0);
 
-    response = await request("/api/admin/scene-library/backgrounds", { headers: actorHeaders("admin") });
+    const pageFixtures = await seedSceneCatalogPaginationFixtures(
+      prisma, marker, SCENE_CATALOG_ADMIN_PAGE_SIZE + 1,
+    );
+    pageFixtures.backgroundIds.forEach((id) => createdBackgroundIds.add(id));
+    pageFixtures.paletteIds.forEach((id) => createdPaletteIds.add(id));
+
+    response = await request(`/api/admin/scene-library/backgrounds?q=${marker}`, { headers: actorHeaders("admin") });
     const firstBackgroundPage = await readJson(response, 200);
-    assert.equal(firstBackgroundPage.data.items.length, 12);
+    assert.equal(firstBackgroundPage.data.items.length, SCENE_CATALOG_ADMIN_PAGE_SIZE);
+    assert.equal(firstBackgroundPage.data.total, SCENE_CATALOG_ADMIN_PAGE_SIZE + 1);
     assert.equal(typeof firstBackgroundPage.data.nextCursor, "string");
     response = await request(
-      `/api/admin/scene-library/backgrounds?cursor=${encodeURIComponent(firstBackgroundPage.data.nextCursor)}`,
+      `/api/admin/scene-library/backgrounds?q=${marker}&cursor=${encodeURIComponent(firstBackgroundPage.data.nextCursor)}`,
       { headers: actorHeaders("admin") },
     );
     const secondBackgroundPage = await readJson(response, 200);
     assert.equal(secondBackgroundPage.data.total, firstBackgroundPage.data.total);
+    assert.equal(secondBackgroundPage.data.items.length, 1);
     assert.equal(
       secondBackgroundPage.data.items.some((item: { id: string }) =>
         firstBackgroundPage.data.items.some((first: { id: string }) => first.id === item.id)),
       false,
     );
 
-    response = await request("/api/admin/scene-library/palettes", { headers: actorHeaders("admin") });
+    response = await request(`/api/admin/scene-library/palettes?q=${marker}`, { headers: actorHeaders("admin") });
     const firstPalettePage = await readJson(response, 200);
-    assert.equal(firstPalettePage.data.items.length, 12);
+    assert.equal(firstPalettePage.data.items.length, SCENE_CATALOG_ADMIN_PAGE_SIZE);
+    assert.equal(firstPalettePage.data.total, SCENE_CATALOG_ADMIN_PAGE_SIZE + 1);
     assert.equal(typeof firstPalettePage.data.nextCursor, "string");
     response = await request(
-      `/api/admin/scene-library/palettes?cursor=${encodeURIComponent(firstBackgroundPage.data.nextCursor)}`,
+      `/api/admin/scene-library/palettes?q=${marker}&cursor=${encodeURIComponent(firstBackgroundPage.data.nextCursor)}`,
       { headers: actorHeaders("admin") },
     );
     const backgroundCursorOnPalette = await readJson(response, 200);

@@ -10,6 +10,8 @@ import {
 } from "@/lib/repositories/prisma-scene-catalog-repository";
 import { AdminSceneCatalogService, type SceneCatalogAdminAuditEvent } from "@/lib/services/admin-scene-catalog-service";
 import { CommandError } from "@/lib/services/command-error";
+import { SCENE_CATALOG_ADMIN_PAGE_SIZE } from "@/lib/validation/scene-catalog-schema";
+import { seedSceneCatalogPaginationFixtures } from "./fixtures/scene-catalog-pagination-fixtures";
 
 loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
 let stage = "initialize";
@@ -134,14 +136,23 @@ async function run() {
       "Catalog search must be accent/case-insensitive AND-token matching",
     );
 
-    const firstBackgroundPage = await service.listBackgrounds(adminId, adminQuery);
-    assert.equal(firstBackgroundPage.items.length, 12);
+    const pageFixtures = await seedSceneCatalogPaginationFixtures(
+      prisma, marker, SCENE_CATALOG_ADMIN_PAGE_SIZE,
+    );
+    pageFixtures.backgroundIds.forEach((id) => backgroundIds.add(id));
+    pageFixtures.paletteIds.forEach((id) => paletteIds.add(id));
+
+    const backgroundPageQuery = { ...adminQuery, q: marker };
+    const firstBackgroundPage = await service.listBackgrounds(adminId, backgroundPageQuery);
+    assert.equal(firstBackgroundPage.items.length, SCENE_CATALOG_ADMIN_PAGE_SIZE);
+    assert.equal(firstBackgroundPage.total, SCENE_CATALOG_ADMIN_PAGE_SIZE + 1);
     assert.ok(firstBackgroundPage.nextCursor);
     const secondBackgroundPage = await service.listBackgrounds(adminId, {
-      ...adminQuery,
+      ...backgroundPageQuery,
       cursor: firstBackgroundPage.nextCursor,
     });
     assert.equal(secondBackgroundPage.total, firstBackgroundPage.total);
+    assert.equal(secondBackgroundPage.items.length, 1);
     assert.equal(
       secondBackgroundPage.items.some((item) => firstBackgroundPage.items.some((first) => first.id === item.id)),
       false,
@@ -273,7 +284,7 @@ async function run() {
     assert.equal(await prisma.backgroundAsset.findUnique({ where: { id: draft.data.id } }), null);
 
     stage = "palette read-only audit and retirement";
-    const paletteQuery = { q: "", status: "all", cursor: null } as const;
+    const paletteQuery = { q: marker, status: "all", cursor: null } as const;
     const firstPalettePage = await service.listPalettes(adminId, paletteQuery);
     assert.ok(firstPalettePage.items.length > 0);
     assert.ok(firstPalettePage.items.every((item) => item.can_hard_delete === false));
@@ -284,13 +295,15 @@ async function run() {
       can_archive: false,
       hard_delete_never_activated_only: false,
     });
-    assert.equal(firstPalettePage.items.length, 12);
+    assert.equal(firstPalettePage.items.length, SCENE_CATALOG_ADMIN_PAGE_SIZE);
+    assert.equal(firstPalettePage.total, SCENE_CATALOG_ADMIN_PAGE_SIZE + 1);
     assert.ok(firstPalettePage.nextCursor);
     const secondPalettePage = await service.listPalettes(adminId, {
       ...paletteQuery,
       cursor: firstPalettePage.nextCursor,
     });
     assert.equal(secondPalettePage.total, firstPalettePage.total);
+    assert.equal(secondPalettePage.items.length, 1);
     assert.equal(
       secondPalettePage.items.some((item) => firstPalettePage.items.some((first) => first.id === item.id)),
       false,
