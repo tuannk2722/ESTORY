@@ -1,5 +1,5 @@
 import "server-only";
-import { prisma } from "@/lib/db/prisma";
+import { loadRuntimePrismaClient } from "@/lib/repositories/prisma-read-client";
 import { CommandError } from "@/lib/services/command-error";
 import { freesoundClient } from "./runtime";
 
@@ -19,6 +19,7 @@ export async function searchFreesound(userId: string, q: string, page: number) {
   const key = JSON.stringify([q.toLowerCase(), page]);
   const existing = cache.get(key);
   if (existing && existing.expires > now) return existing.data;
+  const prisma = await loadRuntimePrismaClient();
   // Transaction-scoped advisory lock prevents overlapping upstream calls by the same
   // author even on different server instances. The minute burst bucket is per instance.
   return prisma.$transaction(async (tx) => {

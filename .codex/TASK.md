@@ -1,5 +1,15 @@
 # P3-15 ? local implementation validated, external gates pending
 
+## Active follow-up — CI/Vercel failure 2026-09-21
+
+User reports Node24 CI build fails collecting Freesound disconnect route without DATABASE_URL.
+Clean worktree at start. Fixed eager Prisma imports in oauth/search/import using existing runtime
+loader. Added isolated module-import regression test and CI step. Regression + audio DB pass;
+no-DB production build (including TypeScript), targeted ESLint and audio HTTP regression passed.
+Vercel CLI inspect requested deployment
+dpl_6Mebu1n39RTXqfLF9UwrXUzw3WoY requires authentication; asked user via async input.
+No schema changes, commits or push. Preserve UI and M4A/AAC follow-ups below.
+
 User: no schema/migrations/reservation table; Freesound 15/day; AI 0 pending P3-16.
 Source of truth: docs/02 2.5, docs/08 8.9, docs/verification/p3-15.md.
 P3-13/14 acceptance updated using user confirmation; historical drift preserved.

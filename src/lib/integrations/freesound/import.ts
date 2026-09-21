@@ -1,6 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { prisma } from "@/lib/db/prisma";
+import { loadRuntimePrismaClient } from "@/lib/repositories/prisma-read-client";
 import { serverEnv } from "@/lib/env";
 import { requireR2Environment } from "@/lib/config/environment";
 import { R2MediaStorageProvider } from "@/lib/storage/r2-media-storage-provider";
@@ -23,6 +23,7 @@ export function licenseMetadata(sound: ImportSound) {
 }
 const activeImports = new Set<string>();
 export async function importFreesound(ownerId: string, soundId: string) {
+  const prisma = await loadRuntimePrismaClient();
   const client = freesoundClient();
   const find = async (id: string, sound: string) => {
     const row = await prisma.audioAsset.findUnique({ where: { ownerId_freesoundId: { ownerId: id, freesoundId: sound } } });

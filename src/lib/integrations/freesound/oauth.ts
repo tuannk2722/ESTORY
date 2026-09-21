@@ -1,6 +1,6 @@
 import "server-only";
 import { z } from "zod";
-import { prisma } from "@/lib/db/prisma";
+import { loadRuntimePrismaClient } from "@/lib/repositories/prisma-read-client";
 import { CommandError } from "@/lib/services/command-error";
 import { decryptCredential, encryptCredential } from "./crypto";
 import { boundedResponse, FreesoundClient } from "./client";
@@ -25,18 +25,21 @@ function encryptedTokens(userId: string, tokens: z.infer<typeof tokenSchema>) {
   };
 }
 export async function connectFreesound(userId: string, code: string) {
+  const prisma = await loadRuntimePrismaClient();
   const tokens = await exchangeToken({ grant_type: "authorization_code", code });
   const { apiKey } = freesoundConfig();
   const profile = z.object({ username: z.string().min(1).max(200) }).parse(await new FreesoundClient(apiKey).json("me/", tokens.access_token));
   await prisma.user.update({ where: { id: userId }, data: { ...encryptedTokens(userId, tokens), freesoundUsername: profile.username } });
 }
 export async function disconnectFreesound(userId: string) {
+  const prisma = await loadRuntimePrismaClient();
   await prisma.user.update({ where: { id: userId }, data: {
     freesoundAccessTokenCiphertext: null, freesoundRefreshTokenCiphertext: null,
     freesoundTokenExpiresAt: null, freesoundUsername: null,
   } });
 }
 export async function connectionStatus(userId: string) {
+  const prisma = await loadRuntimePrismaClient();
   const row = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: {
     freesoundAccessTokenCiphertext: true, freesoundRefreshTokenCiphertext: true, freesoundTokenExpiresAt: true, freesoundUsername: true,
   } });
@@ -44,6 +47,7 @@ export async function connectionStatus(userId: string) {
   return { connected, ...(connected ? { freesound_username: row.freesoundUsername! } : {}) };
 }
 export async function accessToken(userId: string): Promise<string> {
+  const prisma = await loadRuntimePrismaClient();
   const { key } = freesoundConfig();
   // Serialize rotating refresh tokens across instances; disconnect waits for this same row lock.
   return prisma.$transaction(async (tx) => {
