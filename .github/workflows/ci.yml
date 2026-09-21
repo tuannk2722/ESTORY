@@ -35,6 +35,7 @@ jobs:
           test ! -f bun.lock
           test ! -f bun.lockb
       - run: pnpm install --frozen-lockfile
+      - run: pnpm test:audio:transcode
       - run: pnpm db:format
       - run: git diff --exit-code -- prisma/schema.prisma
       - run: pnpm db:validate
@@ -91,9 +92,12 @@ jobs:
       - run: pnpm test:commands:db
       - run: pnpm test:sync:db
       - run: pnpm test:media:db
+      - run: pnpm test:quota:db
+      - run: pnpm test:audio:db
       - run: pnpm build
       - run: pnpm test:auth:http
       - run: pnpm test:commands:http
       - run: pnpm test:effects:http
       - run: pnpm test:scene-catalog:http
       - run: pnpm test:sync:http
+      - run: pnpm test:audio:http

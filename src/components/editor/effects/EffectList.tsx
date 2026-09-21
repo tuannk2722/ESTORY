@@ -5,7 +5,8 @@
 
 import React, { useId, useMemo, useState } from "react";
 import type { EffectCategory, EffectType } from "@/types/story";
-import { Check, Eye, Play, Search, Square } from "lucide-react";
+import { Check, Eye, Search } from "lucide-react";
+import SoundRow from "../audio/SoundRow";
 import SearchInput from "@/components/ui/SearchInput";
 import { matchesEffectSearch } from "@/lib/effects/effect-search";
 import {
@@ -192,44 +193,15 @@ export const EffectList = React.memo(function EffectList({
                 const isPlaying = previewingAudioSrc === preset.src;
 
                 return (
-                  <div
+                  <SoundRow
                     key={preset.src}
-                    className={`flex min-h-14 items-center gap-1 rounded-xl border p-1.5 text-xs transition-colors motion-reduce:transition-none ${isSelected
-                      ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/40"
-                      : "border-border bg-secondary/30 text-foreground hover:bg-secondary/70"
-                      }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => onToggleAudioPreview(preset.src)}
-                      className={`flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md transition-colors motion-reduce:transition-none ${focusRing} ${isPlaying
-                        ? "bg-destructive/15 text-destructive hover:bg-destructive/25"
-                        : "bg-primary/10 text-primary hover:bg-primary/20"
-                        }`}
-                      aria-label={
-                        isPlaying
-                          ? `Dừng phát ${preset.label}`
-                          : `Nghe thử ${preset.label}`
-                      }
-                    >
-                      {isPlaying ? (
-                        <Square className="h-4 w-4" aria-hidden="true" />
-                      ) : (
-                        <Play className="h-4 w-4" aria-hidden="true" />
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onSelectAudioPreset(preset.src)}
-                      aria-pressed={isSelected}
-                      className={`flex min-h-11 min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 text-left ${focusRing}`}
-                    >
-                      <span className="truncate font-medium">{preset.label}</span>
-                      {isSelected && (
-                        <Check className="h-4 w-4 shrink-0" aria-hidden="true" />
-                      )}
-                    </button>
-                  </div>
+                    title={preset.label}
+                    description={`${preset.duration ? `${preset.duration} · ` : ""}${preset.source ?? "Hệ thống"}`}
+                    selected={isSelected}
+                    playing={isPlaying}
+                    onPreview={() => onToggleAudioPreview(preset.src)}
+                    onSelect={() => onSelectAudioPreset(preset.src)}
+                  />
                 );
               })
             )

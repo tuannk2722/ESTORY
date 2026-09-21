@@ -1,14 +1,16 @@
 // src/components/editor/scenes/picker/SceneAudioEditor.tsx
-// Bước 4: Nhạc Nền Môi Trường — SearchableCombobox chọn mẫu âm thanh, nhập URL thủ công, nghe thử Howler và chỉnh Volume (khớp 100% UI gốc)
+// Scene audio sources and the configuration of the selected sound.
 
 "use client";
 
 import { matchesEffectSearch } from "@/lib/effects/effect-search";
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useRef } from "react";
 import { EffectConfig } from "@/types/story";
 import { AUDIO_EFFECT_PRESETS } from "@/lib/effects/effectCatalog";
 import { createAudioEffect } from "@/lib/effects/effectFactory";
 import { Music, VolumeX, Play, Square } from "lucide-react";
+import SoundSourcePicker from "../../audio/SoundSourcePicker";
+import { audioFocusRing } from "../../audio/SoundRow";
 import SearchableCombobox, { ComboboxOption } from "@/components/ui/SearchableCombobox";
 import { useAudioPreview } from "@/components/editor/effects/useAudioPreview";
 import { useEditorEffectCatalog } from "@/components/editor/EditorProvider";
@@ -29,19 +31,26 @@ export const SceneAudioEditor = React.memo(function SceneAudioEditor({
   const activeAudio = Boolean(
     getActiveEffectDefinition(effectCatalog, "audio")?.allowed_scopes.includes("scene"),
   );
+  const audioPreview = useAudioPreview();
   const {
     previewingAudioSrc,
     togglePlayAudio,
     setAudioPreviewVolume,
     stopAudio,
-  } = useAudioPreview();
+  } = audioPreview;
 
   const currentSrc = ambientAudio?.audio_src || "";
   const currentVolume = ambientAudio?.intensity ?? 0.5;
   const currentLoop = ambientAudio?.loop ?? true;
+  const config = useRef<HTMLDivElement>(null);
+  const [personalTitle, setPersonalTitle] = useState("");
+  const revealConfig = () => requestAnimationFrame(() => {
+    config.current?.focus({ preventScroll: true });
+    config.current?.scrollIntoView({ block: "nearest", behavior: "instant" });
+  });
 
   const [showCustomAudioInput, setShowCustomAudioInput] = useState<boolean>(
-    currentSrc !== "" && !AUDIO_EFFECT_PRESETS.some((p) => p.src === currentSrc)
+    currentSrc !== "" && !ambientAudio?.audio_asset_id && !AUDIO_EFFECT_PRESETS.some((p) => p.src === currentSrc)
   );
 
   const isPlaying = previewingAudioSrc === currentSrc;
@@ -94,6 +103,9 @@ export const SceneAudioEditor = React.memo(function SceneAudioEditor({
         icon: VolumeX,
       },
       ...(activeAudio ? audioPresetItems : []),
+      ...(ambientAudio?.audio_asset_id ? [{
+        id: "__personal__", label: personalTitle || "Âm thanh từ thư viện của tôi", icon: Music,
+      }] : []),
       ...(activeAudio ? [{
         id: "__custom__",
         label: "Nhập URL thủ công...",
@@ -106,12 +118,14 @@ export const SceneAudioEditor = React.memo(function SceneAudioEditor({
         icon: Music,
       }] : []),
     ];
-  }, [activeAudio, audioPresetItems, currentSrc]);
+  }, [activeAudio, audioPresetItems, currentSrc, ambientAudio?.audio_asset_id, personalTitle]);
 
   const audioComboboxValue = !currentSrc
     ? "__none__"
     : !activeAudio
       ? "__retained__"
+    : ambientAudio?.audio_asset_id
+      ? "__personal__"
     : AUDIO_EFFECT_PRESETS.some((p) => p.src === currentSrc)
       ? currentSrc
       : "__custom__";
@@ -121,25 +135,26 @@ export const SceneAudioEditor = React.memo(function SceneAudioEditor({
     if (id === "__none__") {
       setShowCustomAudioInput(false);
       onChangeAudio(null);
-    } else if (id === "__retained__") {
+    } else if (id === "__retained__" || id === "__personal__") {
       return;
     } else if (id === "__custom__") {
       setShowCustomAudioInput(true);
       const customSrc = AUDIO_EFFECT_PRESETS.some((preset) => preset.src === currentSrc)
         ? ""
         : currentSrc;
-      onChangeAudio(buildAudioEffect(customSrc));
+      onChangeAudio(createAudioEffect(customSrc, currentVolume, currentLoop, { id: ambientAudio?.id }));
     } else {
       setShowCustomAudioInput(false);
       onChangeAudio(buildAudioEffect(id));
+      revealConfig();
     }
   };
 
   return (
-    <div className="space-y-3 font-editor">
+    <div className="min-w-0 space-y-4 font-editor">
       <SearchableCombobox
         searchMatcher={matchesEffectSearch}
-        label="Âm Thanh Nền (Ambient Audio)"
+        label="Âm thanh đang chọn"
         icon={Music}
         options={audioComboboxOptions}
         value={audioComboboxValue}
@@ -149,10 +164,11 @@ export const SceneAudioEditor = React.memo(function SceneAudioEditor({
       />
 
       {/* Custom audio URL input */}
-      {showCustomAudioInput && (
+      {showCustomAudioInput && !ambientAudio?.audio_asset_id && (
         <div className="animate-fade-in">
           <input
             type="text"
+            aria-label="URL âm thanh nền"
             value={currentSrc}
             onChange={(e) => {
               stopAudio();
@@ -164,17 +180,26 @@ export const SceneAudioEditor = React.memo(function SceneAudioEditor({
         </div>
       )}
 
+      {activeAudio && <SoundSourcePicker audioPreview={audioPreview} selectedId={ambientAudio?.audio_asset_id ?? currentSrc} onSelect={(asset) => {
+        stopAudio();
+        setShowCustomAudioInput(false);
+        setPersonalTitle(asset.title);
+        onChangeAudio(createAudioEffect(asset.url, currentVolume, currentLoop, { id: ambientAudio?.id, audio_asset_id: asset.id }));
+        revealConfig();
+      }} />}
+
       {/* Audio Audition & Volume Controls */}
       {currentSrc && (
-        <div className="p-3.5 rounded-xl bg-card border border-border/80 space-y-3 animate-fade-in">
+        <div ref={config} tabIndex={-1} role="region" aria-label="Tùy chỉnh âm thanh nền" className={`scroll-my-4 p-4 rounded-xl bg-card border border-border space-y-3 ${audioFocusRing}`}>
+          <h4 className="text-xs font-semibold">Tùy chỉnh âm thanh nền</h4>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={togglePlay}
-                className={`p-2 rounded-xl transition-all cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center ${
+                className={`p-2 rounded-xl transition-colors motion-reduce:transition-none cursor-pointer min-h-11 min-w-11 flex items-center justify-center ${audioFocusRing} ${
                   isPlaying
-                    ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                    ? "bg-destructive/15 text-destructive hover:bg-destructive/25"
                     : "bg-primary/10 text-primary hover:bg-primary/20"
                 }`}
                 title={isPlaying ? "Dừng nghe thử" : "Nghe thử âm thanh"}
@@ -201,6 +226,7 @@ export const SceneAudioEditor = React.memo(function SceneAudioEditor({
             </div>
             <input
               type="range"
+              aria-label="Âm lượng âm thanh nền"
               min="0.05"
               max="1"
               step="0.05"

@@ -5,7 +5,7 @@
 
 import React, { useId } from "react";
 import type { EffectConfig } from "@/types/story";
-import { Clock, Repeat, Sliders, Timer, Volume2 } from "lucide-react";
+import { Clock, Repeat, Sliders, Timer } from "lucide-react";
 import { getEffectIcon } from "@/lib/effects/effectCatalog";
 import { getAuthorEffectPresentation } from "@/lib/effects/effect-authoring";
 import { useEditorEffectCatalog } from "../EditorProvider";
@@ -17,8 +17,6 @@ export type EffectConfigUpdate = Partial<
     | "duration_ms"
     | "delay_ms"
     | "loop"
-    | "audio_src"
-    | "audio_asset_id"
   >
 >;
 
@@ -40,9 +38,7 @@ export const EffectConfigForm = React.memo(function EffectConfigForm({
   const intensityId = useId();
   const durationId = useId();
   const delayId = useId();
-  const audioSourceId = useId();
   const isAudio = effect.type === "audio";
-  const audioSrc = effect.audio_src ?? "";
   const durationValue =
     effect.duration_ms >= 200 ? Math.min(effect.duration_ms, 10000) : 2000;
   const meta = getAuthorEffectPresentation(effectCatalog, effect.type);
@@ -67,34 +63,6 @@ export const EffectConfigForm = React.memo(function EffectConfigForm({
           Tùy chỉnh: {meta.label.split("(")[0].trim()}
         </h3>
       </div>}
-
-      {isAudio && (
-        <div className="space-y-2">
-          <label
-            htmlFor={audioSourceId}
-            className="flex items-center gap-1.5 text-xs font-semibold text-foreground"
-          >
-            <Volume2 className="h-3.5 w-3.5" aria-hidden="true" />
-            Nguồn âm thanh
-          </label>
-          <div className="flex items-stretch gap-2">
-            <input
-              id={audioSourceId}
-              type="text"
-              inputMode="url"
-              value={audioSrc}
-              onChange={(event) =>
-                onChange({
-                  audio_src: event.target.value,
-                  audio_asset_id: undefined,
-                })
-              }
-              placeholder="Chọn preset hoặc dán URL âm thanh..."
-              className={`min-h-11 min-w-0 flex-1 rounded-lg border border-border bg-card px-3 text-xs text-foreground placeholder:text-muted-foreground ${focusRing}`}
-            />
-          </div>
-        </div>
-      )}
 
       <div className="space-y-1.5">
         <div className="flex items-center justify-between gap-3 text-xs">

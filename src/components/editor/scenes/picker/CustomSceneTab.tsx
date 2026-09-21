@@ -137,24 +137,25 @@ export const CustomSceneTab = React.memo(function CustomSceneTab({
 
       <section className="space-y-4 rounded-2xl border border-border/60 bg-secondary/30 px-4 py-3">
         <h3 className="text-sm font-bold text-foreground font-ui">
-          2. Màu sắc &amp; âm thanh nền
+          2. Màu sắc
         </h3>
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(17.5rem,0.8fr)]">
+        <div>
           <VisualTreatmentControl
             mode={draft.treatmentMode}
             status={derivationStatus}
             disabled={!draft.background}
             onChange={handleTreatmentChange}
           />
-          <div className="space-y-2">
-            <p className="text-xs font-semibold text-foreground">Âm thanh nền</p>
-            <SceneAudioEditor
-              ambientAudio={draft.ambientAudio}
-              onChangeAudio={handleChangeAudio}
-              initialAudioSrc={initialAudioSrc}
-            />
-          </div>
         </div>
+      </section>
+
+      <section className="min-w-0 space-y-4 rounded-2xl border border-border/60 bg-secondary/30 p-4">
+        <h3 className="text-sm font-bold text-foreground font-ui">3. Âm thanh nền</h3>
+        <SceneAudioEditor
+          ambientAudio={draft.ambientAudio}
+          onChangeAudio={handleChangeAudio}
+          initialAudioSrc={initialAudioSrc}
+        />
       </section>
 
       <SceneEffectsEditor

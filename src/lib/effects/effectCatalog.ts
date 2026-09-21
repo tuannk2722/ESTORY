@@ -34,10 +34,18 @@ export const EFFECT_METADATA = Object.fromEntries(EFFECT_TYPES.map(type => {
   }];
 })) as Record<EffectType, EffectMeta>;
 
-export const AUDIO_EFFECT_PRESETS = [
-  { label: "Tiếng Mưa Rơi (Gentle Rain)", src: "/audio/gentle_rain_falling.mp3", keywords: ["mưa", "lộp độp", "rain"] },
-  { label: "Sấm Rền Vang (Thunder Rumble)", src: "/audio/thunder-rumble.mp3", keywords: ["sấm", "sét", "giông", "thunder"] },
-  { label: "Không Khí U Ám (Horror Atmosphere)", src: "/audio/horror_atmosphe.mp3", keywords: ["kinh dị", "rùng rợn", "horror"] },
+export interface AudioEffectPreset {
+  label: string;
+  src: string;
+  duration?: string;
+  source?: string;
+  keywords: string[];
+}
+
+export const AUDIO_EFFECT_PRESETS: AudioEffectPreset[] = [
+  { label: "Tiếng Mưa Rơi (Gentle Rain)", src: "/audio/gentle_rain_falling.mp3", duration: "2 giây", source: "Hệ thống", keywords: ["mưa", "lộp độp", "rain"] },
+  { label: "Sấm Rền Vang (Thunder Rumble)", src: "/audio/thunder-rumble.mp3", duration: "3 giây", source: "Hệ thống", keywords: ["sấm", "sét", "giông", "thunder"] },
+  { label: "Không Khí U Ám (Horror Atmosphere)", src: "/audio/horror_atmosphe.mp3", duration: "1 giây", source: "Hệ thống", keywords: ["kinh dị", "rùng rợn", "horror"] },
 ];
 
 // Legacy visual picker helper: audio has its own control.

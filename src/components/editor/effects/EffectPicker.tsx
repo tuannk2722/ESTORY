@@ -14,6 +14,7 @@ import { EffectConfigForm, type EffectConfigUpdate } from "./EffectConfigForm";
 import { EffectList } from "./EffectList";
 import { EffectPreview } from "./EffectPreview";
 import { useAudioPreview } from "./useAudioPreview";
+import SoundSourcePicker from "../audio/SoundSourcePicker";
 
 export interface EffectPickerProps {
   isOpen: boolean;
@@ -64,7 +65,15 @@ function EffectPickerDialog({
   );
   const [previewEffect, setPreviewEffect] = useState<EffectConfig | null>(null);
   const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { previewingAudioSrc, togglePlayAudio, stopAudio } = useAudioPreview();
+  const configRef = useRef<HTMLDivElement>(null);
+  const revealAudioConfig = useCallback(() => {
+    requestAnimationFrame(() => {
+      configRef.current?.focus({ preventScroll: true });
+      configRef.current?.scrollIntoView({ block: "nearest", behavior: "instant" });
+    });
+  }, []);
+  const audioPreview = useAudioPreview();
+  const { previewingAudioSrc, togglePlayAudio, stopAudio } = audioPreview;
 
   const stopVisualPreview = useCallback(() => {
     if (previewTimerRef.current) {
@@ -100,15 +109,17 @@ function EffectPickerDialog({
   );
 
   const handleSelectCategory = useCallback((category: EffectCategory) => {
+    stopAudio();
     setSelectedCategory(category);
     if (category === "audio" && getActiveEffectDefinition(effectCatalog, "audio")?.allowed_scopes.includes("block")) {
       setDraft((current) =>
         current?.type === "audio" ? current : createEffectConfig("audio")
       );
     }
-  }, [effectCatalog]);
+  }, [effectCatalog, stopAudio]);
 
   const handleSelectAudioPreset = useCallback((audioSrc: string) => {
+    stopAudio();
     setDraft((current) =>
       createEffectConfig("audio", {
         ...(current?.type === "audio" ? current : undefined),
@@ -116,7 +127,8 @@ function EffectPickerDialog({
         audio_asset_id: undefined,
       })
     );
-  }, []);
+    revealAudioConfig();
+  }, [stopAudio, revealAudioConfig]);
 
   const handleConfigChange = useCallback((update: EffectConfigUpdate) => {
     if (!draft) return;
@@ -240,11 +252,26 @@ function EffectPickerDialog({
         />
 
         <div className="p-4 sm:p-6">
+          {selectedCategory === "audio" && getActiveEffectDefinition(effectCatalog, "audio")?.allowed_scopes.includes("block") && (
+            <div className="mb-4">
+              <SoundSourcePicker
+                audioPreview={audioPreview}
+                selectedId={draft?.audio_asset_id ?? normalizedAudioSrc}
+                onSelect={(asset) => {
+                  stopAudio();
+                  setDraft((current) => createEffectConfig("audio", { ...(current?.type === "audio" ? current : undefined), audio_src: asset.url, audio_asset_id: asset.id }));
+                  revealAudioConfig();
+                }}
+              />
+            </div>
+          )}
           {draft && isDraftInCurrentCategory ? (
-            <EffectConfigForm
-              effect={draft}
-              onChange={handleConfigChange}
-            />
+            <div ref={configRef} tabIndex={-1} role="region" aria-label="Tùy chỉnh hiệu ứng đã chọn" className={`scroll-my-4 rounded-xl ${focusRing}`}>
+              <EffectConfigForm
+                effect={draft}
+                onChange={handleConfigChange}
+              />
+            </div>
           ) : (
             <div className="space-y-2 rounded-xl border border-dashed border-border/80 bg-secondary/20 p-6 text-center">
               <Sliders className="mx-auto h-6 w-6 text-muted-foreground/50" aria-hidden="true" />

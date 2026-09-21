@@ -1,4 +1,6 @@
 import "./reader-metrics.test";
+import { runQuotaServiceTests } from "./quota-service.test";
+import { runPersonalAudioTests } from "./p3-15-audio.test";
 import "./public-access.test";
 import "./effect-playback.test";
 import "./effect-manifest.test";
@@ -19,7 +21,7 @@ import { runP312EffectAdminTests } from "./p3-12-effect-admin.test";
 import { runP313SceneCatalogTests } from "./p3-13-scene-catalog.test";
 import { runSceneVisualTreatmentTests } from "./scene-visual-treatment.test";
 
-Promise.all([runSceneRepositoryTests(), runAuthTests(), runPhase3MigrationTests(), runShadowReadTests(), runStoryCommandTests(), runP307ClientTests(), runReaderSyncTests(), runMediaUploadTests(), runP310AuthorClientTests(), runP311SearchTests(), runP311ModerationTests(), runP312EffectAdminTests(), runP313SceneCatalogTests(), runSceneVisualTreatmentTests()]).then(() => {
+Promise.all([runPersonalAudioTests(), runQuotaServiceTests(), runSceneRepositoryTests(), runAuthTests(), runPhase3MigrationTests(), runShadowReadTests(), runStoryCommandTests(), runP307ClientTests(), runReaderSyncTests(), runMediaUploadTests(), runP310AuthorClientTests(), runP311SearchTests(), runP311ModerationTests(), runP312EffectAdminTests(), runP313SceneCatalogTests(), runSceneVisualTreatmentTests()]).then(() => {
   console.log("All Reader, Effect, Scene and repository tests completed successfully");
 }).catch((error: unknown) => {
   console.error(error);

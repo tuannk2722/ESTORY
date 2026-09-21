@@ -5,6 +5,7 @@ import ReaderPane from "@/components/reader/ReaderPane";
 import { requirePageRole } from "@/lib/auth/page-guards";
 import { CommandError } from "@/lib/services/command-error";
 import { StoryDataAccess } from "@/lib/services/story-dal";
+import { getChapterAudioAttributions } from "@/lib/repositories/audio-attribution-repository";
 
 export default async function AdminStoryPreviewPage({
   params,
@@ -28,6 +29,7 @@ export default async function AdminStoryPreviewPage({
     throw error;
   }
 
+  const audioAttributions = await getChapterAudioAttributions(preview.data.chapter, preview.data.scenes);
   return (
     <div className="reader-screen min-h-dvh bg-[#05070F] text-[#F8FAFC]">
       <header
@@ -77,6 +79,7 @@ export default async function AdminStoryPreviewPage({
           chapter={preview.data.chapter}
           scenes={preview.data.scenes}
           isPreview
+          audioAttributions={audioAttributions}
         />
       </div>
     </div>

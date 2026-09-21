@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { authEnvironmentShape } from "./auth-environment";
+import { freesoundEnvironmentShape } from "./freesound-environment";
 
 // Pure parser shared by the server-only entry point, CLI config and tests.
 // Never include input values in configuration errors: URLs contain credentials.
@@ -38,6 +39,7 @@ const httpsOriginSchema = z.string().url().refine((value) => {
 
 const environmentSchema = z.object({
   ...authEnvironmentShape,
+  ...freesoundEnvironmentShape,
   DATABASE_URL: optionalPostgresUrl,
   DIRECT_URL: optionalPostgresUrl,
   SHADOW_DATABASE_URL: optionalPostgresUrl,

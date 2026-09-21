@@ -3,6 +3,7 @@ import { storyRepository } from "@/lib/repositories";
 import ReaderPane from "@/components/reader/ReaderPane";
 import ReaderScreenHeader from "@/components/reader/ReaderScreenHeader";
 import ProgressBar from "@/components/reader/ProgressBar";
+import { getChapterAudioAttributions } from "@/lib/repositories/audio-attribution-repository";
 
 interface ReaderPageProps {
   params: Promise<{ storyId: string; chapterId: string }>;
@@ -17,6 +18,7 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
   }
 
   const { story, chapter, scenes, previousChapterId, nextChapterId, isLastChapter } = data;
+  const audioAttributions = await getChapterAudioAttributions(chapter, scenes);
 
   return (
     <div className="reader-screen min-h-screen bg-[#05070F] text-[#F8FAFC] transition-colors duration-300">
@@ -40,6 +42,7 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
           isLastChapter={isLastChapter}
           scenes={scenes}
           isPreview={false}
+          audioAttributions={audioAttributions}
         />
       </div>
     </div>

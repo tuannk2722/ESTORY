@@ -116,7 +116,7 @@ async function publicPost<T>(url: string, body: unknown, signal?: AbortSignal): 
   return json.data as T;
 }
 
-function uploadPart(
+export function uploadPart(
   part: PresignedPart,
   file: File,
   signal: AbortSignal,

@@ -266,6 +266,21 @@ export interface AppUser {
 > User mới mặc định `reader`, tự nâng lên `author` ngay khi tạo truyện đầu tiên (không cần admin duyệt bước đổi role). Nhưng **truyện họ tạo vẫn phải qua kiểm duyệt admin trước khi publish công khai** — mục 2.7.
 > `freesound_connection`, `freesound_import_quota`, `ai_background_quota` chỉ có ý nghĩa/hiệu lực từ Phase 3 (cùng lý do `AppUser` "CHƯA dùng ở Phase 1–2" ở trên) — nhưng định nghĩa sẵn trong shape để không phải đổi DTO giữa chừng. `AppUser` là allowlist client-safe: mapper chỉ chiếu trạng thái kết nối/tên Freesound và quota đã chuẩn hóa; credential mã hóa chỉ tồn tại phía server. Chi tiết luồng dùng 2 quota này ở mục 2.11 và `08-effects-and-scenes.md` mục 8.9 → 8.10.
 
+**Quyết định P3-15 (2026-09-20):** giữ nguyên Prisma schema và sáu migration;
+không tạo bảng reservation/log, cron hay cleanup quota. Freesound mặc định **15 lượt/user/ngày UTC**;
+AI giữ `0` tới benchmark P3-16. Service khởi tạo hạn mức Freesound cho row chưa có reset và
+limit bằng `0`; không ghi đè limit đã khởi tạo hoặc limit riêng khác `0`.
+
+Quota dùng conditional atomic SQL trên các cột User hiện có và context opaque trong request.
+Reserve tăng counter nếu còn limit; commit chỉ đóng context; refund một lần với điều kiện
+đúng `userId`, quota kind, `resetAt` của lượt reserve và `used > 0`. Không serialize context ra
+client. First terminal action wins, kể cả commit/refund gọi đồng thời. Reset lazy về đầu ngày UTC
+kế tiếp; refund kỳ cũ không giảm kỳ mới. Đây là idempotency trong cùng thao tác đang chạy,
+không phải exactly-once xuyên process restart. Process bị kill hoặc DB acknowledgement không
+xác định có thể giữ lượt tới reset; không retry decrement mù. AI nhiều request phải dùng trạng thái
+`AiBackgroundGenerationSession` hiện có làm guard bền vững và settlement transaction ở P3-16,
+không dựng lại context từ dữ liệu client hoặc thêm engine quota riêng.
+
 ## 2.6. Effect Library — technical manifest, code-owned audio và admin overlay
 
 `EffectType` (mục 2.1), renderer và constraint kỹ thuật vẫn là **nguồn chân lý trong code**. `effect-management.ts` phân loại quyền quản lý: `audio` thuộc code; các effect còn lại thuộc Admin. DB chỉ có overlay cho tập `ADMIN_MANAGED_EFFECT_TYPES`, không yêu cầu một dòng cho mọi technical type.

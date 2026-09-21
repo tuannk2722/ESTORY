@@ -17,6 +17,8 @@ import { STORY_FONT_OPTIONS } from "@/types/settings";
 import { getScenePreloadSources } from "@/lib/reader/scenePreload";
 import { useSettingsSync } from "@/hooks/useSettingsSync";
 import { settingsStore } from "@/lib/settingsStore";
+import type { AudioAttribution } from "@/lib/reader/audio-attribution";
+import AttributionFooter from "./AttributionFooter";
 
 export interface ReaderPaneProps {
   storyId: string;
@@ -26,6 +28,7 @@ export interface ReaderPaneProps {
   isLastChapter?: boolean;
   scenes: Scene[];
   isPreview: boolean;
+  audioAttributions?: AudioAttribution[];
 }
 
 export default function ReaderPane({
@@ -36,6 +39,7 @@ export default function ReaderPane({
   isLastChapter = false,
   scenes: chapterScenes,
   isPreview,
+  audioAttributions = [],
 }: ReaderPaneProps) {
   const { settings, isMounted } = useReaderSettings();
   const sync = useSettingsSync();
@@ -182,6 +186,7 @@ export default function ReaderPane({
           ))}
         </main>
 
+        <AttributionFooter items={audioAttributions} />
         {!isPreview && (
           <div className="max-w-2xl mx-auto px-4 mt-12">
             <ChapterNav

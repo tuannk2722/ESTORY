@@ -285,6 +285,8 @@ Bổ sung nguồn cho **cả 2 nơi** hiện đang chỉ có "preset có sẵn /
 - **"Thư viện của tôi"** — danh sách `AudioAsset` (`02-data-schema.md` mục 2.11) đã import/upload trước đó, tái sử dụng ngay không cần làm lại.
 - **"Tìm trên Freesound"** — search + preview trực tiếp trong Editor.
 
+ScenePicker đặt âm thanh nền thành vùng riêng đủ chiều rộng, dropdown âm thanh hệ thống phía trên thư viện cá nhân; cấu hình nguồn đang chọn nằm ngay bên dưới và được đưa vào vùng nhìn thấy khi chọn. EffectPicker dùng cùng hàng âm thanh cho preset/thư viện/Freesound. Kết quả Freesound nằm trong vùng cuộn giới hạn chiều cao, phân trang ở ngoài vùng cuộn.
+
 Component: `SoundSourcePicker.tsx` (sub-panel dùng chung ở cả 2 nơi trên) chứa `FreesoundSearchPanel.tsx` — vị trí file ở `03-file-structure.md`.
 
 ### 8.9.1. Search & Preview — KHÔNG cần connect, KHÔNG tốn quota
@@ -307,12 +309,28 @@ Component: `SoundSourcePicker.tsx` (sub-panel dùng chung ở cả 2 nơi trên)
 4. Thành công → `AudioAsset` mới xuất hiện ngay trong tab "Thư viện của tôi", dùng được ngay cho block/scene hiện tại và mọi chapter/story khác của cùng author — **không** tự động lên thư viện dùng chung cho author khác (xem ranh giới ở mục 2.11 và `10-out-of-scope.md`).
 
 ### 8.9.3. Ghi nguồn (Attribution)
+
+Import hỗ trợ WAV, MP3, OGG, FLAC, AIFF và bổ sung M4A/AAC (2026-09-21).
+M4A nhận diện qua container `ftyp`, đọc từ file tạm riêng để seek được khi `moov`
+nằm cuối file; file tạm được dọn sau khi tiến trình kết thúc, kể cả khi lỗi. FFmpeg chặn
+network protocol và external data references. AAC ADTS và các định dạng cũ vẫn đọc qua pipe.
+Thay đổi này chỉ áp dụng import Freesound; upload trực tiếp vẫn nhận MP3/WAV/OGG.
+
+P3-15 implementation: Freesound import giới hạn input 64 MiB/5 phút, normalize thành MP3
+128 kbps stereo 44.1 kHz, output vẫn phải qua validator và cap 8 MiB. Không cắt audio dài để
+vượt qua giới hạn. Candidate `ffmpeg-static@5.3.0` được kiểm tra bằng spike, chưa coi local
+pass là Vercel pass; trạng thái benchmark/deployment tại `verification/p3-15.md`.
+Unique `(ownerId, freesoundId)` bảo vệ import trùng; asset đã có được reuse không reserve.
+Conflict unique trong save refund lượt thừa; lỗi acknowledgement phải đối chiếu asset trước
+khi refund/delete object. Nếu không xác minh được DB outcome, giữ lượt/object và log mã lỗi.
+In-memory cap là per-instance; PostgreSQL giữ daily cap trên toàn bộ instances.
+
 - Cuối mỗi chapter, `AttributionFooter.tsx` duyệt qua block effects và `Scene.render_config.ambient_effects` có `audio_asset_id` trỏ tới `AudioAsset.attribution` khác `null` → hiển thị tên, link nguồn và giấy phép.
 - Danh sách này **tính động lúc render**, không lưu bảng riêng — đúng nguyên tắc suy ra từ dữ liệu đã có, tương tự cách trang "Đang đọc" suy ra từ `ReadingProgress` (`02-data-schema.md` mục 2.3).
 - Sound có `license: "cc0"` không cần attribution, không xuất hiện trong danh sách này.
 
 ### 8.9.4. Upload từ thiết bị
-- Cùng 1 tab "Tải lên" bên cạnh "Thư viện của tôi"/"Tìm trên Freesound". Upload dùng `/api/upload/presign` → direct storage PUT → `/api/upload/complete`, tạo `AudioAsset` (`source: "upload"`, không có `license`/`attribution`).
+- Chỉ có hai tab "Thư viện của tôi" và "Tìm trên Freesound". Nút "Tải âm thanh" nằm trong thư viện: chọn tệp là tự tải và lưu, đưa asset mới lên đầu danh sách. Upload không tự thay âm thanh đang gắn; chọn hàng trong thư viện để áp dụng và mở cấu hình. Lỗi có Retry; đang tải có progress/Cancel (khóa Cancel khi đang hoàn tất lưu). Upload dùng `/api/upload/presign` → direct storage PUT → `/api/upload/complete`, tạo `AudioAsset` (`source: "upload"`, không có `license`/`attribution`).
 - **Định mức chấp nhận** (áp dụng thống nhất cho mọi nơi upload audio trong dự án): định dạng `mp3`/`wav`/`ogg`, dung lượng tối đa **8 MiB**, thời lượng tối đa **5 phút** — đủ cho SFX chấm phá và nhạc nền loop ngắn, tránh phình storage free-tier cho 1 personal project (khớp tinh thần Performance NFR ở `09-non-functional-requirements.md`). Validate cả client (chặn sớm) lẫn server (nguồn tin cậy).
 - Upload **không** tốn `freesound_import_quota` (quota đó chỉ áp dụng cho luồng Import từ Freesound) và **không** yêu cầu connect Freesound.
 

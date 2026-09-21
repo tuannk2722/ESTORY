@@ -151,7 +151,7 @@ export default function ProfileModal({ user, onClose, triggerRef }: ProfileModal
         <X aria-hidden="true" className="h-5 w-5" />
       </button>
 
-      <IntegrationsSection />
+      {user.role !== "reader" && <IntegrationsSection />}
 
       {user.role === "admin" ? (
         <div className="border-b border-[var(--color-border)] py-2">

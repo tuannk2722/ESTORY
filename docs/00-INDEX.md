@@ -13,6 +13,10 @@ Không mặc định đọc hết docs, toàn bộ `02` hoặc toàn bộ roadma
 
 ## Nguồn quyết định & bằng chứng
 
+**Cập nhật nghiệm thu 2026-09-20:** chủ dự án xác nhận P3-13 và P3-14 hoàn tất,
+baseline/test/GitHub Actions/Vercel Preview xanh. Các ghi chú gate chờ ở baseline lịch sử
+bên dưới được thay thế bởi xác nhận này; xem phần cập nhật đầu verification P3-13/P3-14.
+
 Khi docs mâu thuẫn, giữ thứ tự ưu tiên:
 
 1. **Constraints:** `01` §1.3 và `10`.

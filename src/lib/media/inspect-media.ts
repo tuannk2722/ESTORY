@@ -99,7 +99,7 @@ function inspectMp3(bytes: Uint8Array): InspectedMedia {
   let frames = 0;
   while (offset + 4 <= bytes.length) {
     const header = ((bytes[offset] << 24) | (bytes[offset + 1] << 16) | (bytes[offset + 2] << 8) | bytes[offset + 3]) >>> 0;
-    if ((header & 0xffe00000) !== 0xffe00000) { offset += frames ? bytes.length : 1; continue; }
+    if (((header & 0xffe00000) >>> 0) !== 0xffe00000) { offset += frames ? bytes.length : 1; continue; }
     const versionBits = (header >>> 19) & 3;
     const layerBits = (header >>> 17) & 3;
     const bitrateIndex = (header >>> 12) & 15;

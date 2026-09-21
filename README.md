@@ -24,6 +24,18 @@ chặn script `pnpm.ps1`.
 
 ## Kiểm tra
 
+P3-15: `pnpm test:quota:db`, `pnpm test:audio:db`, `pnpm test:audio:http` dùng fixture
+tạm, cleanup sau test. `pnpm spike:audio` đo chuyển WAV 299 giây sang MP3 bằng candidate
+`ffmpeg-static`; benchmark local không thay gate Vercel. Chi tiết tại
+[P3-15 verification](docs/verification/p3-15.md).
+
+Freesound cấu hình server-only trong `.env.example`. `FREESOUND_API_KEY` có thể bỏ trống
+để dùng `FREESOUND_CLIENT_SECRET` (cùng credential “Client secret/Api key” của Freesound).
+`FREESOUND_TOKEN_ENCRYPTION_KEY` phải là 32 byte ngẫu nhiên (base64 hoặc 64 hex digits),
+giữ ổn định ở mỗi môi trường; đổi key khiến credential cũ không giải mã được, cần kết nối lại.
+Đăng ký callback chính xác `https://<app-origin>/api/integrations/freesound/callback`.
+OAuth mở cửa sổ riêng, giữ nguyên editor draft; trình duyệt phải cho phép popup và cookie app.
+
 ```sh
 pnpm lint
 pnpm typecheck

@@ -172,7 +172,7 @@ export const SceneEffectsEditor = React.memo(function SceneEffectsEditor({
     >
       <div className="flex items-center justify-between">
         <label className="text-sm font-bold text-foreground flex items-center gap-2 font-ui">
-          3. Hiệu Ứng Không Gian Đa Tầng (Tùy Chọn)
+          4. Hiệu Ứng Không Gian Đa Tầng (Tùy Chọn)
         </label>
 
         {/* Nút Xóa tất cả khi có hiệu ứng */}

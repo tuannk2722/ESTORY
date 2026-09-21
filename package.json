@@ -24,6 +24,12 @@
     "db:migrate:status": "prisma migrate status",
     "db:check-empty": "node scripts/run-typescript-tests.cjs scripts/check-empty-database.ts",
     "test:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/database.integration.ts",
+    "test:quota:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/p3-15-quota.integration.ts",
+    "test:audio:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/p3-15-audio.integration.ts",
+    "test:audio:http": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/p3-15-audio-http.integration.ts",
+    "test:audio:r2": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/p3-15-audio-r2.integration.ts",
+    "spike:audio": "node --conditions=react-server scripts/run-typescript-tests.cjs scripts/spike-audio-transcode.ts",
+    "test:audio:transcode": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/audio-transcode.integration.ts",
     "test:auth:db": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/auth.integration.ts",
     "test:auth:http": "node --conditions=react-server scripts/run-typescript-tests.cjs src/__tests__/auth-http.integration.ts",
     "auth:bootstrap-admin": "node --conditions=react-server scripts/run-typescript-tests.cjs scripts/bootstrap-admin.ts",
@@ -56,6 +62,7 @@
     "@prisma/client": "7.10.0",
     "@studio-freight/lenis": "^1.0.42",
     "clsx": "^2.1.1",
+    "ffmpeg-static": "5.3.0",
     "framer-motion": "^13.1.1",
     "gsap": "^3.15.0",
     "howler": "^2.2.4",
@@ -88,6 +95,7 @@
     "onlyBuiltDependencies": [
       "@prisma/client",
       "@prisma/engines",
+      "ffmpeg-static",
       "prisma"
     ]
   }
