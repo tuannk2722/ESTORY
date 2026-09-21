@@ -2,6 +2,13 @@
 
 ## Active follow-up — CI/Vercel failure 2026-09-21
 
+Latest supplied Vercel log: dpl_7SdS5MxJyQb6XjHReNVXB68UgCLT, commit 24aad2b.
+Webpack build succeeds; deployment rejects Function package mentioning symlink directories.
+Fixed next.config.ts explicit FFmpeg includes to resolve the real package directory.
+Node24 webpack build/TypeScript and targeted ESLint pass; fresh local traces retain binary
+without descendants beneath traced directory symlinks. See verification/p3-15.md.
+Linux Vercel redeploy still required to confirm root cause. No push/deploy performed.
+
 User reports Node24 CI build fails collecting Freesound disconnect route without DATABASE_URL.
 Clean worktree at start. Fixed eager Prisma imports in oauth/search/import using existing runtime
 loader. Added isolated module-import regression test and CI step. Regression + audio DB pass;
